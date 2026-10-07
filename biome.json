@@ -19,10 +19,16 @@
       "preset": "recommended",
       "a11y": {
         "noSvgWithoutTitle": "off"
+      },
+      "style": {
+        "useImportType": "off"
       }
     }
   },
   "javascript": {
+    "parser": {
+      "unsafeParameterDecoratorsEnabled": true
+    },
     "formatter": {
       "quoteStyle": "single",
       "jsxQuoteStyle": "double"

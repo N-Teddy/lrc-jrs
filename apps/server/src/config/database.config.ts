@@ -1,5 +1,11 @@
 import { registerAs } from '@nestjs/config';
 
-export const databaseConfig = registerAs('database', () => ({
-  uri: process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/lrc-jrs',
-}));
+export const databaseConfig = registerAs('database', () => {
+  const uri = process.env.MONGODB_URI;
+  if (!uri) {
+    throw new Error(
+      'FATAL: MONGODB_URI environment variable is missing or empty. Application cannot start.',
+    );
+  }
+  return { uri };
+});

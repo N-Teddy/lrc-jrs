@@ -5,7 +5,7 @@ import {
   ForbiddenException,
   Injectable,
 } from '@nestjs/common';
-import type { Reflector } from '@nestjs/core';
+import { Reflector } from '@nestjs/core';
 import { TOWN_SCOPE_KEY } from '../decorators/town-scope.decorator';
 
 @Injectable()

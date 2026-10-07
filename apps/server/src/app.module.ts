@@ -2,8 +2,10 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { AppController } from './app.controller';
+import { AppService } from './app.service';
 import { appConfig } from './config/app.config';
 import { databaseConfig } from './config/database.config';
+import { validateEnvironment } from './config/env.validation';
 import { jwtConfig } from './config/jwt.config';
 import { DatabaseModule } from './core/database/database.module';
 import { AllExceptionsFilter } from './core/filters/all-exceptions.filter';
@@ -13,18 +15,26 @@ import { RolesGuard } from './core/guards/roles.guard';
 import { TownScopeGuard } from './core/guards/town-scope.guard';
 import { LoggingInterceptor } from './core/interceptors/logging.interceptor';
 import { TransformResponseInterceptor } from './core/interceptors/transform-response.interceptor';
+import { AuthModule } from './modules/auth/auth.module';
+import { UsersModule } from './modules/users/users.module';
+import { ServicesModule } from './services/services.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       load: [appConfig, databaseConfig, jwtConfig],
-      envFilePath: '.env',
+      validate: validateEnvironment,
+      envFilePath: ['.env', 'apps/server/.env'],
     }),
     DatabaseModule,
+    ServicesModule,
+    UsersModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [
+    AppService,
     // Global Exception Filters
     {
       provide: APP_FILTER,

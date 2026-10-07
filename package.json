@@ -13,6 +13,7 @@
     "mobile": "pnpm --filter @jrs/mobile start",
     "server": "pnpm --filter @jrs/server start:dev",
     "backend": "pnpm --filter @jrs/server start:dev",
+    "maildev": "maildev",
     "prepare": "husky"
   },
   "devDependencies": {

@@ -45,6 +45,37 @@ export interface IAuthUser {
 }
 
 export interface ILoginResponse {
-  accessToken: string;
+  accessToken?: string;
+  refreshToken?: string;
+  expiresIn?: number;
+  requiresPasswordChange?: boolean;
+  setupToken?: string;
+  message?: string;
   user: IAuthUser;
+}
+
+export interface IForgotPasswordResponse {
+  sent: boolean;
+  channel?: string;
+  maskedDestination?: string;
+  expiresInMinutes?: number;
+  message: string;
+}
+
+export interface IVerifyResetCodeResponse {
+  valid: boolean;
+  resetToken: string;
+  expiresInMinutes: number;
+  message: string;
+}
+
+export interface IResetPasswordResponse {
+  success: boolean;
+  message: string;
+}
+
+export interface IRefreshTokenResponse {
+  accessToken: string;
+  refreshToken: string;
+  expiresIn: number;
 }

@@ -94,7 +94,48 @@ export class HttpService {
         const errBody = error.response?.data as ApiErrorResponse | undefined;
 
         if (status === 401) {
+          const originalRequest = error.config;
+          const isAuthEndpoint = originalRequest?.url?.includes('/auth/');
+
+          if (originalRequest && !originalRequest._retry && !isAuthEndpoint) {
+            originalRequest._retry = true;
+            try {
+              const refreshToken =
+                await this.storage.getItem('jrs_refresh_token');
+              if (refreshToken) {
+                const refreshRes = await axios.post<{
+                  success: boolean;
+                  data?: { accessToken: string; refreshToken: string };
+                }>(
+                  `${this.instance.defaults.baseURL}/auth/refresh`,
+                  { refreshToken },
+                  { headers: { 'Content-Type': 'application/json' } },
+                );
+
+                const newTokens = refreshRes.data?.data;
+                if (newTokens?.accessToken) {
+                  await this.storage.setItem(
+                    'jrs_access_token',
+                    newTokens.accessToken,
+                  );
+                  if (newTokens.refreshToken) {
+                    await this.storage.setItem(
+                      'jrs_refresh_token',
+                      newTokens.refreshToken,
+                    );
+                  }
+
+                  originalRequest.headers.Authorization = `Bearer ${newTokens.accessToken}`;
+                  return this.instance(originalRequest);
+                }
+              }
+            } catch {
+              // Refresh token revoked or expired
+            }
+          }
+
           await this.storage.removeItem('jrs_access_token');
+          await this.storage.removeItem('jrs_refresh_token');
           await this.storage.removeItem('jrs_user');
           if (this.onUnauthorized) {
             this.onUnauthorized();
