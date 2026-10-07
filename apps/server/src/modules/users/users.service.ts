@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { type Model, Types } from 'mongoose';
 import { PhoneSanitizer } from '../../core/utils/phone-sanitizer.util';
-import { User, type UserDocument } from './schemas/user.schema';
+import { User, type UserDocument } from '../../database/schemas';
 
 @Injectable()
 export class UsersService {

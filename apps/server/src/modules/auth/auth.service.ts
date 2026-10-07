@@ -12,17 +12,16 @@ import * as bcrypt from 'bcrypt';
 import type { Model, Types } from 'mongoose';
 import { PasswordGeneratorUtil } from '../../core/utils/password-generator.util';
 import { PhoneSanitizer } from '../../core/utils/phone-sanitizer.util';
-import { EmailService } from '../../services/email.service';
-import { WhatsAppService } from '../../services/whatsapp.service';
 import {
+  AccountStatus,
   PasswordResetToken,
   type PasswordResetTokenDocument,
-} from '../users/schemas/password-reset.schema';
-import {
   RefreshToken,
   type RefreshTokenDocument,
-} from '../users/schemas/refresh-token.schema';
-import { AccountStatus, type UserDocument } from '../users/schemas/user.schema';
+  type UserDocument,
+} from '../../database/schemas';
+import { EmailService } from '../../services/email.service';
+import { WhatsAppService } from '../../services/whatsapp.service';
 import { UsersService } from '../users/users.service';
 import type { ChangePasswordDto } from './dto/change-password.dto';
 import type { CompleteSetupDto } from './dto/complete-setup.dto';

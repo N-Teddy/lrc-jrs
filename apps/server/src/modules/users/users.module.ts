@@ -3,12 +3,11 @@ import { MongooseModule } from '@nestjs/mongoose';
 import {
   PasswordResetToken,
   PasswordResetTokenSchema,
-} from './schemas/password-reset.schema';
-import {
   RefreshToken,
   RefreshTokenSchema,
-} from './schemas/refresh-token.schema';
-import { User, UserSchema } from './schemas/user.schema';
+  User,
+  UserSchema,
+} from '../../database/schemas';
 import { UsersService } from './users.service';
 
 @Module({

@@ -16,6 +16,7 @@ import { TownScopeGuard } from './core/guards/town-scope.guard';
 import { LoggingInterceptor } from './core/interceptors/logging.interceptor';
 import { TransformResponseInterceptor } from './core/interceptors/transform-response.interceptor';
 import { AuthModule } from './modules/auth/auth.module';
+import { TownsModule } from './modules/towns/towns.module';
 import { UsersModule } from './modules/users/users.module';
 import { ServicesModule } from './services/services.module';
 
@@ -29,6 +30,7 @@ import { ServicesModule } from './services/services.module';
     }),
     DatabaseModule,
     ServicesModule,
+    TownsModule,
     UsersModule,
     AuthModule,
   ],

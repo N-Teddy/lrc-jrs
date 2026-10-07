@@ -4,7 +4,7 @@ import { type Document, Types } from 'mongoose';
 import {
   BaseDocument,
   baseSchemaOptions,
-} from '../../../core/database/base.schema';
+} from '../../core/database/base.schema';
 
 export type UserDocument = User & Document;
 
