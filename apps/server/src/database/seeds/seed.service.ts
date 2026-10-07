@@ -67,7 +67,13 @@ export class SeedService {
         Town: u.townCode,
         Phone: u.phoneNumber,
         Email: u.email,
-        Password: u.password,
+        'Temp Password': u.password,
+        'App Access': u.hasAppAccess ? 'Yes' : 'No',
+        'Email Status': !u.hasAppAccess
+          ? '— (No App Access)'
+          : u.emailSent
+            ? '✅ Dispatched'
+            : '⚠️ SMTP Offline (Maildev not running)',
       })),
     );
     console.log(

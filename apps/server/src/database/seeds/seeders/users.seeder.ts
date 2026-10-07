@@ -2,13 +2,11 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import * as bcrypt from 'bcrypt';
 import { type Model, Types } from 'mongoose';
+import { PasswordGeneratorUtil } from '../../../core/utils/password-generator.util';
 import { PhoneSanitizer } from '../../../core/utils/phone-sanitizer.util';
-import {
-  Town,
-  type TownDocument,
-  User,
-  type UserDocument,
-} from '../../schemas';
+import { UsersService } from '../../../modules/users/users.service';
+import { EmailService } from '../../../services/email.service';
+import { Town, type TownDocument } from '../../schemas';
 import {
   SEED_ADMIN_USERS,
   SEED_MEMBER_USERS,
@@ -23,6 +21,8 @@ export interface SeededUserSummary {
   email: string;
   password: string;
   townCode: string;
+  hasAppAccess: boolean;
+  emailSent: boolean;
 }
 
 @Injectable()
@@ -30,12 +30,14 @@ export class UsersSeeder {
   private readonly logger = new Logger(UsersSeeder.name);
 
   constructor(
-    @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
+    private readonly usersService: UsersService,
+    private readonly emailService: EmailService,
     @InjectModel(Town.name) private readonly townModel: Model<TownDocument>,
   ) {}
 
   /**
-   * Seeds users and links them to towns.
+   * Seeds users using the existing UsersService, auto-generates credentials,
+   * and emails users who have application access.
    */
   async seed(
     townMap: Map<string, Types.ObjectId>,
@@ -46,8 +48,10 @@ export class UsersSeeder {
     } = {},
   ): Promise<SeededUserSummary[]> {
     if (options.clean) {
-      this.logger.warn('Cleaning existing users collection...');
-      await this.userModel.deleteMany({});
+      this.logger.warn(
+        'Cleaning existing users collection via UsersService...',
+      );
+      await this.usersService.deleteAll();
     }
 
     const isProd = options.mode === 'prod';
@@ -69,8 +73,12 @@ export class UsersSeeder {
       const sanitizedPhone = PhoneSanitizer.toInternationalDigits(
         userData.phoneNumber,
       );
-      const plainPassword = options.defaultPassword || userData.password;
-      const passwordHash = await bcrypt.hash(plainPassword, 10);
+
+      // Auto-generate strong temporary password
+      const tempPassword =
+        options.defaultPassword ||
+        PasswordGeneratorUtil.generateTemporaryPassword();
+      const passwordHash = await bcrypt.hash(tempPassword, 10);
 
       // Map allowed read town codes to object IDs
       const allowedReadTownIds = (userData.account.allowedReadTownCodes || [])
@@ -82,6 +90,9 @@ export class UsersSeeder {
         phoneNumber: sanitizedPhone,
         email: userData.email.toLowerCase().trim(),
         passwordHash,
+        tempPasswordHash: passwordHash,
+        tempPasswordExpiresAt: new Date(Date.now() + 48 * 60 * 60 * 1000), // 48h validity
+        isTemporaryPassword: true,
         dateOfBirth: userData.dateOfBirth,
         isJr: userData.isJr,
         role: userData.role,
@@ -95,22 +106,48 @@ export class UsersSeeder {
         },
       };
 
-      const existing = await this.userModel.findOne({
-        phoneNumber: sanitizedPhone,
-      });
-
+      const existing = await this.usersService.findByPhone(sanitizedPhone);
       if (existing) {
-        await this.userModel.findByIdAndUpdate(existing._id, payload, {
-          new: true,
-        });
+        await this.usersService.update(existing._id, payload);
         this.logger.log(
-          `Updated user: ${userData.fullName} (${userData.role}) - ${sanitizedPhone}`,
+          `Updated user via UsersService: ${userData.fullName} (${userData.role}) - ${sanitizedPhone}`,
         );
       } else {
-        await this.userModel.create(payload);
+        await this.usersService.create(payload);
         this.logger.log(
-          `Created user: ${userData.fullName} (${userData.role}) - ${sanitizedPhone}`,
+          `Created user via UsersService: ${userData.fullName} (${userData.role}) - ${sanitizedPhone}`,
         );
+      }
+
+      // Send email notification to users who have application access
+      let emailSent = false;
+      const hasAppAccess = Boolean(
+        userData.account.hasAppAccess &&
+          !userData.account.isAccessRevoked &&
+          userData.email,
+      );
+
+      if (hasAppAccess) {
+        try {
+          emailSent = await this.emailService.sendTemporaryPasswordEmail(
+            userData.email,
+            {
+              fullName: userData.fullName,
+              tempPassword,
+              expiresInHours: 48,
+              loginUrl: 'http://localhost:5173/login',
+            },
+          );
+          if (emailSent) {
+            this.logger.log(
+              `📧 Sent temporary password email to ${userData.email}`,
+            );
+          }
+        } catch (emailErr) {
+          this.logger.warn(
+            `Could not dispatch email to ${userData.email}: ${emailErr}`,
+          );
+        }
       }
 
       summaries.push({
@@ -118,18 +155,16 @@ export class UsersSeeder {
         role: userData.role,
         phoneNumber: sanitizedPhone,
         email: userData.email,
-        password: plainPassword,
+        password: tempPassword,
         townCode: userData.homeTownCode,
+        hasAppAccess,
+        emailSent,
       });
     }
 
-    // Refresh activePcCount on each town
+    // Refresh activePcCount on each town using UsersService
     for (const [code, townId] of townMap.entries()) {
-      const count = await this.userModel.countDocuments({
-        homeTownId: townId,
-        isActivePC: true,
-        'account.isAccessRevoked': { $ne: true },
-      });
+      const count = await this.usersService.countActivePcsForTown(townId);
       await this.townModel.findByIdAndUpdate(townId, { activePcCount: count });
       this.logger.log(`Updated active PC count for town ${code}: ${count}`);
     }

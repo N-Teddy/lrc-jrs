@@ -57,4 +57,8 @@ export class UsersService {
       'account.isAccessRevoked': { $ne: true },
     });
   }
+
+  async deleteAll(): Promise<void> {
+    await this.userModel.deleteMany({}).exec();
+  }
 }
