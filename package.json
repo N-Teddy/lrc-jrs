@@ -4,12 +4,23 @@
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
-    "lint": "turbo run lint",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "check-types": "turbo run check-types"
+    "lint": "biome lint .",
+    "format": "biome format --write .",
+    "check": "biome check --write .",
+    "check-types": "turbo run check-types",
+    "audit": "pnpm audit --prod",
+    "desktop": "pnpm --filter @jrs/desktop tauri dev",
+    "mobile": "pnpm --filter @jrs/mobile start",
+    "server": "pnpm --filter @jrs/server start:dev",
+    "backend": "pnpm --filter @jrs/server start:dev",
+    "prepare": "husky"
   },
   "devDependencies": {
-    "prettier": "3.9.6",
+    "@biomejs/biome": "^2.5.15",
+    "@commitlint/cli": "^21.2.3",
+    "@commitlint/config-conventional": "^21.2.3",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.6.0",
     "turbo": "^2.11.7",
     "typescript": "7.0.2"
   },

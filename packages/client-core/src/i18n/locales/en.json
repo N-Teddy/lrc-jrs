@@ -1,0 +1,68 @@
+{
+  "common": {
+    "appName": "JR Management",
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "search": "Search...",
+    "confirm": "Confirm",
+    "success": "Operation successful",
+    "error": "An error occurred",
+    "refresh": "Refresh"
+  },
+  "auth": {
+    "login": "Login",
+    "logout": "Logout",
+    "phoneNumber": "Phone Number",
+    "password": "Password",
+    "signIn": "Sign In",
+    "welcome": "Welcome to JR Platform",
+    "sessionExpired": "Your session has expired. Please sign in again."
+  },
+  "towns": {
+    "town": "Town",
+    "allTowns": "All Towns",
+    "switchTown": "Switch Town",
+    "readOnlyBanner": "Read-Only Mode — You are viewing data from another town",
+    "douala": "Douala",
+    "yaounde": "Yaoundé",
+    "bafoussam": "Bafoussam"
+  },
+  "roles": {
+    "ap": "Principal Coordinator (AP)",
+    "pc": "Contact Person (PC)",
+    "member": "JR Member",
+    "ageWarning": "The JR group is designated for youth aged 18 to 30."
+  },
+  "activities": {
+    "activities": "Activities",
+    "createActivity": "Create Activity",
+    "activityType": "Activity Type",
+    "location": "Location",
+    "date": "Date & Time",
+    "report": "Google Drive Report",
+    "linkReport": "Link Report",
+    "types": {
+      "PRAYER": "Prayer",
+      "EVANGELISM": "Evangelism",
+      "FELLOWSHIP": "Fellowship",
+      "CONFERENCE": "Conference",
+      "SPORTS": "Sports",
+      "OUTREACH": "Outreach",
+      "TRAINING": "Training",
+      "OTHER": "Other"
+    }
+  },
+  "attendance": {
+    "attendance": "Attendance",
+    "recordAttendance": "Record Attendance",
+    "membersPresent": "Members Present",
+    "guests": "Guests / Visitors",
+    "addGuest": "Add Guest",
+    "fullName": "Full Name",
+    "phone": "Phone",
+    "originTown": "Origin Town"
+  }
+}

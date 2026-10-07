@@ -1,0 +1,50 @@
+import type { UserRole } from '../constants/roles.constant';
+import type { ITown } from './town.interface';
+
+export interface ITownTransfer {
+  fromTownId: string;
+  toTownId: string;
+  transferredAt: string;
+  transferredBy: string;
+  reason?: string;
+}
+
+export interface IUserAccount {
+  hasAppAccess: boolean;
+  isAccessRevoked: boolean;
+  allowedReadTownIds: string[];
+  invitedBy?: string;
+  invitedAt?: string;
+}
+
+export interface IUser {
+  id: string;
+  fullName: string;
+  phoneNumber: string;
+  email?: string;
+  dateOfBirth: string;
+  isJr: boolean;
+  homeTownId: string;
+  homeTown?: ITown;
+  role: UserRole;
+  isActivePC: boolean;
+  account: IUserAccount;
+  transferHistory: ITownTransfer[];
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface IAuthUser {
+  id: string;
+  fullName: string;
+  phoneNumber: string;
+  role: UserRole;
+  homeTownId: string;
+  isActivePC: boolean;
+  account: IUserAccount;
+}
+
+export interface ILoginResponse {
+  accessToken: string;
+  user: IAuthUser;
+}

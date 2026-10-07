@@ -1,0 +1,68 @@
+{
+  "common": {
+    "appName": "Gestion JR",
+    "loading": "Chargement...",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "search": "Rechercher...",
+    "confirm": "Confirmer",
+    "success": "Opération réussie",
+    "error": "Une erreur est survenue",
+    "refresh": "Actualiser"
+  },
+  "auth": {
+    "login": "Connexion",
+    "logout": "Déconnexion",
+    "phoneNumber": "Numéro de téléphone",
+    "password": "Mot de passe",
+    "signIn": "Se connecter",
+    "welcome": "Bienvenue sur l'espace JR",
+    "sessionExpired": "Votre session a expiré. Veuillez vous reconnecter."
+  },
+  "towns": {
+    "town": "Ville",
+    "allTowns": "Toutes les villes",
+    "switchTown": "Changer de ville",
+    "readOnlyBanner": "Mode lecture seule — Vous consultez les données d'une autre ville",
+    "douala": "Douala",
+    "yaounde": "Yaoundé",
+    "bafoussam": "Bafoussam"
+  },
+  "roles": {
+    "ap": "Animateur Principal (AP)",
+    "pc": "Personne Contact (PC)",
+    "member": "Membre JR",
+    "ageWarning": "Le groupe JR concerne les jeunes de 18 à 30 ans."
+  },
+  "activities": {
+    "activities": "Activités",
+    "createActivity": "Créer une activité",
+    "activityType": "Type d'activité",
+    "location": "Lieu",
+    "date": "Date & Heure",
+    "report": "Rapport Google Drive",
+    "linkReport": "Associer un rapport",
+    "types": {
+      "PRAYER": "Prière",
+      "EVANGELISM": "Évangélisation",
+      "FELLOWSHIP": "Communion Fraternelle",
+      "CONFERENCE": "Conférence",
+      "SPORTS": "Sport",
+      "OUTREACH": "Sortie / Impact",
+      "TRAINING": "Formation",
+      "OTHER": "Autre"
+    }
+  },
+  "attendance": {
+    "attendance": "Présences",
+    "recordAttendance": "Prendre les présences",
+    "membersPresent": "Membres présents",
+    "guests": "Invités / Visiteurs",
+    "addGuest": "Ajouter un invité",
+    "fullName": "Nom complet",
+    "phone": "Téléphone",
+    "originTown": "Ville d'origine"
+  }
+}

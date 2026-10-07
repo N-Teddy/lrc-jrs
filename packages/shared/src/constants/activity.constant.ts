@@ -1,0 +1,15 @@
+export enum ActivityType {
+  PRAYER = 'PRAYER',
+  EVANGELISM = 'EVANGELISM',
+  FELLOWSHIP = 'FELLOWSHIP',
+  CONFERENCE = 'CONFERENCE',
+  SPORTS = 'SPORTS',
+  OUTREACH = 'OUTREACH',
+  TRAINING = 'TRAINING',
+  OTHER = 'OTHER',
+}
+
+export enum AttendeeType {
+  MEMBER = 'MEMBER',
+  GUEST = 'GUEST',
+}
