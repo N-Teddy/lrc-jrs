@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { ActivitiesSeeder } from './seeders/activities.seeder';
 import { TownsSeeder } from './seeders/towns.seeder';
 import { type SeededUserSummary, UsersSeeder } from './seeders/users.seeder';
 
@@ -15,6 +16,7 @@ export class SeedService {
   constructor(
     private readonly townsSeeder: TownsSeeder,
     private readonly usersSeeder: UsersSeeder,
+    private readonly activitiesSeeder: ActivitiesSeeder,
   ) {}
 
   async run(options: SeedRunOptions = {}): Promise<void> {
@@ -41,7 +43,22 @@ export class SeedService {
         mode,
         defaultPassword: options.defaultPassword,
       });
-      this.logger.log(`✅ Seeded ${userSummaries.length} users successfully.`);
+      this.logger.log(
+        `✅ Processed ${userSummaries.length} key users with application access.`,
+      );
+
+      // 3. Seed Activities (in dev mode)
+      if (mode !== 'prod') {
+        this.logger.log(
+          '📅 Phase 3: Seeding Activities (2024, 2025, 2026) & Attendances...',
+        );
+        const activityStats = await this.activitiesSeeder.seed(townMap, {
+          clean,
+        });
+        this.logger.log(
+          `✅ Seeded ${activityStats.totalActivities} activities (~50 per year) and ${activityStats.totalAttendances} attendance sheets.`,
+        );
+      }
 
       const elapsed = ((Date.now() - startTime) / 1000).toFixed(2);
       this.logger.log('====================================================');

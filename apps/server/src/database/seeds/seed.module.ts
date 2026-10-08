@@ -7,8 +7,18 @@ import { DatabaseModule } from '../../core/database/database.module';
 import { TownsModule } from '../../modules/towns/towns.module';
 import { UsersModule } from '../../modules/users/users.module';
 import { ServicesModule } from '../../services/services.module';
-import { Town, TownSchema } from '../schemas';
+import {
+  Activity,
+  ActivitySchema,
+  Attendance,
+  AttendanceSchema,
+  Town,
+  TownSchema,
+  User,
+  UserSchema,
+} from '../schemas';
 import { SeedService } from './seed.service';
+import { ActivitiesSeeder } from './seeders/activities.seeder';
 import { TownsSeeder } from './seeders/towns.seeder';
 import { UsersSeeder } from './seeders/users.seeder';
 
@@ -23,9 +33,14 @@ import { UsersSeeder } from './seeders/users.seeder';
     ServicesModule,
     TownsModule,
     UsersModule,
-    MongooseModule.forFeature([{ name: Town.name, schema: TownSchema }]),
+    MongooseModule.forFeature([
+      { name: Town.name, schema: TownSchema },
+      { name: User.name, schema: UserSchema },
+      { name: Activity.name, schema: ActivitySchema },
+      { name: Attendance.name, schema: AttendanceSchema },
+    ]),
   ],
-  providers: [TownsSeeder, UsersSeeder, SeedService],
+  providers: [TownsSeeder, UsersSeeder, ActivitiesSeeder, SeedService],
   exports: [SeedService],
 })
 export class SeedModule {}
