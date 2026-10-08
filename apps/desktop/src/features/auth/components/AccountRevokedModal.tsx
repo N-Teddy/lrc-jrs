@@ -1,3 +1,4 @@
+import { useTranslation } from '@jrs/client-core';
 import {
   ChatCircleText,
   EnvelopeSimple,
@@ -15,6 +16,8 @@ export const AccountRevokedModal: React.FC<AccountRevokedModalProps> = ({
   isOpen,
   onAcknowledge,
 }) => {
+  const { t } = useTranslation();
+
   if (!isOpen) return null;
 
   return (
@@ -33,23 +36,21 @@ export const AccountRevokedModal: React.FC<AccountRevokedModalProps> = ({
         {/* Title & Explanation */}
         <div className="flex flex-col gap-1">
           <span className="text-[11px] font-bold uppercase tracking-wider text-[#ba1a1a]">
-            Security Alert • 403 Forbidden
+            {t('auth:accountRevoked.badge')}
           </span>
           <h2 id="revoked-title" className="text-xl font-bold text-[#1e1b19]">
-            Account Access Suspended
+            {t('auth:accountRevoked.title')}
           </h2>
         </div>
 
         <p className="text-xs sm:text-sm leading-relaxed text-[#57423b]">
-          Your account access has been revoked or suspended by a community
-          administrator. You have been safely logged out. Please reach out to
-          your local coordinator or fellowship leader to resolve this.
+          {t('auth:accountRevoked.desc')}
         </p>
 
         {/* Contact details card */}
         <div className="w-full bg-[#faf2ee] rounded-xl p-4 text-left flex flex-col gap-2.5 border border-[#e8e1dd]">
           <span className="text-[11px] font-bold uppercase tracking-wider text-[#8a726a]">
-            Community Youth Desk
+            {t('auth:accountRevoked.deskTitle')}
           </span>
           <div className="flex items-center gap-2.5 text-xs font-medium text-[#1e1b19]">
             <EnvelopeSimple
@@ -75,10 +76,10 @@ export const AccountRevokedModal: React.FC<AccountRevokedModalProps> = ({
         <button
           type="button"
           onClick={onAcknowledge}
-          className="w-full py-3.5 px-6 rounded-xl bg-[#b85028] text-white text-sm font-semibold shadow-md hover:bg-[#983912] active:scale-[0.99] transition flex items-center justify-center gap-2 mt-1"
+          className="w-full py-3.5 px-6 rounded-xl bg-[#b85028] text-white text-sm font-semibold shadow-md hover:bg-[#983912] active:scale-[0.99] transition flex items-center justify-center gap-2 mt-1 cursor-pointer"
         >
           <SignOut size={18} weight="bold" />
-          <span>Return to Sign In</span>
+          <span>{t('auth:accountRevoked.returnToSignIn')}</span>
         </button>
       </div>
     </div>

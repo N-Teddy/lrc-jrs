@@ -1,3 +1,4 @@
+import { Trans, useTranslation } from '@jrs/client-core';
 import {
   ArrowLeft,
   ArrowRight,
@@ -12,6 +13,7 @@ import {
   XCircle,
 } from '@phosphor-icons/react';
 import type React from 'react';
+import { LanguageToggle } from '../../../components/LanguageToggle';
 import { useResetPassword } from '../hooks/use-reset-password';
 import { PasswordRequirements } from './PasswordRequirements';
 
@@ -28,6 +30,7 @@ export const ResetPasswordScreen: React.FC<ResetPasswordScreenProps> = ({
   onBackToSignIn,
   onPasswordResetComplete,
 }) => {
+  const { t } = useTranslation();
   const {
     newPassword,
     setNewPassword,
@@ -60,21 +63,26 @@ export const ResetPasswordScreen: React.FC<ResetPasswordScreenProps> = ({
               className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-[#57423b] transition hover:text-[#983912]"
             >
               <ArrowLeft size={16} weight="bold" />
-              <span>Back to Sign In</span>
+              <span>{t('auth:resetPassword.backToSignIn')}</span>
             </button>
-            <div
-              className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${
-                isTimerExpired
-                  ? 'bg-[#ffdad6] text-[#93000a]'
-                  : 'bg-[#faf2ee] text-[#57423b]'
-              }`}
-            >
-              <Clock size={14} weight="bold" />
-              <span>
-                {isTimerExpired
-                  ? 'Token Expired'
-                  : `${formattedTime} remaining`}
-              </span>
+            <div className="flex items-center gap-3">
+              <LanguageToggle />
+              <div
+                className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${
+                  isTimerExpired
+                    ? 'bg-[#ffdad6] text-[#93000a]'
+                    : 'bg-[#faf2ee] text-[#57423b]'
+                }`}
+              >
+                <Clock size={14} weight="bold" />
+                <span>
+                  {isTimerExpired
+                    ? t('auth:resetPassword.tokenExpired')
+                    : t('auth:resetPassword.timeRemaining', {
+                        time: formattedTime,
+                      })}
+                </span>
+              </div>
             </div>
           </div>
 
@@ -84,28 +92,32 @@ export const ResetPasswordScreen: React.FC<ResetPasswordScreenProps> = ({
               <Key size={32} weight="fill" />
             </div>
             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#1e1b19]">
-              Set New Password
+              {t('auth:resetPassword.title')}
             </h1>
             <p className="text-sm text-[#57423b] max-w-md">
-              Create a fresh, secure password for{' '}
-              <strong className="text-[#1e1b19]">{identifier}</strong>. All
-              previous active sessions will be safely terminated.
+              <Trans
+                i18nKey="auth:resetPassword.subtitle"
+                values={{ identifier }}
+                components={{ 1: <strong className="text-[#1e1b19]" /> }}
+              />
             </p>
           </div>
 
           {/* Expired Token Notice */}
           {isTimerExpired && (
             <div className="rounded-xl border border-[#ba1a1a]/20 bg-[#ffdad6] p-4 text-center text-xs text-[#93000a]">
-              <p className="font-bold">Reset Session Timed Out</p>
+              <p className="font-bold">
+                {t('auth:resetPassword.tokenExpiredTitle')}
+              </p>
               <p className="mt-1 text-[#57423b]">
-                For your safety, password reset tokens expire after 15 minutes.
+                {t('auth:resetPassword.tokenExpiredDesc')}
               </p>
               <button
                 type="button"
                 onClick={onBackToSignIn}
                 className="mt-3 rounded-lg bg-[#b85028] px-4 py-2 font-bold text-white transition hover:bg-[#983912]"
               >
-                Restart Verification Flow
+                {t('auth:resetPassword.restartFlow')}
               </button>
             </div>
           )}
@@ -130,11 +142,10 @@ export const ResetPasswordScreen: React.FC<ResetPasswordScreenProps> = ({
               </div>
               <div className="flex flex-col gap-1">
                 <h3 className="text-xl font-bold text-[#1e1b19]">
-                  Password Successfully Reset!
+                  {t('auth:resetPassword.successTitle')}
                 </h3>
                 <p className="text-sm text-[#57423b] max-w-sm">
-                  Your credentials have been safely updated. You can now sign in
-                  using your new password.
+                  {t('auth:resetPassword.successDesc')}
                 </p>
               </div>
               <button
@@ -142,7 +153,7 @@ export const ResetPasswordScreen: React.FC<ResetPasswordScreenProps> = ({
                 onClick={onPasswordResetComplete}
                 className="w-full max-w-xs h-12 rounded-xl bg-[#b85028] text-white font-semibold text-sm shadow-sm hover:bg-[#983912] transition-all flex items-center justify-center gap-2 mt-2"
               >
-                <span>Sign In to Fellowship Hub</span>
+                <span>{t('auth:resetPassword.signInHub')}</span>
                 <ArrowRight size={18} weight="bold" />
               </button>
             </div>
@@ -155,7 +166,7 @@ export const ResetPasswordScreen: React.FC<ResetPasswordScreenProps> = ({
                   htmlFor="reset-new-password"
                   className="text-xs font-semibold uppercase tracking-wider text-[#1e1b19]"
                 >
-                  New Password
+                  {t('auth:resetPassword.newPasswordLabel')}
                 </label>
                 <div className="relative flex items-center">
                   <div className="pointer-events-none absolute left-3.5 text-[#8a726a]">
@@ -168,7 +179,7 @@ export const ResetPasswordScreen: React.FC<ResetPasswordScreenProps> = ({
                     disabled={isTimerExpired || isPending}
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    placeholder="Minimum 8 characters"
+                    placeholder={t('auth:resetPassword.newPasswordPlaceholder')}
                     className="w-full h-12 pl-11 pr-11 rounded-xl bg-[#faf2ee] text-sm text-[#1e1b19] placeholder-[#8a726a] border border-[#e8e1dd] outline-none focus:bg-white focus:ring-2 focus:ring-[#b85028]/20 focus:border-[#b85028] transition"
                   />
                   <button
@@ -189,7 +200,7 @@ export const ResetPasswordScreen: React.FC<ResetPasswordScreenProps> = ({
               {/* Requirements Checklist */}
               <div className="rounded-xl border border-[#e8e1dd] bg-[#faf2ee] p-4">
                 <span className="block text-[11px] font-semibold uppercase tracking-wider text-[#57423b] mb-2.5">
-                  Security Requirements
+                  {t('auth:rules.securityRequirements')}
                 </span>
                 <PasswordRequirements rules={rules} />
               </div>
@@ -200,7 +211,7 @@ export const ResetPasswordScreen: React.FC<ResetPasswordScreenProps> = ({
                   htmlFor="reset-confirm-password"
                   className="text-xs font-semibold uppercase tracking-wider text-[#1e1b19]"
                 >
-                  Confirm New Password
+                  {t('auth:resetPassword.confirmPasswordLabel')}
                 </label>
                 <div className="relative flex items-center">
                   <div className="pointer-events-none absolute left-3.5 text-[#8a726a]">
@@ -213,7 +224,9 @@ export const ResetPasswordScreen: React.FC<ResetPasswordScreenProps> = ({
                     disabled={isTimerExpired || isPending}
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="Re-enter your new password"
+                    placeholder={t(
+                      'auth:resetPassword.confirmPasswordPlaceholder',
+                    )}
                     className="w-full h-12 pl-11 pr-11 rounded-xl bg-[#faf2ee] text-sm text-[#1e1b19] placeholder-[#8a726a] border border-[#e8e1dd] outline-none focus:bg-white focus:ring-2 focus:ring-[#b85028]/20 focus:border-[#b85028] transition"
                   />
                   <div className="absolute right-3.5 flex items-center gap-1">
@@ -222,7 +235,7 @@ export const ResetPasswordScreen: React.FC<ResetPasswordScreenProps> = ({
                         <CheckCircle
                           size={18}
                           weight="fill"
-                          className="text-[#43664d]"
+                          className="text-[#486b52]"
                         />
                       ) : (
                         <XCircle
@@ -247,7 +260,7 @@ export const ResetPasswordScreen: React.FC<ResetPasswordScreenProps> = ({
                 </div>
                 {confirmPassword.length > 0 && !passwordsMatch && (
                   <p className="text-xs text-[#ba1a1a]">
-                    Passwords do not match yet.
+                    {t('auth:resetPassword.passwordsDoNotMatch')}
                   </p>
                 )}
               </div>
@@ -261,11 +274,11 @@ export const ResetPasswordScreen: React.FC<ResetPasswordScreenProps> = ({
                 {isPending ? (
                   <>
                     <CircleNotch size={18} className="animate-spin" />
-                    <span>Updating Password...</span>
+                    <span>{t('auth:resetPassword.updating')}</span>
                   </>
                 ) : (
                   <>
-                    <span>Save Password & Return to Login</span>
+                    <span>{t('auth:resetPassword.saveAndReturn')}</span>
                     <ArrowRight size={18} weight="bold" />
                   </>
                 )}

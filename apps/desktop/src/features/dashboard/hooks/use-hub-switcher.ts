@@ -7,13 +7,18 @@ export function useHubSwitcher() {
   const [searchQuery, setSearchQuery] = useState('');
 
   // Map town code to Region display name
-  const getRegionName = useCallback((code: string) => {
-    const upper = code.toUpperCase();
-    const entry = Object.values(CAMEROON_REGIONS).find(
-      (r) => r.townCode === upper,
-    );
-    return entry?.displayNameEn || 'Cameroon Region';
-  }, []);
+  const getRegionName = useCallback(
+    (code: string, lang: 'fr' | 'en' = 'en') => {
+      const upper = code.toUpperCase();
+      const entry = Object.values(CAMEROON_REGIONS).find(
+        (r) => r.townCode === upper,
+      );
+      if (!entry)
+        return lang === 'fr' ? 'Région du Cameroun' : 'Cameroon Region';
+      return lang === 'fr' ? entry.displayNameFr : entry.displayNameEn;
+    },
+    [],
+  );
 
   const filteredTowns = useMemo(() => {
     if (!searchQuery.trim()) return availableTowns;

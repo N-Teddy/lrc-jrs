@@ -21,10 +21,14 @@ export function getUserInitials(fullName?: string): string {
 }
 
 /**
- * Formats a Date object into a readable dashboard date (e.g. "Wed, Oct 8, 2026").
+ * Formats a Date object into a readable dashboard date (e.g. "Wed, Oct 8, 2026" or "mer. 8 oct. 2026").
  */
-export function formatDashboardDate(date: Date = new Date()): string {
-  return new Intl.DateTimeFormat('en-US', {
+export function formatDashboardDate(
+  date: Date = new Date(),
+  locale = 'fr',
+): string {
+  const intlLocale = locale?.startsWith('fr') ? 'fr-FR' : 'en-US';
+  return new Intl.DateTimeFormat(intlLocale, {
     weekday: 'short',
     month: 'short',
     day: 'numeric',

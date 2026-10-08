@@ -12,6 +12,8 @@ export const resources = {
     roles: fr.roles,
     activities: fr.activities,
     attendance: fr.attendance,
+    navigation: fr.navigation,
+    dashboard: fr.dashboard,
   },
   en: {
     common: en.common,
@@ -20,6 +22,8 @@ export const resources = {
     roles: en.roles,
     activities: en.activities,
     attendance: en.attendance,
+    navigation: en.navigation,
+    dashboard: en.dashboard,
   },
 } as const;
 
@@ -30,6 +34,16 @@ export function initI18n(initialLanguage = 'fr'): typeof i18n {
       lng: initialLanguage,
       fallbackLng: 'en',
       defaultNS: 'common',
+      ns: [
+        'common',
+        'auth',
+        'towns',
+        'roles',
+        'activities',
+        'attendance',
+        'navigation',
+        'dashboard',
+      ],
       interpolation: {
         escapeValue: false,
       },
@@ -38,4 +52,5 @@ export function initI18n(initialLanguage = 'fr'): typeof i18n {
   return i18n;
 }
 
+export { Trans, useTranslation } from 'react-i18next';
 export { i18n };

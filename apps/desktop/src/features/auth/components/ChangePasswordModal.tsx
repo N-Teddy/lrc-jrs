@@ -1,3 +1,4 @@
+import { useTranslation } from '@jrs/client-core';
 import {
   Check,
   CheckCircle,
@@ -26,6 +27,7 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
   onClose,
   onSuccess,
 }) => {
+  const { t } = useTranslation();
   const {
     currentPassword,
     handleCurrentPasswordChange,
@@ -56,6 +58,13 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
 
   if (!isOpen) return null;
 
+  const strengthLabel = t(
+    `auth:rules.strength.${strength.label.toLowerCase()}`,
+    {
+      defaultValue: strength.label,
+    },
+  );
+
   return (
     <div
       role="dialog"
@@ -75,17 +84,17 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
                 id="change-pw-title"
                 className="text-xl font-bold text-[#1e1b19]"
               >
-                Change Password
+                {t('auth:changePassword.title')}
               </h2>
               <p className="text-xs text-[#57423b]">
-                Update your password to preserve the safety of your account.
+                {t('auth:changePassword.subtitle')}
               </p>
             </div>
           </div>
           <button
             type="button"
             onClick={handleClose}
-            className="p-1 rounded-lg text-[#8a726a] hover:text-[#1e1b19] hover:bg-[#faf2ee] transition"
+            className="p-1 rounded-lg text-[#8a726a] hover:text-[#1e1b19] hover:bg-[#faf2ee] transition cursor-pointer"
           >
             <X size={20} weight="bold" />
           </button>
@@ -101,10 +110,10 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
             />
             <div>
               <p className="text-xs font-bold">
-                Password Successfully Updated!
+                {t('auth:changePassword.successTitle')}
               </p>
               <p className="text-[11px] text-[#2c4e37] mt-0.5">
-                Your new password is now active. Closing window...
+                {t('auth:changePassword.successDesc')}
               </p>
             </div>
           </div>
@@ -130,7 +139,7 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
               htmlFor="modal-current-password"
               className="block text-xs font-semibold uppercase tracking-wider text-[#1e1b19]"
             >
-              Current Password
+              {t('auth:changePassword.currentPasswordLabel')}
             </label>
             <div className="relative mt-1.5">
               <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-[#8a726a]">
@@ -142,7 +151,9 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
                 required
                 value={currentPassword}
                 onChange={(e) => handleCurrentPasswordChange(e.target.value)}
-                placeholder="Enter current password"
+                placeholder={t(
+                  'auth:changePassword.currentPasswordPlaceholder',
+                )}
                 className="w-full rounded-xl border border-[#e8e1dd] bg-[#faf2ee] py-3 pl-11 pr-11 text-sm text-[#1e1b19] placeholder-[#8a726a] outline-none focus:bg-white focus:border-[#b85028] focus:ring-2 focus:ring-[#b85028]/20 transition"
               />
               <button
@@ -166,7 +177,7 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
               htmlFor="modal-new-password"
               className="block text-xs font-semibold uppercase tracking-wider text-[#1e1b19]"
             >
-              New Password
+              {t('auth:changePassword.newPasswordLabel')}
             </label>
             <div className="relative mt-1.5">
               <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-[#8a726a]">
@@ -178,7 +189,7 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
                 required
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="Minimum 8 characters"
+                placeholder={t('auth:changePassword.newPasswordPlaceholder')}
                 className="w-full rounded-xl border border-[#e8e1dd] bg-[#faf2ee] py-3 pl-11 pr-11 text-sm text-[#1e1b19] placeholder-[#8a726a] outline-none focus:bg-white focus:border-[#b85028] focus:ring-2 focus:ring-[#b85028]/20 transition"
               />
               <button
@@ -198,16 +209,16 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
             {/* Reused Warning */}
             {isReused && (
               <p className="mt-1 text-xs text-[#9f2f23] font-medium">
-                New password must be different from your current password.
+                {t('auth:changePassword.reusedWarning')}
               </p>
             )}
 
             {/* Strength Meter & Requirements */}
             <div className="mt-3 rounded-xl border border-[#e8e1dd] bg-[#faf2ee] p-3.5">
               <div className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-wider text-[#57423b] mb-1.5">
-                <span>Password Requirements</span>
+                <span>{t('auth:rules.passwordRequirements')}</span>
                 <span className="font-bold text-[#1e1b19]">
-                  {strength.label}
+                  {strengthLabel}
                 </span>
               </div>
               <div className="h-1.5 w-full rounded-full bg-[#e8e1dd] overflow-hidden mb-2.5">
@@ -226,7 +237,7 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
               htmlFor="modal-confirm-password"
               className="block text-xs font-semibold uppercase tracking-wider text-[#1e1b19]"
             >
-              Confirm New Password
+              {t('auth:changePassword.confirmPasswordLabel')}
             </label>
             <div className="relative mt-1.5">
               <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-[#8a726a]">
@@ -238,7 +249,9 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
                 required
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Re-enter new password"
+                placeholder={t(
+                  'auth:changePassword.confirmPasswordPlaceholder',
+                )}
                 className="w-full rounded-xl border border-[#e8e1dd] bg-[#faf2ee] py-3 pl-11 pr-11 text-sm text-[#1e1b19] placeholder-[#8a726a] outline-none focus:bg-white focus:border-[#b85028] focus:ring-2 focus:ring-[#b85028]/20 transition"
               />
               <div className="absolute inset-y-0 right-0 flex items-center pr-3.5">
@@ -247,7 +260,7 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
                     <CheckCircle
                       size={18}
                       weight="fill"
-                      className="text-[#43664d]"
+                      className="text-[#486b52]"
                     />
                   ) : (
                     <XCircle
@@ -272,7 +285,7 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
             </div>
             {confirmPassword.length > 0 && !passwordsMatch && (
               <p className="mt-1 text-xs text-[#ba1a1a]">
-                Passwords do not match yet.
+                {t('auth:changePassword.passwordsDoNotMatch')}
               </p>
             )}
           </div>
@@ -282,24 +295,24 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
             <button
               type="button"
               onClick={handleClose}
-              className="w-full sm:w-auto px-5 py-2.5 rounded-xl border border-[#e8e1dd] bg-[#faf2ee] text-xs font-semibold text-[#57423b] hover:bg-[#f4ece9] transition"
+              className="w-full sm:w-auto px-5 py-2.5 rounded-xl border border-[#e8e1dd] bg-[#faf2ee] text-xs font-semibold text-[#57423b] hover:bg-[#f4ece9] transition cursor-pointer"
             >
-              Cancel
+              {t('common:cancel')}
             </button>
             <button
               type="submit"
               disabled={isSubmitDisabled}
-              className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-[#b85028] text-white text-xs font-bold shadow-sm hover:bg-[#983912] active:scale-[0.99] transition flex items-center justify-center gap-2 disabled:cursor-not-allowed disabled:opacity-50"
+              className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-[#b85028] text-white text-xs font-bold shadow-sm hover:bg-[#983912] active:scale-[0.99] transition flex items-center justify-center gap-2 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
             >
               {isPending ? (
                 <>
                   <CircleNotch size={16} className="animate-spin" />
-                  <span>Updating Password...</span>
+                  <span>{t('auth:changePassword.updating')}</span>
                 </>
               ) : (
                 <>
                   <Check size={16} weight="bold" />
-                  <span>Update Password</span>
+                  <span>{t('auth:changePassword.updatePassword')}</span>
                 </>
               )}
             </button>

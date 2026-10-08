@@ -1,3 +1,4 @@
+import { useTranslation } from '@jrs/client-core';
 import type { IAuthUser, ITown } from '@jrs/shared';
 import { ArrowRight, MapPin, SignOut, Sparkle } from '@phosphor-icons/react';
 import type React from 'react';
@@ -8,6 +9,7 @@ import {
   Marker,
 } from 'react-simple-maps';
 import cameroonGeo from '../../../assets/geo/cameroon-regions.json';
+import { LanguageToggle } from '../../../components/LanguageToggle';
 import { CAMEROON_REGIONS } from '../config/cameroon-map.config';
 import { useRegionSelector } from '../hooks/use-region-selector';
 
@@ -20,6 +22,8 @@ export const RegionSelectorScreen: React.FC<RegionSelectorScreenProps> = ({
   user,
   onTownSelected,
 }) => {
+  const { t, i18n } = useTranslation();
+  const isFrench = i18n.language?.startsWith('fr');
   const {
     signOut,
     availableTowns,
@@ -68,7 +72,7 @@ export const RegionSelectorScreen: React.FC<RegionSelectorScreenProps> = ({
           </div>
           {hoveredInfo.hasHub && (
             <span className="text-[9px] bg-[#b85028] text-white px-1.5 py-0.5 rounded font-bold uppercase ml-1">
-              Active Hub
+              {t('towns:activeHub')}
             </span>
           )}
         </div>
@@ -78,19 +82,20 @@ export const RegionSelectorScreen: React.FC<RegionSelectorScreenProps> = ({
       <div className="absolute top-6 left-8 z-20">
         <div className="mb-2 inline-flex items-center gap-1.5 rounded-lg border border-[#e8e1dd] bg-white/85 px-3 py-1 text-xs font-semibold text-[#b85028] shadow-xs backdrop-blur-md">
           <Sparkle size={14} weight="fill" />
-          <span>LRC JRS · Youth Fellowship</span>
+          <span>{t('common:fullAppName')}</span>
         </div>
         <h1 className="text-2xl font-black tracking-tight text-[#1e1b19] sm:text-3xl">
-          Select Fellowship Hub
+          {t('towns:selectHubTitle')}
         </h1>
         <p className="mt-1 max-w-md text-xs sm:text-sm text-[#6e5850]">
-          Click your active region or city on the map of Cameroon to enter your
-          workspace
+          {t('towns:selectHubSubtitle')}
         </p>
       </div>
 
       {/* Top Right Floating Profile & Sign Out Controls */}
       <div className="absolute top-6 right-8 z-20 flex items-center gap-3">
+        <LanguageToggle />
+
         <div className="flex items-center gap-2 rounded-lg border border-[#e8e1dd] bg-white/85 px-3.5 py-1.5 text-xs shadow-xs backdrop-blur-md">
           <span className="rounded bg-[#edf3ee] px-2 py-0.5 text-[11px] font-bold text-[#486b52]">
             {user.role}
@@ -102,10 +107,10 @@ export const RegionSelectorScreen: React.FC<RegionSelectorScreenProps> = ({
           type="button"
           onClick={() => signOut()}
           className="flex cursor-pointer items-center gap-1.5 rounded-lg border border-[#e8e1dd] bg-[#ffdad6] px-3.5 py-1.5 text-xs font-bold text-[#ba1a1a] shadow-xs backdrop-blur-md transition hover:bg-[#ffb4a8]"
-          title="Sign Out"
+          title={t('common:signOut')}
         >
           <SignOut size={16} weight="bold" />
-          <span>Sign Out</span>
+          <span>{t('common:signOut')}</span>
         </button>
       </div>
 
@@ -130,10 +135,13 @@ export const RegionSelectorScreen: React.FC<RegionSelectorScreenProps> = ({
                   const isSelected = selectedIso === iso;
                   const isHovered = hoveredIso === iso;
                   const regionConfig = CAMEROON_REGIONS[iso];
-                  const regionName =
-                    regionConfig?.displayNameEn ||
-                    geo.properties?.shapeName ||
-                    'Region';
+                  const regionName = isFrench
+                    ? regionConfig?.displayNameFr ||
+                      geo.properties?.shapeName ||
+                      'Région'
+                    : regionConfig?.displayNameEn ||
+                      geo.properties?.shapeName ||
+                      'Region';
 
                   let fillColor = '#f4ece9';
                   let strokeColor = '#ded5d0';
@@ -162,8 +170,8 @@ export const RegionSelectorScreen: React.FC<RegionSelectorScreenProps> = ({
                         setHoveredInfo({
                           title: regionName,
                           subtitle: hasTown
-                            ? `${isoToTown[iso].name} Hub (${isoToTown[iso].code})`
-                            : 'No Active Hub',
+                            ? `${isoToTown[iso].name} ${t('towns:hub')} (${isoToTown[iso].code})`
+                            : t('towns:noActiveHub'),
                           hasHub: hasTown,
                           x: e.clientX,
                           y: e.clientY,
@@ -216,8 +224,10 @@ export const RegionSelectorScreen: React.FC<RegionSelectorScreenProps> = ({
                     className="group cursor-pointer"
                     onMouseEnter={(e: React.MouseEvent) => {
                       setHoveredInfo({
-                        title: `${town.name} Hub (${town.code})`,
-                        subtitle: config.displayNameEn,
+                        title: `${town.name} ${t('towns:hub')} (${town.code})`,
+                        subtitle: isFrench
+                          ? config.displayNameFr
+                          : config.displayNameEn,
                         hasHub: true,
                         x: e.clientX,
                         y: e.clientY,
@@ -285,10 +295,13 @@ export const RegionSelectorScreen: React.FC<RegionSelectorScreenProps> = ({
           <div className="flex items-start justify-between">
             <div>
               <span className="text-[11px] font-bold uppercase tracking-wider text-[#8a726a]">
-                {selectedRegionConfig?.displayNameEn || 'Active Region'}
+                {(isFrench
+                  ? selectedRegionConfig?.displayNameFr
+                  : selectedRegionConfig?.displayNameEn) ||
+                  t('towns:activeHub')}
               </span>
               <h2 className="mt-0.5 text-xl font-bold text-[#1e1b19]">
-                {selectedTown.name} Hub
+                {selectedTown.name} {t('towns:hub')}
               </h2>
             </div>
             <span className="rounded-md border border-[#e8e1dd] bg-[#faf2ee] px-2.5 py-1 font-mono text-xs font-bold text-[#b85028]">
@@ -298,7 +311,7 @@ export const RegionSelectorScreen: React.FC<RegionSelectorScreenProps> = ({
 
           <div className="mt-2.5 flex items-center gap-2 text-xs text-[#486b52]">
             <span className="inline-block h-2 w-2 rounded-full bg-[#486b52] animate-pulse" />
-            <span className="font-semibold">Active Fellowship Workspace</span>
+            <span className="font-semibold">{t('towns:activeWorkspace')}</span>
           </div>
 
           <div className="mt-4">
@@ -308,7 +321,9 @@ export const RegionSelectorScreen: React.FC<RegionSelectorScreenProps> = ({
               disabled={isEntering}
               className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-[#b85028] px-5 py-3 text-sm font-bold text-white shadow-md transition hover:bg-[#983912] active:scale-[0.99] disabled:opacity-50"
             >
-              <span>Enter {selectedTown.name} Workspace</span>
+              <span>
+                {t('towns:enterWorkspace', { town: selectedTown.name })}
+              </span>
               <ArrowRight size={18} weight="bold" />
             </button>
           </div>
@@ -317,11 +332,9 @@ export const RegionSelectorScreen: React.FC<RegionSelectorScreenProps> = ({
         <div className="absolute right-8 bottom-8 z-20 w-80 rounded-xl border border-[#e8e1dd] bg-white/95 p-6 text-center text-[#8a726a] shadow-xl backdrop-blur-md sm:w-92">
           <MapPin size={28} className="mx-auto mb-2 text-[#b85028]" />
           <p className="font-semibold text-sm text-[#1e1b19]">
-            No Region Selected
+            {t('towns:noRegionSelected')}
           </p>
-          <p className="mt-1 text-xs">
-            Click a highlighted region or city on the map.
-          </p>
+          <p className="mt-1 text-xs">{t('towns:clickHighlighted')}</p>
         </div>
       )}
     </div>

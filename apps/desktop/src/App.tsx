@@ -1,4 +1,4 @@
-import { CoreProviders } from '@jrs/client-core';
+import { CoreProviders, useTranslation } from '@jrs/client-core';
 import {
   FirstTimeSetupScreen,
   ForgotPasswordScreen,
@@ -16,6 +16,7 @@ const API_BASE_URL =
   import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
 function AppContent() {
+  const { t } = useTranslation();
   const {
     user,
     isAuthenticated,
@@ -48,7 +49,7 @@ function AppContent() {
         <div className="flex flex-col items-center gap-3">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#b85028] border-t-transparent" />
           <p className="text-xs font-medium text-[#57423b]">
-            Loading LRC JRS Portal...
+            {t('common:loadingPortal')}
           </p>
         </div>
       </div>

@@ -1,4 +1,4 @@
-import { useTownContext } from '@jrs/client-core';
+import { useTownContext, useTranslation } from '@jrs/client-core';
 import type { IAuthUser } from '@jrs/shared';
 import { CheckCircle, Sparkle, SquaresFour } from '@phosphor-icons/react';
 import type React from 'react';
@@ -18,6 +18,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   user,
   onSwitchRegion,
 }) => {
+  const { t } = useTranslation();
   const { activeTown } = useTownContext();
 
   const {
@@ -31,8 +32,12 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     isChangePasswordOpen,
     openChangePassword,
     closeChangePassword,
-    currentTabTitle,
   } = useDashboardLayout();
+
+  const tabTitle =
+    activeTab === 'dashboard'
+      ? t('dashboard:overview')
+      : t(`navigation:${activeTab}`);
 
   return (
     <div className="min-h-screen w-full bg-[#fff8f5] text-[#1e1b19]">
@@ -50,7 +55,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         isSidebarCollapsed={isSidebarCollapsed}
         onToggleSidebar={toggleSidebar}
         onOpenChangePassword={openChangePassword}
-        title={currentTabTitle}
+        title={tabTitle}
       />
 
       {/* 3. Main Workspace Area */}
@@ -89,8 +94,8 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                 <span className="w-2 h-2 rounded-full bg-[#486b52] animate-pulse" />
                 <span className="font-bold text-[#1e1b19]">
                   {activeTown
-                    ? `${activeTown.name} Hub (${activeTown.code})`
-                    : 'Active Hub'}
+                    ? `${activeTown.name} ${t('towns:hub')} (${activeTown.code})`
+                    : t('towns:activeHub')}
                 </span>
                 <span className="text-[#8a726a] font-mono text-[11px]">
                   #LRC-JRS-PORTAL
@@ -100,7 +105,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               <div className="flex items-center gap-2 text-xs font-semibold text-[#8a726a]">
                 <span>SANCTUARY CANVAS</span>
                 <span className="px-2 py-0.5 rounded-md bg-[#faf2ee] border border-[#e8e1dd] text-[#1e1b19] font-mono text-[11px]">
-                  READY
+                  {t('common:ready')}
                 </span>
               </div>
             </div>
@@ -113,20 +118,17 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 
               <div className="inline-flex items-center gap-1.5 bg-[#ffdbcf]/50 text-[#812901] px-3 py-1 rounded-full text-xs font-bold mb-3 border border-[#ffb59c]/50">
                 <Sparkle size={14} weight="fill" />
-                <span>Reserved Workspace Initialized</span>
+                <span>{t('dashboard:reservedWorkspace')}</span>
               </div>
 
               <h2 className="text-xl sm:text-2xl font-bold text-[#1e1b19] tracking-tight mb-2">
-                Pristine Fellowship Workspace
+                {t('dashboard:pristineTitle')}
               </h2>
 
               <p className="text-xs sm:text-sm text-[#57423b] leading-relaxed">
-                The application shell for{' '}
-                <strong className="text-[#1e1b19] font-semibold">
-                  {activeTown ? activeTown.name : 'your assigned'} Hub
-                </strong>{' '}
-                is active. This core viewport serves as the dedicated space for
-                youth registries, activities, and fellowship notes.
+                {t('dashboard:pristineDesc', {
+                  hub: activeTown ? activeTown.name : t('dashboard:assigned'),
+                })}
               </p>
             </div>
 
@@ -135,7 +137,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               <div className="flex items-center gap-4 text-xs text-[#8a726a]">
                 <div className="flex items-center gap-1.5">
                   <div className="w-2.5 h-2.5 rounded-full bg-[#b85028]" />
-                  <span>Terracotta Accent</span>
+                  <span>Terracotta</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <div className="w-2.5 h-2.5 rounded-full bg-[#486b52]" />
@@ -150,7 +152,10 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                   className="text-[#486b52]"
                 />
                 <span>
-                  Signed in as {user.fullName} ({user.role})
+                  {t('dashboard:signedInAs', {
+                    name: user.fullName,
+                    role: user.role,
+                  })}
                 </span>
               </div>
             </div>

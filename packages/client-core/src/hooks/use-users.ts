@@ -1,4 +1,13 @@
-import type { IUser, UserRole } from '@jrs/shared';
+import type {
+  ICreateMemberDto,
+  IMemberQueryDto,
+  IMemberStats,
+  IPaginatedMembersResponse,
+  IUpdateMemberAccessDto,
+  IUpdateMemberDto,
+  IUser,
+  UserRole,
+} from '@jrs/shared';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useHttp } from '../context/http.context';
 import { queryKeys } from '../query/query-keys';
@@ -17,6 +26,121 @@ export interface IInviteUserDto {
   allowedReadTownIds?: string[];
 }
 
+/**
+ * Hook to query paginated, filtered, and searched members
+ */
+export function useMembersQuery(query?: IMemberQueryDto) {
+  const http = useHttp();
+  return useQuery({
+    queryKey: queryKeys.users.list(query),
+    queryFn: () =>
+      http.get<IPaginatedMembersResponse>('/users', {
+        params: query,
+      }),
+  });
+}
+
+/**
+ * Hook to fetch member hub aggregate metrics
+ */
+export function useMemberStatsQuery(townId?: string) {
+  const http = useHttp();
+  return useQuery({
+    queryKey: queryKeys.users.stats(townId),
+    queryFn: () =>
+      http.get<IMemberStats>('/users/stats', {
+        params: townId ? { townId } : undefined,
+      }),
+  });
+}
+
+/**
+ * Hook to fetch single member details
+ */
+export function useMemberDetailQuery(id: string) {
+  const http = useHttp();
+  return useQuery({
+    queryKey: queryKeys.users.detail(id),
+    queryFn: () => http.get<IUser>(`/users/${id}`),
+    enabled: Boolean(id),
+  });
+}
+
+/**
+ * Hook to register a new member in the fellowship
+ */
+export function useCreateMemberMutation() {
+  const http = useHttp();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (dto: ICreateMemberDto) => http.post<IUser>('/users', dto),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.users.all });
+      queryClient.invalidateQueries({ queryKey: ['users', 'stats'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.towns.all });
+    },
+  });
+}
+
+/**
+ * Hook to update a member profile
+ */
+export function useUpdateMemberMutation() {
+  const http = useHttp();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, dto }: { id: string; dto: IUpdateMemberDto }) =>
+      http.patch<IUser>(`/users/${id}`, dto),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.users.all });
+      queryClient.invalidateQueries({ queryKey: ['users', 'stats'] });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.users.detail(variables.id),
+      });
+      queryClient.invalidateQueries({ queryKey: queryKeys.towns.all });
+    },
+  });
+}
+
+/**
+ * Hook to toggle member platform access or resend temporary credentials
+ */
+export function useUpdateMemberAccessMutation() {
+  const http = useHttp();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, dto }: { id: string; dto: IUpdateMemberAccessDto }) =>
+      http.patch<IUser>(`/users/${id}/access`, dto),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.users.all });
+      queryClient.invalidateQueries({ queryKey: ['users', 'stats'] });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.users.detail(variables.id),
+      });
+    },
+  });
+}
+
+/**
+ * Hook to remove a member (AP only)
+ */
+export function useDeleteMemberMutation() {
+  const http = useHttp();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => http.delete(`/users/${id}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.users.all });
+      queryClient.invalidateQueries({ queryKey: ['users', 'stats'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.towns.all });
+    },
+  });
+}
+
 export function useUsersByTownQuery(townId?: string) {
   const http = useHttp();
   return useQuery({
@@ -29,12 +153,7 @@ export function useUsersByTownQuery(townId?: string) {
 }
 
 export function useUserDetailQuery(id: string) {
-  const http = useHttp();
-  return useQuery({
-    queryKey: queryKeys.users.detail(id),
-    queryFn: () => http.get<IUser>(`/users/${id}`),
-    enabled: Boolean(id),
-  });
+  return useMemberDetailQuery(id);
 }
 
 export function useTransferTownMutation() {

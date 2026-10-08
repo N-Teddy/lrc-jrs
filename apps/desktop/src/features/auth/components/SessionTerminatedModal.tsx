@@ -1,3 +1,4 @@
+import { useTranslation } from '@jrs/client-core';
 import { ArrowClockwise, Fingerprint, LockKey } from '@phosphor-icons/react';
 import type React from 'react';
 
@@ -10,6 +11,8 @@ export const SessionTerminatedModal: React.FC<SessionTerminatedModalProps> = ({
   isOpen,
   onAcknowledge,
 }) => {
+  const { t } = useTranslation();
+
   if (!isOpen) return null;
 
   return (
@@ -28,33 +31,31 @@ export const SessionTerminatedModal: React.FC<SessionTerminatedModalProps> = ({
         {/* Title & Explanation */}
         <div className="flex flex-col gap-1">
           <span className="text-[11px] font-bold uppercase tracking-wider text-[#b85028]">
-            Session Expiry Guard
+            {t('auth:sessionTerminated.guardBadge')}
           </span>
           <h2 id="session-title" className="text-xl font-bold text-[#1e1b19]">
-            Session Terminated for Security
+            {t('auth:sessionTerminated.title')}
           </h2>
         </div>
 
         <p className="text-xs sm:text-sm leading-relaxed text-[#57423b]">
-          A security irregularity or session expiration was detected. To protect
-          your personal information, all active sessions on this device have
-          been signed out.
+          {t('auth:sessionTerminated.desc')}
         </p>
 
         {/* Audit Tag */}
         <div className="w-full bg-[#faf2ee] rounded-xl px-4 py-2.5 flex items-center justify-center gap-2 text-xs text-[#8a726a] border border-[#e8e1dd]">
           <Fingerprint size={16} weight="bold" />
-          <span>Security Event Logged • Session Refresh Required</span>
+          <span>{t('auth:sessionTerminated.auditTag')}</span>
         </div>
 
         {/* Primary Action */}
         <button
           type="button"
           onClick={onAcknowledge}
-          className="w-full py-3.5 px-6 rounded-xl bg-[#b85028] text-white text-sm font-semibold shadow-md hover:bg-[#983912] active:scale-[0.99] transition flex items-center justify-center gap-2 mt-1"
+          className="w-full py-3.5 px-6 rounded-xl bg-[#b85028] text-white text-sm font-semibold shadow-md hover:bg-[#983912] active:scale-[0.99] transition flex items-center justify-center gap-2 mt-1 cursor-pointer"
         >
           <ArrowClockwise size={18} weight="bold" />
-          <span>Sign In Again</span>
+          <span>{t('auth:sessionTerminated.signInAgain')}</span>
         </button>
       </div>
     </div>

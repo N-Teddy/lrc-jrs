@@ -1,3 +1,4 @@
+import { useTranslation } from '@jrs/client-core';
 import type { IAuthUser } from '@jrs/shared';
 import {
   ArrowRight,
@@ -14,6 +15,7 @@ import {
 } from '@phosphor-icons/react';
 import type React from 'react';
 import fellowshipHero from '../../../assets/fellowship-hero.jpg';
+import { LanguageToggle } from '../../../components/LanguageToggle';
 import { useLogin } from '../hooks/use-login';
 import { AccountRevokedModal } from './AccountRevokedModal';
 
@@ -29,6 +31,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
   onRequiresPasswordChange,
   onForgotPasswordClick,
 }) => {
+  const { t } = useTranslation();
   const {
     identifier,
     setIdentifier,
@@ -62,16 +65,20 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
       </div>
 
       {/* Full 50% Right Side: Form Container */}
-      <div className="flex h-full w-full flex-col justify-center overflow-y-auto px-8 sm:px-14 lg:w-1/2 lg:px-16 xl:px-24">
+      <div className="relative flex h-full w-full flex-col justify-center overflow-y-auto px-8 sm:px-14 lg:w-1/2 lg:px-16 xl:px-24">
+        {/* Floating Language Switcher */}
+        <div className="absolute top-6 right-8 z-10">
+          <LanguageToggle showIcon />
+        </div>
+
         <div className="mx-auto w-full max-w-[480px] py-8">
           {/* Header */}
           <div className="mb-8">
             <h1 className="text-3xl font-bold tracking-tight text-[#1e1b19] sm:text-4xl">
-              Welcome back
+              {t('auth:login.title')}
             </h1>
             <p className="mt-2.5 text-sm sm:text-base leading-relaxed text-[#57423b]">
-              Sign in to access your youth circles, events calendar, and
-              mentorship notes.
+              {t('auth:login.subtitle')}
             </p>
           </div>
 
@@ -83,11 +90,10 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
               </div>
               <div>
                 <p className="font-semibold text-[#1e1b19]">
-                  First time logging in?
+                  {t('auth:login.firstTimeNoticeTitle')}
                 </p>
                 <p className="mt-1 leading-relaxed text-[#57423b]">
-                  Enter the temporary password sent to your phone via WhatsApp
-                  or your registered email address.
+                  {t('auth:login.firstTimeNoticeDesc')}
                 </p>
               </div>
             </div>
@@ -110,7 +116,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
                       onClick={() => onForgotPasswordClick?.(identifier)}
                       className="mt-1.5 inline-flex items-center text-xs font-bold underline hover:text-[#ba1a1a]"
                     >
-                      Reset Password Now →
+                      {t('auth:login.resetNow')}
                     </button>
                   )}
                 </div>
@@ -126,7 +132,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
                 htmlFor="identifier"
                 className="block text-xs font-semibold uppercase tracking-wider text-[#1e1b19]"
               >
-                Phone Number or Email
+                {t('auth:login.identifierLabel')}
               </label>
               <div className="relative mt-2">
                 <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-[#8a726a]">
@@ -145,13 +151,12 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
                   autoComplete="username"
                   value={identifier}
                   onChange={(e) => setIdentifier(e.target.value)}
-                  placeholder="e.g. 693087159 or name@example.com"
+                  placeholder={t('auth:login.identifierPlaceholder')}
                   className="w-full rounded-xl border border-[#e8e1dd] bg-white py-3.5 pl-12 pr-4 text-sm sm:text-base text-[#1e1b19] placeholder-[#8a726a] transition focus:border-[#b85028] focus:outline-none focus:ring-2 focus:ring-[#b85028]/15"
                 />
               </div>
               <p className="mt-1.5 text-xs text-[#8a726a]">
-                Enter your registered fellowship telephone number or email
-                address.
+                {t('auth:login.identifierHelper')}
               </p>
             </div>
 
@@ -162,14 +167,14 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
                   htmlFor="password"
                   className="block text-xs font-semibold uppercase tracking-wider text-[#1e1b19]"
                 >
-                  Password or Code
+                  {t('auth:login.passwordLabel')}
                 </label>
                 <button
                   type="button"
                   onClick={() => onForgotPasswordClick?.(identifier)}
                   className="text-xs font-semibold text-[#b85028] transition hover:text-[#983912]"
                 >
-                  Forgot password?
+                  {t('auth:login.forgotPassword')}
                 </button>
               </div>
               <div className="relative mt-2">
@@ -183,7 +188,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
                   autoComplete="current-password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter your password or temporary code"
+                  placeholder={t('auth:login.passwordPlaceholder')}
                   className="w-full rounded-xl border border-[#e8e1dd] bg-white py-3.5 pl-12 pr-12 text-sm sm:text-base text-[#1e1b19] placeholder-[#8a726a] transition focus:border-[#b85028] focus:outline-none focus:ring-2 focus:ring-[#b85028]/15"
                 />
                 <button
@@ -224,7 +229,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
                   <Check size={14} weight="bold" />
                 </div>
                 <span className="text-xs sm:text-sm font-medium text-[#1e1b19]">
-                  Keep me signed in on this device
+                  {t('auth:login.keepSignedIn')}
                 </span>
               </label>
             </div>
@@ -239,11 +244,11 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
                 {isLoading ? (
                   <>
                     <CircleNotch size={20} className="animate-spin" />
-                    <span>Signing in...</span>
+                    <span>{t('auth:login.signingIn')}</span>
                   </>
                 ) : (
                   <>
-                    <span>Sign In</span>
+                    <span>{t('auth:login.signInButton')}</span>
                     <ArrowRight size={20} weight="bold" />
                   </>
                 )}

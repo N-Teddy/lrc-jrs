@@ -79,3 +79,56 @@ export interface IRefreshTokenResponse {
   refreshToken: string;
   expiresIn: number;
 }
+
+export interface ICreateMemberDto {
+  fullName: string;
+  phoneNumber: string;
+  email?: string;
+  dateOfBirth: string;
+  role?: UserRole;
+  homeTownId?: string;
+  hasAppAccess?: boolean;
+}
+
+export interface IUpdateMemberDto {
+  fullName?: string;
+  phoneNumber?: string;
+  email?: string;
+  dateOfBirth?: string;
+  role?: UserRole;
+  isActivePC?: boolean;
+  homeTownId?: string;
+  hasAppAccess?: boolean;
+}
+
+export interface IUpdateMemberAccessDto {
+  hasAppAccess?: boolean;
+  isAccessRevoked?: boolean;
+  resendInvite?: boolean;
+}
+
+export interface IMemberQueryDto {
+  page?: number;
+  limit?: number;
+  search?: string;
+  townId?: string;
+  role?: UserRole;
+  status?: string;
+  isJr?: boolean;
+}
+
+export interface IMemberStats {
+  totalMembers: number;
+  activeJrCount: number;
+  activePcCount: number;
+  appAccessCount: number;
+  pendingActivationCount: number;
+}
+
+export interface IPaginatedMembersResponse {
+  items: IUser[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}

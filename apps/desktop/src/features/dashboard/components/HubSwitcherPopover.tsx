@@ -1,3 +1,4 @@
+import { useTranslation } from '@jrs/client-core';
 import {
   CaretRight,
   Check,
@@ -23,6 +24,8 @@ export const HubSwitcherPopover: React.FC<HubSwitcherPopoverProps> = ({
   onOpenMapView,
   isSidebarCollapsed = false,
 }) => {
+  const { t, i18n } = useTranslation();
+  const isFrench = i18n.language?.startsWith('fr');
   const {
     availableTowns,
     activeTownId,
@@ -57,17 +60,19 @@ export const HubSwitcherPopover: React.FC<HubSwitcherPopoverProps> = ({
             </div>
             <div>
               <h3 className="font-bold text-xs text-[#1e1b19] leading-tight">
-                Select Fellowship Hub
+                {t('dashboard:hubSwitcher.title')}
               </h3>
               <p className="text-[10px] text-[#57423b]">
-                Active regional community scope
+                {t('dashboard:hubSwitcher.scope')}
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
             <span className="px-2 py-0.5 rounded bg-[#edf3ee] text-[#486b52] text-[10px] font-bold">
-              {availableTowns.length} Active
+              {t('dashboard:hubSwitcher.activeCount', {
+                count: availableTowns.length,
+              })}
             </span>
             <button
               type="button"
@@ -91,7 +96,7 @@ export const HubSwitcherPopover: React.FC<HubSwitcherPopoverProps> = ({
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Find hub by city or code..."
+              placeholder={t('dashboard:hubSwitcher.searchPlaceholder')}
               className="w-full pl-8 pr-3 py-1.5 bg-[#faf2ee] border border-[#e8e1dd] rounded-lg text-xs text-[#1e1b19] placeholder:text-[#8a726a] outline-none transition focus:bg-white focus:border-[#b85028]"
             />
           </div>
@@ -101,7 +106,7 @@ export const HubSwitcherPopover: React.FC<HubSwitcherPopoverProps> = ({
         <div className="p-2 max-h-64 overflow-y-auto space-y-1">
           {filteredTowns.map((town) => {
             const isCurrent = activeTownId === town.id;
-            const regionName = getRegionName(town.code);
+            const regionName = getRegionName(town.code, isFrench ? 'fr' : 'en');
 
             return (
               <div
@@ -129,11 +134,11 @@ export const HubSwitcherPopover: React.FC<HubSwitcherPopoverProps> = ({
                   <div className="flex flex-col min-w-0">
                     <div className="flex items-center gap-1.5">
                       <span className="text-xs font-bold text-[#1e1b19] truncate">
-                        {town.name} Hub
+                        {town.name} {t('towns:hub')}
                       </span>
                       {isCurrent && (
                         <span className="px-1.5 py-0.2 rounded bg-[#ffdbcf] text-[#812901] text-[10px] font-bold">
-                          Current
+                          {t('dashboard:hubSwitcher.current')}
                         </span>
                       )}
                     </div>
@@ -162,7 +167,7 @@ export const HubSwitcherPopover: React.FC<HubSwitcherPopoverProps> = ({
 
           {filteredTowns.length === 0 && (
             <div className="py-6 text-center text-xs text-[#8a726a]">
-              No matching fellowship hubs found.
+              {t('dashboard:hubSwitcher.noHubsFound')}
             </div>
           )}
         </div>
@@ -178,15 +183,17 @@ export const HubSwitcherPopover: React.FC<HubSwitcherPopoverProps> = ({
             className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-lg bg-white text-[#1e1b19] text-xs font-bold border border-[#e8e1dd] shadow-xs hover:border-[#b85028] hover:text-[#b85028] transition cursor-pointer"
           >
             <MapTrifold size={16} weight="bold" className="text-[#b85028]" />
-            <span>Open Cameroon Map View</span>
+            <span>{t('dashboard:hubSwitcher.openMapView')}</span>
           </button>
 
           <div className="flex items-center justify-between text-[10px] text-[#8a726a] px-1">
             <span className="flex items-center gap-1">
               <Sparkle size={11} weight="fill" className="text-[#b85028]" />
-              <span>LRC JRS Sanctuary</span>
+              <span>{t('common:appName')} Sanctuary</span>
             </span>
-            <span className="font-mono">10 Regions Scope</span>
+            <span className="font-mono">
+              {t('dashboard:hubSwitcher.tenRegionsScope')}
+            </span>
           </div>
         </div>
       </div>

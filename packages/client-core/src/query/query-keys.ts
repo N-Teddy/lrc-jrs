@@ -8,6 +8,8 @@ export const queryKeys = {
   },
   users: {
     all: ['users'] as const,
+    list: (query?: unknown) => ['users', 'list', query] as const,
+    stats: (townId?: string) => ['users', 'stats', townId] as const,
     byTown: (townId: string) => ['users', 'byTown', townId] as const,
     detail: (id: string) => ['users', id] as const,
   },

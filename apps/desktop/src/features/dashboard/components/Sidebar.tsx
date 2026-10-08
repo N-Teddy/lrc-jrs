@@ -1,4 +1,4 @@
-import { useAuth, useTownContext } from '@jrs/client-core';
+import { useAuth, useTownContext, useTranslation } from '@jrs/client-core';
 import {
   ArrowsLeftRight,
   CalendarBlank,
@@ -31,6 +31,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onSelectTab,
   onOpenHubSwitcher,
 }) => {
+  const { t } = useTranslation();
   const { user, signOut } = useAuth();
   const { activeTown } = useTownContext();
 
@@ -42,34 +43,34 @@ export const Sidebar: React.FC<SidebarProps> = ({
   }[] = [
     {
       id: 'dashboard',
-      label: 'Dashboard',
+      label: t('navigation:dashboard'),
       icon: SquaresFour,
     },
     {
       id: 'members',
-      label: 'Members',
+      label: t('navigation:members'),
       icon: Users,
     },
     {
       id: 'activities',
-      label: 'Activities & Calendar',
+      label: t('navigation:activities'),
       icon: CalendarBlank,
     },
     {
       id: 'transfers',
-      label: 'Town Transfers',
+      label: t('navigation:transfers'),
       icon: ArrowsLeftRight,
       requiresAdmin: true,
     },
     {
       id: 'access',
-      label: 'Access & Accounts',
+      label: t('navigation:access'),
       icon: ShieldCheck,
       requiresAdmin: true,
     },
     {
       id: 'reports',
-      label: 'Reports',
+      label: t('navigation:reports'),
       icon: ChartBar,
     },
   ];
@@ -103,10 +104,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
             {!isCollapsed && (
               <div className="flex flex-col min-w-0">
                 <span className="font-bold text-sm text-[#1e1b19] leading-tight truncate">
-                  LRC JRS
+                  {t('common:appName')}
                 </span>
                 <span className="text-[11px] text-[#8a726a] font-medium leading-tight">
-                  Youth Fellowship
+                  {t('common:fellowshipName')}
                 </span>
               </div>
             )}
@@ -117,7 +118,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               type="button"
               onClick={onToggleCollapse}
               className="p-1.5 rounded-md text-[#8a726a] hover:bg-[#faf2ee] hover:text-[#1e1b19] transition cursor-pointer"
-              title="Collapse Sidebar"
+              title={t('navigation:collapseSidebar')}
             >
               <SidebarSimple size={18} weight="bold" />
             </button>
@@ -138,8 +139,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <div className="absolute left-[78px] top-1/2 -translate-y-1/2 hidden group-hover:flex items-center z-50 pointer-events-none">
                 <div className="bg-[#1e1b19] text-white text-xs px-3 py-1.5 rounded-md shadow-lg whitespace-nowrap">
                   {activeTown
-                    ? `${activeTown.name} Hub (${activeTown.code})`
-                    : 'Active Hub'}
+                    ? `${activeTown.name} ${t('towns:hub')} (${activeTown.code})`
+                    : t('towns:activeHub')}
                 </div>
               </div>
             </div>
@@ -151,10 +152,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 </div>
                 <div className="flex flex-col min-w-0">
                   <span className="text-xs font-bold text-[#1e1b19] truncate">
-                    {activeTown ? `${activeTown.name} Hub` : 'Regional Hub'}
+                    {activeTown
+                      ? `${activeTown.name} ${t('towns:hub')}`
+                      : t('towns:regionalHub')}
                   </span>
                   <span className="text-[10px] text-[#8a726a] font-mono">
-                    {activeTown ? `Code: ${activeTown.code}` : 'Cameroon'}
+                    {activeTown
+                      ? `${t('towns:code')}: ${activeTown.code}`
+                      : 'Cameroon'}
                   </span>
                 </div>
               </div>
@@ -164,7 +169,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 onClick={onOpenHubSwitcher}
                 className="px-2.5 py-1 rounded-md bg-white text-[#b85028] text-[11px] font-bold border border-[#e8e1dd] hover:bg-[#ffdbcf] transition cursor-pointer shrink-0"
               >
-                Switch ▾
+                {t('common:switch')} ▾
               </button>
             </div>
           )}
@@ -174,7 +179,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <nav className="p-2 space-y-1">
           {!isCollapsed && (
             <div className="px-3 pt-2 pb-1 text-[10px] font-bold uppercase tracking-wider text-[#8a726a]">
-              Workspace Navigation
+              {t('navigation:workspaceNavigation')}
             </div>
           )}
 
@@ -205,7 +210,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       <span>{item.label}</span>
                       {isActive && (
                         <span className="text-[10px] bg-[#b85028] text-white px-1.5 py-0.5 rounded">
-                          Active
+                          {t('common:active')}
                         </span>
                       )}
                     </div>
@@ -245,7 +250,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               type="button"
               onClick={onToggleCollapse}
               className="w-10 h-8 rounded-md bg-[#faf2ee] text-[#57423b] hover:bg-white hover:text-[#1e1b19] transition flex items-center justify-center cursor-pointer"
-              title="Expand Sidebar"
+              title={t('navigation:expandSidebar')}
             >
               <SidebarSimple size={16} weight="bold" />
             </button>
@@ -256,13 +261,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 type="button"
                 onClick={() => signOut()}
                 className="w-10 h-10 rounded-lg bg-[#ffdad6] text-[#ba1a1a] hover:bg-[#ffb4a8] transition flex items-center justify-center cursor-pointer shadow-xs"
-                title="Log Out"
+                title={t('common:logOut')}
               >
                 <SignOut size={18} weight="bold" />
               </button>
               <div className="absolute left-[78px] bottom-0 hidden group-hover:flex items-center z-50 pointer-events-none">
                 <div className="bg-[#1e1b19] text-white text-xs px-3 py-1.5 rounded-md shadow-lg whitespace-nowrap">
-                  Log Out
+                  {t('common:logOut')}
                 </div>
               </div>
             </div>
@@ -291,7 +296,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-lg bg-[#ffdad6] text-[#ba1a1a] hover:bg-[#ffb4a8] font-bold text-xs transition cursor-pointer shadow-xs"
             >
               <SignOut size={16} weight="bold" />
-              <span>Log Out</span>
+              <span>{t('common:logOut')}</span>
             </button>
           </>
         )}

@@ -1,3 +1,4 @@
+import { useTranslation } from '@jrs/client-core';
 import {
   ArrowLeft,
   ArrowRight,
@@ -15,6 +16,7 @@ import {
   WhatsappLogo,
 } from '@phosphor-icons/react';
 import type React from 'react';
+import { LanguageToggle } from '../../../components/LanguageToggle';
 import { useVerifyOtp } from '../hooks/use-verify-otp';
 
 interface VerifyOtpScreenProps {
@@ -30,6 +32,7 @@ export const VerifyOtpScreen: React.FC<VerifyOtpScreenProps> = ({
   onBackToChangeContact,
   onCodeVerified,
 }) => {
+  const { t } = useTranslation();
   const {
     digits,
     inputRefs,
@@ -72,8 +75,9 @@ export const VerifyOtpScreen: React.FC<VerifyOtpScreenProps> = ({
                 weight="bold"
                 className="transition-transform group-hover:-translate-x-0.5"
               />
-              <span>Change contact</span>
+              <span>{t('auth:verifyOtp.changeContact')}</span>
             </button>
+            <LanguageToggle />
           </div>
 
           {/* Icon Badge Illustration & Header */}
@@ -85,11 +89,10 @@ export const VerifyOtpScreen: React.FC<VerifyOtpScreenProps> = ({
               </div>
             </div>
             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#1e1b19]">
-              Verify Your Identity
+              {t('auth:verifyOtp.title')}
             </h1>
             <p className="text-sm text-[#57423b] max-w-md">
-              Enter the single-use six digit code sent to your registered
-              channel.
+              {t('auth:verifyOtp.subtitle')}
             </p>
           </div>
 
@@ -105,7 +108,9 @@ export const VerifyOtpScreen: React.FC<VerifyOtpScreenProps> = ({
               </div>
               <div className="flex flex-col min-w-0 text-left">
                 <span className="text-[11px] font-semibold uppercase tracking-wider text-[#8a726a]">
-                  Sent via {identifier.includes('@') ? 'Email' : 'WhatsApp'}
+                  {identifier.includes('@')
+                    ? t('auth:verifyOtp.sentViaEmail')
+                    : t('auth:verifyOtp.sentViaWhatsapp')}
                 </span>
                 <span className="text-xs sm:text-sm font-bold text-[#1e1b19] truncate">
                   {maskedId}
@@ -115,7 +120,7 @@ export const VerifyOtpScreen: React.FC<VerifyOtpScreenProps> = ({
             <button
               type="button"
               onClick={onBackToChangeContact}
-              title="Change contact identifier"
+              title={t('auth:verifyOtp.changeContact')}
               className="p-1.5 rounded-lg text-[#8a726a] hover:text-[#983912] hover:bg-[#f4ece9] transition"
             >
               <PencilSimple size={18} weight="bold" />
@@ -140,10 +145,10 @@ export const VerifyOtpScreen: React.FC<VerifyOtpScreenProps> = ({
               />
               <span>
                 {isTimerExpired ? (
-                  'Code expired'
+                  t('auth:verifyOtp.codeExpired')
                 ) : (
                   <>
-                    Code expires in{' '}
+                    {t('auth:verifyOtp.codeExpiresIn')}{' '}
                     <strong className="text-[#1e1b19]">{formattedTime}</strong>
                   </>
                 )}
@@ -209,7 +214,7 @@ export const VerifyOtpScreen: React.FC<VerifyOtpScreenProps> = ({
                 <div className="absolute inset-0 bg-[#e8e1dd]/80 rounded-xl flex items-center justify-center z-10 backdrop-blur-[1px]">
                   <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-white text-[#93000a] rounded-full shadow-sm text-xs font-bold border border-[#ffdad6]">
                     <Lock size={14} weight="bold" />
-                    <span>Input locked</span>
+                    <span>{t('auth:verifyOtp.inputLocked')}</span>
                   </span>
                 </div>
               )}
@@ -219,14 +224,16 @@ export const VerifyOtpScreen: React.FC<VerifyOtpScreenProps> = ({
             <div className="w-full flex items-center justify-between text-xs text-[#8a726a] px-1 mb-5">
               <span className="flex items-center gap-1">
                 <ShieldCheck size={14} weight="bold" />
-                <span>LRC Fellowship Security</span>
+                <span>{t('auth:verifyOtp.securityBadge')}</span>
               </span>
               <span
                 className={`font-semibold ${
                   attemptsRemaining <= 2 ? 'text-[#ba1a1a]' : 'text-[#1e1b19]'
                 }`}
               >
-                Attempts remaining: {attemptsRemaining} of 5
+                {t('auth:verifyOtp.attemptsRemaining', {
+                  count: attemptsRemaining,
+                })}
               </span>
             </div>
 
@@ -236,17 +243,17 @@ export const VerifyOtpScreen: React.FC<VerifyOtpScreenProps> = ({
                 type="button"
                 onClick={handleResendCode}
                 disabled={isResendPending}
-                className="w-full py-3.5 px-6 rounded-xl bg-[#b85028] text-white text-sm font-bold shadow-sm hover:bg-[#983912] active:scale-[0.99] transition flex items-center justify-center gap-2"
+                className="w-full py-3.5 px-6 rounded-xl bg-[#b85028] text-white text-sm font-bold shadow-sm hover:bg-[#983912] active:scale-[0.99] transition flex items-center justify-center gap-2 cursor-pointer"
               >
                 {isResendPending ? (
                   <>
                     <CircleNotch size={18} className="animate-spin" />
-                    <span>Requesting fresh code...</span>
+                    <span>{t('auth:verifyOtp.requestingFreshCode')}</span>
                   </>
                 ) : (
                   <>
                     <ArrowsClockwise size={18} weight="bold" />
-                    <span>Request Fresh Code</span>
+                    <span>{t('auth:verifyOtp.requestFreshCode')}</span>
                   </>
                 )}
               </button>
@@ -254,16 +261,16 @@ export const VerifyOtpScreen: React.FC<VerifyOtpScreenProps> = ({
               <button
                 type="submit"
                 disabled={!isFormComplete || isVerifyPending}
-                className="w-full py-3.5 px-6 rounded-xl bg-[#b85028] text-white text-sm font-bold shadow-sm hover:bg-[#983912] active:scale-[0.99] transition flex items-center justify-center gap-2 disabled:cursor-not-allowed disabled:opacity-50"
+                className="w-full py-3.5 px-6 rounded-xl bg-[#b85028] text-white text-sm font-bold shadow-sm hover:bg-[#983912] active:scale-[0.99] transition flex items-center justify-center gap-2 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
               >
                 {isVerifyPending ? (
                   <>
                     <CircleNotch size={18} className="animate-spin" />
-                    <span>Verifying code...</span>
+                    <span>{t('auth:verifyOtp.verifying')}</span>
                   </>
                 ) : (
                   <>
-                    <span>Verify Code & Proceed</span>
+                    <span>{t('auth:verifyOtp.verifyAndProceed')}</span>
                     <ArrowRight size={18} weight="bold" />
                   </>
                 )}
@@ -273,24 +280,26 @@ export const VerifyOtpScreen: React.FC<VerifyOtpScreenProps> = ({
 
           {/* Resend Mechanism */}
           <div className="pt-2 flex flex-col items-center gap-2 text-center border-t border-[#faf2ee]">
-            <p className="text-xs text-[#8a726a]">Didn't receive the code?</p>
+            <p className="text-xs text-[#8a726a]">
+              {t('auth:verifyOtp.didNotReceive')}
+            </p>
             <div className="flex items-center gap-2 text-xs">
               <button
                 type="button"
                 onClick={handleResendCode}
                 disabled={isResendPending}
-                className="font-bold text-[#b85028] hover:underline inline-flex items-center gap-1 disabled:opacity-50"
+                className="font-bold text-[#b85028] hover:underline inline-flex items-center gap-1 disabled:opacity-50 cursor-pointer"
               >
                 <ArrowsClockwise size={14} weight="bold" />
-                <span>Resend Code</span>
+                <span>{t('auth:verifyOtp.resendCode')}</span>
               </button>
               <span className="text-[#8a726a]">•</span>
               <button
                 type="button"
                 onClick={handleResendCode}
-                className="text-[#57423b] hover:text-[#1e1b19] hover:underline"
+                className="text-[#57423b] hover:text-[#1e1b19] hover:underline cursor-pointer"
               >
-                Try alternate channel
+                {t('auth:verifyOtp.tryAlternate')}
               </button>
             </div>
           </div>
@@ -304,14 +313,16 @@ export const VerifyOtpScreen: React.FC<VerifyOtpScreenProps> = ({
             </div>
             <div className="flex flex-col text-left">
               <span className="text-xs font-semibold text-[#1e1b19]">
-                Need help verifying?
+                {t('auth:verifyOtp.needHelp')}
               </span>
               <span className="text-[11px] text-[#8a726a]">
-                Contact LRC Youth Desk
+                {t('auth:verifyOtp.contactDesk')}
               </span>
             </div>
           </div>
-          <span className="text-xs font-bold text-[#b85028]">Get Help</span>
+          <span className="text-xs font-bold text-[#b85028]">
+            {t('auth:verifyOtp.getHelp')}
+          </span>
         </div>
       </div>
     </div>

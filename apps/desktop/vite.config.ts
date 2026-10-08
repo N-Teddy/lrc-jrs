@@ -1,3 +1,4 @@
+import path from 'node:path';
 import process from 'node:process';
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
@@ -10,6 +11,16 @@ export default defineConfig(() => ({
   plugins: [react(), tailwindcss()],
   resolve: {
     dedupe: ['react', 'react-dom'],
+    alias: {
+      '@jrs/client-core': path.resolve(
+        import.meta.dirname,
+        '../../packages/client-core/src/index.ts',
+      ),
+      '@jrs/shared': path.resolve(
+        import.meta.dirname,
+        '../../packages/shared/src/index.ts',
+      ),
+    },
   },
 
   // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`

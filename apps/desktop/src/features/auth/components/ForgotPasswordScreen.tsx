@@ -1,3 +1,4 @@
+import { useTranslation } from '@jrs/client-core';
 import {
   ArrowLeft,
   ArrowRight,
@@ -11,6 +12,7 @@ import {
   WarningCircle,
 } from '@phosphor-icons/react';
 import type React from 'react';
+import { LanguageToggle } from '../../../components/LanguageToggle';
 import { useForgotPassword } from '../hooks/use-forgot-password';
 
 interface ForgotPasswordScreenProps {
@@ -27,6 +29,7 @@ export const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({
   onBackToSignIn,
   onCodeSent,
 }) => {
+  const { t } = useTranslation();
   const {
     identifier,
     isEmailInput,
@@ -53,8 +56,9 @@ export const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({
               className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#57423b] transition hover:text-[#983912]"
             >
               <ArrowLeft size={18} weight="bold" />
-              <span>Back to Sign In</span>
+              <span>{t('auth:forgotPassword.backToSignIn')}</span>
             </button>
+            <LanguageToggle />
           </div>
 
           {/* Icon Motif & Title */}
@@ -67,11 +71,10 @@ export const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({
             </div>
             <div className="flex flex-col gap-1.5 max-w-md">
               <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#1e1b19]">
-                Reset Your Password
+                {t('auth:forgotPassword.title')}
               </h1>
               <p className="text-sm leading-relaxed text-[#57423b]">
-                Enter your registered phone number or email address. We'll send
-                you a 6-digit verification code to help you regain access.
+                {t('auth:forgotPassword.subtitle')}
               </p>
             </div>
           </div>
@@ -97,9 +100,11 @@ export const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({
                   htmlFor="reset-identifier"
                   className="text-xs font-semibold uppercase tracking-wider text-[#1e1b19]"
                 >
-                  Phone Number or Email
+                  {t('auth:forgotPassword.identifierLabel')}
                 </label>
-                <span className="text-xs text-[#8a726a]">Required</span>
+                <span className="text-xs text-[#8a726a]">
+                  {t('common:required')}
+                </span>
               </div>
               <div className="relative flex items-center">
                 <div className="pointer-events-none absolute left-3.5 text-[#8a726a]">
@@ -117,12 +122,12 @@ export const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({
                   autoComplete="username"
                   value={identifier}
                   onChange={(e) => handleIdentifierChange(e.target.value)}
-                  placeholder="e.g. 693087159 or name@example.com"
+                  placeholder={t('auth:forgotPassword.identifierPlaceholder')}
                   className="w-full h-12 pl-11 pr-4 bg-[#faf2ee] text-[#1e1b19] placeholder-[#8a726a] rounded-xl text-sm transition-all outline-none focus:bg-white focus:ring-2 focus:ring-[#b85028]/20 focus:border-[#b85028] border border-[#e8e1dd]"
                 />
               </div>
               <p className="text-xs text-[#8a726a]">
-                Accepts official fellowship contact lines or email address.
+                {t('auth:forgotPassword.identifierHelper')}
               </p>
             </div>
 
@@ -135,11 +140,11 @@ export const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({
               {isPending ? (
                 <>
                   <CircleNotch size={20} className="animate-spin" />
-                  <span>Sending Verification Code...</span>
+                  <span>{t('auth:forgotPassword.sendingCode')}</span>
                 </>
               ) : (
                 <>
-                  <span>Send Verification Code</span>
+                  <span>{t('auth:forgotPassword.sendCode')}</span>
                   <ArrowRight size={18} weight="bold" />
                 </>
               )}
@@ -149,9 +154,11 @@ export const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({
           {/* Supportive Leadership Assistance */}
           <div className="flex flex-col sm:flex-row items-center justify-center text-center gap-2 pt-3 bg-[#faf2ee]/70 rounded-xl p-3.5 border border-[#e8e1dd]">
             <Headset size={20} weight="bold" className="text-[#8a726a]" />
-            <span className="text-xs text-[#57423b]">Having trouble?</span>
+            <span className="text-xs text-[#57423b]">
+              {t('auth:forgotPassword.havingTrouble')}
+            </span>
             <span className="text-xs font-semibold text-[#983912]">
-              Contact your community animator or leader
+              {t('auth:forgotPassword.contactLeader')}
             </span>
           </div>
         </div>

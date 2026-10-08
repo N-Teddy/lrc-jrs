@@ -1,3 +1,4 @@
+import { useTranslation } from '@jrs/client-core';
 import { CheckCircle, Circle } from '@phosphor-icons/react';
 import type React from 'react';
 import type { PasswordRule } from '../utils/password.utils';
@@ -12,6 +13,8 @@ interface PasswordRequirementsProps {
 export const PasswordRequirements: React.FC<PasswordRequirementsProps> = ({
   rules,
 }) => {
+  const { t } = useTranslation();
+
   return (
     <div className="space-y-1.5 py-1 text-xs">
       {rules.map((rule) => (
@@ -34,7 +37,9 @@ export const PasswordRequirements: React.FC<PasswordRequirementsProps> = ({
               className="text-[#dcd4c8] shrink-0"
             />
           )}
-          <span>{rule.label}</span>
+          <span>
+            {t(`auth:rules.${rule.id}`, { defaultValue: rule.label })}
+          </span>
         </div>
       ))}
     </div>
