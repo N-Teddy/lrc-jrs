@@ -230,32 +230,223 @@
     "ageWarning": "Le groupe JR est destiné aux jeunes âgés de 18 à 30 ans."
   },
   "activities": {
-    "activities": "Activités",
-    "createActivity": "Créer une activité",
-    "activityType": "Type d'activité",
-    "location": "Lieu",
-    "date": "Date & Heure",
-    "report": "Rapport Google Drive",
-    "linkReport": "Lier le rapport",
+    "title": "Activités de Communion",
+    "subtitle": "Planning & Rassemblements Communautaires",
+    "createActivity": "Planifier une Activité",
+    "editActivity": "Modifier l'Activité",
+    "deleteActivity": "Supprimer l'Activité",
+    "deleteConfirmTitle": "Supprimer l'Activité",
+    "deleteConfirmMessage": "Êtes-vous sûr de vouloir supprimer cette activité ? Cette action est irréversible.",
+    "activityType": "Type d'Activité",
+    "locationTown": "Ville d'Accueil",
+    "venue": "Lieu / Salle",
+    "startDate": "Date & Heure de Début",
+    "endDate": "Date & Heure de Fin",
+    "notes": "Notes & Ordre du Jour",
+    "status": "Statut",
+    "changeReason": "Motif de la Modification",
+    "changeReasonPlaceholder": "Expliquez pourquoi les dates, le lieu ou le statut ont changé...",
+    "historyTitle": "Historique des Modifications",
+    "noHistory": "Aucune modification enregistrée pour cette activité.",
+    "views": {
+      "table": "Tableau Détaillé",
+      "grid": "Grille de Cartes",
+      "calendar": "Calendrier Mensuel"
+    },
+    "filters": {
+      "year": "Année",
+      "month": "Mois",
+      "allMonths": "Tous les Mois",
+      "allTowns": "Toutes les Villes",
+      "allTypes": "Tous les Types",
+      "allStatuses": "Tous les Statuts",
+      "searchPlaceholder": "Rechercher par titre, salle ou notes..."
+    },
+    "stats": {
+      "totalActivities": "Total Activités",
+      "upcomingActivities": "Rassemblements à Venir",
+      "completedActivities": "Activités Terminées",
+      "avgAttendance": "Participants Moy.",
+      "totalGuests": "Invités Touchés"
+    },
     "types": {
-      "PRAYER": "Prière",
-      "EVANGELISM": "Évangélisation",
-      "FELLOWSHIP": "Communion fraternelle",
+      "MONTHLY_MEETING": "Réunion mensuelle",
+      "RECREATIONAL": "Activité ludique",
+      "SERVICE": "Service",
+      "CAUSERIE": "Causerie",
       "CONFERENCE": "Conférence",
-      "SPORTS": "Sports",
-      "OUTREACH": "Sortie / Mission",
-      "TRAINING": "Formation",
-      "OTHER": "Autre"
+      "JPO": "JPO"
+    },
+    "statuses": {
+      "SCHEDULED": "Planifiée",
+      "IN_PROGRESS": "En cours",
+      "COMPLETED": "Terminée",
+      "CANCELLED": "Annulée",
+      "RESCHEDULED": "Reportée"
+    },
+    "changeTypes": {
+      "RESCHEDULED": "Reportée / Décalée",
+      "LOCATION_CHANGED": "Lieu modifié",
+      "STATUS_CHANGED": "Statut modifié"
+    },
+    "table": {
+      "activity": "Activité",
+      "type": "Type",
+      "dates": "Date & Heure",
+      "location": "Ville & Salle",
+      "turnout": "Participation",
+      "status": "Statut",
+      "actions": "Actions",
+      "empty": "Aucune activité trouvée correspondant aux critères."
+    },
+    "card": {
+      "trackAttendance": "Pointer les Présences",
+      "viewHistory": "Historique ({{count}})",
+      "edit": "Modifier",
+      "delete": "Supprimer"
+    },
+    "timingNotice": {
+      "notStarted": "Cette activité n'a pas encore débuté. La prise des présences est verrouillée jusqu'à l'heure officielle de début.",
+      "countdown": "Débute dans {{time}}"
     }
   },
   "attendance": {
-    "attendance": "Présences",
-    "recordAttendance": "Enregistrer les présences",
-    "membersPresent": "Membres présents",
-    "guests": "Invités / Visiteurs",
-    "addGuest": "Ajouter un invité",
-    "fullName": "Nom complet",
-    "phone": "Téléphone",
-    "originTown": "Ville d'origine"
+    "title": "Feuille de Présence",
+    "backToActivities": "Retour aux Activités",
+    "notStartedTitle": "Prise de Présence Verrouillée",
+    "notStartedDesc": "Les présences ne peuvent pas être enregistrées avant le début officiel de l'activité ({{date}}). Veuillez revenir une fois le rassemblement commencé.",
+    "markAttendance": "Enregistrer les Présences",
+    "savedSuccess": "Présences mises à jour avec succès.",
+    "metrics": {
+      "totalPresent": "Total Présents",
+      "membersPresent": "Membres",
+      "guestsPresent": "Invités",
+      "excused": "Absences Excusées",
+      "rate": "Taux de Participation"
+    },
+    "tabs": {
+      "members": "Membres de la Ville",
+      "guests": "Invités / Visiteurs"
+    },
+    "memberSearchPlaceholder": "Rechercher parmi les membres...",
+    "status": {
+      "present": "Présent(e)",
+      "excused": "Excusé(e)",
+      "absent": "Absent(e)"
+    },
+    "guest": {
+      "addGuest": "Ajouter un Invité",
+      "fullName": "Nom Complet",
+      "phone": "Numéro de Téléphone",
+      "notes": "Notes / Invité par",
+      "remove": "Retirer",
+      "noGuests": "Aucun invité enregistré pour cette session."
+    }
+  },
+  "members": {
+    "title": "Annuaire Principal des Membres",
+    "subtitle": "Registre Canonique",
+    "registerMember": "Enregistrer un Membre",
+    "stats": {
+      "totalRegistered": "Total Enregistré",
+      "canonicalJrAge": "Âge Canonique JR (18–30)",
+      "leadershipContacts": "Responsables de Contact",
+      "activePcs": "PC Actifs",
+      "fullQuota": "Quota Plein",
+      "portalAccounts": "Comptes Portail",
+      "active": "Actif",
+      "offline": "Hors-ligne",
+      "joinedThisQuarter": "+{{count}} inscrits ce trimestre",
+      "ageBracket": "Tranche 18–30 ans (Directives Canoniques)"
+    },
+    "filters": {
+      "searchPlaceholder": "Rechercher par nom, téléphone (+237...), email...",
+      "allRoles": "Tous les Rôles",
+      "allStatuses": "Tous les Statuts",
+      "jrEligibleOnly": "Éligibles JR 18–30 uniquement",
+      "tableView": "Vue Tableau",
+      "gridView": "Vue Grille",
+      "activeStatus": "Actif",
+      "mustSetPassword": "Doit Définir Mot de Passe",
+      "offlineOnly": "Hors-ligne Uniquement"
+    },
+    "table": {
+      "member": "Membre",
+      "role": "Rôle",
+      "contactChannel": "Contact & Canal",
+      "homeHub": "Centre d'attache",
+      "portalStatus": "Statut Portail",
+      "actions": "Actions",
+      "noMembersFound": "Aucun membre trouvé selon les critères.",
+      "copyNumber": "Copier le numéro",
+      "whatsappChat": "Discussion WhatsApp",
+      "viewProfile": "Voir le profil",
+      "editRecord": "Modifier le profil",
+      "manageAccess": "Gérer les accès",
+      "deactivateMember": "Désactiver"
+    },
+    "modal": {
+      "registerTitle": "Enregistrer un Nouveau Membre",
+      "registerSubtitle": "Ajouter un jeune au registre du centre de {{hub}}",
+      "editTitle": "Modifier le Profil du Membre",
+      "editSubtitle": "Mettre à jour l'identité et les coordonnées",
+      "sectionIdentity": "Identité & Détails Vitaux",
+      "fullName": "Nom Complet",
+      "fullNamePlaceholder": "ex. Samuel Eto'o Junior",
+      "dob": "Date de Naissance",
+      "ageBadgeUnder": "Âge {{age}} — Sous l'âge canonique (< 18)",
+      "ageBadgeEligible": "Âge {{age}} — Jeune éligible JR (18–30)",
+      "ageBadgeSenior": "Âge {{age}} — Cohorte aînée (> 30)",
+      "sectionContact": "Contact & Envoi des Identifiants",
+      "phoneLabel": "Numéro de Téléphone (WhatsApp Recommandé)",
+      "phoneHelper": "Utilisé pour envoyer les identifiants temporaires et les alertes.",
+      "emailLabel": "Adresse Email",
+      "emailOptional": "(Optionnel)",
+      "sectionRole": "Rôle & Périmètre de Communauté",
+      "jrMemberDesc": "Membre régulier participant aux cercles de partage et missions.",
+      "pcDesc": "Responsable coordonnant les activités et l'animation du centre.",
+      "apDesc": "Animateur diocésain supervisant les programmes pastoraux.",
+      "quotaFull": "Quota Plein (2/2 PC Actifs)",
+      "quotaAlert": "Alerte Quota : 2 PC déjà désignés pour ce centre.",
+      "sectionAccess": "Accorder l'Accès au Portail Mobile & Desktop",
+      "accessHelper": "Un mot de passe temporaire à usage unique sera généré et envoyé immédiatement par WhatsApp et Email. Si décoché, le membre reste enregistré hors-ligne uniquement.",
+      "submitting": "Enregistrement...",
+      "saving": "Sauvegarde des modifications...",
+      "saveChanges": "Enregistrer les Modifications"
+    },
+    "detail": {
+      "backToMembers": "Retour aux Membres",
+      "yearsOld": "{{age}} ans",
+      "canonicalJr": "JR",
+      "tabIdentity": "Identité & Identifiants",
+      "tabRegistry": "Registre & Historique de Transfert",
+      "callDirect": "Appel Direct",
+      "copyEmail": "Copier l'Email",
+      "statusActive": "Membre Actif",
+      "residentHub": "Centre de Résidence Actuel",
+      "originHub": "Centre d'Origine",
+      "transferHistory": "Piste d'Audit des Transferts",
+      "noTransfers": "Aucun transfert inter-centres enregistré pour ce membre.",
+      "credentials": "Identifiants & Accès",
+      "portalAccess": "Accès Portail",
+      "granted": "Accordé",
+      "notGranted": "Hors-ligne Uniquement",
+      "lastLogin": "Dernière Connexion",
+      "registeredOn": "Inscrit le"
+    },
+    "accessModal": {
+      "title": "Gérer les Accès & Identifiants du Portail",
+      "subtitle": "Configurer l'accès au portail, réinitialiser le mot de passe temporaire ou suspendre le compte de {{name}}.",
+      "resendTempPassword": "Générer & Renvoyer le Mot de Passe Temporaire",
+      "resendDesc": "Génère un nouveau mot de passe temporaire valable 48h et l'envoie immédiatement sur WhatsApp et par email.",
+      "resendAction": "Renvoyer le Mot de Passe Temporaire",
+      "resending": "Envoi des identifiants...",
+      "resendSuccess": "Identifiants temporaires envoyés avec succès par WhatsApp et Email.",
+      "suspendTitle": "Suspension & Statut du Compte",
+      "suspendDesc": "Bloquer temporairement l'accès au portail sans supprimer le profil.",
+      "suspendAction": "Suspendre l'Accès",
+      "reactivateAction": "Réactiver l'Accès",
+      "deactivateConfirmation": "Êtes-vous sûr de vouloir désactiver {{name}} ? Le membre sera archivé et n'apparaîtra plus dans les listes actives."
+    }
   }
 }

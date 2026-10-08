@@ -1,0 +1,515 @@
+import {
+  useMemberDetailQuery,
+  useTownContext,
+  useTranslation,
+} from '@jrs/client-core';
+import type { IUser } from '@jrs/shared';
+import {
+  ArrowLeft,
+  ChatCircleText,
+  CheckCircle,
+  Copy,
+  IdentificationCard,
+  Key,
+  MapPin,
+  PencilSimple,
+  Phone,
+  ShieldCheck,
+  Swap,
+  Trash,
+  User,
+} from '@phosphor-icons/react';
+import type React from 'react';
+import { useState } from 'react';
+import {
+  calculateAge,
+  formatCameroonPhone,
+  getCleanDigitsForWhatsApp,
+  getInitials,
+  getRoleDisplayInfo,
+} from '../utils/member-ui.utils';
+
+interface MemberDetailPageProps {
+  memberId: string;
+  onBack: () => void;
+  onEdit: (member: IUser) => void;
+  onManageAccess: (member: IUser) => void;
+  onDelete?: (member: IUser) => void;
+  isCurrentUserAp: boolean;
+}
+
+export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
+  memberId,
+  onBack,
+  onEdit,
+  onManageAccess,
+  onDelete,
+  isCurrentUserAp,
+}) => {
+  const { t } = useTranslation();
+  const { activeTown } = useTownContext();
+  const { data: member, isLoading, error } = useMemberDetailQuery(memberId);
+
+  const [activeDetailTab, setActiveDetailTab] = useState<
+    'identity' | 'transfers'
+  >('identity');
+  const [copiedEmail, setCopiedEmail] = useState(false);
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col gap-6 animate-pulse p-4">
+        <div className="h-6 w-48 bg-[#f4ece9] rounded" />
+        <div className="h-48 rounded-3xl bg-white border border-[#e8e1dd]" />
+        <div className="h-64 rounded-3xl bg-white border border-[#e8e1dd]" />
+      </div>
+    );
+  }
+
+  if (error || !member) {
+    return (
+      <div className="bg-white rounded-3xl border border-[#e8e1dd] p-12 text-center flex flex-col items-center">
+        <div className="w-14 h-14 rounded-2xl bg-[#ffdad6] text-[#ba1a1a] flex items-center justify-center mb-4">
+          <User size={28} />
+        </div>
+        <h3 className="text-lg font-bold text-[#1e1b19] mb-2">
+          Member Not Found
+        </h3>
+        <p className="text-xs text-[#8a726a] mb-6">
+          The requested member could not be retrieved from the active registry.
+        </p>
+        <button
+          type="button"
+          onClick={onBack}
+          className="px-4 py-2 rounded-xl bg-[#faf2ee] hover:bg-[#f4ece9] text-xs font-bold text-[#1e1b19] transition-colors cursor-pointer"
+        >
+          {t('members:detail.backToMembers')}
+        </button>
+      </div>
+    );
+  }
+
+  const age = calculateAge(member.dateOfBirth);
+  const roleInfo = getRoleDisplayInfo(member.role);
+  const initials = getInitials(member.fullName);
+  const formattedPhone = formatCameroonPhone(member.phoneNumber);
+  const cleanDigits = getCleanDigitsForWhatsApp(member.phoneNumber);
+  const isEligibleJr = member.isJr ?? (age !== null && age >= 18 && age <= 30);
+  const hasAppAccess = member.account?.hasAppAccess ?? false;
+  const isRevoked = member.account?.isAccessRevoked ?? false;
+
+  const handleCopyEmail = () => {
+    if (member.email) {
+      navigator.clipboard.writeText(member.email);
+      setCopiedEmail(true);
+      setTimeout(() => setCopiedEmail(false), 1500);
+    }
+  };
+
+  return (
+    <div className="flex flex-col gap-6">
+      {/* 1. Breadcrumb Bar */}
+      <div className="flex items-center gap-2 text-xs text-[#8a726a]">
+        <button
+          type="button"
+          onClick={onBack}
+          className="flex items-center gap-1.5 font-bold text-[#b85028] hover:underline cursor-pointer"
+        >
+          <ArrowLeft size={16} weight="bold" />
+          <span>{t('members:detail.backToMembers')}</span>
+        </button>
+        <span>/</span>
+        <span className="font-semibold text-[#1e1b19] truncate">
+          {member.fullName}
+        </span>
+      </div>
+
+      {/* 2. Hero Profile Card */}
+      <section className="bg-white rounded-3xl border border-[#e8e1dd] p-6 sm:p-8 shadow-xs flex flex-col xl:flex-row xl:items-center justify-between gap-6">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
+          <div className="w-20 h-20 rounded-2xl bg-[#faf2ee] border border-[#e8e1dd] flex items-center justify-center text-[#b85028] text-2xl font-black shadow-xs shrink-0">
+            {initials}
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <div className="flex flex-wrap items-center gap-2">
+              <h1 className="text-xl sm:text-2xl font-bold text-[#1e1b19] tracking-tight">
+                {member.fullName}
+              </h1>
+              <span
+                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold border ${roleInfo.badgeBg} ${roleInfo.badgeText} ${roleInfo.border}`}
+              >
+                {roleInfo.label}
+              </span>
+              <span className="inline-flex items-center px-2 py-0.5 rounded bg-[#f4ece9] text-[#57423b] text-xs font-mono font-bold">
+                {member.homeTown?.code ?? activeTown?.code ?? 'HUB'}
+              </span>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3 text-xs text-[#8a726a]">
+              {age !== null && (
+                <span
+                  className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md font-bold ${
+                    isEligibleJr
+                      ? 'bg-[#c2e9ca] text-[#2c4e37]'
+                      : 'bg-[#faf2ee] text-[#8a726a]'
+                  }`}
+                >
+                  <span>{age} yrs</span>
+                  {isEligibleJr && <span>· Canonical JR</span>}
+                </span>
+              )}
+              <span>•</span>
+              <span className="flex items-center gap-1">
+                <MapPin size={14} className="text-[#b85028]" />
+                <span>
+                  {member.homeTown?.name ?? activeTown?.name ?? 'Assigned Hub'}
+                </span>
+              </span>
+              <span>•</span>
+              <span className="inline-flex items-center gap-1 text-[#486b52] font-semibold">
+                <CheckCircle size={14} weight="fill" />
+                <span>{t('members:detail.statusActive')}</span>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Action Buttons & Contact Shortcuts */}
+        <div className="flex flex-wrap items-center gap-3">
+          {/* WhatsApp Direct */}
+          {member.phoneNumber && (
+            <a
+              href={`https://wa.me/${cleanDigits}`}
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#c2e9ca] hover:bg-[#a9d0b2] text-[#2c4e37] text-xs font-bold transition-colors cursor-pointer shadow-2xs"
+            >
+              <ChatCircleText size={18} weight="fill" />
+              <span>WhatsApp</span>
+            </a>
+          )}
+
+          {/* Call Direct */}
+          {member.phoneNumber && (
+            <a
+              href={`tel:${member.phoneNumber}`}
+              className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#faf2ee] hover:bg-[#f4ece9] border border-[#e8e1dd] text-[#1e1b19] text-xs font-bold transition-colors cursor-pointer"
+            >
+              <Phone size={16} weight="bold" />
+              <span>{t('members:detail.callDirect')}</span>
+            </a>
+          )}
+
+          {/* Edit Profile */}
+          <button
+            type="button"
+            onClick={() => onEdit(member)}
+            className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white hover:bg-[#faf2ee] border border-[#e8e1dd] text-[#1e1b19] text-xs font-bold transition-colors cursor-pointer"
+          >
+            <PencilSimple size={16} />
+            <span>{t('common:edit')}</span>
+          </button>
+
+          {/* Manage Access */}
+          <button
+            type="button"
+            onClick={() => onManageAccess(member)}
+            className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#fff2ee] hover:bg-[#ffdbcf] border border-[#ffb59c] text-[#b85028] text-xs font-bold transition-colors cursor-pointer shadow-2xs"
+          >
+            <Key size={16} weight="bold" />
+            <span>{t('members:table.manageAccess')}</span>
+          </button>
+
+          {/* Deactivate (AP Only) */}
+          {isCurrentUserAp && onDelete && (
+            <button
+              type="button"
+              onClick={() => onDelete(member)}
+              title={t('members:table.deactivateMember')}
+              className="w-9 h-9 rounded-xl hover:bg-[#ffdad6] text-[#8a726a] hover:text-[#ba1a1a] flex items-center justify-center transition-colors cursor-pointer"
+            >
+              <Trash size={18} />
+            </button>
+          )}
+        </div>
+      </section>
+
+      {/* 3. Detail Tabs Strip */}
+      <div className="flex items-center gap-2 border-b border-[#e8e1dd] pb-1">
+        <button
+          type="button"
+          onClick={() => setActiveDetailTab('identity')}
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+            activeDetailTab === 'identity'
+              ? 'bg-[#b85028] text-white shadow-xs'
+              : 'text-[#57423b] hover:bg-[#faf2ee]'
+          }`}
+        >
+          <IdentificationCard
+            size={18}
+            weight={activeDetailTab === 'identity' ? 'bold' : 'regular'}
+          />
+          <span>{t('members:detail.tabIdentity')}</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveDetailTab('transfers')}
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+            activeDetailTab === 'transfers'
+              ? 'bg-[#b85028] text-white shadow-xs'
+              : 'text-[#57423b] hover:bg-[#faf2ee]'
+          }`}
+        >
+          <Swap
+            size={18}
+            weight={activeDetailTab === 'transfers' ? 'bold' : 'regular'}
+          />
+          <span>{t('members:detail.tabRegistry')}</span>
+        </button>
+      </div>
+
+      {/* 4. Tab 1: Personal Identity & Credentials */}
+      {activeDetailTab === 'identity' && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Identity & Canonical Status */}
+          <div className="lg:col-span-2 flex flex-col gap-6">
+            <div className="bg-white rounded-3xl border border-[#e8e1dd] p-6 shadow-xs flex flex-col gap-5">
+              <h3 className="text-sm font-bold text-[#1e1b19] uppercase tracking-wider text-[#8a726a]">
+                Identity & Demographic Credentials
+              </h3>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                <div className="p-3.5 rounded-2xl bg-[#faf2ee] border border-[#e8e1dd] flex flex-col gap-1">
+                  <span className="text-[#8a726a] font-medium">Full Name</span>
+                  <span className="font-bold text-[#1e1b19] text-sm">
+                    {member.fullName}
+                  </span>
+                </div>
+
+                <div className="p-3.5 rounded-2xl bg-[#faf2ee] border border-[#e8e1dd] flex flex-col gap-1">
+                  <span className="text-[#8a726a] font-medium">
+                    Date of Birth
+                  </span>
+                  <span className="font-bold text-[#1e1b19] text-sm">
+                    {member.dateOfBirth
+                      ? new Date(member.dateOfBirth).toLocaleDateString(
+                          'en-GB',
+                          {
+                            day: 'numeric',
+                            month: 'long',
+                            year: 'numeric',
+                          },
+                        )
+                      : 'Not recorded'}
+                  </span>
+                </div>
+
+                <div className="p-3.5 rounded-2xl bg-[#faf2ee] border border-[#e8e1dd] flex flex-col gap-1">
+                  <span className="text-[#8a726a] font-medium">
+                    Phone (WhatsApp Line)
+                  </span>
+                  <span className="font-mono font-bold text-[#1e1b19] text-sm">
+                    {formattedPhone || '—'}
+                  </span>
+                </div>
+
+                <div className="p-3.5 rounded-2xl bg-[#faf2ee] border border-[#e8e1dd] flex flex-col gap-1">
+                  <span className="text-[#8a726a] font-medium">
+                    Email Address
+                  </span>
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium text-[#1e1b19] truncate">
+                      {member.email || 'None'}
+                    </span>
+                    {member.email && (
+                      <button
+                        type="button"
+                        onClick={handleCopyEmail}
+                        className="text-[#8a726a] hover:text-[#b85028] transition-colors cursor-pointer"
+                        title={
+                          copiedEmail
+                            ? 'Copied!'
+                            : t('members:detail.copyEmail')
+                        }
+                      >
+                        <Copy size={14} />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Pastoral & Fellowship Notes */}
+              <div className="p-4 rounded-2xl bg-[#faf2ee] border border-[#e8e1dd] flex flex-col gap-2">
+                <span className="text-xs font-bold text-[#1e1b19]">
+                  Canonical Community Standing
+                </span>
+                <p className="text-xs text-[#57423b] leading-relaxed">
+                  Member registered in good standing under Diocesan Youth
+                  Fellowship statutes. Eligible for fellowship circles, regional
+                  gatherings, and sacramental retreat cohorts.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Account Portal Credentials Side Card */}
+          <div className="flex flex-col gap-6">
+            <div className="bg-white rounded-3xl border border-[#e8e1dd] p-6 shadow-xs flex flex-col gap-4">
+              <div className="flex items-center gap-2">
+                <ShieldCheck size={20} className="text-[#b85028]" />
+                <h3 className="text-sm font-bold text-[#1e1b19]">
+                  {t('members:detail.credentials')}
+                </h3>
+              </div>
+
+              <div className="flex flex-col gap-3 text-xs">
+                <div className="flex items-center justify-between py-2 border-b border-[#f4ece9]">
+                  <span className="text-[#8a726a]">Portal Account</span>
+                  <span
+                    className={`font-bold ${
+                      hasAppAccess && !isRevoked
+                        ? 'text-[#486b52]'
+                        : 'text-[#8a726a]'
+                    }`}
+                  >
+                    {hasAppAccess && !isRevoked
+                      ? t('members:detail.granted')
+                      : t('members:detail.notGranted')}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between py-2 border-b border-[#f4ece9]">
+                  <span className="text-[#8a726a]">Account Status</span>
+                  <span
+                    className={`font-bold ${
+                      isRevoked
+                        ? 'text-[#ba1a1a]'
+                        : hasAppAccess
+                          ? 'text-[#486b52]'
+                          : 'text-[#8a726a]'
+                    }`}
+                  >
+                    {isRevoked
+                      ? 'Suspended'
+                      : hasAppAccess
+                        ? 'Active'
+                        : 'Offline Only'}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between py-2 border-b border-[#f4ece9]">
+                  <span className="text-[#8a726a]">
+                    {t('members:detail.registeredOn')}
+                  </span>
+                  <span className="font-medium text-[#1e1b19]">
+                    {member.createdAt
+                      ? new Date(member.createdAt).toLocaleDateString('en-GB')
+                      : '—'}
+                  </span>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => onManageAccess(member)}
+                className="w-full mt-2 py-2.5 px-4 rounded-xl bg-[#faf2ee] hover:bg-[#f4ece9] border border-[#e8e1dd] text-[#b85028] text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <Key size={16} />
+                <span>{t('members:table.manageAccess')}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 5. Tab 2: Town Registry & Transfer History */}
+      {activeDetailTab === 'transfers' && (
+        <div className="flex flex-col gap-6">
+          {/* Side-by-side Hub Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Current Resident Hub */}
+            <div className="relative bg-white rounded-3xl border border-[#e8e1dd] p-6 shadow-xs overflow-hidden">
+              <div className="absolute top-0 right-0 h-full w-1.5 bg-[#486b52]" />
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs font-bold text-[#486b52] uppercase tracking-wider">
+                  {t('members:detail.residentHub')}
+                </span>
+                <span className="text-xl font-black text-[#8a726a]/40 font-mono">
+                  {member.homeTown?.code ?? activeTown?.code ?? 'HUB'}
+                </span>
+              </div>
+              <h4 className="text-xl font-bold text-[#1e1b19]">
+                {member.homeTown?.name ?? activeTown?.name ?? 'Assigned Hub'}
+              </h4>
+              <p className="text-xs text-[#8a726a] mt-1">
+                Canonical Deanery Jurisdiction
+              </p>
+            </div>
+
+            {/* Origin Registration Hub */}
+            <div className="relative bg-white rounded-3xl border border-[#e8e1dd] p-6 shadow-xs overflow-hidden">
+              <div className="absolute top-0 right-0 h-full w-1.5 bg-[#b85028]" />
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs font-bold text-[#b85028] uppercase tracking-wider">
+                  {t('members:detail.originHub')}
+                </span>
+                <span className="text-xl font-black text-[#8a726a]/40 font-mono">
+                  {member.homeTown?.code ?? activeTown?.code ?? 'HUB'}
+                </span>
+              </div>
+              <h4 className="text-xl font-bold text-[#1e1b19]">
+                {member.homeTown?.name ??
+                  activeTown?.name ??
+                  'Mother Sanctuary'}
+              </h4>
+              <p className="text-xs text-[#8a726a] mt-1">
+                Initial Registration Registry
+              </p>
+            </div>
+          </div>
+
+          {/* Chronological Audit Trail Timeline */}
+          <div className="bg-white rounded-3xl border border-[#e8e1dd] p-6 sm:p-8 shadow-xs flex flex-col gap-6">
+            <div>
+              <h3 className="text-base font-bold text-[#1e1b19]">
+                {t('members:detail.transferHistory')}
+              </h3>
+              <p className="text-xs text-[#8a726a] mt-0.5">
+                Chronological record of inter-hub relocations and pastoral
+                endorsements across Cameroon.
+              </p>
+            </div>
+
+            {/* Illustrated Timeline */}
+            <div className="relative pl-6 before:content-[''] before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-[#e8e1dd] flex flex-col gap-6">
+              {/* Event 1: Initial Enrollment */}
+              <div className="relative flex items-start gap-4">
+                <div className="absolute -left-6 top-0.5 w-5 h-5 rounded-full bg-[#486b52] text-white flex items-center justify-center ring-4 ring-white shadow-xs">
+                  <CheckCircle size={14} weight="fill" />
+                </div>
+                <div className="p-4 rounded-2xl bg-[#faf2ee] border border-[#e8e1dd] flex-1 flex flex-col gap-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-[#1e1b19]">
+                      Canonical Enrollment at{' '}
+                      {member.homeTown?.name ?? 'Active Hub'}
+                    </span>
+                    <span className="text-[11px] font-semibold text-[#8a726a]">
+                      {member.createdAt
+                        ? new Date(member.createdAt).toLocaleDateString('en-GB')
+                        : 'Active'}
+                    </span>
+                  </div>
+                  <p className="text-xs text-[#57423b]">
+                    Enrolled into Youth Fellowship registry under active
+                    pastoral care.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};

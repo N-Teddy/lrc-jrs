@@ -15,6 +15,8 @@ export const queryKeys = {
   },
   activities: {
     all: ['activities'] as const,
+    list: (query?: unknown) => ['activities', 'list', query] as const,
+    stats: (params?: unknown) => ['activities', 'stats', params] as const,
     byTown: (townId?: string) => ['activities', { townId }] as const,
     detail: (id: string) => ['activities', id] as const,
   },

@@ -1,35 +1,37 @@
-import type { IActivity, IActivityReport } from '@jrs/shared';
+import type {
+  IActivity,
+  IActivityQueryDto,
+  IActivityStats,
+  ICreateActivityDto,
+  IPaginatedActivitiesResponse,
+  IUpdateActivityDto,
+} from '@jrs/shared';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useHttp } from '../context/http.context';
 import { queryKeys } from '../query/query-keys';
 
-export interface ICreateActivityDto {
-  title: string;
-  description?: string;
-  activityType: string;
-  date: string;
-  location: string;
-  isGlobal?: boolean;
-  townIds?: string[];
-  hostTownId: string;
-}
-
-export interface IUpdateActivityDto {
-  title?: string;
-  description?: string;
-  date?: string;
-  location?: string;
-  isGlobal?: boolean;
-  townIds?: string[];
-}
-
-export function useActivitiesQuery(townId?: string) {
+export function useActivitiesQuery(query?: IActivityQueryDto) {
   const http = useHttp();
   return useQuery({
-    queryKey: queryKeys.activities.byTown(townId),
+    queryKey: queryKeys.activities.list(query),
     queryFn: () =>
-      http.get<IActivity[]>('/activities', {
-        params: townId ? { townId } : undefined,
+      http.get<IPaginatedActivitiesResponse>('/activities', {
+        params: query as Record<string, any>,
+      }),
+  });
+}
+
+export function useActivityStatsQuery(params?: {
+  townId?: string;
+  year?: number;
+  month?: number;
+}) {
+  const http = useHttp();
+  return useQuery({
+    queryKey: queryKeys.activities.stats(params),
+    queryFn: () =>
+      http.get<IActivityStats>('/activities/stats', {
+        params: params as Record<string, any>,
       }),
   });
 }
@@ -72,19 +74,13 @@ export function useUpdateActivityMutation() {
   });
 }
 
-export function useUploadActivityReportMutation() {
+export function useDeleteActivityMutation() {
   const http = useHttp();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, formData }: { id: string; formData: FormData }) =>
-      http.post<IActivityReport>(`/activities/${id}/report`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      }),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.activities.detail(variables.id),
-      });
+    mutationFn: (id: string) => http.delete(`/activities/${id}`),
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.activities.all });
     },
   });

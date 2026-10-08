@@ -1,15 +1,26 @@
 export enum ActivityType {
-  PRAYER = 'PRAYER',
-  EVANGELISM = 'EVANGELISM',
-  FELLOWSHIP = 'FELLOWSHIP',
+  MONTHLY_MEETING = 'MONTHLY_MEETING',
+  RECREATIONAL = 'RECREATIONAL',
+  SERVICE = 'SERVICE',
+  CAUSERIE = 'CAUSERIE',
   CONFERENCE = 'CONFERENCE',
-  SPORTS = 'SPORTS',
-  OUTREACH = 'OUTREACH',
-  TRAINING = 'TRAINING',
-  OTHER = 'OTHER',
+  JPO = 'JPO',
+}
+
+export enum ActivityStatus {
+  SCHEDULED = 'SCHEDULED',
+  IN_PROGRESS = 'IN_PROGRESS',
+  COMPLETED = 'COMPLETED',
+  CANCELLED = 'CANCELLED',
 }
 
 export enum AttendeeType {
   MEMBER = 'MEMBER',
   GUEST = 'GUEST',
+}
+
+export enum AttendanceStatus {
+  PRESENT = 'PRESENT',
+  EXCUSED = 'EXCUSED',
+  ABSENT = 'ABSENT',
 }

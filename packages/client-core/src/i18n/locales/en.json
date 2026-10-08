@@ -230,32 +230,223 @@
     "ageWarning": "The JR group is designated for youth aged 18 to 30."
   },
   "activities": {
-    "activities": "Activities",
-    "createActivity": "Create Activity",
+    "title": "Fellowship Activities",
+    "subtitle": "Planning & Community Gatherings",
+    "createActivity": "Schedule Activity",
+    "editActivity": "Edit Activity",
+    "deleteActivity": "Delete Activity",
+    "deleteConfirmTitle": "Delete Activity",
+    "deleteConfirmMessage": "Are you sure you want to delete this activity? This action cannot be undone.",
     "activityType": "Activity Type",
-    "location": "Location",
-    "date": "Date & Time",
-    "report": "Google Drive Report",
-    "linkReport": "Link Report",
+    "locationTown": "Location Town",
+    "venue": "Venue / Room",
+    "startDate": "Start Date & Time",
+    "endDate": "End Date & Time",
+    "notes": "Notes & Pastoral Agenda",
+    "status": "Status",
+    "changeReason": "Reason for Modification",
+    "changeReasonPlaceholder": "Describe why dates, venue, or status were changed...",
+    "historyTitle": "Modification & Audit History",
+    "noHistory": "No modifications recorded for this activity.",
+    "views": {
+      "table": "Dense Table",
+      "grid": "Card Grid",
+      "calendar": "Monthly Calendar"
+    },
+    "filters": {
+      "year": "Year",
+      "month": "Month",
+      "allMonths": "All Months",
+      "allTowns": "All Towns",
+      "allTypes": "All Types",
+      "allStatuses": "All Statuses",
+      "searchPlaceholder": "Search by title, venue, or notes..."
+    },
+    "stats": {
+      "totalActivities": "Total Activities",
+      "upcomingActivities": "Upcoming Gatherings",
+      "completedActivities": "Completed Activities",
+      "avgAttendance": "Avg. Attendees",
+      "totalGuests": "Guests Reached"
+    },
     "types": {
-      "PRAYER": "Prayer",
-      "EVANGELISM": "Evangelism",
-      "FELLOWSHIP": "Fellowship",
+      "MONTHLY_MEETING": "Monthly Meeting",
+      "RECREATIONAL": "Recreational Activity",
+      "SERVICE": "Service",
+      "CAUSERIE": "Causerie",
       "CONFERENCE": "Conference",
-      "SPORTS": "Sports",
-      "OUTREACH": "Outreach",
-      "TRAINING": "Training",
-      "OTHER": "Other"
+      "JPO": "JPO"
+    },
+    "statuses": {
+      "SCHEDULED": "Scheduled",
+      "IN_PROGRESS": "In Progress",
+      "COMPLETED": "Completed",
+      "CANCELLED": "Cancelled",
+      "RESCHEDULED": "Rescheduled"
+    },
+    "changeTypes": {
+      "RESCHEDULED": "Rescheduled",
+      "LOCATION_CHANGED": "Location Changed",
+      "STATUS_CHANGED": "Status Changed"
+    },
+    "table": {
+      "activity": "Activity",
+      "type": "Type",
+      "dates": "Date & Time",
+      "location": "Location & Venue",
+      "turnout": "Turnout",
+      "status": "Status",
+      "actions": "Actions",
+      "empty": "No activities found matching your filters."
+    },
+    "card": {
+      "trackAttendance": "Track Attendance",
+      "viewHistory": "History ({{count}})",
+      "edit": "Edit",
+      "delete": "Delete"
+    },
+    "timingNotice": {
+      "notStarted": "This activity has not started yet. Attendance tracking is locked until the scheduled start time.",
+      "countdown": "Starts in {{time}}"
     }
   },
   "attendance": {
-    "attendance": "Attendance",
-    "recordAttendance": "Record Attendance",
-    "membersPresent": "Members Present",
-    "guests": "Guests / Visitors",
-    "addGuest": "Add Guest",
-    "fullName": "Full Name",
-    "phone": "Phone",
-    "originTown": "Origin Town"
+    "title": "Attendance Roster",
+    "backToActivities": "Back to Activities",
+    "notStartedTitle": "Attendance Tracking Locked",
+    "notStartedDesc": "Attendance cannot be recorded before the activity has officially started ({{date}}). Please check back once the gathering commences.",
+    "markAttendance": "Save Attendance",
+    "savedSuccess": "Attendance updated successfully.",
+    "metrics": {
+      "totalPresent": "Total Present",
+      "membersPresent": "Members",
+      "guestsPresent": "Guests",
+      "excused": "Excused Absences",
+      "rate": "Turnout Rate"
+    },
+    "tabs": {
+      "members": "Town Members",
+      "guests": "Guests / Visitors"
+    },
+    "memberSearchPlaceholder": "Search members in this town...",
+    "status": {
+      "present": "Present",
+      "excused": "Excused",
+      "absent": "Absent"
+    },
+    "guest": {
+      "addGuest": "Add Guest Attendee",
+      "fullName": "Full Name",
+      "phone": "Phone Number",
+      "notes": "Notes / Invited By",
+      "remove": "Remove",
+      "noGuests": "No guest visitors registered yet for this session."
+    }
+  },
+  "members": {
+    "title": "Primary Members Directory",
+    "subtitle": "Canonical Register",
+    "registerMember": "Register Member",
+    "stats": {
+      "totalRegistered": "Total Registered",
+      "canonicalJrAge": "Canonical JR Age (18–30)",
+      "leadershipContacts": "Leadership Contacts",
+      "activePcs": "Active PCs",
+      "fullQuota": "Full Quota",
+      "portalAccounts": "Portal Accounts",
+      "active": "Active",
+      "offline": "Offline",
+      "joinedThisQuarter": "+{{count}} joined this quarter",
+      "ageBracket": "Age bracket 18–30 (Canonical Guidelines)"
+    },
+    "filters": {
+      "searchPlaceholder": "Search by name, phone (+237...), or email...",
+      "allRoles": "All Roles",
+      "allStatuses": "All Statuses",
+      "jrEligibleOnly": "18–30 JR Eligible Only",
+      "tableView": "Table View",
+      "gridView": "Grid View",
+      "activeStatus": "Active",
+      "mustSetPassword": "Must Set Password",
+      "offlineOnly": "Offline Only"
+    },
+    "table": {
+      "member": "Member",
+      "role": "Role",
+      "contactChannel": "Contact & Channel",
+      "homeHub": "Home Hub",
+      "portalStatus": "Portal Status",
+      "actions": "Actions",
+      "noMembersFound": "No members found matching the criteria.",
+      "copyNumber": "Copy Number",
+      "whatsappChat": "WhatsApp Chat",
+      "viewProfile": "View Profile",
+      "editRecord": "Edit Profile",
+      "manageAccess": "Manage Access",
+      "deactivateMember": "Deactivate"
+    },
+    "modal": {
+      "registerTitle": "Register New Fellowship Member",
+      "registerSubtitle": "Add a youth member to {{hub}} registry",
+      "editTitle": "Edit Member Profile",
+      "editSubtitle": "Update identity and contact details",
+      "sectionIdentity": "Identity & Vital Details",
+      "fullName": "Full Name",
+      "fullNamePlaceholder": "e.g. Samuel Eto'o Junior",
+      "dob": "Date of Birth",
+      "ageBadgeUnder": "Age {{age}} — Under Canonical Age (< 18)",
+      "ageBadgeEligible": "Age {{age}} — Canonical JR Eligible Youth (18–30)",
+      "ageBadgeSenior": "Age {{age}} — Senior Cohort (> 30)",
+      "sectionContact": "Contact & Credentials Dispatch",
+      "phoneLabel": "Phone Number (WhatsApp Preferred)",
+      "phoneHelper": "Used to dispatch temporary credentials & notifications.",
+      "emailLabel": "Email Address",
+      "emailOptional": "(Optional)",
+      "sectionRole": "Fellowship Role & Scope",
+      "jrMemberDesc": "Regular youth cohort member attending study groups & missions.",
+      "pcDesc": "Community leader coordinating hub activities and care.",
+      "apDesc": "Diocesan animator supervising pastoral programs.",
+      "quotaFull": "Quota Full (2/2 Active PCs)",
+      "quotaAlert": "Quota Alert: 2 active PCs already designated for this hub.",
+      "sectionAccess": "Grant Mobile & Desktop Portal Access",
+      "accessHelper": "A single-use temporary password will be generated and dispatched immediately via WhatsApp and Email. If unchecked, the member remains in the offline registry only.",
+      "submitting": "Registering...",
+      "saving": "Saving changes...",
+      "saveChanges": "Save Changes"
+    },
+    "detail": {
+      "backToMembers": "Back to Members",
+      "yearsOld": "{{age}} yrs",
+      "canonicalJr": "JR",
+      "tabIdentity": "Personal Identity & Credentials",
+      "tabRegistry": "Town Registry & Transfer History",
+      "callDirect": "Direct Call",
+      "copyEmail": "Copy Email",
+      "statusActive": "Active Member",
+      "residentHub": "Current Resident Hub",
+      "originHub": "Origin Registration Hub",
+      "transferHistory": "Transfer & Relocation Audit Trail",
+      "noTransfers": "No inter-hub transfers recorded for this member.",
+      "credentials": "Credentials & Access",
+      "portalAccess": "Portal Access",
+      "granted": "Granted",
+      "notGranted": "Offline Only",
+      "lastLogin": "Last Sign-In",
+      "registeredOn": "Registered On"
+    },
+    "accessModal": {
+      "title": "Manage Platform Access & Credentials",
+      "subtitle": "Configure portal access, reset temporary login credentials, or suspend account for {{name}}.",
+      "resendTempPassword": "Generate & Resend Temporary Password",
+      "resendDesc": "Generates a fresh single-use password valid for 48 hours and sends it immediately to the member's WhatsApp and Email address.",
+      "resendAction": "Resend Temporary Password",
+      "resending": "Dispatching credentials...",
+      "resendSuccess": "Temporary credentials successfully dispatched via WhatsApp and Email.",
+      "suspendTitle": "Account Suspension & Status",
+      "suspendDesc": "Temporarily lock portal access without deleting the registry profile.",
+      "suspendAction": "Suspend Access",
+      "reactivateAction": "Reactivate Access",
+      "deactivateConfirmation": "Are you sure you want to deactivate {{name}}? They will be archived and will no longer appear in active member rosters."
+    }
   }
 }

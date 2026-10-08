@@ -15,6 +15,7 @@ import { RolesGuard } from './core/guards/roles.guard';
 import { TownScopeGuard } from './core/guards/town-scope.guard';
 import { LoggingInterceptor } from './core/interceptors/logging.interceptor';
 import { TransformResponseInterceptor } from './core/interceptors/transform-response.interceptor';
+import { ActivitiesModule } from './modules/activities/activities.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { TownsModule } from './modules/towns/towns.module';
 import { UsersModule } from './modules/users/users.module';
@@ -32,6 +33,7 @@ import { ServicesModule } from './services/services.module';
     ServicesModule,
     TownsModule,
     UsersModule,
+    ActivitiesModule,
     AuthModule,
   ],
   controllers: [AppController],

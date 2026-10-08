@@ -1,20 +1,33 @@
-import type { AttendeeType } from '../constants/activity.constant.js';
+import type {
+  AttendanceStatus,
+  AttendeeType,
+} from '../constants/activity.constant.js';
+import type { UserRole } from '../constants/roles.constant.js';
 import type { IActivity } from './activity.interface.js';
-import type { IUser } from './user.interface.js';
 
 export interface IGuestInfo {
   fullName: string;
   phoneNumber?: string;
-  originTown?: string;
   notes?: string;
 }
 
+export interface IAttendanceMemberSummary {
+  id: string;
+  fullName: string;
+  phoneNumber: string;
+  email?: string;
+  role: UserRole;
+  homeTownId: string;
+}
+
 export interface IAttendanceItem {
+  id?: string;
   attendeeType: AttendeeType;
   memberId?: string;
-  member?: IUser;
+  member?: IAttendanceMemberSummary;
   guestInfo?: IGuestInfo;
   checkInTime: string;
+  status: AttendanceStatus;
 }
 
 export interface IAttendance {
@@ -24,4 +37,23 @@ export interface IAttendance {
   recordedBy: string;
   recordedAt: string;
   attendees: IAttendanceItem[];
+  summary: {
+    totalPresent: number;
+    membersPresent: number;
+    guestsPresent: number;
+    totalExcused: number;
+  };
+}
+
+export interface IRecordAttendanceItemDto {
+  attendeeType: AttendeeType;
+  memberId?: string;
+  guestInfo?: IGuestInfo;
+  status: AttendanceStatus;
+  checkInTime?: string;
+}
+
+export interface IRecordAttendanceDto {
+  activityId: string;
+  attendees: IRecordAttendanceItemDto[];
 }

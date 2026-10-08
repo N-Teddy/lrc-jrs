@@ -1,0 +1,29 @@
+import { Module } from '@nestjs/common';
+import { MongooseModule } from '@nestjs/mongoose';
+import {
+  Activity,
+  ActivitySchema,
+  Attendance,
+  AttendanceSchema,
+  Town,
+  TownSchema,
+  User,
+  UserSchema,
+} from '../../database/schemas';
+import { ActivitiesController } from './activities.controller';
+import { ActivitiesService } from './activities.service';
+
+@Module({
+  imports: [
+    MongooseModule.forFeature([
+      { name: Activity.name, schema: ActivitySchema },
+      { name: Attendance.name, schema: AttendanceSchema },
+      { name: Town.name, schema: TownSchema },
+      { name: User.name, schema: UserSchema },
+    ]),
+  ],
+  controllers: [ActivitiesController],
+  providers: [ActivitiesService],
+  exports: [ActivitiesService],
+})
+export class ActivitiesModule {}
