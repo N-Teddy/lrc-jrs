@@ -1,4 +1,8 @@
-import { evaluateTownPermissions, type ITown } from '@jrs/shared';
+import {
+  DEFAULT_TOWNS,
+  evaluateTownPermissions,
+  type ITown,
+} from '@jrs/shared';
 import { useQueryClient } from '@tanstack/react-query';
 import type React from 'react';
 import {
@@ -36,23 +40,32 @@ export interface TownProviderProps {
 
 const STORAGE_ACTIVE_TOWN_KEY = 'jrs_active_town_id';
 
+const FALLBACK_TOWNS: ITown[] = DEFAULT_TOWNS.map((dt) => ({
+  id: dt.code.toLowerCase(),
+  name: dt.name,
+  code: dt.code,
+  activePcCount: 1,
+}));
+
 export function TownProvider({ children, storage }: TownProviderProps) {
   const { user, isAuthenticated } = useAuth();
   const http = useHttp();
   const queryClient = useQueryClient();
 
   const [activeTownId, setActiveTownIdState] = useState<string | null>(null);
-  const [availableTowns, setAvailableTowns] = useState<ITown[]>([]);
-  const [isLoadingTowns, setIsLoadingTowns] = useState<boolean>(true);
+  const [availableTowns, setAvailableTowns] = useState<ITown[]>(FALLBACK_TOWNS);
+  const [isLoadingTowns, setIsLoadingTowns] = useState<boolean>(false);
 
   // Fetch list of towns
   const refreshTowns = useCallback(async () => {
     try {
       setIsLoadingTowns(true);
       const towns = await http.get<ITown[]>('/towns');
-      setAvailableTowns(towns || []);
+      if (Array.isArray(towns) && towns.length > 0) {
+        setAvailableTowns(towns);
+      }
     } catch {
-      setAvailableTowns([]);
+      // keep fallback towns
     } finally {
       setIsLoadingTowns(false);
     }

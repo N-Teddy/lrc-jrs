@@ -9,7 +9,7 @@
     "check": "biome check --write .",
     "check-types": "turbo run check-types",
     "audit": "pnpm audit --prod",
-    "desktop": "pnpm --filter @jrs/desktop tauri dev",
+    "desktop": "WEBKIT_DISABLE_DMABUF_RENDERER=1 WEBKIT_DISABLE_SANDBOX_THIS_IS_DANGEROUS=1 pnpm --filter @jrs/desktop tauri dev",
     "mobile": "pnpm --filter @jrs/mobile start",
     "server": "pnpm --filter @jrs/server start:dev",
     "backend": "pnpm --filter @jrs/server start:dev",
@@ -27,6 +27,6 @@
   },
   "packageManager": "pnpm@11.25.0",
   "engines": {
-    "node": ">=24"
+    "node": ">=22"
   }
 }

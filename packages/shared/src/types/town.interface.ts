@@ -1,5 +1,5 @@
-import { UserRole } from '../constants/roles.constant';
-import type { IAuthUser } from './user.interface';
+import { UserRole } from '../constants/roles.constant.js';
+import type { IAuthUser } from './user.interface.js';
 
 export interface ITown {
   id: string;

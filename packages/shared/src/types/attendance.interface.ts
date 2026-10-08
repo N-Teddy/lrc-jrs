@@ -1,6 +1,6 @@
-import type { AttendeeType } from '../constants/activity.constant';
-import type { IActivity } from './activity.interface';
-import type { IUser } from './user.interface';
+import type { AttendeeType } from '../constants/activity.constant.js';
+import type { IActivity } from './activity.interface.js';
+import type { IUser } from './user.interface.js';
 
 export interface IGuestInfo {
   fullName: string;

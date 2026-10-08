@@ -1,4 +1,4 @@
-import type { ActivityType } from '../constants/activity.constant';
+import type { ActivityType } from '../constants/activity.constant.js';
 
 export interface IActivityReport {
   driveFileId: string;

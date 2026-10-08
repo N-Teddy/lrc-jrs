@@ -1,5 +1,5 @@
-import type { UserRole } from '../constants/roles.constant';
-import type { ITown } from './town.interface';
+import type { UserRole } from '../constants/roles.constant.js';
+import type { ITown } from './town.interface.js';
 
 export interface ITownTransfer {
   fromTownId: string;

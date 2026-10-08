@@ -1,0 +1,88 @@
+# LRC JRS - Test Credentials
+
+---
+
+## 🔒 1. Verified Accounts (Direct Login)
+All accounts in this section have permanent passwords and are already verified (`account.status: ACTIVE`, `isTemporaryPassword: false`). Logging in will grant immediate access to the dashboard without any password change prompt.
+
+### Animateur Principal (AP / Overseer)
+- **Email**: `ap.overseer@lrcjrs.org`
+- **Phone**: `+237670000001`
+- **Password**: `AdminPassword123!`
+- **Role**: `AP` (Global Overseer Access)
+- **Home Town**: Douala (DLA)
+- **Status**: Verified & Active
+
+### Personne Contact (PC)
+- **Email**: `pc.douala1@lrcjrs.org`
+- **Phone**: `+237671110001`
+- **Password**: `PcPassword123!`
+- **Role**: `PC`
+- **Home Town**: Douala (DLA)
+- **Status**: Verified & Active
+
+*(Other verified PCs)*:
+- **PC Yaoundé**: `pc.yaounde1@lrcjrs.org` | `+237672220001` | Password: `PcPassword123!`
+- **PC Bafoussam**: `pc.bafoussam1@lrcjrs.org` | `+237673330001` | Password: `PcPassword123!`
+
+### Regular JR Member (MEMBER)
+- **Email**: `member.dla1@lrcjrs.org`
+- **Phone**: `+237674440001`
+- **Password**: `MemberPassword123!`
+- **Role**: `MEMBER`
+- **Home Town**: Douala (DLA)
+- **Status**: Verified & Active
+
+---
+
+## 🚀 2. Unverified Accounts (New User Setup Flow)
+All accounts in this section have temporary passwords (`isTemporaryPassword: true`, `status: MUST_CHANGE_PASSWORD`).
+Logging in will trigger the **First-Time Setup / Mandatory Password Change** screen with a 15-minute `setupToken`.
+
+### Temporary Password for All Unverified Accounts:
+```
+TempPassword123!
+```
+
+---
+
+### Unverified AP (Animateur Principal)
+- **Email**: `ap.assistant@lrcjrs.org`
+- **Phone**: `+237670000002`
+- **Role**: `AP`
+- **Temporary Password**: `TempPassword123!`
+- **Expected Flow**: Login → `FirstTimeSetupScreen` (Create new permanent password) → Redirect to AP Dashboard
+
+---
+
+### Unverified PC (Personne Contact - Douala)
+- **Email**: `pc.douala2@lrcjrs.org`
+- **Phone**: `+237671110002`
+- **Role**: `PC`
+- **Home Town**: Douala (DLA)
+- **Temporary Password**: `TempPassword123!`
+- **Expected Flow**: Login → `FirstTimeSetupScreen` → Redirect to PC Dashboard
+
+*(Additional unverified PCs for testing other towns)*:
+- **PC Yaoundé 2**: `pc.yaounde2@lrcjrs.org` | `+237672220002` | Temp Password: `TempPassword123!`
+- **PC Bafoussam 2**: `pc.bafoussam2@lrcjrs.org` | `+237673330002` | Temp Password: `TempPassword123!`
+
+---
+
+### Unverified Member (Bafoussam)
+- **Email**: `member.baf1@lrcjrs.org`
+- **Phone**: `+237676660001`
+- **Role**: `MEMBER`
+- **Home Town**: Bafoussam (BAF)
+- **Temporary Password**: `TempPassword123!`
+- **Expected Flow**: Login → `FirstTimeSetupScreen` → Redirect to Member View
+
+---
+
+### Pending Activation Member (No App Access)
+- **Email**: `member.yde1@lrcjrs.org`
+- **Phone**: `+237675550001`
+- **Role**: `MEMBER`
+- **Home Town**: Yaoundé (YDE)
+- **Temporary Password**: `TempPassword123!`
+- **Expected Flow**: Login rejected (Account is pending activation, `hasAppAccess: false`)
