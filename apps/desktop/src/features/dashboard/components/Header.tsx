@@ -8,6 +8,7 @@ import {
 } from '@phosphor-icons/react';
 import type React from 'react';
 import { useState } from 'react';
+import { formatDashboardDate, getUserInitials } from '../utils/dashboard.utils';
 
 interface HeaderProps {
   isSidebarCollapsed: boolean;
@@ -26,23 +27,8 @@ export const Header: React.FC<HeaderProps> = ({
   const { activeTown } = useTownContext();
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
 
-  // Compute initials
-  const initials = user?.fullName
-    ? user.fullName
-        .split(' ')
-        .map((n) => n[0])
-        .slice(0, 2)
-        .join('')
-        .toUpperCase()
-    : 'JR';
-
-  // Format current date
-  const todayFormatted = new Intl.DateTimeFormat('en-US', {
-    weekday: 'short',
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  }).format(new Date());
+  const initials = getUserInitials(user?.fullName);
+  const todayFormatted = formatDashboardDate();
 
   return (
     <header

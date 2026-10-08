@@ -18,6 +18,10 @@ export interface AuthContextValue {
   signIn: (identifier: string, password: string) => Promise<ILoginResponse>;
   signOut: () => Promise<void>;
   updateUser: (user: IAuthUser) => Promise<void>;
+  completeSetup: (
+    newPassword: string,
+    setupToken?: string,
+  ) => Promise<ILoginResponse>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -116,6 +120,43 @@ export function AuthProvider({ children, storage, http }: AuthProviderProps) {
     [storage],
   );
 
+  const completeSetup = useCallback(
+    async (
+      newPassword: string,
+      setupToken?: string,
+    ): Promise<ILoginResponse> => {
+      const config = setupToken
+        ? {
+            headers: {
+              Authorization: `Bearer ${setupToken}`,
+            },
+          }
+        : undefined;
+
+      const res = await http.post<ILoginResponse>(
+        '/auth/complete-setup',
+        { newPassword },
+        config,
+      );
+
+      if (res.accessToken) {
+        await storage.setItem('jrs_access_token', res.accessToken);
+      }
+      if (res.refreshToken) {
+        await storage.setItem('jrs_refresh_token', res.refreshToken);
+      }
+      if (res.user) {
+        await storage.setItem('jrs_user', JSON.stringify(res.user));
+        setUser(res.user);
+        setIsAuthenticated(true);
+        queryClient.clear();
+      }
+
+      return res;
+    },
+    [http, storage, queryClient],
+  );
+
   return (
     <AuthContext.Provider
       value={{
@@ -125,6 +166,7 @@ export function AuthProvider({ children, storage, http }: AuthProviderProps) {
         signIn,
         signOut,
         updateUser,
+        completeSetup,
       }}
     >
       {children}

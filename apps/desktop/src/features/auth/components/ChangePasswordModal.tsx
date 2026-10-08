@@ -1,4 +1,3 @@
-import { useChangePasswordMutation } from '@jrs/client-core';
 import {
   Check,
   CheckCircle,
@@ -13,11 +12,8 @@ import {
   XCircle,
 } from '@phosphor-icons/react';
 import type React from 'react';
-import { useState } from 'react';
-import {
-  PasswordRequirements,
-  validatePasswordRules,
-} from './PasswordRequirements';
+import { useChangePassword } from '../hooks/use-change-password';
+import { PasswordRequirements } from './PasswordRequirements';
 
 interface ChangePasswordModalProps {
   isOpen: boolean;
@@ -30,102 +26,35 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
   onClose,
   onSuccess,
 }) => {
-  const [currentPassword, setCurrentPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-
-  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
-  const [showNewPassword, setShowNewPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [showSuccessToast, setShowSuccessToast] = useState(false);
-
-  const changePasswordMutation = useChangePasswordMutation();
+  const {
+    currentPassword,
+    handleCurrentPasswordChange,
+    newPassword,
+    setNewPassword,
+    confirmPassword,
+    setConfirmPassword,
+    showCurrentPassword,
+    toggleShowCurrentPassword,
+    showNewPassword,
+    toggleShowNewPassword,
+    showConfirmPassword,
+    toggleShowConfirmPassword,
+    errorMessage,
+    showSuccessToast,
+    rules,
+    strength,
+    passwordsMatch,
+    isReused,
+    isSubmitDisabled,
+    isPending,
+    handleClose,
+    handleSubmit,
+  } = useChangePassword({
+    onClose,
+    onSuccess,
+  });
 
   if (!isOpen) return null;
-
-  const rules = validatePasswordRules(newPassword);
-  const allRulesPassed = rules.every((r) => r.met);
-  const passwordsMatch =
-    newPassword.length > 0 && newPassword === confirmPassword;
-  const isReused =
-    newPassword.length > 0 &&
-    currentPassword.length > 0 &&
-    newPassword === currentPassword;
-
-  // Strength score
-  const metCount = rules.filter((r) => r.met).length;
-  let strengthPercent = 0;
-  let strengthLabel = 'Unchecked';
-  let strengthColor = 'bg-[#8a726a]';
-
-  if (newPassword.length > 0) {
-    if (metCount === 1) {
-      strengthPercent = 33;
-      strengthLabel = 'Weak';
-      strengthColor = 'bg-[#ba1a1a]';
-    } else if (metCount === 2) {
-      strengthPercent = 66;
-      strengthLabel = 'Fair';
-      strengthColor = 'bg-[#b85028]';
-    } else if (metCount === 3) {
-      strengthPercent = 100;
-      strengthLabel = 'Strong';
-      strengthColor = 'bg-[#43664d]';
-    }
-  }
-
-  const isSubmitDisabled =
-    !currentPassword ||
-    !allRulesPassed ||
-    !passwordsMatch ||
-    isReused ||
-    changePasswordMutation.isPending;
-
-  const resetForm = () => {
-    setCurrentPassword('');
-    setNewPassword('');
-    setConfirmPassword('');
-    setErrorMessage(null);
-  };
-
-  const handleClose = () => {
-    resetForm();
-    onClose();
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (isSubmitDisabled) return;
-
-    setErrorMessage(null);
-
-    try {
-      await changePasswordMutation.mutateAsync({
-        currentPassword,
-        newPassword,
-      });
-
-      setShowSuccessToast(true);
-      resetForm();
-      setTimeout(() => {
-        setShowSuccessToast(false);
-        onSuccess?.();
-        onClose();
-      }, 2000);
-    } catch (err: any) {
-      const serverMsg =
-        err?.response?.data?.message ||
-        err?.message ||
-        'Failed to change password. Please verify your current password.';
-      setErrorMessage(
-        typeof serverMsg === 'string'
-          ? serverMsg
-          : 'Could not change password. Please check your current password.',
-      );
-    }
-  };
 
   return (
     <div
@@ -212,16 +141,13 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
                 type={showCurrentPassword ? 'text' : 'password'}
                 required
                 value={currentPassword}
-                onChange={(e) => {
-                  setCurrentPassword(e.target.value);
-                  if (errorMessage) setErrorMessage(null);
-                }}
+                onChange={(e) => handleCurrentPasswordChange(e.target.value)}
                 placeholder="Enter current password"
                 className="w-full rounded-xl border border-[#e8e1dd] bg-[#faf2ee] py-3 pl-11 pr-11 text-sm text-[#1e1b19] placeholder-[#8a726a] outline-none focus:bg-white focus:border-[#b85028] focus:ring-2 focus:ring-[#b85028]/20 transition"
               />
               <button
                 type="button"
-                onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                onClick={toggleShowCurrentPassword}
                 className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-[#8a726a] hover:text-[#1e1b19]"
                 tabIndex={-1}
               >
@@ -257,7 +183,7 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
               />
               <button
                 type="button"
-                onClick={() => setShowNewPassword(!showNewPassword)}
+                onClick={toggleShowNewPassword}
                 className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-[#8a726a] hover:text-[#1e1b19]"
                 tabIndex={-1}
               >
@@ -281,13 +207,13 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
               <div className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-wider text-[#57423b] mb-1.5">
                 <span>Password Requirements</span>
                 <span className="font-bold text-[#1e1b19]">
-                  {strengthLabel}
+                  {strength.label}
                 </span>
               </div>
               <div className="h-1.5 w-full rounded-full bg-[#e8e1dd] overflow-hidden mb-2.5">
                 <div
-                  className={`h-full ${strengthColor} transition-all duration-300`}
-                  style={{ width: `${strengthPercent}%` }}
+                  className={`h-full ${strength.colorClass} transition-all duration-300`}
+                  style={{ width: `${strength.percent}%` }}
                 />
               </div>
               <PasswordRequirements rules={rules} />
@@ -332,7 +258,7 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
                   ))}
                 <button
                   type="button"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  onClick={toggleShowConfirmPassword}
                   className="ml-1 text-[#8a726a] hover:text-[#1e1b19]"
                   tabIndex={-1}
                 >
@@ -365,7 +291,7 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
               disabled={isSubmitDisabled}
               className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-[#b85028] text-white text-xs font-bold shadow-sm hover:bg-[#983912] active:scale-[0.99] transition flex items-center justify-center gap-2 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {changePasswordMutation.isPending ? (
+              {isPending ? (
                 <>
                   <CircleNotch size={16} className="animate-spin" />
                   <span>Updating Password...</span>

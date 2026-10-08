@@ -2,11 +2,11 @@ import { useTownContext } from '@jrs/client-core';
 import type { IAuthUser } from '@jrs/shared';
 import { CheckCircle, Sparkle, SquaresFour } from '@phosphor-icons/react';
 import type React from 'react';
-import { useState } from 'react';
 import { ChangePasswordModal } from '../../auth';
+import { useDashboardLayout } from '../hooks/use-dashboard-layout';
 import { Header } from './Header';
 import { HubSwitcherPopover } from './HubSwitcherPopover';
-import { type DashboardTabId, Sidebar } from './Sidebar';
+import { Sidebar } from './Sidebar';
 
 interface DashboardLayoutProps {
   user: IAuthUser;
@@ -20,41 +20,40 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 }) => {
   const { activeTown } = useTownContext();
 
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [activeTab, setActiveTab] = useState<DashboardTabId>('dashboard');
-  const [isHubSwitcherOpen, setIsHubSwitcherOpen] = useState(false);
-  const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
-
-  // Tab Titles
-  const tabTitles: Record<DashboardTabId, string> = {
-    dashboard: 'Dashboard Overview',
-    members: 'Members & Directory',
-    activities: 'Activities & Calendar',
-    transfers: 'Town Transfers',
-    access: 'Access & Accounts',
-    reports: 'Reports & Analytics',
-  };
+  const {
+    isSidebarCollapsed,
+    toggleSidebar,
+    activeTab,
+    setActiveTab,
+    isHubSwitcherOpen,
+    openHubSwitcher,
+    closeHubSwitcher,
+    isChangePasswordOpen,
+    openChangePassword,
+    closeChangePassword,
+    currentTabTitle,
+  } = useDashboardLayout();
 
   return (
     <div className="min-h-screen w-full bg-[#fff8f5] text-[#1e1b19]">
       {/* 1. Left Sidebar */}
       <Sidebar
         isCollapsed={isSidebarCollapsed}
-        onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+        onToggleCollapse={toggleSidebar}
         activeTab={activeTab}
-        onSelectTab={(tab) => setActiveTab(tab)}
-        onOpenHubSwitcher={() => setIsHubSwitcherOpen(true)}
+        onSelectTab={setActiveTab}
+        onOpenHubSwitcher={openHubSwitcher}
       />
 
       {/* 2. Top Header */}
       <Header
         isSidebarCollapsed={isSidebarCollapsed}
-        onToggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-        onOpenChangePassword={() => setIsChangePasswordOpen(true)}
-        title={tabTitles[activeTab]}
+        onToggleSidebar={toggleSidebar}
+        onOpenChangePassword={openChangePassword}
+        title={currentTabTitle}
       />
 
-      {/* 3. Main Workspace Area (Empty Sanctuary Canvas) */}
+      {/* 3. Main Workspace Area */}
       <main
         className={`pt-16 min-h-screen transition-all duration-200 ${
           isSidebarCollapsed ? 'pl-[72px]' : 'pl-[260px]'
@@ -162,7 +161,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       {/* 4. Active Hub Switcher Popover */}
       <HubSwitcherPopover
         isOpen={isHubSwitcherOpen}
-        onClose={() => setIsHubSwitcherOpen(false)}
+        onClose={closeHubSwitcher}
         onOpenMapView={onSwitchRegion}
         isSidebarCollapsed={isSidebarCollapsed}
       />
@@ -170,7 +169,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       {/* 5. In-App Change Password Modal */}
       <ChangePasswordModal
         isOpen={isChangePasswordOpen}
-        onClose={() => setIsChangePasswordOpen(false)}
+        onClose={closeChangePassword}
       />
     </div>
   );

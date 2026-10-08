@@ -1,5 +1,4 @@
-import { useAuth } from '@jrs/client-core';
-import type { IAuthUser, ILoginResponse } from '@jrs/shared';
+import type { IAuthUser } from '@jrs/shared';
 import {
   ArrowRight,
   At,
@@ -14,8 +13,8 @@ import {
   WarningCircle,
 } from '@phosphor-icons/react';
 import type React from 'react';
-import { useState } from 'react';
 import fellowshipHero from '../../../assets/fellowship-hero.jpg';
+import { useLogin } from '../hooks/use-login';
 import { AccountRevokedModal } from './AccountRevokedModal';
 
 interface LoginScreenProps {
@@ -30,77 +29,26 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
   onRequiresPasswordChange,
   onForgotPasswordClick,
 }) => {
-  const { signIn } = useAuth();
-
-  const [identifier, setIdentifier] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [keepSignedIn, setKeepSignedIn] = useState(true);
-  const [isLoading, setIsLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [isTempExpired, setIsTempExpired] = useState(false);
-  const [isRevokedModalOpen, setIsRevokedModalOpen] = useState(false);
-
-  // Dynamic icon detection for identifier (Email vs Phone)
-  const isEmailInput = identifier.includes('@');
-  const isPhoneInput =
-    !isEmailInput &&
-    (identifier.startsWith('+') ||
-      /^\d+$/.test(identifier.replace(/\s+/g, '')));
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!identifier.trim() || !password) return;
-
-    setIsLoading(true);
-    setErrorMessage(null);
-    setIsTempExpired(false);
-
-    try {
-      const response: ILoginResponse = await signIn(
-        identifier.trim(),
-        password,
-      );
-
-      if (response.requiresPasswordChange && response.setupToken) {
-        onRequiresPasswordChange({
-          setupToken: response.setupToken,
-          user: response.user,
-        });
-      }
-    } catch (err: any) {
-      const status = err?.response?.status || err?.status;
-      const serverMsg =
-        err?.response?.data?.message || err?.message || 'Authentication failed';
-
-      if (
-        status === 403 ||
-        String(serverMsg).toLowerCase().includes('revoked')
-      ) {
-        setIsRevokedModalOpen(true);
-      } else if (
-        status === 401 &&
-        String(serverMsg).toLowerCase().includes('expired')
-      ) {
-        setIsTempExpired(true);
-        setErrorMessage(
-          'Your temporary password has expired. Please use Forgot Password or request a new invitation.',
-        );
-      } else if (status === 401) {
-        setErrorMessage(
-          'Invalid identifier or password. Please verify your credentials.',
-        );
-      } else {
-        setErrorMessage(
-          typeof serverMsg === 'string'
-            ? serverMsg
-            : 'Unable to connect to the authentication server. Please check your network.',
-        );
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const {
+    identifier,
+    setIdentifier,
+    password,
+    setPassword,
+    showPassword,
+    toggleShowPassword,
+    keepSignedIn,
+    setKeepSignedIn,
+    isLoading,
+    errorMessage,
+    isTempExpired,
+    isRevokedModalOpen,
+    closeRevokedModal,
+    isEmailInput,
+    isPhoneInput,
+    handleSubmit,
+  } = useLogin({
+    onRequiresPasswordChange,
+  });
 
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-[#fdfbf9]">
@@ -240,7 +188,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
                 />
                 <button
                   type="button"
-                  onClick={() => setShowPassword(!showPassword)}
+                  onClick={toggleShowPassword}
                   className="absolute inset-y-0 right-0 flex items-center pr-4 text-[#8a726a] hover:text-[#1e1b19]"
                   tabIndex={-1}
                 >
@@ -308,7 +256,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
       {/* Account Revoked Modal (403 Handler) */}
       <AccountRevokedModal
         isOpen={isRevokedModalOpen}
-        onAcknowledge={() => setIsRevokedModalOpen(false)}
+        onAcknowledge={closeRevokedModal}
       />
     </div>
   );

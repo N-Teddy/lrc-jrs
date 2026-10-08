@@ -1,6 +1,5 @@
 import type {
   IForgotPasswordResponse,
-  ILoginResponse,
   IResetPasswordResponse,
   IVerifyResetCodeResponse,
 } from '@jrs/shared';
@@ -15,6 +14,7 @@ export interface ILoginCredentials {
 
 export interface ICompleteSetupDto {
   newPassword: string;
+  setupToken?: string;
 }
 
 export interface IForgotPasswordDto {
@@ -47,15 +47,11 @@ export function useLoginMutation() {
 }
 
 export function useCompleteSetupMutation() {
-  const http = useHttp();
-  const queryClient = useQueryClient();
+  const { completeSetup } = useAuth();
 
   return useMutation({
     mutationFn: (dto: ICompleteSetupDto) =>
-      http.post<ILoginResponse>('/auth/complete-setup', dto),
-    onSuccess: () => {
-      queryClient.clear();
-    },
+      completeSetup(dto.newPassword, dto.setupToken),
   });
 }
 

@@ -1,8 +1,4 @@
 import {
-  useForgotPasswordMutation,
-  useVerifyResetCodeMutation,
-} from '@jrs/client-core';
-import {
   ArrowLeft,
   ArrowRight,
   ArrowsClockwise,
@@ -19,7 +15,7 @@ import {
   WhatsappLogo,
 } from '@phosphor-icons/react';
 import type React from 'react';
-import { useEffect, useRef, useState } from 'react';
+import { useVerifyOtp } from '../hooks/use-verify-otp';
 
 interface VerifyOtpScreenProps {
   identifier: string;
@@ -34,184 +30,37 @@ export const VerifyOtpScreen: React.FC<VerifyOtpScreenProps> = ({
   onBackToChangeContact,
   onCodeVerified,
 }) => {
-  const [digits, setDigits] = useState<string[]>(['', '', '', '', '', '']);
-  const [attemptsRemaining, setAttemptsRemaining] = useState(5);
-  const [secondsRemaining, setSecondsRemaining] = useState(10 * 60); // 10 minutes (600s)
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [isLockedOut, setIsLockedOut] = useState(false);
-  const [resendNotice, setResendNotice] = useState<string | null>(null);
-
-  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
-
-  const verifyMutation = useVerifyResetCodeMutation();
-  const resendMutation = useForgotPasswordMutation();
-
-  const isTimerExpired = secondsRemaining <= 0;
-
-  // Countdown timer
-  useEffect(() => {
-    if (secondsRemaining <= 0) return;
-    const interval = setInterval(() => {
-      setSecondsRemaining((prev) => (prev > 0 ? prev - 1 : 0));
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [secondsRemaining]);
-
-  // Focus first input on mount
-  useEffect(() => {
-    inputRefs.current[0]?.focus();
-  }, []);
-
-  const formatTimer = (totalSec: number) => {
-    const mins = Math.floor(totalSec / 60);
-    const secs = totalSec % 60;
-    return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-  };
-
-  // Mask identifier for safety
-  const maskIdentifier = (val: string) => {
-    if (val.includes('@')) {
-      const [name, domain] = val.split('@');
-      const maskedName =
-        name.length > 2
-          ? `${name[0]}${'•'.repeat(Math.min(name.length - 2, 5))}${name.slice(-1)}`
-          : `${name[0]}•`;
-      return `${maskedName}@${domain}`;
-    }
-    const clean = val.replace(/\s+/g, '');
-    if (clean.length > 6) {
-      return `${clean.slice(0, 4)} •• •• ${clean.slice(-2)}`;
-    }
-    return val;
-  };
-
-  const handleCellChange = (index: number, value: string) => {
-    const cleanDigit = value.replace(/\D/g, '').slice(-1);
-    const newDigits = [...digits];
-    newDigits[index] = cleanDigit;
-    setDigits(newDigits);
-    setErrorMessage(null);
-
-    // Auto advance
-    if (cleanDigit && index < 5) {
-      inputRefs.current[index + 1]?.focus();
-    }
-  };
-
-  const handleKeyDown = (
-    index: number,
-    e: React.KeyboardEvent<HTMLInputElement>,
-  ) => {
-    if (e.key === 'Backspace') {
-      if (!digits[index] && index > 0) {
-        inputRefs.current[index - 1]?.focus();
-      } else {
-        const newDigits = [...digits];
-        newDigits[index] = '';
-        setDigits(newDigits);
-      }
-    } else if (e.key === 'ArrowLeft' && index > 0) {
-      inputRefs.current[index - 1]?.focus();
-    } else if (e.key === 'ArrowRight' && index < 5) {
-      inputRefs.current[index + 1]?.focus();
-    }
-  };
-
-  const handlePaste = (e: React.ClipboardEvent) => {
-    e.preventDefault();
-    const pasteData = e.clipboardData.getData('text').trim();
-    const numDigits = pasteData.replace(/\D/g, '').slice(0, 6);
-    if (!numDigits) return;
-
-    const newDigits = [...digits];
-    for (let i = 0; i < 6; i++) {
-      newDigits[i] = numDigits[i] || '';
-    }
-    setDigits(newDigits);
-    setErrorMessage(null);
-
-    const nextIndex = Math.min(numDigits.length, 5);
-    inputRefs.current[nextIndex]?.focus();
-  };
-
-  const handleSubmit = async (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    const fullCode = digits.join('');
-    if (fullCode.length < 6) {
-      setErrorMessage('Please enter all 6 digits of your verification code.');
-      return;
-    }
-    if (isTimerExpired) {
-      setErrorMessage(
-        'This verification code has expired. Please request a new code below.',
-      );
-      return;
-    }
-    if (isLockedOut) {
-      return;
-    }
-
-    setErrorMessage(null);
-
-    try {
-      const response = await verifyMutation.mutateAsync({
-        identifier: identifier.trim(),
-        code: fullCode,
-      });
-
-      if (response.resetToken) {
-        onCodeVerified(response.resetToken);
-      }
-    } catch (err: any) {
-      const remaining = Math.max(0, attemptsRemaining - 1);
-      setAttemptsRemaining(remaining);
-
-      if (remaining <= 0) {
-        setIsLockedOut(true);
-        setErrorMessage(
-          'Maximum verification attempts reached. For security, please request a fresh code.',
-        );
-      } else {
-        const serverMsg =
-          err?.response?.data?.message ||
-          err?.message ||
-          'Incorrect verification code. Please check and try again.';
-        setErrorMessage(
-          typeof serverMsg === 'string'
-            ? `${serverMsg} (${remaining} attempt${remaining === 1 ? '' : 's'} remaining)`
-            : `Code mismatch. (${remaining} attempts left)`,
-        );
-      }
-    }
-  };
-
-  const handleResendCode = async () => {
-    setErrorMessage(null);
-    setResendNotice(null);
-    try {
-      await resendMutation.mutateAsync({
-        identifier: identifier.trim(),
-        channel,
-      });
-      setDigits(['', '', '', '', '', '']);
-      setSecondsRemaining(10 * 60);
-      setAttemptsRemaining(5);
-      setIsLockedOut(false);
-      setResendNotice('A new 6-digit verification code has been dispatched.');
-      inputRefs.current[0]?.focus();
-    } catch (_err) {
-      setErrorMessage('Failed to resend code. Please try again shortly.');
-    }
-  };
-
-  const isFormComplete = digits.every((d) => d.length === 1);
+  const {
+    digits,
+    inputRefs,
+    attemptsRemaining,
+    errorMessage,
+    isLockedOut,
+    resendNotice,
+    formattedTime,
+    secondsRemaining,
+    isTimerExpired,
+    isFormComplete,
+    maskedId,
+    isVerifyPending,
+    isResendPending,
+    handleCellChange,
+    handleKeyDown,
+    handlePaste,
+    handleSubmit,
+    handleResendCode,
+  } = useVerifyOtp({
+    identifier,
+    channel,
+    onCodeVerified,
+  });
 
   return (
     <div className="flex min-h-screen w-full items-center justify-center bg-[#fff8f5] p-4 sm:p-6 lg:p-8">
       <div className="w-full max-w-xl mx-auto flex flex-col gap-6">
         {/* Main Card */}
         <div className="rounded-2xl border border-[#e8e1dd] bg-white p-6 sm:p-10 shadow-sm flex flex-col gap-6 transition-all">
-          {/* Top Navigation Inside Card: No border and no step indicator */}
+          {/* Top Navigation Inside Card */}
           <div className="flex items-center justify-between">
             <button
               type="button"
@@ -259,7 +108,7 @@ export const VerifyOtpScreen: React.FC<VerifyOtpScreenProps> = ({
                   Sent via {identifier.includes('@') ? 'Email' : 'WhatsApp'}
                 </span>
                 <span className="text-xs sm:text-sm font-bold text-[#1e1b19] truncate">
-                  {maskIdentifier(identifier)}
+                  {maskedId}
                 </span>
               </div>
             </div>
@@ -295,9 +144,7 @@ export const VerifyOtpScreen: React.FC<VerifyOtpScreenProps> = ({
                 ) : (
                   <>
                     Code expires in{' '}
-                    <strong className="text-[#1e1b19]">
-                      {formatTimer(secondsRemaining)}
-                    </strong>
+                    <strong className="text-[#1e1b19]">{formattedTime}</strong>
                   </>
                 )}
               </span>
@@ -349,9 +196,7 @@ export const VerifyOtpScreen: React.FC<VerifyOtpScreenProps> = ({
                     pattern="[0-9]*"
                     maxLength={1}
                     value={digit}
-                    disabled={
-                      isLockedOut || isTimerExpired || verifyMutation.isPending
-                    }
+                    disabled={isLockedOut || isTimerExpired || isVerifyPending}
                     onChange={(e) => handleCellChange(i, e.target.value)}
                     onKeyDown={(e) => handleKeyDown(i, e)}
                     className="w-12 h-14 sm:w-14 sm:h-16 text-center text-2xl font-bold text-[#1e1b19] bg-[#faf2ee] rounded-xl transition outline-none focus:bg-white focus:ring-2 focus:ring-[#b85028] border border-[#e8e1dd] shadow-xs disabled:cursor-not-allowed disabled:bg-[#f3efea]"
@@ -390,10 +235,10 @@ export const VerifyOtpScreen: React.FC<VerifyOtpScreenProps> = ({
               <button
                 type="button"
                 onClick={handleResendCode}
-                disabled={resendMutation.isPending}
+                disabled={isResendPending}
                 className="w-full py-3.5 px-6 rounded-xl bg-[#b85028] text-white text-sm font-bold shadow-sm hover:bg-[#983912] active:scale-[0.99] transition flex items-center justify-center gap-2"
               >
-                {resendMutation.isPending ? (
+                {isResendPending ? (
                   <>
                     <CircleNotch size={18} className="animate-spin" />
                     <span>Requesting fresh code...</span>
@@ -408,10 +253,10 @@ export const VerifyOtpScreen: React.FC<VerifyOtpScreenProps> = ({
             ) : (
               <button
                 type="submit"
-                disabled={!isFormComplete || verifyMutation.isPending}
+                disabled={!isFormComplete || isVerifyPending}
                 className="w-full py-3.5 px-6 rounded-xl bg-[#b85028] text-white text-sm font-bold shadow-sm hover:bg-[#983912] active:scale-[0.99] transition flex items-center justify-center gap-2 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {verifyMutation.isPending ? (
+                {isVerifyPending ? (
                   <>
                     <CircleNotch size={18} className="animate-spin" />
                     <span>Verifying code...</span>
@@ -433,7 +278,7 @@ export const VerifyOtpScreen: React.FC<VerifyOtpScreenProps> = ({
               <button
                 type="button"
                 onClick={handleResendCode}
-                disabled={resendMutation.isPending}
+                disabled={isResendPending}
                 className="font-bold text-[#b85028] hover:underline inline-flex items-center gap-1 disabled:opacity-50"
               >
                 <ArrowsClockwise size={14} weight="bold" />

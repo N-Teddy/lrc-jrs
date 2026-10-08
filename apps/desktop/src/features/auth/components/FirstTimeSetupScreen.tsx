@@ -1,5 +1,4 @@
-import { useAuth, useHttp } from '@jrs/client-core';
-import type { IAuthUser, ILoginResponse } from '@jrs/shared';
+import type { IAuthUser } from '@jrs/shared';
 import {
   ArrowLeft,
   CheckCircle,
@@ -13,11 +12,8 @@ import {
   XCircle,
 } from '@phosphor-icons/react';
 import type React from 'react';
-import { useEffect, useState } from 'react';
-import {
-  PasswordRequirements,
-  validatePasswordRules,
-} from './PasswordRequirements';
+import { useFirstTimeSetup } from '../hooks/use-first-time-setup';
+import { PasswordRequirements } from './PasswordRequirements';
 
 interface FirstTimeSetupScreenProps {
   setupToken: string;
@@ -32,95 +28,32 @@ export const FirstTimeSetupScreen: React.FC<FirstTimeSetupScreenProps> = ({
   onCancel,
   onSetupComplete,
 }) => {
-  const http = useHttp();
-  const { updateUser } = useAuth();
-
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [isSuccess, setIsSuccess] = useState(false);
-
-  // 15-minute countdown timer (900 seconds)
-  const [secondsRemaining, setSecondsRemaining] = useState(15 * 60);
-  const isTimerExpired = secondsRemaining <= 0;
-
-  useEffect(() => {
-    if (secondsRemaining <= 0) return;
-    const interval = setInterval(() => {
-      setSecondsRemaining((prev) => (prev > 0 ? prev - 1 : 0));
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [secondsRemaining]);
-
-  const formatTimer = (totalSec: number) => {
-    const mins = Math.floor(totalSec / 60);
-    const secs = totalSec % 60;
-    return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-  };
-
-  const rules = validatePasswordRules(newPassword);
-  const allRulesPassed = rules.every((r) => r.met);
-  const passwordsMatch =
-    newPassword.length > 0 && newPassword === confirmPassword;
-  const isSubmitDisabled =
-    !allRulesPassed || !passwordsMatch || isLoading || isTimerExpired;
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (isSubmitDisabled) return;
-
-    setIsLoading(true);
-    setErrorMessage(null);
-
-    try {
-      // Call complete-setup with the setupToken in headers
-      const res = await http.post<ILoginResponse>(
-        '/auth/complete-setup',
-        { newPassword },
-        {
-          headers: {
-            Authorization: `Bearer ${setupToken}`,
-          },
-        },
-      );
-
-      // Save tokens to localStorage/tauri storage for subsequent requests
-      if (res.accessToken) {
-        localStorage.setItem('jrs_access_token', res.accessToken);
-      }
-      if (res.refreshToken) {
-        localStorage.setItem('jrs_refresh_token', res.refreshToken);
-      }
-      if (res.user) {
-        localStorage.setItem('jrs_user', JSON.stringify(res.user));
-        await updateUser(res.user);
-      }
-
-      setIsSuccess(true);
-      setTimeout(() => {
-        onSetupComplete();
-      }, 1500);
-    } catch (err: any) {
-      const serverMsg =
-        err?.response?.data?.message ||
-        err?.message ||
-        'Failed to set permanent password.';
-      setErrorMessage(
-        typeof serverMsg === 'string'
-          ? serverMsg
-          : 'Could not complete setup. Please check password criteria.',
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const {
+    newPassword,
+    setNewPassword,
+    confirmPassword,
+    setConfirmPassword,
+    showPassword,
+    toggleShowPassword,
+    showConfirmPassword,
+    toggleShowConfirmPassword,
+    isLoading,
+    errorMessage,
+    isSuccess,
+    formattedTime,
+    isTimerExpired,
+    rules,
+    passwordsMatch,
+    isSubmitDisabled,
+    handleSubmit,
+  } = useFirstTimeSetup({
+    setupToken,
+    onSetupComplete,
+  });
 
   return (
     <div className="flex min-h-screen w-full items-center justify-center bg-[#fdfbf9] p-4 sm:p-6 lg:p-10">
-      <div className="w-full max-w-[580px] rounded-[28px] border border-[#ece5dd] bg-white p-8 sm:p-12 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+      <div className="w-full max-w-[580px] rounded-[28px] border border-[#ece5dd] bg-white p-8 sm:12 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
         {/* Top Bar: Back Action & Session Timer Widget */}
         <div className="mb-7 flex items-center justify-between">
           <button
@@ -135,7 +68,7 @@ export const FirstTimeSetupScreen: React.FC<FirstTimeSetupScreenProps> = ({
           {/* Visual Countdown Badge */}
           <div
             className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold transition ${
-              secondsRemaining < 120
+              isTimerExpired
                 ? 'bg-[#fbf1ef] text-[#ba4334]'
                 : 'bg-[#f3efea] text-[#5c554f]'
             }`}
@@ -144,7 +77,7 @@ export const FirstTimeSetupScreen: React.FC<FirstTimeSetupScreenProps> = ({
             <span>
               {isTimerExpired
                 ? 'Session Expired'
-                : `${formatTimer(secondsRemaining)} remaining`}
+                : `${formattedTime} remaining`}
             </span>
           </div>
         </div>
@@ -235,7 +168,7 @@ export const FirstTimeSetupScreen: React.FC<FirstTimeSetupScreenProps> = ({
                 />
                 <button
                   type="button"
-                  onClick={() => setShowPassword(!showPassword)}
+                  onClick={toggleShowPassword}
                   className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-[#8c847c] hover:text-[#23201e]"
                   tabIndex={-1}
                 >
@@ -297,7 +230,7 @@ export const FirstTimeSetupScreen: React.FC<FirstTimeSetupScreenProps> = ({
                     ))}
                   <button
                     type="button"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    onClick={toggleShowConfirmPassword}
                     className="ml-2 text-[#8c847c] hover:text-[#23201e]"
                     tabIndex={-1}
                   >

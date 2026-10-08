@@ -1,8 +1,6 @@
-import { useAuth, useTownContext } from '@jrs/client-core';
 import type { IAuthUser, ITown } from '@jrs/shared';
 import { ArrowRight, MapPin, SignOut, Sparkle } from '@phosphor-icons/react';
 import type React from 'react';
-import { useMemo, useState } from 'react';
 import {
   ComposableMap,
   Geographies,
@@ -11,97 +9,40 @@ import {
 } from 'react-simple-maps';
 import cameroonGeo from '../../../assets/geo/cameroon-regions.json';
 import { CAMEROON_REGIONS } from '../config/cameroon-map.config';
+import { useRegionSelector } from '../hooks/use-region-selector';
 
 interface RegionSelectorScreenProps {
   user: IAuthUser;
   onTownSelected: (town: ITown) => void;
 }
 
-const TOWN_TO_ISO_MAP: Record<string, string> = {
-  DLA: 'CM-LT',
-  YDE: 'CM-CE',
-  BAF: 'CM-OU',
-};
-
 export const RegionSelectorScreen: React.FC<RegionSelectorScreenProps> = ({
   user,
   onTownSelected,
 }) => {
-  const { signOut } = useAuth();
-  const { availableTowns, activeTownId, setActiveTownId } = useTownContext();
-
-  // Find initial selected town (activeTownId -> homeTown -> first available)
-  const initialTown = useMemo(() => {
-    if (activeTownId) {
-      const found = availableTowns.find((t) => t.id === activeTownId);
-      if (found) return found;
-    }
-    if (user.homeTownId) {
-      const home = availableTowns.find((t) => t.id === user.homeTownId);
-      if (home) return home;
-    }
-    return availableTowns[0] || null;
-  }, [activeTownId, availableTowns, user.homeTownId]);
-
-  const [selectedTown, setSelectedTown] = useState<ITown | null>(initialTown);
-  const [hoveredIso, setHoveredIso] = useState<string | null>(null);
-  const [hoveredInfo, setHoveredInfo] = useState<{
-    title: string;
-    subtitle?: string;
-    hasHub?: boolean;
-    x: number;
-    y: number;
-  } | null>(null);
-  const [isEntering, setIsEntering] = useState(false);
-
-  // Map ISO to Town
-  const isoToTown = useMemo(() => {
-    const map: Record<string, ITown> = {};
-    availableTowns.forEach((t) => {
-      const code = t.code.toUpperCase();
-      const iso = TOWN_TO_ISO_MAP[code];
-      if (iso) {
-        map[iso] = t;
-      }
-    });
-    return map;
-  }, [availableTowns]);
-
-  // Selected region ISO
-  const selectedIso = selectedTown
-    ? TOWN_TO_ISO_MAP[selectedTown.code.toUpperCase()] || null
-    : null;
-
-  // Selected region metadata
-  const selectedRegionConfig = selectedIso
-    ? CAMEROON_REGIONS[selectedIso]
-    : null;
-
-  const handleSelectTown = (town: ITown) => {
-    setSelectedTown(town);
-  };
-
-  const handleConfirmAndEnter = async () => {
-    if (!selectedTown) return;
-    setIsEntering(true);
-    try {
-      await setActiveTownId(selectedTown.id);
-      onTownSelected(selectedTown);
-    } finally {
-      setIsEntering(false);
-    }
-  };
+  const {
+    signOut,
+    availableTowns,
+    selectedTown,
+    hoveredIso,
+    setHoveredIso,
+    hoveredInfo,
+    setHoveredInfo,
+    clearHover,
+    isEntering,
+    isoToTown,
+    selectedIso,
+    selectedRegionConfig,
+    townToIsoMap,
+    handleSelectTown,
+    handleConfirmAndEnter,
+    handleContainerMouseMove,
+  } = useRegionSelector({ user, onTownSelected });
 
   return (
     <div
       className="relative flex h-screen w-screen overflow-hidden bg-[#faf8f5] select-none"
-      onMouseMove={(e) => {
-        if (hoveredInfo) {
-          setHoveredInfo((prev) =>
-            prev ? { ...prev, x: e.clientX, y: e.clientY } : null,
-          );
-        }
-      }}
+      onMouseMove={handleContainerMouseMove}
     >
       {/* Background Subtle Grid Texture */}
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(#e8e1dd_1px,transparent_1px)] [background-size:28px_28px] opacity-40" />
@@ -239,10 +180,7 @@ export const RegionSelectorScreen: React.FC<RegionSelectorScreenProps> = ({
                             : null,
                         );
                       }}
-                      onMouseLeave={() => {
-                        setHoveredIso(null);
-                        setHoveredInfo(null);
-                      }}
+                      onMouseLeave={clearHover}
                       onClick={() => {
                         if (hasTown) {
                           handleSelectTown(isoToTown[iso]);
@@ -262,7 +200,7 @@ export const RegionSelectorScreen: React.FC<RegionSelectorScreenProps> = ({
 
             {/* Town Pins / Interactive Markers */}
             {availableTowns.map((town) => {
-              const iso = TOWN_TO_ISO_MAP[town.code.toUpperCase()];
+              const iso = townToIsoMap[town.code.toUpperCase()];
               const config = iso ? CAMEROON_REGIONS[iso] : null;
               if (!config) return null;
 
@@ -296,7 +234,7 @@ export const RegionSelectorScreen: React.FC<RegionSelectorScreenProps> = ({
                           : null,
                       );
                     }}
-                    onMouseLeave={() => setHoveredInfo(null)}
+                    onMouseLeave={clearHover}
                   >
                     {/* Outer pulsing ring */}
                     <circle

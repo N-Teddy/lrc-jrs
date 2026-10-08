@@ -1,4 +1,3 @@
-import { useResetPasswordMutation } from '@jrs/client-core';
 import {
   ArrowLeft,
   ArrowRight,
@@ -13,11 +12,8 @@ import {
   XCircle,
 } from '@phosphor-icons/react';
 import type React from 'react';
-import { useEffect, useState } from 'react';
-import {
-  PasswordRequirements,
-  validatePasswordRules,
-} from './PasswordRequirements';
+import { useResetPassword } from '../hooks/use-reset-password';
+import { PasswordRequirements } from './PasswordRequirements';
 
 interface ResetPasswordScreenProps {
   resetToken: string;
@@ -32,68 +28,25 @@ export const ResetPasswordScreen: React.FC<ResetPasswordScreenProps> = ({
   onBackToSignIn,
   onPasswordResetComplete,
 }) => {
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [isSuccess, setIsSuccess] = useState(false);
-
-  // 15-minute countdown timer
-  const [secondsRemaining, setSecondsRemaining] = useState(15 * 60);
-  const isTimerExpired = secondsRemaining <= 0;
-
-  useEffect(() => {
-    if (secondsRemaining <= 0) return;
-    const interval = setInterval(() => {
-      setSecondsRemaining((prev) => (prev > 0 ? prev - 1 : 0));
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [secondsRemaining]);
-
-  const formatTimer = (totalSec: number) => {
-    const mins = Math.floor(totalSec / 60);
-    const secs = totalSec % 60;
-    return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-  };
-
-  const resetMutation = useResetPasswordMutation();
-
-  const rules = validatePasswordRules(newPassword);
-  const allRulesPassed = rules.every((r) => r.met);
-  const passwordsMatch =
-    newPassword.length > 0 && newPassword === confirmPassword;
-  const isSubmitDisabled =
-    !allRulesPassed ||
-    !passwordsMatch ||
-    resetMutation.isPending ||
-    isTimerExpired;
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (isSubmitDisabled) return;
-
-    setErrorMessage(null);
-
-    try {
-      await resetMutation.mutateAsync({
-        resetToken,
-        newPassword,
-      });
-
-      setIsSuccess(true);
-    } catch (err: any) {
-      const serverMsg =
-        err?.response?.data?.message ||
-        err?.message ||
-        'Failed to reset password. The reset session may have expired.';
-      setErrorMessage(
-        typeof serverMsg === 'string'
-          ? serverMsg
-          : 'Could not reset password. Please request a new verification code.',
-      );
-    }
-  };
+  const {
+    newPassword,
+    setNewPassword,
+    confirmPassword,
+    setConfirmPassword,
+    showPassword,
+    toggleShowPassword,
+    showConfirmPassword,
+    toggleShowConfirmPassword,
+    errorMessage,
+    isSuccess,
+    formattedTime,
+    isTimerExpired,
+    rules,
+    passwordsMatch,
+    isSubmitDisabled,
+    isPending,
+    handleSubmit,
+  } = useResetPassword({ resetToken });
 
   return (
     <div className="flex min-h-screen w-full items-center justify-center bg-[#fff8f5] p-4 sm:p-6 lg:p-8">
@@ -111,8 +64,8 @@ export const ResetPasswordScreen: React.FC<ResetPasswordScreenProps> = ({
             </button>
             <div
               className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${
-                secondsRemaining < 120
-                  ? 'bg-[#ffdad4] text-[#881f14]'
+                isTimerExpired
+                  ? 'bg-[#ffdad6] text-[#93000a]'
                   : 'bg-[#faf2ee] text-[#57423b]'
               }`}
             >
@@ -120,7 +73,7 @@ export const ResetPasswordScreen: React.FC<ResetPasswordScreenProps> = ({
               <span>
                 {isTimerExpired
                   ? 'Token Expired'
-                  : `${formatTimer(secondsRemaining)} remaining`}
+                  : `${formattedTime} remaining`}
               </span>
             </div>
           </div>
@@ -212,7 +165,7 @@ export const ResetPasswordScreen: React.FC<ResetPasswordScreenProps> = ({
                     id="reset-new-password"
                     type={showPassword ? 'text' : 'password'}
                     required
-                    disabled={isTimerExpired || resetMutation.isPending}
+                    disabled={isTimerExpired || isPending}
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     placeholder="Minimum 8 characters"
@@ -220,7 +173,7 @@ export const ResetPasswordScreen: React.FC<ResetPasswordScreenProps> = ({
                   />
                   <button
                     type="button"
-                    onClick={() => setShowPassword(!showPassword)}
+                    onClick={toggleShowPassword}
                     className="absolute right-3.5 text-[#8a726a] hover:text-[#1e1b19] transition"
                     tabIndex={-1}
                   >
@@ -257,7 +210,7 @@ export const ResetPasswordScreen: React.FC<ResetPasswordScreenProps> = ({
                     id="reset-confirm-password"
                     type={showConfirmPassword ? 'text' : 'password'}
                     required
-                    disabled={isTimerExpired || resetMutation.isPending}
+                    disabled={isTimerExpired || isPending}
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="Re-enter your new password"
@@ -280,9 +233,7 @@ export const ResetPasswordScreen: React.FC<ResetPasswordScreenProps> = ({
                       ))}
                     <button
                       type="button"
-                      onClick={() =>
-                        setShowConfirmPassword(!showConfirmPassword)
-                      }
+                      onClick={toggleShowConfirmPassword}
                       className="ml-1 text-[#8a726a] hover:text-[#1e1b19] transition"
                       tabIndex={-1}
                     >
@@ -307,7 +258,7 @@ export const ResetPasswordScreen: React.FC<ResetPasswordScreenProps> = ({
                 disabled={isSubmitDisabled}
                 className="w-full h-12 rounded-xl bg-[#b85028] text-white text-sm font-semibold shadow-sm hover:bg-[#983912] active:scale-[0.99] transition flex items-center justify-center gap-2 disabled:cursor-not-allowed disabled:opacity-50 mt-2"
               >
-                {resetMutation.isPending ? (
+                {isPending ? (
                   <>
                     <CircleNotch size={18} className="animate-spin" />
                     <span>Updating Password...</span>

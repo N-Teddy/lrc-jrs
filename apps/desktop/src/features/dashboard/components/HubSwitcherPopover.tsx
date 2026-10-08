@@ -1,4 +1,3 @@
-import { useTownContext } from '@jrs/client-core';
 import {
   CaretRight,
   Check,
@@ -9,8 +8,7 @@ import {
   X,
 } from '@phosphor-icons/react';
 import type React from 'react';
-import { useCallback, useMemo, useState } from 'react';
-import { CAMEROON_REGIONS } from '../../towns/config/cameroon-map.config';
+import { useHubSwitcher } from '../hooks/use-hub-switcher';
 
 interface HubSwitcherPopoverProps {
   isOpen: boolean;
@@ -25,28 +23,15 @@ export const HubSwitcherPopover: React.FC<HubSwitcherPopoverProps> = ({
   onOpenMapView,
   isSidebarCollapsed = false,
 }) => {
-  const { availableTowns, activeTownId, setActiveTownId } = useTownContext();
-  const [searchQuery, setSearchQuery] = useState('');
-
-  // Map town code to Region display name
-  const getRegionName = useCallback((code: string) => {
-    const upper = code.toUpperCase();
-    const entry = Object.values(CAMEROON_REGIONS).find(
-      (r) => r.townCode === upper,
-    );
-    return entry?.displayNameEn || 'Cameroon Region';
-  }, []);
-
-  const filteredTowns = useMemo(() => {
-    if (!searchQuery.trim()) return availableTowns;
-    const q = searchQuery.toLowerCase();
-    return availableTowns.filter(
-      (t) =>
-        t.name.toLowerCase().includes(q) ||
-        t.code.toLowerCase().includes(q) ||
-        getRegionName(t.code).toLowerCase().includes(q),
-    );
-  }, [availableTowns, searchQuery, getRegionName]);
+  const {
+    availableTowns,
+    activeTownId,
+    searchQuery,
+    setSearchQuery,
+    filteredTowns,
+    getRegionName,
+    selectTown,
+  } = useHubSwitcher();
 
   if (!isOpen) return null;
 
@@ -122,7 +107,7 @@ export const HubSwitcherPopover: React.FC<HubSwitcherPopoverProps> = ({
               <div
                 key={town.id}
                 onClick={async () => {
-                  await setActiveTownId(town.id);
+                  await selectTown(town.id);
                   onClose();
                 }}
                 className={`group flex items-center justify-between p-2 rounded-lg cursor-pointer transition ${

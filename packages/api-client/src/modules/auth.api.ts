@@ -18,10 +18,18 @@ export class AuthApi {
     });
   }
 
-  public completeSetup(newPassword: string): Promise<ILoginResponse> {
-    return this.http.post<ILoginResponse>('/auth/complete-setup', {
-      newPassword,
-    });
+  public completeSetup(
+    newPassword: string,
+    setupToken?: string,
+  ): Promise<ILoginResponse> {
+    const headers = setupToken
+      ? { Authorization: `Bearer ${setupToken}` }
+      : undefined;
+    return this.http.post<ILoginResponse>(
+      '/auth/complete-setup',
+      { newPassword },
+      { headers },
+    );
   }
 
   public refresh(refreshToken: string): Promise<IRefreshTokenResponse> {

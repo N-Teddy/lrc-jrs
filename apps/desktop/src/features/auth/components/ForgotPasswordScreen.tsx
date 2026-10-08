@@ -1,4 +1,3 @@
-import { useForgotPasswordMutation } from '@jrs/client-core';
 import {
   ArrowLeft,
   ArrowRight,
@@ -12,7 +11,7 @@ import {
   WarningCircle,
 } from '@phosphor-icons/react';
 import type React from 'react';
-import { useState } from 'react';
+import { useForgotPassword } from '../hooks/use-forgot-password';
 
 interface ForgotPasswordScreenProps {
   initialIdentifier?: string;
@@ -28,63 +27,18 @@ export const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({
   onBackToSignIn,
   onCodeSent,
 }) => {
-  const [identifier, setIdentifier] = useState(initialIdentifier);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
-  const forgotPasswordMutation = useForgotPasswordMutation();
-
-  // Dynamic icon detection
-  const isEmailInput = identifier.includes('@');
-  const isPhoneInput =
-    !isEmailInput &&
-    (identifier.startsWith('+') ||
-      /^\d+$/.test(identifier.replace(/\s+/g, '')));
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const cleanId = identifier.trim();
-    if (!cleanId) {
-      setErrorMessage(
-        'Please enter your registered phone number or email address.',
-      );
-      return;
-    }
-
-    const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanId);
-    const isPhone = /^[0-9+\-\s]{8,15}$/.test(cleanId);
-
-    if (!isEmail && !isPhone) {
-      setErrorMessage(
-        'Please enter a valid phone number (e.g. 693087159) or email address.',
-      );
-      return;
-    }
-
-    setErrorMessage(null);
-
-    const determinedChannel: 'email' | 'whatsapp' = cleanId.includes('@')
-      ? 'email'
-      : 'whatsapp';
-
-    try {
-      await forgotPasswordMutation.mutateAsync({
-        identifier: cleanId,
-        channel: determinedChannel,
-      });
-
-      // Instantly transition to OTP screen without delay or temporary banner
-      onCodeSent(cleanId, determinedChannel);
-    } catch (err: any) {
-      // For anti-enumeration reasons or network, handle gracefully
-      const serverMsg =
-        err?.response?.data?.message ||
-        err?.message ||
-        'Unable to request reset code. Please try again.';
-      setErrorMessage(
-        typeof serverMsg === 'string' ? serverMsg : 'Request failed.',
-      );
-    }
-  };
+  const {
+    identifier,
+    isEmailInput,
+    isPhoneInput,
+    errorMessage,
+    isPending,
+    handleIdentifierChange,
+    handleSubmit,
+  } = useForgotPassword({
+    initialIdentifier,
+    onCodeSent,
+  });
 
   return (
     <div className="flex min-h-screen w-full items-center justify-center bg-[#fff8f5] p-4 sm:p-6 lg:p-8">
@@ -162,10 +116,7 @@ export const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({
                   type="text"
                   autoComplete="username"
                   value={identifier}
-                  onChange={(e) => {
-                    setIdentifier(e.target.value);
-                    if (errorMessage) setErrorMessage(null);
-                  }}
+                  onChange={(e) => handleIdentifierChange(e.target.value)}
                   placeholder="e.g. 693087159 or name@example.com"
                   className="w-full h-12 pl-11 pr-4 bg-[#faf2ee] text-[#1e1b19] placeholder-[#8a726a] rounded-xl text-sm transition-all outline-none focus:bg-white focus:ring-2 focus:ring-[#b85028]/20 focus:border-[#b85028] border border-[#e8e1dd]"
                 />
@@ -178,10 +129,10 @@ export const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({
             {/* Submit CTA */}
             <button
               type="submit"
-              disabled={forgotPasswordMutation.isPending || !identifier.trim()}
+              disabled={isPending || !identifier.trim()}
               className="w-full h-12 bg-[#b85028] text-white text-sm font-semibold rounded-xl flex items-center justify-center gap-2 transition hover:bg-[#983912] active:scale-[0.99] shadow-sm disabled:cursor-not-allowed disabled:opacity-50 mt-2"
             >
-              {forgotPasswordMutation.isPending ? (
+              {isPending ? (
                 <>
                   <CircleNotch size={20} className="animate-spin" />
                   <span>Sending Verification Code...</span>

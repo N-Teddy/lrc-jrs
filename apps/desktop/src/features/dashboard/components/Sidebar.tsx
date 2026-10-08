@@ -11,14 +11,10 @@ import {
   Users,
 } from '@phosphor-icons/react';
 import type React from 'react';
+import type { DashboardTabId } from '../hooks/use-dashboard-layout';
+import { getUserInitials } from '../utils/dashboard.utils';
 
-export type DashboardTabId =
-  | 'dashboard'
-  | 'members'
-  | 'activities'
-  | 'transfers'
-  | 'access'
-  | 'reports';
+export type { DashboardTabId };
 
 interface SidebarProps {
   isCollapsed: boolean;
@@ -38,7 +34,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const { user, signOut } = useAuth();
   const { activeTown } = useTownContext();
 
-  // Navigation Items
   const navItems: {
     id: DashboardTabId;
     label: string;
@@ -79,21 +74,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
     },
   ];
 
-  // Filter items based on user role
+  // Filter items based on user role (AP and PC have administrative rights)
   const isPrivileged = user?.role === 'AP' || user?.role === 'PC';
   const visibleNavItems = navItems.filter(
     (item) => !item.requiresAdmin || isPrivileged,
   );
 
-  // Compute initials for avatar
-  const initials = user?.fullName
-    ? user.fullName
-        .split(' ')
-        .map((n) => n[0])
-        .slice(0, 2)
-        .join('')
-        .toUpperCase()
-    : 'JR';
+  const initials = getUserInitials(user?.fullName);
 
   return (
     <aside
