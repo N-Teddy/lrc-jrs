@@ -17,17 +17,24 @@ export interface IUserAccount {
   invitedAt?: string;
 }
 
+export type Gender = 'MALE' | 'FEMALE';
+
 export interface IUser {
   id: string;
   fullName: string;
   phoneNumber: string;
   email?: string;
+  avatarUrl?: string;
+  gender?: Gender;
   dateOfBirth: string;
   isJr: boolean;
   homeTownId: string;
   homeTown?: ITown;
   role: UserRole;
   isActivePC: boolean;
+  isWhatsappVerified?: boolean;
+  isTemporaryPassword?: boolean;
+  integrationDate?: string;
   account: IUserAccount;
   transferHistory: ITownTransfer[];
   createdAt?: string;
@@ -84,6 +91,8 @@ export interface ICreateMemberDto {
   fullName: string;
   phoneNumber: string;
   email?: string;
+  avatarUrl?: string;
+  gender?: Gender;
   dateOfBirth: string;
   role?: UserRole;
   homeTownId?: string;
@@ -94,6 +103,8 @@ export interface IUpdateMemberDto {
   fullName?: string;
   phoneNumber?: string;
   email?: string;
+  avatarUrl?: string;
+  gender?: Gender;
   dateOfBirth?: string;
   role?: UserRole;
   isActivePC?: boolean;
@@ -105,6 +116,7 @@ export interface IUpdateMemberAccessDto {
   hasAppAccess?: boolean;
   isAccessRevoked?: boolean;
   resendInvite?: boolean;
+  channel?: 'email' | 'whatsapp';
 }
 
 export interface IMemberQueryDto {
@@ -113,7 +125,6 @@ export interface IMemberQueryDto {
   search?: string;
   townId?: string;
   role?: UserRole;
-  status?: string;
   isJr?: boolean;
 }
 

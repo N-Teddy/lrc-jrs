@@ -75,6 +75,12 @@ export class User extends BaseDocument {
   })
   email?: string;
 
+  @Prop({ trim: true })
+  avatarUrl?: string;
+
+  @Prop({ type: String, enum: ['MALE', 'FEMALE'], required: false })
+  gender?: 'MALE' | 'FEMALE';
+
   @Prop()
   passwordHash?: string;
 

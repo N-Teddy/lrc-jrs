@@ -72,6 +72,18 @@ export class ActivitiesController {
     );
   }
 
+  @Get('member/:memberId/history')
+  @ApiOperation({
+    summary: 'Get attendance history and engagement summary for a member',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Member attendance history and engagement summary',
+  })
+  async getMemberAttendanceHistory(@Param('memberId') memberId: string) {
+    return this.activitiesService.getMemberAttendanceHistory(memberId);
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Get single activity details' })
   @ApiResponse({ status: 200, description: 'Activity details' })

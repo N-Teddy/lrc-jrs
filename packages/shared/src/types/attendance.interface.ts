@@ -57,3 +57,49 @@ export interface IRecordAttendanceDto {
   activityId: string;
   attendees: IRecordAttendanceItemDto[];
 }
+
+export type MemberEngagementLevel =
+  | 'COMMITTED'
+  | 'OCCASIONAL'
+  | 'IRREGULAR'
+  | 'NEEDS_FOLLOW_UP'
+  | 'NEW';
+
+export interface IMemberVisitedHub {
+  townId: string;
+  townName: string;
+  townCode: string;
+  visitCount: number;
+}
+
+export interface IMemberAttendanceHistoryItem {
+  id: string;
+  activityId: string;
+  activityTitle: string;
+  activityType: string;
+  startDate: string;
+  endDate: string;
+  venue?: string;
+  townId: string;
+  townName: string;
+  townCode: string;
+  isExternal: boolean;
+  status: AttendanceStatus;
+  checkInTime?: string;
+}
+
+export interface IMemberAttendanceHistoryResponse {
+  memberId: string;
+  totalAttended: number;
+  totalExcused: number;
+  totalAbsent: number;
+  hubActivitiesCount: number;
+  hubAttendanceRate: number;
+  externalVisitsCount: number;
+  consecutiveAttended: number;
+  consecutiveMissed: number;
+  engagementLevel: MemberEngagementLevel;
+  recentTurnoutRatio: string;
+  visitedHubs: IMemberVisitedHub[];
+  items: IMemberAttendanceHistoryItem[];
+}

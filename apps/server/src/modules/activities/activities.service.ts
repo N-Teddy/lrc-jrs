@@ -9,7 +9,10 @@ import {
   type IAttendance,
   type IAttendanceItem,
   type IAuthUser,
+  type IMemberAttendanceHistoryItem,
+  type IMemberAttendanceHistoryResponse,
   type IPaginatedActivitiesResponse,
+  type MemberEngagementLevel,
   UserRole,
 } from '@jrs/shared';
 import {
@@ -838,5 +841,210 @@ export class ActivitiesService {
     await activity.save();
 
     return { success: true };
+  }
+
+  /**
+   * Retrieve member attendance history and gathering-based engagement analytics
+   */
+  async getMemberAttendanceHistory(
+    memberId: string,
+  ): Promise<IMemberAttendanceHistoryResponse> {
+    if (!Types.ObjectId.isValid(memberId)) {
+      throw new BadRequestException('Invalid member ID');
+    }
+
+    const memberObjectId = new Types.ObjectId(memberId);
+    const member = await this._userModel
+      .findById(memberObjectId)
+      .populate('homeTownId', 'name code')
+      .exec();
+
+    if (!member) {
+      throw new NotFoundException(`Member with ID ${memberId} not found`);
+    }
+
+    const memberHomeTownId =
+      (member.homeTownId as any)?._id?.toString() ||
+      member.homeTownId?.toString() ||
+      '';
+
+    // 1. Find all attendance docs containing this member
+    const attendanceDocs = await this.attendanceModel
+      .find({ 'attendees.memberId': memberObjectId })
+      .populate({
+        path: 'activityId',
+        match: { isDeleted: false },
+        populate: [
+          { path: 'townId', select: 'name code' },
+          { path: 'hostTownId', select: 'name code' },
+        ],
+      })
+      .exec();
+
+    const items: IMemberAttendanceHistoryItem[] = [];
+    const visitedHubsMap = new Map<
+      string,
+      { townId: string; townName: string; townCode: string; visitCount: number }
+    >();
+
+    let totalAttended = 0;
+    let totalExcused = 0;
+    let totalAbsent = 0;
+    let externalVisitsCount = 0;
+    let hubAttendedCount = 0;
+
+    for (const doc of attendanceDocs) {
+      const activity = doc.activityId as any;
+      if (!activity) continue;
+
+      const attendee = doc.attendees.find(
+        (a) => a.memberId?.toString() === memberId,
+      );
+      if (!attendee) continue;
+
+      const activityTownId =
+        activity.townId?._id?.toString() || activity.townId?.toString() || '';
+      const isExternal = Boolean(
+        activityTownId &&
+          memberHomeTownId &&
+          activityTownId !== memberHomeTownId,
+      );
+
+      if (attendee.status === AttendanceStatus.PRESENT) {
+        totalAttended++;
+        if (isExternal) {
+          externalVisitsCount++;
+          const hubKey = activityTownId;
+          const existingHub = visitedHubsMap.get(hubKey);
+          if (existingHub) {
+            existingHub.visitCount++;
+          } else {
+            visitedHubsMap.set(hubKey, {
+              townId: activityTownId,
+              townName: activity.townId?.name || 'External Hub',
+              townCode: activity.townId?.code || 'EXT',
+              visitCount: 1,
+            });
+          }
+        } else {
+          hubAttendedCount++;
+        }
+      } else if (attendee.status === AttendanceStatus.EXCUSED) {
+        totalExcused++;
+      } else if (attendee.status === AttendanceStatus.ABSENT) {
+        totalAbsent++;
+      }
+
+      items.push({
+        id: (doc as any)._id?.toString() || '',
+        activityId: activity._id.toString(),
+        activityTitle: activity.title,
+        activityType: activity.activityType,
+        startDate: activity.startDate.toISOString(),
+        endDate: activity.endDate.toISOString(),
+        venue: activity.venue,
+        townId: activityTownId,
+        townName: activity.townId?.name || '',
+        townCode: activity.townId?.code || '',
+        isExternal,
+        status: attendee.status,
+        checkInTime: attendee.checkInTime
+          ? attendee.checkInTime.toISOString()
+          : undefined,
+      });
+    }
+
+    // Sort items by startDate descending (newest first)
+    items.sort(
+      (a, b) =>
+        new Date(b.startDate).getTime() - new Date(a.startDate).getTime(),
+    );
+
+    // 2. Count total activities held in member's home town up to now
+    const hubActivitiesCount = memberHomeTownId
+      ? await this.activityModel
+          .countDocuments({
+            townId: new Types.ObjectId(memberHomeTownId),
+            isDeleted: false,
+            startDate: { $lte: new Date() },
+          })
+          .exec()
+      : 0;
+
+    const hubAttendanceRate =
+      hubActivitiesCount > 0
+        ? Math.min(
+            100,
+            Math.round((hubAttendedCount / hubActivitiesCount) * 100),
+          )
+        : totalAttended > 0
+          ? 100
+          : 0;
+
+    // 3. Gathering-based streaks and engagement classification
+    let consecutiveAttended = 0;
+    let consecutiveMissed = 0;
+
+    for (const item of items) {
+      if (item.status === AttendanceStatus.PRESENT) {
+        if (consecutiveMissed === 0) {
+          consecutiveAttended++;
+        } else {
+          break;
+        }
+      } else if (item.status === AttendanceStatus.ABSENT) {
+        if (consecutiveAttended === 0) {
+          consecutiveMissed++;
+        } else {
+          break;
+        }
+      }
+    }
+
+    // Calculate recent turnout ratio from last 5 gatherings
+    const recentSample = items.slice(0, 5);
+    const recentPresentCount = recentSample.filter(
+      (it) => it.status === AttendanceStatus.PRESENT,
+    ).length;
+    const recentTotalCount = recentSample.length;
+    const recentTurnoutRatio =
+      recentTotalCount > 0
+        ? `${recentPresentCount}/${recentTotalCount}`
+        : '0/0';
+
+    let engagementLevel: MemberEngagementLevel = 'NEW';
+    if (items.length === 0) {
+      engagementLevel = 'NEW';
+    } else if (consecutiveMissed >= 2) {
+      engagementLevel = 'NEEDS_FOLLOW_UP';
+    } else {
+      const recentRate =
+        recentTotalCount > 0
+          ? (recentPresentCount / recentTotalCount) * 100
+          : 0;
+      if (recentRate >= 70) {
+        engagementLevel = 'COMMITTED';
+      } else if (recentRate >= 40) {
+        engagementLevel = 'OCCASIONAL';
+      } else {
+        engagementLevel = 'IRREGULAR';
+      }
+    }
+
+    return {
+      memberId,
+      totalAttended,
+      totalExcused,
+      totalAbsent,
+      hubActivitiesCount,
+      hubAttendanceRate,
+      externalVisitsCount,
+      consecutiveAttended,
+      consecutiveMissed,
+      engagementLevel,
+      recentTurnoutRatio,
+      visitedHubs: Array.from(visitedHubsMap.values()),
+      items,
+    };
   }
 }
