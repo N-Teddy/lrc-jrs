@@ -64,7 +64,7 @@ const ACTIVITY_TEMPLATES: {
   },
   {
     type: ActivityType.CONFERENCE,
-    titleGenerator: (month, town, year) =>
+    titleGenerator: (_month, town, year) =>
       `Conférence Annuelle de la Jeunesse ${year} (${town})`,
     durationHours: 8,
   },

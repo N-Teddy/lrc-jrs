@@ -15,7 +15,6 @@ import {
 import {
   BadRequestException,
   Injectable,
-  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
@@ -39,8 +38,6 @@ import type {
 
 @Injectable()
 export class ActivitiesService {
-  private readonly logger = new Logger(ActivitiesService.name);
-
   constructor(
     @InjectModel(Activity.name)
     private readonly activityModel: Model<ActivityDocument>,
@@ -48,8 +45,7 @@ export class ActivitiesService {
     private readonly attendanceModel: Model<AttendanceDocument>,
     @InjectModel(Town.name)
     private readonly townModel: Model<TownDocument>,
-    @InjectModel(User.name)
-    private readonly userModel: Model<UserDocument>,
+    @InjectModel(User.name) readonly _userModel: Model<UserDocument>,
   ) {}
 
   /**
@@ -637,9 +633,9 @@ export class ActivitiesService {
 
     // Process items
     const processedAttendees: any[] = [];
-    let membersPresent = 0;
-    let guestsPresent = 0;
-    let totalExcused = 0;
+    let _membersPresent = 0;
+    let _guestsPresent = 0;
+    let _totalExcused = 0;
 
     for (const item of dto.attendees) {
       if (item.attendeeType === AttendeeType.MEMBER) {
@@ -648,8 +644,8 @@ export class ActivitiesService {
             'Member ID is required and must be valid for member attendee',
           );
         }
-        if (item.status === AttendanceStatus.PRESENT) membersPresent++;
-        else if (item.status === AttendanceStatus.EXCUSED) totalExcused++;
+        if (item.status === AttendanceStatus.PRESENT) _membersPresent++;
+        else if (item.status === AttendanceStatus.EXCUSED) _totalExcused++;
 
         processedAttendees.push({
           attendeeType: AttendeeType.MEMBER,
@@ -665,7 +661,7 @@ export class ActivitiesService {
             'Guest full name is required for guest attendee',
           );
         }
-        if (item.status === AttendanceStatus.PRESENT) guestsPresent++;
+        if (item.status === AttendanceStatus.PRESENT) _guestsPresent++;
 
         processedAttendees.push({
           attendeeType: AttendeeType.GUEST,
