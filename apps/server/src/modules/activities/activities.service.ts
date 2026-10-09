@@ -55,17 +55,21 @@ export class ActivitiesService {
    * Helper to resolve town identifier (ObjectId string or town code like "DLA")
    */
   async resolveTownObjectId(
-    identifier?: string,
+    identifier?: unknown,
   ): Promise<Types.ObjectId | null> {
     if (!identifier) return null;
-    const trimmed = identifier.trim();
+    if (identifier instanceof Types.ObjectId) {
+      return identifier;
+    }
+    const str = String(identifier).trim();
+    if (!str) return null;
 
-    if (Types.ObjectId.isValid(trimmed) && trimmed.length === 24) {
-      return new Types.ObjectId(trimmed);
+    if (Types.ObjectId.isValid(str) && str.length === 24) {
+      return new Types.ObjectId(str);
     }
 
     const town = await this.townModel
-      .findOne({ code: trimmed.toUpperCase() })
+      .findOne({ code: str.toUpperCase() })
       .exec();
     return town ? (town._id as Types.ObjectId) : null;
   }
@@ -170,14 +174,17 @@ export class ActivitiesService {
 
     const filter: Record<string, any> = { isDeleted: false };
 
-    // Resolve town scoping
+    // Resolve town scoping: if a specific town is requested via header or query, prioritize it
     let effectiveTownId: Types.ObjectId | null = null;
-    if (currentUser && currentUser.role !== UserRole.AP) {
+    const requestedTown = xTownId || query.townId;
+    if (requestedTown) {
+      effectiveTownId = await this.resolveTownObjectId(requestedTown);
+    } else if (
+      currentUser &&
+      currentUser.role !== UserRole.AP &&
+      currentUser.homeTownId
+    ) {
       effectiveTownId = await this.resolveTownObjectId(currentUser.homeTownId);
-    } else if (xTownId) {
-      effectiveTownId = await this.resolveTownObjectId(xTownId);
-    } else if (query.townId) {
-      effectiveTownId = await this.resolveTownObjectId(query.townId);
     }
 
     if (effectiveTownId) {
@@ -195,18 +202,22 @@ export class ActivitiesService {
       if (hostTownObjId) filter.hostTownId = hostTownObjId;
     }
 
-    // Date range filtering (Year >= 2026)
+    // Date range filtering
     if (query.year) {
-      const targetYear = Math.max(2026, Number(query.year));
-      if (query.month) {
-        const targetMonth = Math.min(12, Math.max(1, Number(query.month)));
-        const startOfMonth = new Date(Date.UTC(targetYear, targetMonth - 1, 1));
-        const endOfMonth = new Date(Date.UTC(targetYear, targetMonth, 1));
-        filter.startDate = { $gte: startOfMonth, $lt: endOfMonth };
-      } else {
-        const startOfYear = new Date(Date.UTC(targetYear, 0, 1));
-        const endOfYear = new Date(Date.UTC(targetYear + 1, 0, 1));
-        filter.startDate = { $gte: startOfYear, $lt: endOfYear };
+      const targetYear = Number(query.year);
+      if (!isNaN(targetYear) && targetYear > 2000) {
+        if (query.month) {
+          const targetMonth = Math.min(12, Math.max(1, Number(query.month)));
+          const startOfMonth = new Date(
+            Date.UTC(targetYear, targetMonth - 1, 1),
+          );
+          const endOfMonth = new Date(Date.UTC(targetYear, targetMonth, 1));
+          filter.startDate = { $gte: startOfMonth, $lt: endOfMonth };
+        } else {
+          const startOfYear = new Date(Date.UTC(targetYear, 0, 1));
+          const endOfYear = new Date(Date.UTC(targetYear + 1, 0, 1));
+          filter.startDate = { $gte: startOfYear, $lt: endOfYear };
+        }
       }
     }
 
@@ -293,12 +304,15 @@ export class ActivitiesService {
     const filter: Record<string, any> = { isDeleted: false };
 
     let effectiveTownId: Types.ObjectId | null = null;
-    if (currentUser && currentUser.role !== UserRole.AP) {
+    const requestedTown = xTownId || townId;
+    if (requestedTown) {
+      effectiveTownId = await this.resolveTownObjectId(requestedTown);
+    } else if (
+      currentUser &&
+      currentUser.role !== UserRole.AP &&
+      currentUser.homeTownId
+    ) {
       effectiveTownId = await this.resolveTownObjectId(currentUser.homeTownId);
-    } else if (xTownId) {
-      effectiveTownId = await this.resolveTownObjectId(xTownId);
-    } else if (townId) {
-      effectiveTownId = await this.resolveTownObjectId(townId);
     }
 
     if (effectiveTownId) {
@@ -309,16 +323,20 @@ export class ActivitiesService {
     }
 
     if (year) {
-      const targetYear = Math.max(2026, Number(year));
-      if (month) {
-        const targetMonth = Math.min(12, Math.max(1, Number(month)));
-        const startOfMonth = new Date(Date.UTC(targetYear, targetMonth - 1, 1));
-        const endOfMonth = new Date(Date.UTC(targetYear, targetMonth, 1));
-        filter.startDate = { $gte: startOfMonth, $lt: endOfMonth };
-      } else {
-        const startOfYear = new Date(Date.UTC(targetYear, 0, 1));
-        const endOfYear = new Date(Date.UTC(targetYear + 1, 0, 1));
-        filter.startDate = { $gte: startOfYear, $lt: endOfYear };
+      const targetYear = Number(year);
+      if (!isNaN(targetYear) && targetYear > 2000) {
+        if (month) {
+          const targetMonth = Math.min(12, Math.max(1, Number(month)));
+          const startOfMonth = new Date(
+            Date.UTC(targetYear, targetMonth - 1, 1),
+          );
+          const endOfMonth = new Date(Date.UTC(targetYear, targetMonth, 1));
+          filter.startDate = { $gte: startOfMonth, $lt: endOfMonth };
+        } else {
+          const startOfYear = new Date(Date.UTC(targetYear, 0, 1));
+          const endOfYear = new Date(Date.UTC(targetYear + 1, 0, 1));
+          filter.startDate = { $gte: startOfYear, $lt: endOfYear };
+        }
       }
     }
 

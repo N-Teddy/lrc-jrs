@@ -33,14 +33,14 @@ export class ActivityQueryDto {
   hostTownId?: string;
 
   @ApiPropertyOptional({
-    description: 'Filter by scheduled year (starting from 2026)',
-    minimum: 2026,
+    description: 'Filter by scheduled year',
+    minimum: 2000,
     example: 2026,
   })
   @IsOptional()
   @Type(() => Number)
   @IsInt()
-  @Min(2026)
+  @Min(2000)
   year?: number;
 
   @ApiPropertyOptional({

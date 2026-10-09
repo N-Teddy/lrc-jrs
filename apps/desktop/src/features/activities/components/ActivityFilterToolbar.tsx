@@ -46,6 +46,7 @@ const PERIOD_OPTIONS: SelectOption[] = [
   { value: '2026-11', label: 'November 2026' },
   { value: '2026-12', label: 'December 2026' },
   { value: '2025-all', label: 'Cycle 2025 (Archive)' },
+  { value: '2024-all', label: 'Cycle 2024 (Archive)' },
 ];
 
 export const ActivityFilterToolbar: React.FC<ActivityFilterToolbarProps> = ({
