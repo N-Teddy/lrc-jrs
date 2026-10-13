@@ -411,6 +411,10 @@ export class UsersService {
       isTemporaryPassword = true;
     }
 
+    // Check WhatsApp existence
+    const isWhatsappVerified =
+      await this.whatsAppService.checkContact(sanitizedPhone);
+
     const createdUser = new this.userModel({
       fullName: dto.fullName.trim(),
       phoneNumber: sanitizedPhone,
@@ -424,6 +428,9 @@ export class UsersService {
       role: assignedRole,
       isActivePC: isPC,
       homeTownId: townObjectId,
+      gender: dto.gender,
+      integrationDate: dto.integrationDate,
+      isWhatsappVerified,
       account: {
         status: hasAppAccess
           ? AccountStatus.MUST_CHANGE_PASSWORD
@@ -576,7 +583,27 @@ export class UsersService {
     }
 
     if (dto.hasAppAccess !== undefined) {
+      const wasAppAccess = user.account.hasAppAccess;
       user.account.hasAppAccess = dto.hasAppAccess;
+
+      if (dto.hasAppAccess && !wasAppAccess) {
+        // Invite to app
+        const tempPassword = PasswordGeneratorUtil.generateTemporaryPassword();
+        const hash = await bcrypt.hash(tempPassword, 10);
+        user.passwordHash = hash;
+        user.tempPasswordHash = hash;
+        user.tempPasswordExpiresAt = new Date(Date.now() + 48 * 60 * 60 * 1000);
+        user.isTemporaryPassword = true;
+        user.account.isAccessRevoked = false;
+        user.account.status = AccountStatus.MUST_CHANGE_PASSWORD;
+
+        this.dispatchCredentials(
+          user.fullName,
+          user.phoneNumber,
+          user.email,
+          tempPassword,
+        );
+      }
     }
 
     if (dto.isAccessRevoked !== undefined) {
@@ -590,6 +617,11 @@ export class UsersService {
 
     // Resend invite / generate fresh temporary password
     if (dto.resendInvite) {
+      if (!user.isTemporaryPassword) {
+        throw new BadRequestException(
+          'Cannot resend temporary password, user has already passed setup phase.',
+        );
+      }
       const tempPassword = PasswordGeneratorUtil.generateTemporaryPassword();
       const hash = await bcrypt.hash(tempPassword, 10);
       user.passwordHash = hash;

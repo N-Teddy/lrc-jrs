@@ -67,4 +67,21 @@ export class CreateMemberDto {
   @IsOptional()
   @IsBoolean()
   hasAppAccess?: boolean;
+
+  @ApiPropertyOptional({
+    example: 'MALE',
+    enum: ['MALE', 'FEMALE'],
+    description: 'Gender of the member',
+  })
+  @IsOptional()
+  @IsEnum(['MALE', 'FEMALE'])
+  gender?: 'MALE' | 'FEMALE';
+
+  @ApiPropertyOptional({
+    example: '09-2026',
+    description: 'Integration date in MM-YYYY format',
+  })
+  @IsOptional()
+  @IsString()
+  integrationDate?: string;
 }

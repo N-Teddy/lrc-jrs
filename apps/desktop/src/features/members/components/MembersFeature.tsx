@@ -38,11 +38,11 @@ export const MembersFeature: React.FC = () => {
   // Filter & View State
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
-  const [statusFilter, setStatusFilter] = useState('all');
+
   const [isJrOnly, setIsJrOnly] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('table');
   const [page, setPage] = useState(1);
-  const limit = 12;
+  const limit = 10;
 
   // Modals State
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
@@ -58,7 +58,7 @@ export const MembersFeature: React.FC = () => {
   const queryParams = {
     townId: activeTownId || undefined,
     role: roleFilter !== 'all' ? (roleFilter as UserRole) : undefined,
-    status: statusFilter !== 'all' ? statusFilter : undefined,
+
     isJr: isJrOnly ? true : undefined,
     search: search.trim() ? search.trim() : undefined,
     page,
@@ -151,9 +151,6 @@ export const MembersFeature: React.FC = () => {
                 ? `${activeTown.name} (${activeTown.code})`
                 : 'Active Hub'}
             </span>
-            <span className="text-xs text-[#8a726a]">
-              · Diocesan Canonical Register
-            </span>
           </div>
           <h1 className="text-2xl font-extrabold text-[#1e1b19] tracking-tight">
             {t('members:title')}
@@ -178,11 +175,6 @@ export const MembersFeature: React.FC = () => {
         roleFilter={roleFilter}
         onRoleFilterChange={(role) => {
           setRoleFilter(role);
-          setPage(1);
-        }}
-        statusFilter={statusFilter}
-        onStatusFilterChange={(status) => {
-          setStatusFilter(status);
           setPage(1);
         }}
         isJrOnly={isJrOnly}

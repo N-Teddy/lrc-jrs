@@ -176,7 +176,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
         {/* Action Buttons & Contact Shortcuts */}
         <div className="flex flex-wrap items-center gap-3">
           {/* WhatsApp Direct */}
-          {member.phoneNumber && (
+          {member.isWhatsappVerified && (
             <a
               href={`https://wa.me/${cleanDigits}`}
               target="_blank"
@@ -185,17 +185,6 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
             >
               <ChatCircleText size={18} weight="fill" />
               <span>WhatsApp</span>
-            </a>
-          )}
-
-          {/* Call Direct */}
-          {member.phoneNumber && (
-            <a
-              href={`tel:${member.phoneNumber}`}
-              className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#faf2ee] hover:bg-[#f4ece9] border border-[#e8e1dd] text-[#1e1b19] text-xs font-bold transition-colors cursor-pointer"
-            >
-              <Phone size={16} weight="bold" />
-              <span>{t('members:detail.callDirect')}</span>
             </a>
           )}
 
@@ -234,19 +223,19 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
       </section>
 
       {/* 3. Detail Tabs Strip */}
-      <div className="flex items-center gap-2 border-b border-[#e8e1dd] pb-1">
+      <div className="flex items-center justify-center gap-2 p-1.5 rounded-2xl bg-[#faf2ee] w-fit mx-auto shadow-2xs border border-[#e8e1dd]">
         <button
           type="button"
           onClick={() => setActiveDetailTab('identity')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+          className={`flex items-center justify-center min-w-[140px] gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
             activeDetailTab === 'identity'
-              ? 'bg-[#b85028] text-white shadow-xs'
-              : 'text-[#57423b] hover:bg-[#faf2ee]'
+              ? 'bg-white text-[#b85028] shadow-xs border border-[#e8e1dd]'
+              : 'text-[#8a726a] hover:text-[#57423b] hover:bg-[#f4ece9] border border-transparent'
           }`}
         >
           <IdentificationCard
             size={18}
-            weight={activeDetailTab === 'identity' ? 'bold' : 'regular'}
+            weight={activeDetailTab === 'identity' ? 'fill' : 'regular'}
           />
           <span>{t('members:detail.tabIdentity')}</span>
         </button>
@@ -254,10 +243,10 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
         <button
           type="button"
           onClick={() => setActiveDetailTab('transfers')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+          className={`flex items-center justify-center min-w-[140px] gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
             activeDetailTab === 'transfers'
-              ? 'bg-[#b85028] text-white shadow-xs'
-              : 'text-[#57423b] hover:bg-[#faf2ee]'
+              ? 'bg-white text-[#b85028] shadow-xs border border-[#e8e1dd]'
+              : 'text-[#8a726a] hover:text-[#57423b] hover:bg-[#f4ece9] border border-transparent'
           }`}
         >
           <Swap

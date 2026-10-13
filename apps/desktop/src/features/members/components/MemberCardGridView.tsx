@@ -100,9 +100,6 @@ export const MemberCardGridView: React.FC<MemberCardGridViewProps> = ({
           const cleanDigits = getCleanDigitsForWhatsApp(m.phoneNumber);
           const isEligibleJr =
             m.isJr ?? (age !== null && age >= 18 && age <= 30);
-          const hasAppAccess = m.account?.hasAppAccess ?? false;
-          const isRevoked = m.account?.isAccessRevoked ?? false;
-
           return (
             <article
               key={m.id}
@@ -195,7 +192,7 @@ export const MemberCardGridView: React.FC<MemberCardGridViewProps> = ({
                         {formattedPhone || '—'}
                       </span>
                     </div>
-                    {m.phoneNumber && (
+                    {m.isWhatsappVerified && (
                       <a
                         href={`https://wa.me/${cleanDigits}`}
                         target="_blank"
@@ -222,19 +219,8 @@ export const MemberCardGridView: React.FC<MemberCardGridViewProps> = ({
               {/* Card Footer */}
               <div className="pt-3 border-t border-[#f4ece9] flex items-center justify-between text-xs">
                 <div className="flex items-center gap-1.5">
-                  <span
-                    className={`w-2 h-2 rounded-full ${
-                      hasAppAccess && !isRevoked
-                        ? 'bg-[#486b52]'
-                        : 'bg-[#8a726a]'
-                    }`}
-                  />
                   <span className="text-[11px] font-semibold text-[#8a726a]">
-                    {hasAppAccess && !isRevoked
-                      ? t('members:filters.activeStatus')
-                      : isRevoked
-                        ? 'Suspended'
-                        : t('members:filters.offlineOnly')}
+                    {m.homeTown?.code ?? '—'}
                   </span>
                 </div>
                 <div className="text-[11px] font-bold text-[#b85028] group-hover:underline inline-flex items-center gap-1">

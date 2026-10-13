@@ -81,6 +81,12 @@ export class User extends BaseDocument {
   @Prop({ type: String, enum: ['MALE', 'FEMALE'], required: false })
   gender?: 'MALE' | 'FEMALE';
 
+  @Prop({ default: false })
+  isWhatsappVerified?: boolean;
+
+  @Prop()
+  integrationDate?: string;
+
   @Prop()
   passwordHash?: string;
 

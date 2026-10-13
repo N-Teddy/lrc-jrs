@@ -97,12 +97,6 @@ export const MemberTableView: React.FC<MemberTableViewProps> = ({
               <th className="py-3 px-4 font-bold">
                 {t('members:table.contactChannel')}
               </th>
-              <th className="py-3 px-4 font-bold">
-                {t('members:table.homeHub')}
-              </th>
-              <th className="py-3 px-4 font-bold">
-                {t('members:table.portalStatus')}
-              </th>
               <th className="py-3 px-4 font-bold text-right">
                 {t('members:table.actions')}
               </th>
@@ -117,9 +111,6 @@ export const MemberTableView: React.FC<MemberTableViewProps> = ({
               const cleanDigits = getCleanDigitsForWhatsApp(m.phoneNumber);
               const isEligibleJr =
                 m.isJr ?? (age !== null && age >= 18 && age <= 30);
-              const hasAppAccess = m.account?.hasAppAccess ?? false;
-              const isRevoked = m.account?.isAccessRevoked ?? false;
-
               return (
                 <tr
                   key={m.id}
@@ -195,15 +186,17 @@ export const MemberTableView: React.FC<MemberTableViewProps> = ({
                             >
                               <Copy size={13} />
                             </button>
-                            <a
-                              href={`https://wa.me/${cleanDigits}`}
-                              target="_blank"
-                              rel="noreferrer"
-                              title={t('members:table.whatsappChat')}
-                              className="w-6 h-6 rounded flex items-center justify-center text-[#486b52] hover:bg-[#c2e9ca]/40 transition-colors cursor-pointer"
-                            >
-                              <ChatCircleText size={15} weight="fill" />
-                            </a>
+                            {m.isWhatsappVerified && (
+                              <a
+                                href={`https://wa.me/${cleanDigits}`}
+                                target="_blank"
+                                rel="noreferrer"
+                                title={t('members:table.whatsappChat')}
+                                className="w-6 h-6 rounded flex items-center justify-center text-[#486b52] hover:bg-[#c2e9ca]/40 transition-colors cursor-pointer"
+                              >
+                                <ChatCircleText size={15} weight="fill" />
+                              </a>
+                            )}
                           </div>
                         )}
                       </div>
@@ -213,33 +206,6 @@ export const MemberTableView: React.FC<MemberTableViewProps> = ({
                         </span>
                       )}
                     </div>
-                  </td>
-
-                  {/* 4. Home Hub */}
-                  <td className="py-3.5 px-4">
-                    <span className="inline-flex items-center px-2 py-0.5 rounded bg-[#f4ece9] border border-[#e8e1dd] text-[#57423b] text-[11px] font-mono font-bold">
-                      {m.homeTown?.code ?? '—'}
-                    </span>
-                  </td>
-
-                  {/* 5. Portal Status */}
-                  <td className="py-3.5 px-4">
-                    {hasAppAccess && !isRevoked ? (
-                      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[#c2e9ca] text-[#2c4e37] text-[10px] font-bold">
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#486b52]" />
-                        {t('members:filters.activeStatus')}
-                      </span>
-                    ) : isRevoked ? (
-                      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[#ffdad6] text-[#ba1a1a] text-[10px] font-bold">
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#ba1a1a]" />
-                        Suspended
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[#f4ece9] text-[#8a726a] text-[10px] font-bold">
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#8a726a]" />
-                        {t('members:filters.offlineOnly')}
-                      </span>
-                    )}
                   </td>
 
                   {/* 6. Actions */}

@@ -183,9 +183,6 @@ export const ActivitiesFeature: React.FC = () => {
           <h1 className="text-2xl font-extrabold text-[#1e1b19] tracking-tight">
             {t('activities:title')}
           </h1>
-          <p className="text-xs text-[#8a726a]">
-            Planning & Community Gatherings across Cameroon Hubs
-          </p>
         </div>
       </section>
 

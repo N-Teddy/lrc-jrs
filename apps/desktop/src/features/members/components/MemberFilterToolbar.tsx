@@ -16,8 +16,7 @@ interface MemberFilterToolbarProps {
   onSearchChange: (value: string) => void;
   roleFilter: string;
   onRoleFilterChange: (role: string) => void;
-  statusFilter: string;
-  onStatusFilterChange: (status: string) => void;
+
   isJrOnly: boolean;
   onToggleJrOnly: () => void;
   viewMode: ViewMode;
@@ -30,8 +29,7 @@ export const MemberFilterToolbar: React.FC<MemberFilterToolbarProps> = ({
   onSearchChange,
   roleFilter,
   onRoleFilterChange,
-  statusFilter,
-  onStatusFilterChange,
+
   isJrOnly,
   onToggleJrOnly,
   viewMode,
@@ -45,13 +43,6 @@ export const MemberFilterToolbar: React.FC<MemberFilterToolbarProps> = ({
     { value: 'MEMBER', label: t('roles:member') },
     { value: 'PC', label: t('roles:pc') },
     { value: 'AP', label: t('roles:ap') },
-  ];
-
-  const statusOptions: SelectOption[] = [
-    { value: 'all', label: t('members:filters.allStatuses') },
-    { value: 'ACTIVE', label: t('members:filters.activeStatus') },
-    { value: 'MUST_SET_PASSWORD', label: t('members:filters.mustSetPassword') },
-    { value: 'OFFLINE', label: t('members:filters.offlineOnly') },
   ];
 
   return (
@@ -77,18 +68,11 @@ export const MemberFilterToolbar: React.FC<MemberFilterToolbarProps> = ({
           options={roleOptions}
         />
 
-        {/* Status Filter Custom Select */}
-        <CustomSelect
-          value={statusFilter}
-          onChange={onStatusFilterChange}
-          options={statusOptions}
-        />
-
         {/* 18–30 JR Toggle Pill */}
         <button
           type="button"
           onClick={onToggleJrOnly}
-          className={`flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-bold transition-all cursor-pointer border ${
+          className={`flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer border ${
             isJrOnly
               ? 'bg-[#c2e9ca] text-[#2c4e37] border-[#a9d0b2] shadow-xs'
               : 'bg-[#faf2ee] text-[#57423b] border-[#e8e1dd] hover:bg-[#f4ece9]'

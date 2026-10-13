@@ -1,7 +1,9 @@
 import { useTranslation } from '@jrs/client-core';
 import type { IUpdateMemberAccessDto, IUser } from '@jrs/shared';
 import {
+  ChatCircleText,
   CheckCircle,
+  EnvelopeSimple,
   Key,
   LockKey,
   PaperPlaneTilt,
@@ -9,8 +11,7 @@ import {
   Warning,
   X,
 } from '@phosphor-icons/react';
-import type React from 'react';
-import { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { formatCameroonPhone } from '../utils/member-ui.utils';
 
 interface ManageAccessModalProps {
@@ -31,11 +32,23 @@ export const ManageAccessModal: React.FC<ManageAccessModalProps> = ({
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
+  const [inviteChannel, setInviteChannel] = useState<'whatsapp' | 'email'>(
+    'email',
+  );
+
+  // Update default channel when member changes
+  useEffect(() => {
+    if (member) {
+      setInviteChannel(member.isWhatsappVerified ? 'whatsapp' : 'email');
+    }
+  }, [member]);
+
   if (!isOpen || !member) return null;
 
   const hasAppAccess = member.account?.hasAppAccess ?? false;
   const isRevoked = member.account?.isAccessRevoked ?? false;
   const isActive = hasAppAccess && !isRevoked;
+  const isTemporaryPassword = member.isTemporaryPassword ?? false;
 
   const handleResendCredentials = async () => {
     setIsSubmitting(true);
@@ -49,6 +62,27 @@ export const ManageAccessModal: React.FC<ManageAccessModalProps> = ({
         err?.response?.data?.message ||
           err?.message ||
           'Failed to resend credentials.',
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleInviteToApp = async () => {
+    setIsSubmitting(true);
+    setErrorMsg(null);
+    setSuccessMsg(null);
+    try {
+      await onUpdateAccess(member.id, {
+        hasAppAccess: true,
+        channel: inviteChannel,
+      });
+      setSuccessMsg('Invitation sent successfully.');
+    } catch (err: any) {
+      setErrorMsg(
+        err?.response?.data?.message ||
+          err?.message ||
+          'Failed to send invitation.',
       );
     } finally {
       setIsSubmitting(false);
@@ -169,74 +203,140 @@ export const ManageAccessModal: React.FC<ManageAccessModalProps> = ({
             </div>
           </div>
 
-          {/* Action 1: Resend Temporary Password */}
-          <div className="p-4 rounded-2xl bg-white border border-[#e8e1dd] flex flex-col gap-3 shadow-2xs">
-            <div className="flex items-start gap-3">
-              <div className="w-9 h-9 rounded-xl bg-[#faf2ee] border border-[#e8e1dd] flex items-center justify-center text-[#b85028] shrink-0">
-                <LockKey size={20} weight="duotone" />
+          {!hasAppAccess ? (
+            <div className="p-4 rounded-2xl bg-white border border-[#e8e1dd] flex flex-col gap-3 shadow-2xs">
+              <div className="flex items-start gap-3">
+                <div className="w-9 h-9 rounded-xl bg-[#faf2ee] border border-[#e8e1dd] flex items-center justify-center text-[#b85028] shrink-0">
+                  <PaperPlaneTilt size={20} weight="duotone" />
+                </div>
+                <div className="flex flex-col">
+                  <h4 className="text-xs font-bold text-[#1e1b19]">
+                    Invite to App
+                  </h4>
+                  <p className="text-[11px] text-[#57423b] mt-0.5 leading-relaxed">
+                    Grant this member access to the application and send them
+                    login credentials.
+                  </p>
+                </div>
               </div>
-              <div className="flex flex-col">
-                <h4 className="text-xs font-bold text-[#1e1b19]">
-                  {t('members:accessModal.resendTempPassword')}
-                </h4>
-                <p className="text-[11px] text-[#57423b] mt-0.5 leading-relaxed">
-                  {t('members:accessModal.resendDesc')}
-                </p>
-              </div>
-            </div>
-            <button
-              type="button"
-              disabled={isSubmitting}
-              onClick={handleResendCredentials}
-              className="w-full py-2.5 px-4 rounded-xl bg-[#b85028] hover:bg-[#a44520] text-white text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
-            >
-              <PaperPlaneTilt size={16} weight="bold" />
-              <span>
-                {isSubmitting
-                  ? t('members:accessModal.resending')
-                  : t('members:accessModal.resendAction')}
-              </span>
-            </button>
-          </div>
 
-          {/* Action 2: Suspend / Reactivate */}
-          <div className="p-4 rounded-2xl bg-white border border-[#e8e1dd] flex flex-col gap-3 shadow-2xs">
-            <div className="flex items-start gap-3">
-              <div
-                className={`w-9 h-9 rounded-xl border flex items-center justify-center shrink-0 ${
-                  !isRevoked
-                    ? 'bg-[#ffdad6] text-[#ba1a1a] border-[#ffb4a8]'
-                    : 'bg-[#c2e9ca] text-[#2c4e37] border-[#a9d0b2]'
-                }`}
+              <div className="flex items-center gap-2 mt-2">
+                <button
+                  type="button"
+                  onClick={() =>
+                    member.isWhatsappVerified && setInviteChannel('whatsapp')
+                  }
+                  disabled={!member.isWhatsappVerified}
+                  className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-xl text-xs font-bold transition-all border ${
+                    inviteChannel === 'whatsapp'
+                      ? 'bg-[#c2e9ca] text-[#2c4e37] border-[#a9d0b2]'
+                      : 'bg-[#faf2ee] text-[#8a726a] border-[#e8e1dd] opacity-60'
+                  }`}
+                >
+                  <ChatCircleText size={16} weight="fill" />
+                  WhatsApp
+                </button>
+                <button
+                  type="button"
+                  onClick={() => member.email && setInviteChannel('email')}
+                  disabled={!member.email}
+                  className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-xl text-xs font-bold transition-all border ${
+                    inviteChannel === 'email'
+                      ? 'bg-[#fff2ee] text-[#b85028] border-[#ffdbcf]'
+                      : 'bg-[#faf2ee] text-[#8a726a] border-[#e8e1dd] opacity-60'
+                  }`}
+                >
+                  <EnvelopeSimple size={16} weight="fill" />
+                  Email
+                </button>
+              </div>
+
+              <button
+                type="button"
+                disabled={
+                  isSubmitting || (!member.isWhatsappVerified && !member.email)
+                }
+                onClick={handleInviteToApp}
+                className="w-full mt-2 py-2.5 px-4 rounded-xl bg-[#b85028] hover:bg-[#a44520] text-white text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
               >
-                <Prohibit size={20} weight="bold" />
-              </div>
-              <div className="flex flex-col">
-                <h4 className="text-xs font-bold text-[#1e1b19]">
-                  {t('members:accessModal.suspendTitle')}
-                </h4>
-                <p className="text-[11px] text-[#57423b] mt-0.5 leading-relaxed">
-                  {t('members:accessModal.suspendDesc')}
-                </p>
-              </div>
+                <PaperPlaneTilt size={16} weight="bold" />
+                <span>{isSubmitting ? 'Sending...' : 'Send Invitation'}</span>
+              </button>
             </div>
-            <button
-              type="button"
-              disabled={isSubmitting}
-              onClick={handleToggleActive}
-              className={`w-full py-2.5 px-4 rounded-xl text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 border ${
-                !isRevoked
-                  ? 'bg-white hover:bg-[#ffdad6] text-[#ba1a1a] border-[#ffb4a8]'
-                  : 'bg-[#486b52] hover:bg-[#3d5b45] text-white border-[#486b52]'
-              }`}
-            >
-              <span>
-                {!isRevoked
-                  ? t('members:accessModal.suspendAction')
-                  : t('members:accessModal.reactivateAction')}
-              </span>
-            </button>
-          </div>
+          ) : (
+            <>
+              {/* Action 1: Resend Temporary Password (Only if temp password is still active) */}
+              {isTemporaryPassword && (
+                <div className="p-4 rounded-2xl bg-white border border-[#e8e1dd] flex flex-col gap-3 shadow-2xs">
+                  <div className="flex items-start gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-[#faf2ee] border border-[#e8e1dd] flex items-center justify-center text-[#b85028] shrink-0">
+                      <LockKey size={20} weight="duotone" />
+                    </div>
+                    <div className="flex flex-col">
+                      <h4 className="text-xs font-bold text-[#1e1b19]">
+                        {t('members:accessModal.resendTempPassword')}
+                      </h4>
+                      <p className="text-[11px] text-[#57423b] mt-0.5 leading-relaxed">
+                        {t('members:accessModal.resendDesc')}
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    disabled={isSubmitting}
+                    onClick={handleResendCredentials}
+                    className="w-full py-2.5 px-4 rounded-xl bg-[#b85028] hover:bg-[#a44520] text-white text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                  >
+                    <PaperPlaneTilt size={16} weight="bold" />
+                    <span>
+                      {isSubmitting
+                        ? t('members:accessModal.resending')
+                        : t('members:accessModal.resendAction')}
+                    </span>
+                  </button>
+                </div>
+              )}
+
+              {/* Action 2: Suspend / Reactivate */}
+              <div className="p-4 rounded-2xl bg-white border border-[#e8e1dd] flex flex-col gap-3 shadow-2xs">
+                <div className="flex items-start gap-3">
+                  <div
+                    className={`w-9 h-9 rounded-xl border flex items-center justify-center shrink-0 ${
+                      !isRevoked
+                        ? 'bg-[#ffdad6] text-[#ba1a1a] border-[#ffb4a8]'
+                        : 'bg-[#c2e9ca] text-[#2c4e37] border-[#a9d0b2]'
+                    }`}
+                  >
+                    <Prohibit size={20} weight="bold" />
+                  </div>
+                  <div className="flex flex-col">
+                    <h4 className="text-xs font-bold text-[#1e1b19]">
+                      {t('members:accessModal.suspendTitle')}
+                    </h4>
+                    <p className="text-[11px] text-[#57423b] mt-0.5 leading-relaxed">
+                      {t('members:accessModal.suspendDesc')}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  disabled={isSubmitting}
+                  onClick={handleToggleActive}
+                  className={`w-full py-2.5 px-4 rounded-xl text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 border ${
+                    !isRevoked
+                      ? 'bg-white hover:bg-[#ffdad6] text-[#ba1a1a] border-[#ffb4a8]'
+                      : 'bg-[#486b52] hover:bg-[#3d5b45] text-white border-[#486b52]'
+                  }`}
+                >
+                  <span>
+                    {!isRevoked
+                      ? t('members:accessModal.suspendAction')
+                      : t('members:accessModal.reactivateAction')}
+                  </span>
+                </button>
+              </div>
+            </>
+          )}
         </div>
 
         {/* Modal Footer */}
