@@ -127,7 +127,7 @@ export class ActivitiesSeeder {
         const townMembers = membersByTown.get(townId.toString()) || allMembers;
         const attendees: any[] = [];
 
-        // Sample 15-25 members present or excused
+        // Sample 15-25 members present
         const sampleSize = Math.min(
           townMembers.length,
           15 + (item.startDate.getDate() % 12),
@@ -135,14 +135,11 @@ export class ActivitiesSeeder {
 
         for (let i = 0; i < sampleSize; i++) {
           const m = townMembers[i];
-          const isExcused = (i + item.startDate.getMonth()) % 7 === 0;
           attendees.push({
             attendeeType: AttendeeType.MEMBER,
             memberId: m._id,
             checkInTime: new Date(item.startDate.getTime() + i * 2 * 60 * 1000),
-            status: isExcused
-              ? AttendanceStatus.EXCUSED
-              : AttendanceStatus.PRESENT,
+            status: AttendanceStatus.PRESENT,
           });
         }
 

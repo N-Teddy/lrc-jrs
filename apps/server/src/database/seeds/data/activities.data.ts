@@ -31,6 +31,12 @@ const VENUES: Record<string, string[]> = {
     'Salle Paroissiale Banengo, Bafoussam',
     'Stade Municipal de Bafoussam',
   ],
+  EDA: [
+    'Paroisse Notre-Dame d’Edéa',
+    'Foyer Polyvalent Sanaga, Edéa',
+    'Centre des Jeunes d’Edéa',
+    'Salle Paroissiale Saint-Jean, Edéa',
+  ],
 };
 
 const ACTIVITY_TEMPLATES: {
@@ -93,19 +99,20 @@ const MONTH_NAMES = [
 
 const TOWN_NAMES: Record<string, string> = {
   DLA: 'Douala',
+  EDA: 'Edéa',
   YDE: 'Yaoundé',
   BAF: 'Bafoussam',
 };
 
 /**
- * Generates ~50 activities for a given year spread across all 12 months and 3 towns.
+ * Generates ~50 activities for a given year spread across all 12 months and 4 towns.
  */
 export function generateYearActivities(
   year: number,
   targetCount = 50,
 ): SeedActivityData[] {
   const activities: SeedActivityData[] = [];
-  const townCodes = ['DLA', 'YDE', 'BAF'];
+  const townCodes = ['DLA', 'EDA', 'YDE', 'BAF'];
 
   // Spread roughly 4 to 5 activities per month
   let activityIndex = 0;

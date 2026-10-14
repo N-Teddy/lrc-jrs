@@ -5,6 +5,7 @@ import { useMemo, useState } from 'react';
 import { CAMEROON_REGIONS } from '../config/cameroon-map.config';
 import {
   buildIsoToTownMap,
+  buildIsoToTownsMap,
   mapTownCodeToIso,
   TOWN_TO_ISO_MAP,
 } from '../utils/town-iso.utils';
@@ -49,6 +50,11 @@ export function useRegionSelector({
 
   const isoToTown = useMemo(
     () => buildIsoToTownMap(availableTowns),
+    [availableTowns],
+  );
+
+  const isoToTowns = useMemo(
+    () => buildIsoToTownsMap(availableTowns),
     [availableTowns],
   );
 
@@ -98,6 +104,7 @@ export function useRegionSelector({
     clearHover,
     isEntering,
     isoToTown,
+    isoToTowns,
     selectedIso,
     selectedRegionConfig,
     townToIsoMap: TOWN_TO_ISO_MAP,

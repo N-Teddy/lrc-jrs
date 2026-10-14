@@ -50,7 +50,7 @@ export const ActivitiesFeature: React.FC = () => {
   );
   const [viewMode, setViewMode] = useState<ActivityViewMode>('table');
   const [page, setPage] = useState(1);
-  const limit = 10;
+  const limit = viewMode === 'grid' ? 12 : 10;
 
   // Modals State
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
@@ -72,15 +72,18 @@ export const ActivitiesFeature: React.FC = () => {
     month,
   });
 
+  const calendarActiveMonth = month ?? new Date().getMonth() + 1;
+  const calendarActiveYear = year ?? new Date().getFullYear();
+
   const queryParams = {
     townId: effectiveTownId,
-    year,
-    month,
+    year: viewMode === 'calendar' ? calendarActiveYear : year,
+    month: viewMode === 'calendar' ? calendarActiveMonth : month,
     activityType: activityTypeFilter !== 'all' ? activityTypeFilter : undefined,
     status: statusFilter !== 'all' ? statusFilter : undefined,
     search: search.trim() ? search.trim() : undefined,
-    page,
-    limit,
+    page: viewMode === 'calendar' ? 1 : page,
+    limit: viewMode === 'calendar' ? 100 : limit,
   };
 
   const { data: activitiesData, isLoading: isActivitiesLoading } =
@@ -221,7 +224,10 @@ export const ActivitiesFeature: React.FC = () => {
           setPage(1);
         }}
         viewMode={viewMode}
-        onViewModeChange={setViewMode}
+        onViewModeChange={(mode) => {
+          setViewMode(mode);
+          setPage(1);
+        }}
         onOpenCreateModal={handleOpenCreateModal}
         onClearFilters={handleClearFilters}
       />
@@ -259,8 +265,12 @@ export const ActivitiesFeature: React.FC = () => {
         <ActivityCalendarView
           activities={activities}
           isLoading={isActivitiesLoading}
-          selectedYear={year}
-          selectedMonth={month}
+          selectedYear={calendarActiveYear}
+          selectedMonth={calendarActiveMonth}
+          onMonthChange={(newYear, newMonth) => {
+            setYear(newYear);
+            setMonth(newMonth);
+          }}
           onTrackAttendance={handleTrackAttendance}
           onEditActivity={handleEditActivity}
         />

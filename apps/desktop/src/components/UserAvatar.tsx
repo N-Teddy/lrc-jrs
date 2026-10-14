@@ -56,7 +56,7 @@ export const UserAvatar: React.FC<UserAvatarProps> = ({
     >
       {showImage ? (
         <img
-          src={avatarUrl!}
+          src={avatarUrl || undefined}
           alt={alt || name || 'User avatar'}
           className="w-full h-full object-cover transition-opacity duration-200"
           onError={() => setImgError(true)}

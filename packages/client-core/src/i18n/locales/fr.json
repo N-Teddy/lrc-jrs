@@ -260,6 +260,10 @@
       "allTowns": "Toutes les Villes",
       "allTypes": "Tous les Types",
       "allStatuses": "Tous les Statuts",
+      "allDates": "Toutes les Dates",
+      "fullYear": "Cycle {{year}} (Année Complète)",
+      "archiveYear": "Cycle {{year}} (Archives)",
+      "clear": "Effacer",
       "searchPlaceholder": "Rechercher par titre, salle ou notes..."
     },
     "stats": {
@@ -420,6 +424,7 @@
       "canonicalJr": "JR",
       "tabIdentity": "Identité & Identifiants",
       "tabRegistry": "Registre & Historique de Transfert",
+      "tabAttendance": "Historique des Présences & Rencontres",
       "callDirect": "Appel Direct",
       "copyEmail": "Copier l'Email",
       "statusActive": "Membre Actif",

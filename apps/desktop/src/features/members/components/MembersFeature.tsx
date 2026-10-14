@@ -42,7 +42,7 @@ export const MembersFeature: React.FC = () => {
   const [isJrOnly, setIsJrOnly] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('table');
   const [page, setPage] = useState(1);
-  const limit = 10;
+  const limit = viewMode === 'grid' ? 12 : 10;
 
   // Modals State
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
@@ -154,14 +154,6 @@ export const MembersFeature: React.FC = () => {
       {/* 1. Header & Title */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
         <div className="flex flex-col gap-1">
-          <div className="flex items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#c2e9ca] text-[#2c4e37] text-xs font-bold">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#486b52]" />
-              {activeTown
-                ? `${activeTown.name} (${activeTown.code})`
-                : 'Active Hub'}
-            </span>
-          </div>
           <h1 className="text-2xl font-extrabold text-[#1e1b19] tracking-tight">
             {t('members:title')}
           </h1>
@@ -193,7 +185,10 @@ export const MembersFeature: React.FC = () => {
           setPage(1);
         }}
         viewMode={viewMode}
-        onViewModeChange={setViewMode}
+        onViewModeChange={(mode) => {
+          setViewMode(mode);
+          setPage(1);
+        }}
         onOpenRegisterModal={() => setIsRegisterModalOpen(true)}
       />
 

@@ -10,7 +10,10 @@ import {
 } from 'react-simple-maps';
 import cameroonGeo from '../../../assets/geo/cameroon-regions.json';
 import { LanguageToggle } from '../../../components/LanguageToggle';
-import { CAMEROON_REGIONS } from '../config/cameroon-map.config';
+import {
+  CAMEROON_REGIONS,
+  CAMEROON_TOWNS_CONFIG,
+} from '../config/cameroon-map.config';
 import { useRegionSelector } from '../hooks/use-region-selector';
 
 interface RegionSelectorScreenProps {
@@ -34,7 +37,7 @@ export const RegionSelectorScreen: React.FC<RegionSelectorScreenProps> = ({
     setHoveredInfo,
     clearHover,
     isEntering,
-    isoToTown,
+    isoToTowns,
     selectedIso,
     selectedRegionConfig,
     townToIsoMap,
@@ -127,7 +130,8 @@ export const RegionSelectorScreen: React.FC<RegionSelectorScreenProps> = ({
               {({ geographies }) =>
                 geographies.map((geo) => {
                   const iso = geo.properties?.shapeISO || '';
-                  const hasTown = Boolean(isoToTown[iso]);
+                  const townsInRegion = isoToTowns[iso] || [];
+                  const hasTown = townsInRegion.length > 0;
                   const isSelected = selectedIso === iso;
                   const isHovered = hoveredIso === iso;
                   const regionConfig = CAMEROON_REGIONS[iso];
@@ -157,6 +161,12 @@ export const RegionSelectorScreen: React.FC<RegionSelectorScreenProps> = ({
                     strokeWidth = 1.1;
                   }
 
+                  const subtitle = hasTown
+                    ? `${townsInRegion
+                        .map((t) => `${t.name} (${t.code})`)
+                        .join(' • ')} ${t('towns:hub')}`
+                    : t('towns:noActiveHub');
+
                   return (
                     <Geography
                       key={geo.rsmKey}
@@ -165,9 +175,7 @@ export const RegionSelectorScreen: React.FC<RegionSelectorScreenProps> = ({
                         setHoveredIso(iso);
                         setHoveredInfo({
                           title: regionName,
-                          subtitle: hasTown
-                            ? `${isoToTown[iso].name} ${t('towns:hub')} (${isoToTown[iso].code})`
-                            : t('towns:noActiveHub'),
+                          subtitle,
                           hasHub: hasTown,
                           x: e.clientX,
                           y: e.clientY,
@@ -186,8 +194,21 @@ export const RegionSelectorScreen: React.FC<RegionSelectorScreenProps> = ({
                       }}
                       onMouseLeave={clearHover}
                       onClick={() => {
-                        if (hasTown) {
-                          handleSelectTown(isoToTown[iso]);
+                        if (townsInRegion.length === 1) {
+                          handleSelectTown(townsInRegion[0]);
+                        } else if (townsInRegion.length > 1) {
+                          const currentIndex = townsInRegion.findIndex(
+                            (t) => t.id === selectedTown?.id,
+                          );
+                          if (currentIndex >= 0) {
+                            const nextTown =
+                              townsInRegion[
+                                (currentIndex + 1) % townsInRegion.length
+                              ];
+                            handleSelectTown(nextTown);
+                          } else {
+                            handleSelectTown(townsInRegion[0]);
+                          }
                         }
                       }}
                       fill={fillColor}
@@ -204,16 +225,29 @@ export const RegionSelectorScreen: React.FC<RegionSelectorScreenProps> = ({
 
             {/* Town Pins / Interactive Markers */}
             {availableTowns.map((town) => {
-              const iso = townToIsoMap[town.code.toUpperCase()];
-              const config = iso ? CAMEROON_REGIONS[iso] : null;
-              if (!config) return null;
+              const code = town.code.toUpperCase();
+              const townConfig = CAMEROON_TOWNS_CONFIG[code];
+              const iso = townToIsoMap[code] || townConfig?.regionIso;
+              const regionConfig = iso ? CAMEROON_REGIONS[iso] : null;
+
+              const coordinates =
+                townConfig?.coordinates || regionConfig?.coordinates;
+              if (!coordinates) return null;
 
               const isSelected = selectedTown?.id === town.id;
+              const labelDy = townConfig?.labelOffset
+                ? townConfig.labelOffset[1]
+                : isSelected
+                  ? -16
+                  : -13;
+              const labelDx = townConfig?.labelOffset
+                ? townConfig.labelOffset[0]
+                : 0;
 
               return (
                 <Marker
                   key={town.id}
-                  coordinates={config.coordinates}
+                  coordinates={coordinates}
                   onClick={() => handleSelectTown(town)}
                 >
                   <g
@@ -222,8 +256,8 @@ export const RegionSelectorScreen: React.FC<RegionSelectorScreenProps> = ({
                       setHoveredInfo({
                         title: `${town.name} ${t('towns:hub')} (${town.code})`,
                         subtitle: isFrench
-                          ? config.displayNameFr
-                          : config.displayNameEn,
+                          ? regionConfig?.displayNameFr
+                          : regionConfig?.displayNameEn,
                         hasHub: true,
                         x: e.clientX,
                         y: e.clientY,
@@ -262,7 +296,7 @@ export const RegionSelectorScreen: React.FC<RegionSelectorScreenProps> = ({
                     />
 
                     {/* Text Label */}
-                    <g transform={`translate(0, ${isSelected ? -16 : -13})`}>
+                    <g transform={`translate(${labelDx}, ${labelDy})`}>
                       <text
                         textAnchor="middle"
                         style={{

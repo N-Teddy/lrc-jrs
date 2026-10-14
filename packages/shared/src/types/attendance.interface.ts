@@ -41,7 +41,6 @@ export interface IAttendance {
     totalPresent: number;
     membersPresent: number;
     guestsPresent: number;
-    totalExcused: number;
   };
 }
 
@@ -91,7 +90,6 @@ export interface IMemberAttendanceHistoryItem {
 export interface IMemberAttendanceHistoryResponse {
   memberId: string;
   totalAttended: number;
-  totalExcused: number;
   totalAbsent: number;
   hubActivitiesCount: number;
   hubAttendanceRate: number;

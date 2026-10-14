@@ -8,6 +8,7 @@ import {
 } from '@phosphor-icons/react';
 import type React from 'react';
 import { useEffect, useId, useRef, useState } from 'react';
+import { CustomSelect, type SelectOption } from './CustomSelect';
 
 // ==========================================
 // CONSTANTS & HELPERS
@@ -48,6 +49,28 @@ const DAY_NAMES_SHORT = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
 function padZero(n: number): string {
   return n.toString().padStart(2, '0');
 }
+
+const HOUR_OPTIONS: SelectOption<string>[] = Array.from({ length: 24 }).map(
+  (_, i) => {
+    const h = padZero(i);
+    return { value: h, label: `${h} h` };
+  },
+);
+
+const MINUTE_OPTIONS: SelectOption<string>[] = [
+  '00',
+  '05',
+  '10',
+  '15',
+  '20',
+  '25',
+  '30',
+  '35',
+  '40',
+  '45',
+  '50',
+  '55',
+].map((m) => ({ value: m, label: `${m} min` }));
 
 function formatDateString(
   year: number,
@@ -817,46 +840,26 @@ export const DateTimePicker: React.FC<DateTimePickerProps> = ({
               <Clock size={16} weight="duotone" className="text-[#b85028]" />
               <span>Time:</span>
             </div>
-            <div className="flex items-center gap-2">
-              <select
+            <div className="flex items-center gap-1.5">
+              <CustomSelect<string>
                 value={hour}
-                onChange={(e) => handleTimeChange(e.target.value, minute)}
-                className="h-8 px-2 rounded-md bg-white border border-[#e8e1dd] text-xs font-bold text-[#1e1b19] outline-none focus:border-[#b85028]"
-              >
-                {Array.from({ length: 24 }).map((_, i) => {
-                  const h = padZero(i);
-                  return (
-                    <option key={h} value={h}>
-                      {h} h
-                    </option>
-                  );
-                })}
-              </select>
+                onChange={(val) => handleTimeChange(val, minute)}
+                options={HOUR_OPTIONS}
+                size="sm"
+                className="w-20"
+                menuClassName="min-w-[85px] w-auto max-h-44"
+                menuPlacement="top"
+              />
               <span className="font-bold text-[#8a726a]">:</span>
-              <select
+              <CustomSelect<string>
                 value={minute}
-                onChange={(e) => handleTimeChange(hour, e.target.value)}
-                className="h-8 px-2 rounded-md bg-white border border-[#e8e1dd] text-xs font-bold text-[#1e1b19] outline-none focus:border-[#b85028]"
-              >
-                {[
-                  '00',
-                  '05',
-                  '10',
-                  '15',
-                  '20',
-                  '25',
-                  '30',
-                  '35',
-                  '40',
-                  '45',
-                  '50',
-                  '55',
-                ].map((m) => (
-                  <option key={m} value={m}>
-                    {m} min
-                  </option>
-                ))}
-              </select>
+                onChange={(val) => handleTimeChange(hour, val)}
+                options={MINUTE_OPTIONS}
+                size="sm"
+                className="w-24"
+                menuClassName="min-w-[95px] w-auto max-h-44"
+                menuPlacement="top"
+              />
             </div>
           </div>
 

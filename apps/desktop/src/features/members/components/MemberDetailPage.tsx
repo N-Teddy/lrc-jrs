@@ -6,6 +6,7 @@ import {
 import type { IUser } from '@jrs/shared';
 import {
   ArrowLeft,
+  CalendarCheck,
   ChatCircleText,
   CheckCircle,
   Copy,
@@ -27,6 +28,7 @@ import {
   getCleanDigitsForWhatsApp,
   getRoleDisplayInfo,
 } from '../utils/member-ui.utils';
+import { MemberAttendanceHistoryTab } from './MemberAttendanceHistoryTab';
 
 interface MemberDetailPageProps {
   memberId: string;
@@ -50,7 +52,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
   const { data: member, isLoading, error } = useMemberDetailQuery(memberId);
 
   const [activeDetailTab, setActiveDetailTab] = useState<
-    'identity' | 'transfers'
+    'identity' | 'transfers' | 'attendance'
   >('identity');
   const [copiedEmail, setCopiedEmail] = useState(false);
 
@@ -258,6 +260,22 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
             weight={activeDetailTab === 'transfers' ? 'bold' : 'regular'}
           />
           <span>{t('members:detail.tabRegistry')}</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveDetailTab('attendance')}
+          className={`flex items-center justify-center min-w-[140px] gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+            activeDetailTab === 'attendance'
+              ? 'bg-white text-[#b85028] shadow-xs border border-[#e8e1dd]'
+              : 'text-[#8a726a] hover:text-[#57423b] hover:bg-[#f4ece9] border border-transparent'
+          }`}
+        >
+          <CalendarCheck
+            size={18}
+            weight={activeDetailTab === 'attendance' ? 'bold' : 'regular'}
+          />
+          <span>{t('members:detail.tabAttendance')}</span>
         </button>
       </div>
 
@@ -537,6 +555,11 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
             </div>
           </div>
         </div>
+      )}
+
+      {/* 6. Tab 3: Attendance & Gatherings History */}
+      {activeDetailTab === 'attendance' && (
+        <MemberAttendanceHistoryTab member={member} />
       )}
     </div>
   );

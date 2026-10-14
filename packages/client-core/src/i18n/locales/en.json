@@ -260,6 +260,10 @@
       "allTowns": "All Towns",
       "allTypes": "All Types",
       "allStatuses": "All Statuses",
+      "allDates": "All Dates",
+      "fullYear": "Cycle {{year}} (Full Year)",
+      "archiveYear": "Cycle {{year}} (Archive)",
+      "clear": "Clear",
       "searchPlaceholder": "Search by title, venue, or notes..."
     },
     "stats": {
@@ -420,6 +424,7 @@
       "canonicalJr": "JR",
       "tabIdentity": "Personal Identity & Credentials",
       "tabRegistry": "Town Registry & Transfer History",
+      "tabAttendance": "Attendance & Gatherings History",
       "callDirect": "Direct Call",
       "copyEmail": "Copy Email",
       "statusActive": "Active Member",

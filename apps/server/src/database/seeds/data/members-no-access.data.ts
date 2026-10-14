@@ -110,11 +110,11 @@ const LAST_NAMES = [
 
 /**
  * Generates 100 realistic standard JR members who do NOT have application access.
- * Ages between 18 and 30, distributed across Douala, Yaoundé, and Bafoussam.
+ * Ages between 18 and 30, distributed across Douala, Edéa, Yaoundé, and Bafoussam.
  */
 export function generateMembersWithoutAppAccess(): SeedUserData[] {
   const members: SeedUserData[] = [];
-  const townCodes = ['DLA', 'YDE', 'BAF'];
+  const townCodes = ['DLA', 'EDA', 'YDE', 'BAF'];
 
   for (let i = 1; i <= 100; i++) {
     const firstName = FIRST_NAMES[(i - 1) % FIRST_NAMES.length];

@@ -142,6 +142,37 @@ export const SEED_PC_USERS: SeedUserData[] = [
       isAccessRevoked: false,
     },
   },
+  // Edéa PCs
+  {
+    fullName: 'PC Edéa 1 (Patrice Manga)',
+    phoneNumber: '+237677770001',
+    email: 'pc.edea1@lrcjrs.org',
+    dateOfBirth: '2001-08-10', // Age ~25
+    isJr: true,
+    role: UserRole.PC,
+    isActivePC: true,
+    homeTownCode: 'EDA',
+    account: {
+      status: AccountStatus.ACTIVE,
+      hasAppAccess: true,
+      isAccessRevoked: false,
+    },
+  },
+  {
+    fullName: 'PC Edéa 2 (Chantal Ebongue)',
+    phoneNumber: '+237677770002',
+    email: 'pc.edea2@lrcjrs.org',
+    dateOfBirth: '2002-11-20', // Age ~24
+    isJr: true,
+    role: UserRole.PC,
+    isActivePC: true,
+    homeTownCode: 'EDA',
+    account: {
+      status: AccountStatus.ACTIVE,
+      hasAppAccess: true,
+      isAccessRevoked: false,
+    },
+  },
 ];
 
 /**

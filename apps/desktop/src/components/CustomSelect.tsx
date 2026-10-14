@@ -20,6 +20,8 @@ export interface CustomSelectProps<T = string> {
   className?: string;
   variant?: 'toolbar' | 'form';
   size?: 'sm' | 'md' | 'lg';
+  menuPlacement?: 'bottom' | 'top';
+  menuClassName?: string;
   id?: string;
   ariaLabel?: string;
 }
@@ -31,6 +33,8 @@ export function CustomSelect<T extends string = string>({
   placeholder = 'Select option...',
   disabled = false,
   className = '',
+  menuPlacement = 'bottom',
+  menuClassName = '',
   variant = 'toolbar',
   size = 'md',
   id,
@@ -134,7 +138,13 @@ export function CustomSelect<T extends string = string>({
         <div
           role="listbox"
           tabIndex={-1}
-          className="absolute z-50 mt-1.5 min-w-[190px] w-full max-h-64 overflow-y-auto bg-white rounded-xl border border-[#e8e1dd] shadow-xl p-1.5 animate-in fade-in zoom-in-95 duration-150 focus:outline-none"
+          className={`absolute z-50 ${
+            menuPlacement === 'top'
+              ? 'bottom-[calc(100%+4px)]'
+              : 'top-[calc(100%+4px)]'
+          } ${
+            menuClassName || 'min-w-[190px] w-full'
+          } max-h-64 overflow-y-auto bg-white rounded-xl border border-[#e8e1dd] shadow-xl p-1.5 animate-in fade-in zoom-in-95 duration-150 focus:outline-none`}
         >
           {options.map((option) => {
             const isSelected = option.value === value;

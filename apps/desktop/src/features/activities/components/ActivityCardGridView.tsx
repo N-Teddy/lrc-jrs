@@ -55,15 +55,21 @@ export const ActivityCardGridView: React.FC<ActivityCardGridViewProps> = ({
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 animate-pulse">
-        {[1, 2, 3, 4, 5, 6].map((i) => (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 animate-pulse">
+        {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
           <div
             key={i}
-            className="h-64 rounded-2xl bg-white border border-[#e8e1dd] p-5 flex flex-col justify-between"
+            className="h-48 rounded-xl bg-white border border-[#e8e1dd] p-4 flex flex-col justify-between"
           >
-            <div className="h-6 w-32 bg-[#f4ece9] rounded" />
-            <div className="h-4 w-48 bg-[#f4ece9] rounded" />
-            <div className="h-8 w-full bg-[#f4ece9] rounded" />
+            <div className="flex items-center justify-between">
+              <div className="h-5 w-24 bg-[#f4ece9] rounded-md" />
+              <div className="h-5 w-16 bg-[#f4ece9] rounded-md" />
+            </div>
+            <div className="space-y-2">
+              <div className="h-4 w-3/4 bg-[#f4ece9] rounded" />
+              <div className="h-3 w-1/2 bg-[#f4ece9] rounded" />
+            </div>
+            <div className="h-8 w-full bg-[#f4ece9] rounded-lg" />
           </div>
         ))}
       </div>
@@ -88,7 +94,7 @@ export const ActivityCardGridView: React.FC<ActivityCardGridViewProps> = ({
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {activities.map((activity) => {
           const typeConfig = getActivityTypeConfig(activity.activityType);
           const statusConfig = getActivityStatusConfig(activity.status);
@@ -103,117 +109,107 @@ export const ActivityCardGridView: React.FC<ActivityCardGridViewProps> = ({
           return (
             <div
               key={activity.id}
-              className="bg-white rounded-2xl border border-[#efe9e5] hover:border-[#ddc0b7] hover:shadow-md transition-all duration-200 p-5 flex flex-col justify-between gap-4 group"
+              className="bg-white rounded-xl border border-[#e8e1dd] hover:border-[#b85028]/40 hover:shadow-md transition-all duration-200 p-4 flex flex-col justify-between gap-3 group"
             >
-              {/* Top Header Row */}
-              <div className="flex flex-col gap-3">
-                <div className="flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-1.5 flex-wrap">
+              {/* Header: Type, Status & Dropdown */}
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <span
+                    className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold border truncate ${typeConfig.badgeBg} ${typeConfig.badgeText} ${typeConfig.badgeBorder}`}
+                  >
+                    <TypeIcon size={12} weight="bold" className="shrink-0" />
+                    <span className="truncate">{typeConfig.label}</span>
+                  </span>
+
+                  <span
+                    className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-semibold border shrink-0 ${statusConfig.badgeBg} ${statusConfig.badgeText} ${statusConfig.badgeBorder}`}
+                  >
                     <span
-                      className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${typeConfig.badgeBg} ${typeConfig.badgeText} ${typeConfig.badgeBorder}`}
+                      className={`w-1.5 h-1.5 rounded-full ${statusConfig.dotColor} ${
+                        statusConfig.isPulse ? 'animate-pulse' : ''
+                      }`}
+                    />
+                    <span>{statusConfig.label}</span>
+                  </span>
+                </div>
+
+                {/* Dropdown Options Menu */}
+                <div className="relative shrink-0">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setOpenMenuId(
+                        openMenuId === activity.id ? null : activity.id,
+                      )
+                    }
+                    className="w-6 h-6 rounded-md hover:bg-[#faf2ee] text-[#8a726a] hover:text-[#1e1b19] flex items-center justify-center transition-colors cursor-pointer"
+                  >
+                    <DotsThreeVertical size={15} weight="bold" />
+                  </button>
+
+                  {openMenuId === activity.id && (
+                    <div
+                      className="absolute right-0 top-full mt-1 w-44 bg-white rounded-xl border border-[#e8e1dd] shadow-lg py-1 z-30 flex flex-col animate-in fade-in zoom-in-95 duration-100"
+                      onMouseLeave={() => setOpenMenuId(null)}
                     >
-                      <TypeIcon size={13} weight="bold" />
-                      <span>{typeConfig.label}</span>
-                    </span>
-
-                    <span
-                      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold border ${statusConfig.badgeBg} ${statusConfig.badgeText} ${statusConfig.badgeBorder}`}
-                    >
-                      <span
-                        className={`w-1.5 h-1.5 rounded-full ${statusConfig.dotColor} ${
-                          statusConfig.isPulse ? 'animate-pulse' : ''
-                        }`}
-                      />
-                      <span>{statusConfig.label}</span>
-                    </span>
-                  </div>
-
-                  {/* Dropdown Options Menu */}
-                  <div className="relative">
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setOpenMenuId(
-                          openMenuId === activity.id ? null : activity.id,
-                        )
-                      }
-                      className="w-7 h-7 rounded-lg hover:bg-[#faf2ee] text-[#8a726a] hover:text-[#1e1b19] flex items-center justify-center transition-colors cursor-pointer"
-                    >
-                      <DotsThreeVertical size={16} weight="bold" />
-                    </button>
-
-                    {openMenuId === activity.id && (
-                      <div
-                        className="absolute right-0 top-full mt-1 w-44 bg-white rounded-xl border border-[#e8e1dd] shadow-lg py-1 z-30 flex flex-col"
-                        onMouseLeave={() => setOpenMenuId(null)}
-                      >
-                        {canWrite && (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setOpenMenuId(null);
-                              onEditActivity(activity);
-                            }}
-                            className="w-full px-3 py-2 text-left text-xs text-[#1e1b19] hover:bg-[#faf2ee] flex items-center gap-2 font-medium cursor-pointer"
-                          >
-                            <PencilSimple size={15} weight="bold" />
-                            <span>
-                              {t('activities:card.edit')} / Reschedule
-                            </span>
-                          </button>
-                        )}
-
+                      {canWrite && (
                         <button
                           type="button"
                           onClick={() => {
                             setOpenMenuId(null);
-                            onViewHistory(activity);
+                            onEditActivity(activity);
                           }}
-                          className="w-full px-3 py-2 text-left text-xs text-[#1e1b19] hover:bg-[#faf2ee] flex items-center gap-2 font-medium cursor-pointer"
+                          className="w-full px-3 py-1.5 text-left text-xs text-[#1e1b19] hover:bg-[#faf2ee] flex items-center gap-2 font-medium cursor-pointer"
                         >
-                          <ClockCounterClockwise size={15} weight="bold" />
-                          <span>
-                            {t('activities:card.viewHistory', {
-                              count: historyCount,
-                            })}
-                          </span>
+                          <PencilSimple size={14} weight="bold" />
+                          <span>{t('activities:card.edit')} / Reschedule</span>
                         </button>
+                      )}
 
-                        {canWrite && isPrivileged && onDeleteActivity && (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setOpenMenuId(null);
-                              onDeleteActivity(activity);
-                            }}
-                            className="w-full px-3 py-2 text-left text-xs text-[#ba1a1a] hover:bg-[#ffdad6]/40 flex items-center gap-2 font-medium cursor-pointer border-t border-[#e8e1dd]"
-                          >
-                            <Trash size={15} weight="bold" />
-                            <span>{t('activities:card.delete')}</span>
-                          </button>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setOpenMenuId(null);
+                          onViewHistory(activity);
+                        }}
+                        className="w-full px-3 py-1.5 text-left text-xs text-[#1e1b19] hover:bg-[#faf2ee] flex items-center gap-2 font-medium cursor-pointer"
+                      >
+                        <ClockCounterClockwise size={14} weight="bold" />
+                        <span>
+                          {t('activities:card.viewHistory', {
+                            count: historyCount,
+                          })}
+                        </span>
+                      </button>
 
-                {/* Title & Notes */}
-                <div>
-                  <h3 className="font-bold text-sm text-[#1e1b19] group-hover:text-[#b85028] transition-colors leading-snug line-clamp-2">
-                    {activity.title}
-                  </h3>
-                  {activity.notes && (
-                    <p className="text-xs text-[#8a726a] line-clamp-2 mt-1 leading-relaxed">
-                      {activity.notes}
-                    </p>
+                      {canWrite && isPrivileged && onDeleteActivity && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setOpenMenuId(null);
+                            onDeleteActivity(activity);
+                          }}
+                          className="w-full px-3 py-1.5 text-left text-xs text-[#ba1a1a] hover:bg-[#ffdad6]/40 flex items-center gap-2 font-medium cursor-pointer border-t border-[#e8e1dd]"
+                        >
+                          <Trash size={14} weight="bold" />
+                          <span>{t('activities:card.delete')}</span>
+                        </button>
+                      )}
+                    </div>
                   )}
                 </div>
+              </div>
 
-                {/* Date & Location Details */}
-                <div className="flex flex-col gap-1.5 pt-0.5 text-xs">
-                  <div className="flex items-center gap-2 text-[#57423b]">
+              {/* Title & Metadata */}
+              <div className="flex flex-col gap-1.5">
+                <h3 className="font-bold text-sm text-[#1e1b19] group-hover:text-[#b85028] transition-colors leading-snug line-clamp-1">
+                  {activity.title}
+                </h3>
+
+                <div className="flex flex-col gap-1 text-[11px] text-[#57423b]">
+                  <div className="flex items-center gap-1.5 truncate">
                     <CalendarBlank
-                      size={15}
+                      size={13}
                       weight="bold"
                       className="text-[#b85028] shrink-0"
                     />
@@ -225,9 +221,9 @@ export const ActivityCardGridView: React.FC<ActivityCardGridViewProps> = ({
                     </span>
                   </div>
 
-                  <div className="flex items-center gap-2 text-[#57423b]">
+                  <div className="flex items-center gap-1.5 truncate text-[#8a726a]">
                     <MapPin
-                      size={15}
+                      size={13}
                       weight="fill"
                       className="text-[#486b52] shrink-0"
                     />
@@ -237,21 +233,21 @@ export const ActivityCardGridView: React.FC<ActivityCardGridViewProps> = ({
                   </div>
                 </div>
 
-                {/* Light Turnout Stats Strip */}
-                <div className="flex items-center justify-between p-2.5 rounded-xl bg-[#faf6f4] border border-[#f2ebe7] text-xs">
+                {/* Turnout Pill */}
+                <div className="flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-[#faf6f4] border border-[#f2ebe7] text-[11px] mt-0.5">
                   <div className="flex items-center gap-1.5">
                     <UserCheck
-                      size={15}
+                      size={14}
                       weight="bold"
                       className="text-[#486b52]"
                     />
-                    <span className="font-bold text-xs text-[#1e1b19]">
+                    <span className="font-bold text-[#1e1b19]">
                       {turnoutStats.total > 0
                         ? `${turnoutStats.total} Attendees`
                         : 'Attendance Pending'}
                     </span>
                   </div>
-                  <span className="text-[11px] text-[#8a726a]">
+                  <span className="text-[10px] text-[#8a726a]">
                     {turnoutStats.total > 0
                       ? `${turnoutStats.members} mbrs · ${turnoutStats.guests} gst`
                       : 'Not recorded'}
@@ -260,14 +256,16 @@ export const ActivityCardGridView: React.FC<ActivityCardGridViewProps> = ({
               </div>
 
               {/* Bottom Actions Footer */}
-              <div className="flex items-center gap-2 pt-3 border-t border-[#f4ece9]">
+              <div className="flex items-center gap-1.5 pt-2 border-t border-[#f4ece9]">
                 <button
                   type="button"
                   onClick={() => onTrackAttendance(activity)}
-                  className="flex-1 py-2 px-3 rounded-lg bg-[#b85028] text-white hover:bg-[#a44520] font-bold text-xs shadow-2xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                  className="flex-1 h-8 px-2.5 rounded-lg bg-[#b85028] text-white hover:bg-[#a44520] font-bold text-xs shadow-2xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
                 >
-                  <UserCheck size={15} weight="bold" />
-                  <span>{t('activities:card.trackAttendance')}</span>
+                  <UserCheck size={14} weight="bold" />
+                  <span className="truncate">
+                    {t('activities:card.trackAttendance')}
+                  </span>
                 </button>
 
                 {canWrite && (
@@ -277,7 +275,7 @@ export const ActivityCardGridView: React.FC<ActivityCardGridViewProps> = ({
                     className="w-8 h-8 rounded-lg bg-[#faf2ee] border border-[#e8e1dd] hover:bg-white text-[#57423b] hover:text-[#1e1b19] flex items-center justify-center transition-colors cursor-pointer shrink-0"
                     title="Edit or Reschedule"
                   >
-                    <PencilSimple size={15} weight="bold" />
+                    <PencilSimple size={14} weight="bold" />
                   </button>
                 )}
               </div>

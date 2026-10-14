@@ -27,11 +27,14 @@ export interface ActivityStatusConfig {
   isPulse?: boolean;
 }
 
-export function getActivityTypeConfig(type: ActivityType): ActivityTypeConfig {
+export function getActivityTypeConfig(
+  type: ActivityType,
+  t?: (key: string, options?: any) => string,
+): ActivityTypeConfig {
   switch (type) {
     case ActivityType.MONTHLY_MEETING:
       return {
-        label: 'Monthly Meeting',
+        label: t ? t('activities:types.MONTHLY_MEETING') : 'Monthly Meeting',
         badgeBg: 'bg-[#ffdbcf]/50',
         badgeText: 'text-[#812901]',
         badgeBorder: 'border-[#ffb59c]/50',
@@ -39,7 +42,7 @@ export function getActivityTypeConfig(type: ActivityType): ActivityTypeConfig {
       };
     case ActivityType.SERVICE:
       return {
-        label: 'Service',
+        label: t ? t('activities:types.SERVICE') : 'Service',
         badgeBg: 'bg-[#edf3ee]',
         badgeText: 'text-[#486b52]',
         badgeBorder: 'border-[#c2e9ca]',
@@ -47,7 +50,7 @@ export function getActivityTypeConfig(type: ActivityType): ActivityTypeConfig {
       };
     case ActivityType.CONFERENCE:
       return {
-        label: 'Conference',
+        label: t ? t('activities:types.CONFERENCE') : 'Conference',
         badgeBg: 'bg-[#faf2ee]',
         badgeText: 'text-[#b85028]',
         badgeBorder: 'border-[#e8e1dd]',
@@ -55,7 +58,7 @@ export function getActivityTypeConfig(type: ActivityType): ActivityTypeConfig {
       };
     case ActivityType.RECREATIONAL:
       return {
-        label: 'Recreational',
+        label: t ? t('activities:types.RECREATIONAL') : 'Recreational',
         badgeBg: 'bg-[#f4ece9]',
         badgeText: 'text-[#57423b]',
         badgeBorder: 'border-[#e8e1dd]',
@@ -63,7 +66,7 @@ export function getActivityTypeConfig(type: ActivityType): ActivityTypeConfig {
       };
     case ActivityType.CAUSERIE:
       return {
-        label: 'Causerie',
+        label: t ? t('activities:types.CAUSERIE') : 'Causerie',
         badgeBg: 'bg-[#ffdad4]/40',
         badgeText: 'text-[#9f2f23]',
         badgeBorder: 'border-[#ffb4a8]/50',
@@ -71,7 +74,7 @@ export function getActivityTypeConfig(type: ActivityType): ActivityTypeConfig {
       };
     case ActivityType.JPO:
       return {
-        label: 'JPO (Portes Ouvertes)',
+        label: t ? t('activities:types.JPO') : 'JPO (Portes Ouvertes)',
         badgeBg: 'bg-[#faf2ee]',
         badgeText: 'text-[#1e1b19]',
         badgeBorder: 'border-[#e8e1dd]',

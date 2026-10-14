@@ -49,6 +49,7 @@ export interface IAuthUser {
   homeTownId: string;
   isActivePC: boolean;
   account: IUserAccount;
+  email?: string;
   avatarUrl?: string;
   gender?: Gender;
 }

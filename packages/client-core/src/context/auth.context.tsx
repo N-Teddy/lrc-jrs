@@ -51,6 +51,19 @@ export function AuthProvider({ children, storage, http }: AuthProviderProps) {
           const parsedUser = JSON.parse(userJson) as IAuthUser;
           setUser(parsedUser);
           setIsAuthenticated(true);
+
+          // Refresh user profile asynchronously to sync avatarUrl or role updates
+          http
+            .get<IAuthUser>('/auth/me')
+            .then(async (freshUser) => {
+              if (isMounted && freshUser?.id) {
+                setUser(freshUser);
+                await storage.setItem('jrs_user', JSON.stringify(freshUser));
+              }
+            })
+            .catch(() => {
+              // Non-blocking background sync
+            });
         }
       } catch {
         if (isMounted) {
@@ -69,7 +82,7 @@ export function AuthProvider({ children, storage, http }: AuthProviderProps) {
     return () => {
       isMounted = false;
     };
-  }, [storage]);
+  }, [storage, http]);
 
   const signIn = useCallback(
     async (identifier: string, password: string): Promise<ILoginResponse> => {

@@ -1,4 +1,3 @@
-import type { IAuthUser } from '@jrs/shared';
 import {
   Body,
   Controller,
@@ -111,8 +110,8 @@ export class AuthController {
   @ApiBearerAuth()
   @Get('me')
   @ApiOperation({ summary: 'Get current authenticated user profile' })
-  async me(@CurrentUser() user: IAuthUser) {
-    return user;
+  async me(@CurrentUser() user: any) {
+    return this.authService.formatUserResponse(user);
   }
 
   @UseGuards(JwtAuthGuard)

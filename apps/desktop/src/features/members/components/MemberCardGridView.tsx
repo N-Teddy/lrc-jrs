@@ -52,7 +52,7 @@ export const MemberCardGridView: React.FC<MemberCardGridViewProps> = ({
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 animate-pulse">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 animate-pulse">
         {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
           <div
             key={i}
@@ -91,7 +91,7 @@ export const MemberCardGridView: React.FC<MemberCardGridViewProps> = ({
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {members.map((m) => {
           const age = calculateAge(m.dateOfBirth);
           const roleInfo = getRoleDisplayInfo(m.role);

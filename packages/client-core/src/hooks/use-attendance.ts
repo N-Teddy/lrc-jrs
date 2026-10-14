@@ -1,4 +1,8 @@
-import type { IAttendance, IRecordAttendanceDto } from '@jrs/shared';
+import type {
+  IAttendance,
+  IMemberAttendanceHistoryResponse,
+  IRecordAttendanceDto,
+} from '@jrs/shared';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useHttp } from '../context/http.context';
 import { queryKeys } from '../query/query-keys';
@@ -10,6 +14,18 @@ export function useAttendanceQuery(activityId: string) {
     queryFn: () =>
       http.get<IAttendance>(`/activities/${activityId}/attendance`),
     enabled: Boolean(activityId),
+  });
+}
+
+export function useMemberAttendanceHistoryQuery(memberId: string) {
+  const http = useHttp();
+  return useQuery({
+    queryKey: queryKeys.activities.memberHistory(memberId),
+    queryFn: () =>
+      http.get<IMemberAttendanceHistoryResponse>(
+        `/activities/member/${memberId}/history`,
+      ),
+    enabled: Boolean(memberId),
   });
 }
 

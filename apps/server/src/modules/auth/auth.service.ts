@@ -48,7 +48,7 @@ export class AuthService {
     private readonly passwordResetModel: Model<PasswordResetTokenDocument>,
   ) {}
 
-  private formatUserResponse(user: UserDocument) {
+  public formatUserResponse(user: UserDocument) {
     return {
       id: user.id || user._id.toString(),
       fullName: user.fullName,

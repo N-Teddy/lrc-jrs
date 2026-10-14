@@ -5,8 +5,55 @@ export interface IRegionConfig {
   displayNameFr: string;
   townCode?: string;
   townName?: string;
+  townCodes?: string[];
   coordinates: [number, number]; // [lng, lat]
 }
+
+export interface ITownMapConfig {
+  code: string;
+  name: string;
+  regionIso: string;
+  coordinates: [number, number]; // [lng, lat]
+  labelOffset?: [number, number]; // [dx, dy]
+}
+
+export const CAMEROON_TOWNS_CONFIG: Record<string, ITownMapConfig> = {
+  DLA: {
+    code: 'DLA',
+    name: 'Douala',
+    regionIso: 'CM-LT',
+    coordinates: [9.7043, 4.0511],
+    labelOffset: [0, -14],
+  },
+  EDA: {
+    code: 'EDA',
+    name: 'Edéa',
+    regionIso: 'CM-LT',
+    coordinates: [10.1333, 3.8],
+    labelOffset: [0, 18],
+  },
+  EDE: {
+    code: 'EDA',
+    name: 'Edéa',
+    regionIso: 'CM-LT',
+    coordinates: [10.1333, 3.8],
+    labelOffset: [0, 18],
+  },
+  YDE: {
+    code: 'YDE',
+    name: 'Yaoundé',
+    regionIso: 'CM-CE',
+    coordinates: [11.5021, 3.848],
+    labelOffset: [0, -14],
+  },
+  BAF: {
+    code: 'BAF',
+    name: 'Bafoussam',
+    regionIso: 'CM-OU',
+    coordinates: [10.4179, 5.4778],
+    labelOffset: [0, -14],
+  },
+};
 
 export const CAMEROON_REGIONS: Record<string, IRegionConfig> = {
   'CM-LT': {
@@ -16,6 +63,7 @@ export const CAMEROON_REGIONS: Record<string, IRegionConfig> = {
     displayNameFr: 'Région du Littoral',
     townCode: 'DLA',
     townName: 'Douala',
+    townCodes: ['DLA', 'EDA'],
     coordinates: [9.7043, 4.0511],
   },
   'CM-CE': {

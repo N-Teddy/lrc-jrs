@@ -9,7 +9,7 @@ import {
   UserCheck,
 } from '@phosphor-icons/react';
 import type React from 'react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   formatActivityTime,
   getActivityTypeConfig,
@@ -20,17 +20,23 @@ interface ActivityCalendarViewProps {
   isLoading: boolean;
   selectedYear?: number;
   selectedMonth?: number;
+  onMonthChange?: (year: number, month: number) => void;
   onTrackAttendance: (activity: IActivity) => void;
   onEditActivity: (activity: IActivity) => void;
 }
 
 const DAYS_OF_WEEK = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
+const pad = (n: number) => n.toString().padStart(2, '0');
+const formatLocalDateKey = (d: Date) =>
+  `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+
 export const ActivityCalendarView: React.FC<ActivityCalendarViewProps> = ({
   activities,
   isLoading,
   selectedYear,
   selectedMonth,
+  onMonthChange,
   onTrackAttendance,
   onEditActivity,
 }) => {
@@ -42,6 +48,22 @@ export const ActivityCalendarView: React.FC<ActivityCalendarViewProps> = ({
     return new Date(year, month, 1);
   });
 
+  // Sync internal state if selectedYear or selectedMonth changes from parent
+  useEffect(() => {
+    if (selectedYear !== undefined) {
+      const targetMonth = selectedMonth !== undefined ? selectedMonth - 1 : 0;
+      setCurrentDate((prev) => {
+        if (
+          prev.getFullYear() !== selectedYear ||
+          prev.getMonth() !== targetMonth
+        ) {
+          return new Date(selectedYear, targetMonth, 1);
+        }
+        return prev;
+      });
+    }
+  }, [selectedYear, selectedMonth]);
+
   const [activeActivityModal, setActiveActivityModal] =
     useState<IActivity | null>(null);
 
@@ -51,16 +73,22 @@ export const ActivityCalendarView: React.FC<ActivityCalendarViewProps> = ({
   const monthName = currentDate.toLocaleString('default', { month: 'long' });
 
   const handlePrevMonth = () => {
-    setCurrentDate(new Date(year, month - 1, 1));
+    const newDate = new Date(year, month - 1, 1);
+    setCurrentDate(newDate);
+    onMonthChange?.(newDate.getFullYear(), newDate.getMonth() + 1);
   };
 
   const handleNextMonth = () => {
-    setCurrentDate(new Date(year, month + 1, 1));
+    const newDate = new Date(year, month + 1, 1);
+    setCurrentDate(newDate);
+    onMonthChange?.(newDate.getFullYear(), newDate.getMonth() + 1);
   };
 
   const handleToday = () => {
     const now = new Date();
-    setCurrentDate(new Date(now.getFullYear(), now.getMonth(), 1));
+    const newDate = new Date(now.getFullYear(), now.getMonth(), 1);
+    setCurrentDate(newDate);
+    onMonthChange?.(newDate.getFullYear(), newDate.getMonth() + 1);
   };
 
   // Calendar matrix calculation
@@ -83,7 +111,7 @@ export const ActivityCalendarView: React.FC<ActivityCalendarViewProps> = ({
         date: d,
         isCurrentMonth: false,
         dayNumber: prevMonthDays - i,
-        dateKey: d.toISOString().split('T')[0],
+        dateKey: formatLocalDateKey(d),
       });
     }
 
@@ -94,7 +122,7 @@ export const ActivityCalendarView: React.FC<ActivityCalendarViewProps> = ({
         date: d,
         isCurrentMonth: true,
         dayNumber: i,
-        dateKey: d.toISOString().split('T')[0],
+        dateKey: formatLocalDateKey(d),
       });
     }
 
@@ -106,19 +134,20 @@ export const ActivityCalendarView: React.FC<ActivityCalendarViewProps> = ({
         date: d,
         isCurrentMonth: false,
         dayNumber: i,
-        dateKey: d.toISOString().split('T')[0],
+        dateKey: formatLocalDateKey(d),
       });
     }
 
     return days;
   }, [year, month]);
 
-  // Group activities by date (YYYY-MM-DD)
+  // Group activities by local date (YYYY-MM-DD)
   const activitiesByDate = useMemo(() => {
     const map = new Map<string, IActivity[]>();
     for (const act of activities) {
       try {
-        const dateKey = new Date(act.startDate).toISOString().split('T')[0];
+        const d = new Date(act.startDate);
+        const dateKey = formatLocalDateKey(d);
         const list = map.get(dateKey) || [];
         list.push(act);
         map.set(dateKey, list);
@@ -129,7 +158,7 @@ export const ActivityCalendarView: React.FC<ActivityCalendarViewProps> = ({
     return map;
   }, [activities]);
 
-  const todayKey = new Date().toISOString().split('T')[0];
+  const todayKey = formatLocalDateKey(new Date());
 
   if (isLoading) {
     return (

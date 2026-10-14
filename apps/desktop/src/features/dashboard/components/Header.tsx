@@ -7,7 +7,7 @@ import {
   SignOut,
 } from '@phosphor-icons/react';
 import type React from 'react';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { LanguageToggle, UserAvatar } from '../../../components';
 import { formatDashboardDate } from '../utils/dashboard.utils';
 
@@ -28,6 +28,34 @@ export const Header: React.FC<HeaderProps> = ({
   const { user, signOut } = useAuth();
   const { activeTown } = useTownContext();
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const profileMenuRef = useRef<HTMLDivElement>(null);
+
+  // Close profile dropdown when clicking outside or pressing Escape
+  useEffect(() => {
+    if (!isProfileMenuOpen) return;
+
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        profileMenuRef.current &&
+        !profileMenuRef.current.contains(event.target as Node)
+      ) {
+        setIsProfileMenuOpen(false);
+      }
+    }
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') {
+        setIsProfileMenuOpen(false);
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isProfileMenuOpen]);
 
   const todayFormatted = formatDashboardDate(new Date(), i18n.language);
 
@@ -94,7 +122,7 @@ export const Header: React.FC<HeaderProps> = ({
       <div className="flex items-center gap-3 shrink-0">
         <LanguageToggle size="md" />
 
-        <div className="relative">
+        <div ref={profileMenuRef} className="relative">
           <button
             type="button"
             onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
@@ -130,56 +158,57 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* Profile Dropdown Menu */}
           {isProfileMenuOpen && (
-            <>
-              <div
-                className="fixed inset-0 z-30"
-                onClick={() => setIsProfileMenuOpen(false)}
-              />
-              <div className="absolute right-0 top-12 z-40 w-56 rounded-lg bg-white border border-[#e8e1dd] shadow-xl p-1.5 animate-in fade-in zoom-in-95 duration-150">
-                <div className="px-3 py-2 border-b border-[#e8e1dd] mb-1">
+            <div className="absolute right-0 top-12 z-40 w-64 rounded-xl bg-white border border-[#e8e1dd] shadow-xl p-2 animate-in fade-in zoom-in-95 duration-150">
+              <div className="flex items-center gap-3 px-2 py-2 border-b border-[#e8e1dd] mb-1">
+                <UserAvatar
+                  avatarUrl={user?.avatarUrl}
+                  name={user?.fullName}
+                  size="md"
+                />
+                <div className="min-w-0 flex-1">
                   <p className="text-xs font-bold text-[#1e1b19] truncate">
                     {user?.fullName}
                   </p>
-                  <p className="text-[11px] text-[#8a726a]">
-                    {user?.phoneNumber}
+                  <p className="text-[11px] text-[#8a726a] truncate">
+                    {user?.phoneNumber || user?.email}
                   </p>
-                  <div className="flex items-center gap-1.5 mt-1.5">
+                  <div className="flex items-center gap-1.5 mt-1">
                     <span className="px-2 py-0.5 rounded bg-[#edf3ee] text-[#486b52] text-[10px] font-bold">
                       {t('dashboard:accessRole', { role: user?.role })}
                     </span>
                     {activeTown && (
-                      <span className="text-[10px] text-[#8a726a]">
+                      <span className="text-[10px] text-[#8a726a] truncate">
                         {t('dashboard:hubPrefix', { name: activeTown.name })}
                       </span>
                     )}
                   </div>
                 </div>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsProfileMenuOpen(false);
-                    onOpenChangePassword();
-                  }}
-                  className="w-full flex items-center gap-2 px-3 py-2 rounded-md text-xs font-medium text-[#57423b] hover:bg-[#faf2ee] hover:text-[#1e1b19] transition cursor-pointer"
-                >
-                  <Key size={15} weight="bold" />
-                  <span>{t('dashboard:changePassword')}</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsProfileMenuOpen(false);
-                    signOut();
-                  }}
-                  className="w-full flex items-center gap-2 px-3 py-2 rounded-md text-xs font-bold text-[#ba1a1a] hover:bg-[#ffdad6] transition cursor-pointer"
-                >
-                  <SignOut size={15} weight="bold" />
-                  <span>{t('common:logOut')}</span>
-                </button>
               </div>
-            </>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setIsProfileMenuOpen(false);
+                  onOpenChangePassword();
+                }}
+                className="w-full flex items-center gap-2 px-3 py-2 rounded-md text-xs font-medium text-[#57423b] hover:bg-[#faf2ee] hover:text-[#1e1b19] transition cursor-pointer"
+              >
+                <Key size={15} weight="bold" />
+                <span>{t('dashboard:changePassword')}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setIsProfileMenuOpen(false);
+                  signOut();
+                }}
+                className="w-full flex items-center gap-2 px-3 py-2 rounded-md text-xs font-bold text-[#ba1a1a] hover:bg-[#ffdad6] transition cursor-pointer"
+              >
+                <SignOut size={15} weight="bold" />
+                <span>{t('common:logOut')}</span>
+              </button>
+            </div>
           )}
         </div>
       </div>

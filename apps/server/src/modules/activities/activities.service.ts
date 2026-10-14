@@ -205,7 +205,7 @@ export class ActivitiesService {
     // Date range filtering
     if (query.year) {
       const targetYear = Number(query.year);
-      if (!isNaN(targetYear) && targetYear > 2000) {
+      if (!Number.isNaN(targetYear) && targetYear > 2000) {
         if (query.month) {
           const targetMonth = Math.min(12, Math.max(1, Number(query.month)));
           const startOfMonth = new Date(
@@ -324,7 +324,7 @@ export class ActivitiesService {
 
     if (year) {
       const targetYear = Number(year);
-      if (!isNaN(targetYear) && targetYear > 2000) {
+      if (!Number.isNaN(targetYear) && targetYear > 2000) {
         if (month) {
           const targetMonth = Math.min(12, Math.max(1, Number(month)));
           const startOfMonth = new Date(
@@ -656,7 +656,6 @@ export class ActivitiesService {
     const processedAttendees: any[] = [];
     let _membersPresent = 0;
     let _guestsPresent = 0;
-    let _totalExcused = 0;
 
     for (const item of dto.attendees) {
       if (item.attendeeType === AttendeeType.MEMBER) {
@@ -666,7 +665,6 @@ export class ActivitiesService {
           );
         }
         if (item.status === AttendanceStatus.PRESENT) _membersPresent++;
-        else if (item.status === AttendanceStatus.EXCUSED) _totalExcused++;
 
         processedAttendees.push({
           attendeeType: AttendeeType.MEMBER,
@@ -767,14 +765,12 @@ export class ActivitiesService {
           totalPresent: 0,
           membersPresent: 0,
           guestsPresent: 0,
-          totalExcused: 0,
         },
       };
     }
 
     let membersPresent = 0;
     let guestsPresent = 0;
-    let totalExcused = 0;
 
     const attendees: IAttendanceItem[] = (attendanceDoc.attendees || []).map(
       (item) => {
@@ -794,8 +790,6 @@ export class ActivitiesService {
         if (item.status === AttendanceStatus.PRESENT) {
           if (item.attendeeType === AttendeeType.MEMBER) membersPresent++;
           else if (item.attendeeType === AttendeeType.GUEST) guestsPresent++;
-        } else if (item.status === AttendanceStatus.EXCUSED) {
-          totalExcused++;
         }
 
         return {
@@ -831,7 +825,6 @@ export class ActivitiesService {
         totalPresent: membersPresent + guestsPresent,
         membersPresent,
         guestsPresent,
-        totalExcused,
       },
     };
   }
@@ -906,7 +899,6 @@ export class ActivitiesService {
     >();
 
     let totalAttended = 0;
-    let totalExcused = 0;
     let totalAbsent = 0;
     let externalVisitsCount = 0;
     let hubAttendedCount = 0;
@@ -947,8 +939,6 @@ export class ActivitiesService {
         } else {
           hubAttendedCount++;
         }
-      } else if (attendee.status === AttendanceStatus.EXCUSED) {
-        totalExcused++;
       } else if (attendee.status === AttendanceStatus.ABSENT) {
         totalAbsent++;
       }
@@ -1052,7 +1042,6 @@ export class ActivitiesService {
     return {
       memberId,
       totalAttended,
-      totalExcused,
       totalAbsent,
       hubActivitiesCount,
       hubAttendanceRate,
