@@ -12,22 +12,21 @@ import {
 import { ActivityStatus, ActivityType, type IActivity } from '@jrs/shared';
 import type React from 'react';
 import { useState } from 'react';
-import { ActivityAttendanceDetailsModal } from './ActivityAttendanceDetailsModal';
 import { ActivityAttendanceRoster } from './ActivityAttendanceRoster';
 import { ActivityAuditLogView } from './ActivityAuditLogView';
 import { ActivityCalendarView } from './ActivityCalendarView';
 import { ActivityCardGridView } from './ActivityCardGridView';
+import { ActivityDetailPage } from './ActivityDetailPage';
 import {
   ActivityFilterToolbar,
   type ActivityViewMode,
 } from './ActivityFilterToolbar';
 import { ActivityFormModal } from './ActivityFormModal';
-import { ActivityReportUploadModal } from './ActivityReportUploadModal';
 import { ActivityStatsOverview } from './ActivityStatsOverview';
 import { ActivityTableView } from './ActivityTableView';
 import { DeleteActivityDialog } from './DeleteActivityDialog';
 
-type ActivitySubView = 'list' | 'attendance' | 'audit-log';
+type ActivitySubView = 'list' | 'details' | 'attendance' | 'audit-log';
 
 export const ActivitiesFeature: React.FC = () => {
   const { t } = useTranslation();
@@ -62,10 +61,6 @@ export const ActivitiesFeature: React.FC = () => {
   const [deletingActivity, setDeletingActivity] = useState<IActivity | null>(
     null,
   );
-  const [detailsActivity, setDetailsActivity] = useState<IActivity | null>(
-    null,
-  );
-  const [reportActivity, setReportActivity] = useState<IActivity | null>(null);
 
   const { data: townsData } = useTownsQuery();
   const towns = townsData || [];
@@ -103,6 +98,11 @@ export const ActivitiesFeature: React.FC = () => {
   const isPrivileged = user?.role === 'AP' || user?.role === 'PC';
 
   // Navigation Handlers
+  const handleViewDetails = (activity: IActivity) => {
+    setSelectedActivity(activity);
+    setSubView('details');
+  };
+
   const handleTrackAttendance = (activity: IActivity) => {
     setSelectedActivity(activity);
     setSubView('attendance');
@@ -158,31 +158,48 @@ export const ActivitiesFeature: React.FC = () => {
     setPage(1);
   };
 
-  // 1. Attendance Roster View
-  if (subView === 'attendance' && selectedActivity) {
+  const activities = activitiesData?.items || [];
+  const total = activitiesData?.total || 0;
+
+  // 1. Activity Detail Screen View (with tabs)
+  if (subView === 'details' && selectedActivity) {
+    const currentActivity =
+      activities.find((a) => a.id === selectedActivity.id) || selectedActivity;
     return (
-      <ActivityAttendanceRoster
-        activity={selectedActivity}
+      <ActivityDetailPage
+        activity={currentActivity}
         onBack={() => setSubView('list')}
+        onTrackAttendance={handleTrackAttendance}
+        onEditActivity={handleEditActivity}
+        onDeleteActivity={(act) => setDeletingActivity(act)}
+        isPrivileged={isPrivileged}
       />
     );
   }
 
-  // 2. Audit History View
+  // 2. Attendance Roster View
+  if (subView === 'attendance' && selectedActivity) {
+    return (
+      <ActivityAttendanceRoster
+        activity={selectedActivity}
+        onBack={() => setSubView('details')}
+      />
+    );
+  }
+
+  // 3. Audit History View
   if (subView === 'audit-log' && selectedActivity) {
     return (
       <ActivityAuditLogView
         activity={selectedActivity}
-        onBack={() => setSubView('list')}
+        onBack={() => setSubView('details')}
         onEditActivity={handleEditActivity}
       />
     );
   }
 
-  // 3. Main Activities Hub View
+  // 4. Main Activities Hub View
   const hubName = activeTown?.name || 'Cameroon';
-  const activities = activitiesData?.items || [];
-  const total = activitiesData?.total || 0;
 
   return (
     <div className="w-full flex flex-col gap-6 animate-in fade-in duration-200">
@@ -247,9 +264,7 @@ export const ActivitiesFeature: React.FC = () => {
           page={page}
           limit={limit}
           onPageChange={setPage}
-          onTrackAttendance={handleTrackAttendance}
-          onViewAttendanceDetails={(act) => setDetailsActivity(act)}
-          onUploadReport={(act) => setReportActivity(act)}
+          onViewDetails={handleViewDetails}
           onEditActivity={handleEditActivity}
           onViewHistory={handleViewHistory}
           onDeleteActivity={(act) => setDeletingActivity(act)}
@@ -263,9 +278,7 @@ export const ActivitiesFeature: React.FC = () => {
           page={page}
           limit={limit}
           onPageChange={setPage}
-          onTrackAttendance={handleTrackAttendance}
-          onViewAttendanceDetails={(act) => setDetailsActivity(act)}
-          onUploadReport={(act) => setReportActivity(act)}
+          onViewDetails={handleViewDetails}
           onEditActivity={handleEditActivity}
           onViewHistory={handleViewHistory}
           onDeleteActivity={(act) => setDeletingActivity(act)}
@@ -281,8 +294,7 @@ export const ActivitiesFeature: React.FC = () => {
             setYear(newYear);
             setMonth(newMonth);
           }}
-          onTrackAttendance={handleTrackAttendance}
-          onViewAttendanceDetails={(act) => setDetailsActivity(act)}
+          onViewDetails={handleViewDetails}
           onEditActivity={handleEditActivity}
         />
       )}
@@ -307,34 +319,6 @@ export const ActivitiesFeature: React.FC = () => {
         onConfirmDelete={handleConfirmDelete}
         isDeleting={deleteActivityMutation.isPending}
       />
-
-      {/* Attendance Details Modal */}
-      {detailsActivity && (
-        <ActivityAttendanceDetailsModal
-          isOpen={Boolean(detailsActivity)}
-          onClose={() => setDetailsActivity(null)}
-          activity={
-            activities.find((a) => a.id === detailsActivity.id) ||
-            detailsActivity
-          }
-          onNavigateToRoster={(act) => {
-            setDetailsActivity(null);
-            handleTrackAttendance(act);
-          }}
-        />
-      )}
-
-      {/* Activity Google Drive Report Upload Modal */}
-      {reportActivity && (
-        <ActivityReportUploadModal
-          isOpen={Boolean(reportActivity)}
-          onClose={() => setReportActivity(null)}
-          activity={
-            activities.find((a) => a.id === reportActivity.id) || reportActivity
-          }
-          isPrivileged={isPrivileged}
-        />
-      )}
     </div>
   );
 };

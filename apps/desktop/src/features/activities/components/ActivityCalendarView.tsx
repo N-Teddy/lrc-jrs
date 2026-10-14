@@ -3,11 +3,10 @@ import type { IActivity } from '@jrs/shared';
 import {
   CaretLeft,
   CaretRight,
-  ChartBar,
   Clock,
+  Eye,
   MapPin,
   PencilSimple,
-  UserCheck,
 } from '@phosphor-icons/react';
 import type React from 'react';
 import { useEffect, useMemo, useState } from 'react';
@@ -22,8 +21,7 @@ interface ActivityCalendarViewProps {
   selectedYear?: number;
   selectedMonth?: number;
   onMonthChange?: (year: number, month: number) => void;
-  onTrackAttendance: (activity: IActivity) => void;
-  onViewAttendanceDetails?: (activity: IActivity) => void;
+  onViewDetails: (activity: IActivity) => void;
   onEditActivity: (activity: IActivity) => void;
 }
 
@@ -39,8 +37,7 @@ export const ActivityCalendarView: React.FC<ActivityCalendarViewProps> = ({
   selectedYear,
   selectedMonth,
   onMonthChange,
-  onTrackAttendance,
-  onViewAttendanceDetails,
+  onViewDetails,
   onEditActivity,
 }) => {
   const { canWrite } = useTownContext();
@@ -339,33 +336,13 @@ export const ActivityCalendarView: React.FC<ActivityCalendarViewProps> = ({
                 onClick={() => {
                   const act = activeActivityModal;
                   setActiveActivityModal(null);
-                  onTrackAttendance(act);
+                  onViewDetails(act);
                 }}
                 className="flex-1 py-2 px-3 rounded-xl bg-[#b85028] text-white hover:bg-[#a44520] font-bold text-xs shadow-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
               >
-                <UserCheck size={16} weight="bold" />
-                <span>Track Attendance</span>
+                <Eye size={16} weight="bold" />
+                <span>Details</span>
               </button>
-
-              {onViewAttendanceDetails && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    const act = activeActivityModal;
-                    setActiveActivityModal(null);
-                    onViewAttendanceDetails(act);
-                  }}
-                  className="py-2 px-3 rounded-xl bg-[#faf2ee] border border-[#e8e1dd] text-[#57423b] hover:text-[#1e1b19] font-bold text-xs transition-colors cursor-pointer flex items-center gap-1"
-                  title="View Attendance & KPIs"
-                >
-                  <ChartBar
-                    size={15}
-                    weight="bold"
-                    className="text-[#486b52]"
-                  />
-                  <span>Details</span>
-                </button>
-              )}
 
               {canWrite && (
                 <button

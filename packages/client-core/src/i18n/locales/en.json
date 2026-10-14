@@ -304,6 +304,8 @@
       "empty": "No activities found matching your filters."
     },
     "card": {
+      "details": "Details",
+      "activityDetails": "Activity Details",
       "trackAttendance": "Track Attendance",
       "viewHistory": "History ({{count}})",
       "edit": "Edit",

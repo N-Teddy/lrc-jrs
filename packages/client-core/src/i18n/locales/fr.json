@@ -304,6 +304,8 @@
       "empty": "Aucune activité trouvée correspondant aux critères."
     },
     "card": {
+      "details": "Détails",
+      "activityDetails": "Détails de l'Activité",
       "trackAttendance": "Pointer les Présences",
       "viewHistory": "Historique ({{count}})",
       "edit": "Modifier",

@@ -1,16 +1,14 @@
 import { useTownContext, useTranslation } from '@jrs/client-core';
-import { ActivityStatus, type IActivity } from '@jrs/shared';
+import type { IActivity } from '@jrs/shared';
 import {
   CalendarBlank,
   CaretLeft,
   CaretRight,
-  ChartBar,
   ClockCounterClockwise,
-  CloudArrowUp,
   DotsThreeVertical,
+  Eye,
   PencilSimple,
   Trash,
-  UserCheck,
 } from '@phosphor-icons/react';
 import type React from 'react';
 import { useState } from 'react';
@@ -27,9 +25,7 @@ interface ActivityTableViewProps {
   page: number;
   limit: number;
   onPageChange: (page: number) => void;
-  onTrackAttendance: (activity: IActivity) => void;
-  onViewAttendanceDetails: (activity: IActivity) => void;
-  onUploadReport?: (activity: IActivity) => void;
+  onViewDetails: (activity: IActivity) => void;
   onEditActivity: (activity: IActivity) => void;
   onViewHistory: (activity: IActivity) => void;
   onDeleteActivity?: (activity: IActivity) => void;
@@ -43,9 +39,7 @@ export const ActivityTableView: React.FC<ActivityTableViewProps> = ({
   page,
   limit,
   onPageChange,
-  onTrackAttendance,
-  onViewAttendanceDetails,
-  onUploadReport,
+  onViewDetails,
   onEditActivity,
   onViewHistory,
   onDeleteActivity,
@@ -132,9 +126,13 @@ export const ActivityTableView: React.FC<ActivityTableViewProps> = ({
                         <TypeIcon size={18} weight="duotone" />
                       </div>
                       <div className="flex flex-col min-w-0 max-w-sm">
-                        <span className="font-bold text-sm text-[#1e1b19] group-hover:text-[#b85028] transition-colors leading-snug truncate">
+                        <button
+                          type="button"
+                          onClick={() => onViewDetails(activity)}
+                          className="font-bold text-sm text-[#1e1b19] group-hover:text-[#b85028] transition-colors leading-snug truncate text-left cursor-pointer"
+                        >
                           {activity.title}
-                        </span>
+                        </button>
                         {activity.notes && (
                           <span className="text-[11px] text-[#8a726a] line-clamp-1 mt-0.5">
                             {activity.notes}
@@ -206,59 +204,23 @@ export const ActivityTableView: React.FC<ActivityTableViewProps> = ({
 
                       {openMenuId === activity.id && (
                         <div
-                          className="absolute right-0 top-full mt-1 w-48 bg-white rounded-xl border border-[#e8e1dd] shadow-lg py-1 z-30 flex flex-col"
+                          className="absolute right-0 top-full mt-1 w-44 bg-white rounded-xl border border-[#e8e1dd] shadow-lg py-1 z-30 flex flex-col"
                           onMouseLeave={() => setOpenMenuId(null)}
                         >
-                          {/* Track Attendance Action */}
+                          {/* Activity Details Action */}
                           <button
                             type="button"
                             onClick={() => {
                               setOpenMenuId(null);
-                              onTrackAttendance(activity);
+                              onViewDetails(activity);
                             }}
                             className="w-full px-3 py-2 text-left text-xs text-[#b85028] hover:bg-[#fff2ee] flex items-center gap-2 font-bold cursor-pointer"
                           >
-                            <UserCheck size={15} weight="bold" />
-                            <span>{t('activities:card.trackAttendance')}</span>
+                            <Eye size={15} weight="bold" />
+                            <span>
+                              {t('activities:card.details', 'Details')}
+                            </span>
                           </button>
-
-                          {/* Attendance Details Action */}
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setOpenMenuId(null);
-                              onViewAttendanceDetails(activity);
-                            }}
-                            className="w-full px-3 py-2 text-left text-xs text-[#1e1b19] hover:bg-[#faf2ee] flex items-center gap-2 font-medium cursor-pointer"
-                          >
-                            <ChartBar
-                              size={15}
-                              weight="bold"
-                              className="text-[#486b52]"
-                            />
-                            <span>Attendance Details</span>
-                          </button>
-
-                          {/* Upload Report to Google Drive Action - STRICTLY ONLY IF PAST & COMPLETED */}
-                          {activity.status === ActivityStatus.COMPLETED &&
-                            new Date() >= new Date(activity.endDate) &&
-                            onUploadReport && (
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setOpenMenuId(null);
-                                  onUploadReport(activity);
-                                }}
-                                className="w-full px-3 py-2 text-left text-xs text-[#b85028] hover:bg-[#fff2ee] flex items-center gap-2 font-semibold cursor-pointer border-t border-[#f4ece9]"
-                              >
-                                <CloudArrowUp size={15} weight="bold" />
-                                <span>
-                                  {activity.report?.fileId
-                                    ? 'Drive Report'
-                                    : 'Upload Report'}
-                                </span>
-                              </button>
-                            )}
 
                           {canWrite && (
                             <button

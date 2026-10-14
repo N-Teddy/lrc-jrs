@@ -1,13 +1,12 @@
 import { useTownContext, useTranslation } from '@jrs/client-core';
-import { ActivityStatus, type IActivity } from '@jrs/shared';
+import type { IActivity } from '@jrs/shared';
 import {
   CalendarBlank,
   CaretLeft,
   CaretRight,
-  ChartBar,
   ClockCounterClockwise,
-  CloudArrowUp,
   DotsThreeVertical,
+  Eye,
   MapPin,
   PencilSimple,
   Trash,
@@ -29,9 +28,7 @@ interface ActivityCardGridViewProps {
   page: number;
   limit: number;
   onPageChange: (page: number) => void;
-  onTrackAttendance: (activity: IActivity) => void;
-  onViewAttendanceDetails: (activity: IActivity) => void;
-  onUploadReport?: (activity: IActivity) => void;
+  onViewDetails: (activity: IActivity) => void;
   onEditActivity: (activity: IActivity) => void;
   onViewHistory: (activity: IActivity) => void;
   onDeleteActivity?: (activity: IActivity) => void;
@@ -45,9 +42,7 @@ export const ActivityCardGridView: React.FC<ActivityCardGridViewProps> = ({
   page,
   limit,
   onPageChange,
-  onTrackAttendance,
-  onViewAttendanceDetails,
-  onUploadReport,
+  onViewDetails,
   onEditActivity,
   onViewHistory,
   onDeleteActivity,
@@ -155,45 +150,24 @@ export const ActivityCardGridView: React.FC<ActivityCardGridViewProps> = ({
 
                   {openMenuId === activity.id && (
                     <div
-                      className="absolute right-0 top-full mt-1 w-48 bg-white rounded-xl border border-[#e8e1dd] shadow-lg py-1 z-30 flex flex-col animate-in fade-in zoom-in-95 duration-100"
+                      className="absolute right-0 top-full mt-1 w-44 bg-white rounded-xl border border-[#e8e1dd] shadow-lg py-1 z-30 flex flex-col animate-in fade-in zoom-in-95 duration-100"
                       onMouseLeave={() => setOpenMenuId(null)}
                     >
                       <button
                         type="button"
                         onClick={() => {
                           setOpenMenuId(null);
-                          onViewAttendanceDetails(activity);
+                          onViewDetails(activity);
                         }}
                         className="w-full px-3 py-1.5 text-left text-xs text-[#1e1b19] hover:bg-[#faf2ee] flex items-center gap-2 font-medium cursor-pointer"
                       >
-                        <ChartBar
+                        <Eye
                           size={14}
                           weight="bold"
-                          className="text-[#486b52]"
+                          className="text-[#b85028]"
                         />
-                        <span>Attendance Details</span>
+                        <span>{t('activities:card.details', 'Details')}</span>
                       </button>
-
-                      {/* Upload Report - STRICTLY ONLY IF PAST & COMPLETED */}
-                      {activity.status === ActivityStatus.COMPLETED &&
-                        new Date() >= new Date(activity.endDate) &&
-                        onUploadReport && (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setOpenMenuId(null);
-                              onUploadReport(activity);
-                            }}
-                            className="w-full px-3 py-1.5 text-left text-xs text-[#b85028] hover:bg-[#fff2ee] flex items-center gap-2 font-semibold cursor-pointer border-t border-[#f4ece9]"
-                          >
-                            <CloudArrowUp size={14} weight="bold" />
-                            <span>
-                              {activity.report?.fileId
-                                ? 'Drive Report'
-                                : 'Upload Report'}
-                            </span>
-                          </button>
-                        )}
 
                       {canWrite && (
                         <button
@@ -276,12 +250,12 @@ export const ActivityCardGridView: React.FC<ActivityCardGridViewProps> = ({
                   </div>
                 </div>
 
-                {/* Turnout Pill - Clickable to open Attendance Details */}
+                {/* Turnout Pill - Clickable to open Activity Details */}
                 <button
                   type="button"
-                  onClick={() => onViewAttendanceDetails(activity)}
+                  onClick={() => onViewDetails(activity)}
                   className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-[#faf6f4] hover:bg-[#f4ede9] border border-[#f2ebe7] hover:border-[#b85028]/30 text-[11px] mt-0.5 cursor-pointer transition-colors text-left"
-                  title="Click to view full attendance breakdown"
+                  title="Click to view full activity & attendance details"
                 >
                   <div className="flex items-center gap-1.5">
                     <UserCheck
@@ -307,12 +281,12 @@ export const ActivityCardGridView: React.FC<ActivityCardGridViewProps> = ({
               <div className="flex items-center gap-1.5 pt-2 border-t border-[#f4ece9]">
                 <button
                   type="button"
-                  onClick={() => onTrackAttendance(activity)}
+                  onClick={() => onViewDetails(activity)}
                   className="flex-1 h-8 px-2.5 rounded-lg bg-[#b85028] text-white hover:bg-[#a44520] font-bold text-xs shadow-2xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
                 >
-                  <UserCheck size={14} weight="bold" />
+                  <Eye size={14} weight="bold" />
                   <span className="truncate">
-                    {t('activities:card.trackAttendance')}
+                    {t('activities:card.details', 'Details')}
                   </span>
                 </button>
 
