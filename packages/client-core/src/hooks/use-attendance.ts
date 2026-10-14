@@ -1,4 +1,5 @@
 import type {
+  IActivity,
   IAttendance,
   IMemberAttendanceHistoryResponse,
   IRecordAttendanceDto,
@@ -47,6 +48,102 @@ export function useRecordAttendanceMutation() {
       });
       queryClient.invalidateQueries({
         queryKey: queryKeys.activities.detail(variables.activityId),
+      });
+      queryClient.invalidateQueries({ queryKey: queryKeys.activities.all });
+    },
+  });
+}
+
+export function useLockAttendanceMutation() {
+  const http = useHttp();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      activityId,
+      reason,
+    }: {
+      activityId: string;
+      reason?: string;
+    }) =>
+      http.post<IActivity>(`/activities/${activityId}/attendance/lock`, {
+        reason,
+      }),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.attendance.byActivity(variables.activityId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.activities.detail(variables.activityId),
+      });
+      queryClient.invalidateQueries({ queryKey: queryKeys.activities.all });
+    },
+  });
+}
+
+export function useUnlockAttendanceMutation() {
+  const http = useHttp();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      activityId,
+      reason,
+    }: {
+      activityId: string;
+      reason?: string;
+    }) =>
+      http.post<IActivity>(`/activities/${activityId}/attendance/unlock`, {
+        reason,
+      }),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.attendance.byActivity(variables.activityId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.activities.detail(variables.activityId),
+      });
+      queryClient.invalidateQueries({ queryKey: queryKeys.activities.all });
+    },
+  });
+}
+
+export function useUploadActivityReportMutation() {
+  const http = useHttp();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      activityId,
+      formData,
+    }: {
+      activityId: string;
+      formData: FormData;
+    }) =>
+      http.post<IActivity>(`/activities/${activityId}/report`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.activities.detail(variables.activityId),
+      });
+      queryClient.invalidateQueries({ queryKey: queryKeys.activities.all });
+    },
+  });
+}
+
+export function useDeleteActivityReportMutation() {
+  const http = useHttp();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (activityId: string) =>
+      http.delete<IActivity>(`/activities/${activityId}/report`),
+    onSuccess: (_, activityId) => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.activities.detail(activityId),
       });
       queryClient.invalidateQueries({ queryKey: queryKeys.activities.all });
     },

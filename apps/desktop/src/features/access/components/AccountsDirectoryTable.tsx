@@ -7,7 +7,6 @@ import {
   EnvelopeSimple,
   Globe,
   Key,
-  PaperPlaneTilt,
   Phone,
   Prohibit,
   ShieldCheck,
@@ -140,7 +139,6 @@ export const AccountsDirectoryTable: React.FC<AccountsDirectoryTableProps> = ({
               const formattedPhone = formatCameroonPhone(m.phoneNumber);
               const cleanDigits = getCleanDigitsForWhatsApp(m.phoneNumber);
 
-              const hasAppAccess = m.account?.hasAppAccess ?? false;
               const isRevoked = m.account?.isAccessRevoked ?? false;
               const isTempPassword = m.isTemporaryPassword ?? false;
               const allowedTownIds = m.account?.allowedReadTownIds || [];
@@ -220,34 +218,25 @@ export const AccountsDirectoryTable: React.FC<AccountsDirectoryTableProps> = ({
 
                   {/* 4. Portal Status */}
                   <td className="py-3.5 px-6">
-                    {hasAppAccess ? (
-                      isRevoked ? (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-[#ffdad6] text-[#ba1a1a]">
-                          <span className="w-1.5 h-1.5 rounded-full bg-[#ba1a1a]" />
-                          <span>
-                            {t('access:table.suspended') || 'Suspended'}
-                          </span>
-                        </span>
-                      ) : isTempPassword ? (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-[#fff8e1] text-[#b78103] border border-[#ffe082]">
-                          <ClockCountdown size={13} weight="bold" />
-                          <span>
-                            {t('access:table.mustChangePassword') ||
-                              'Temp Code Active'}
-                          </span>
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-[#c2e9ca] text-[#2c4e37]">
-                          <span className="w-1.5 h-1.5 rounded-full bg-[#486b52]" />
-                          <span>{t('access:table.active') || 'Active'}</span>
-                        </span>
-                      )
-                    ) : (
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-[#faf2ee] text-[#8a726a] border border-[#e8e1dd]">
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#8a726a]" />
+                    {isRevoked ? (
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-[#ffdad6] text-[#ba1a1a]">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#ba1a1a]" />
                         <span>
-                          {t('access:table.noAccess') || 'No App Access'}
+                          {t('access:table.suspended') || 'Suspended'}
                         </span>
+                      </span>
+                    ) : isTempPassword ? (
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-[#fff8e1] text-[#b78103] border border-[#ffe082]">
+                        <ClockCountdown size={13} weight="bold" />
+                        <span>
+                          {t('access:table.mustChangePassword') ||
+                            'Temp Code Active'}
+                        </span>
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-[#c2e9ca] text-[#2c4e37]">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#486b52]" />
+                        <span>{t('access:table.active') || 'Active'}</span>
                       </span>
                     )}
                   </td>
@@ -275,17 +264,6 @@ export const AccountsDirectoryTable: React.FC<AccountsDirectoryTableProps> = ({
                   {/* 6. Actions */}
                   <td className="py-3.5 px-6 text-right">
                     <div className="relative inline-flex items-center gap-2 justify-end">
-                      {!hasAppAccess && (
-                        <button
-                          type="button"
-                          onClick={() => onOpenManageAccess(m)}
-                          className="px-3 py-1 rounded-lg bg-[#b85028] hover:bg-[#a44520] text-white text-xs font-bold transition-all shadow-xs flex items-center gap-1 cursor-pointer"
-                        >
-                          <PaperPlaneTilt size={13} weight="bold" />
-                          <span>{t('access:table.inviteNow') || 'Invite'}</span>
-                        </button>
-                      )}
-
                       {/* Three-dot dropdown menu */}
                       <div
                         className="relative"
@@ -313,13 +291,11 @@ export const AccountsDirectoryTable: React.FC<AccountsDirectoryTableProps> = ({
                             >
                               <Key size={14} className="text-[#8a726a]" />
                               <span>
-                                {!hasAppAccess
-                                  ? t('access:table.inviteNow') ||
-                                    'Grant App Access'
-                                  : isTempPassword
-                                    ? t('access:table.resend') ||
-                                      'Resend Credentials'
-                                    : 'Manage Access'}
+                                {isTempPassword
+                                  ? t('access:table.resend') ||
+                                    'Resend Credentials'
+                                  : t('access:table.manageAccess') ||
+                                    'Manage Credentials'}
                               </span>
                             </button>
 
@@ -350,7 +326,7 @@ export const AccountsDirectoryTable: React.FC<AccountsDirectoryTableProps> = ({
                               <span>View Profile</span>
                             </button>
 
-                            {hasAppAccess && isCurrentUserAp && (
+                            {isCurrentUserAp && (
                               <>
                                 <div className="my-1 border-t border-[#f4ece9]" />
                                 <button

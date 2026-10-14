@@ -17,6 +17,7 @@ import {
 } from '@jrs/shared';
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -32,6 +33,7 @@ import {
   User,
   type UserDocument,
 } from '../../database/schemas';
+import { DriveService } from '../../services/drive.service';
 import type {
   ActivityQueryDto,
   CreateActivityDto,
@@ -49,6 +51,7 @@ export class ActivitiesService {
     @InjectModel(Town.name)
     private readonly townModel: Model<TownDocument>,
     @InjectModel(User.name) readonly _userModel: Model<UserDocument>,
+    private readonly driveService: DriveService,
   ) {}
 
   /**
@@ -150,6 +153,23 @@ export class ActivitiesService {
       status: doc.status,
       changeHistory,
       attendanceCount: attendanceCounts || { members: 0, guests: 0, total: 0 },
+      isAttendanceLocked: Boolean(doc.isAttendanceLocked),
+      attendanceLockedAt: doc.attendanceLockedAt?.toISOString(),
+      attendanceLockedBy: doc.attendanceLockedBy?.toString(),
+      attendanceLockedByName: doc.attendanceLockedByName,
+      report: doc.report
+        ? {
+            fileId: doc.report.fileId,
+            filename: doc.report.filename,
+            webViewLink: doc.report.webViewLink,
+            uploadedBy: doc.report.uploadedBy?.toString() || '',
+            uploadedByName: doc.report.uploadedByName,
+            uploadedAt: doc.report.uploadedAt
+              ? doc.report.uploadedAt.toISOString()
+              : new Date().toISOString(),
+            summary: doc.report.summary,
+          }
+        : undefined,
       createdBy: doc.createdBy?.toString() || '',
       createdAt: (doc as any).createdAt
         ? (doc as any).createdAt.toISOString()
@@ -631,6 +651,13 @@ export class ActivitiesService {
       throw new NotFoundException(`Activity with ID ${activityId} not found`);
     }
 
+    // STRICT LOCK GUARD: Attendance cannot be modified if finalized and locked
+    if (activity.isAttendanceLocked) {
+      throw new BadRequestException(
+        'Attendance for this activity has been finalized and locked. Edits are disabled.',
+      );
+    }
+
     // STRICT TIMING GUARD: Attendance is forbidden before activity start date
     const now = new Date();
     if (now < activity.startDate) {
@@ -820,6 +847,14 @@ export class ActivitiesService {
       recordedAt: attendanceDoc.recordedAt
         ? attendanceDoc.recordedAt.toISOString()
         : '',
+      isLocked: Boolean(activity.isAttendanceLocked || attendanceDoc.isLocked),
+      lockedAt: (
+        activity.attendanceLockedAt || attendanceDoc.lockedAt
+      )?.toISOString(),
+      lockedBy: (
+        activity.attendanceLockedBy || attendanceDoc.lockedBy
+      )?.toString(),
+      lockReason: attendanceDoc.lockReason,
       attendees,
       summary: {
         totalPresent: membersPresent + guestsPresent,
@@ -1053,5 +1088,216 @@ export class ActivitiesService {
       visitedHubs: Array.from(visitedHubsMap.values()),
       items,
     };
+  }
+
+  /**
+   * Finalize and lock attendance for an activity
+   */
+  async lockAttendance(
+    activityId: string,
+    currentUser: IAuthUser,
+    reason?: string,
+  ): Promise<IActivity> {
+    if (!Types.ObjectId.isValid(activityId)) {
+      throw new BadRequestException('Invalid activity ID');
+    }
+
+    const activity = await this.activityModel
+      .findOne({ _id: new Types.ObjectId(activityId), isDeleted: false })
+      .exec();
+
+    if (!activity) {
+      throw new NotFoundException(`Activity with ID ${activityId} not found`);
+    }
+
+    if (currentUser.role !== UserRole.AP && currentUser.role !== UserRole.PC) {
+      throw new ForbiddenException(
+        'Only coordinators or overseers can lock attendance.',
+      );
+    }
+
+    const now = new Date();
+    activity.isAttendanceLocked = true;
+    activity.attendanceLockedAt = now;
+    activity.attendanceLockedBy = new Types.ObjectId(currentUser.id);
+    activity.attendanceLockedByName = currentUser.fullName;
+    await activity.save();
+
+    await this.attendanceModel.updateOne(
+      { activityId: activity._id },
+      {
+        $set: {
+          isLocked: true,
+          lockedAt: now,
+          lockedBy: new Types.ObjectId(currentUser.id),
+          lockReason: reason || 'Attendance finalized and locked',
+        },
+      },
+    );
+
+    return this.mapActivity(activity);
+  }
+
+  /**
+   * Unlock attendance for an activity (AP only administrative override)
+   */
+  async unlockAttendance(
+    activityId: string,
+    currentUser: IAuthUser,
+    reason?: string,
+  ): Promise<IActivity> {
+    if (!Types.ObjectId.isValid(activityId)) {
+      throw new BadRequestException('Invalid activity ID');
+    }
+
+    const activity = await this.activityModel
+      .findOne({ _id: new Types.ObjectId(activityId), isDeleted: false })
+      .exec();
+
+    if (!activity) {
+      throw new NotFoundException(`Activity with ID ${activityId} not found`);
+    }
+
+    // Strict AP authority check
+    if (currentUser.role !== UserRole.AP) {
+      throw new ForbiddenException(
+        'Only Apostolic Prefects (AP) have authority to unlock finalized attendance records.',
+      );
+    }
+
+    activity.isAttendanceLocked = false;
+    activity.attendanceLockedAt = undefined;
+    activity.attendanceLockedBy = undefined;
+    activity.attendanceLockedByName = undefined;
+
+    activity.changeHistory.push({
+      changeType: 'STATUS_CHANGED',
+      changedBy: new Types.ObjectId(currentUser.id),
+      changedByName: currentUser.fullName,
+      changedAt: new Date(),
+      previousValues: { isAttendanceLocked: true },
+      newValues: { isAttendanceLocked: false },
+      reason: reason || 'Attendance unlocked by AP override',
+    } as any);
+
+    await activity.save();
+
+    await this.attendanceModel.updateOne(
+      { activityId: activity._id },
+      {
+        $set: {
+          isLocked: false,
+          lockedAt: null,
+          lockedBy: null,
+          lockReason: reason || 'Unlocked by AP',
+        },
+      },
+    );
+
+    return this.mapActivity(activity);
+  }
+
+  /**
+   * Upload an activity report file to Google Drive
+   * (Strictly only available after the activity and if completed)
+   */
+  async uploadReport(
+    activityId: string,
+    file: Express.Multer.File,
+    summary: string | undefined,
+    currentUser: IAuthUser,
+  ): Promise<IActivity> {
+    if (!Types.ObjectId.isValid(activityId)) {
+      throw new BadRequestException('Invalid activity ID');
+    }
+
+    const activity = await this.activityModel
+      .findOne({ _id: new Types.ObjectId(activityId), isDeleted: false })
+      .exec();
+
+    if (!activity) {
+      throw new NotFoundException(`Activity with ID ${activityId} not found`);
+    }
+
+    // Strict timing & status check: Must be past activity date and COMPLETED
+    const now = new Date();
+    const isPastActivity = now >= activity.endDate;
+    const isCompleted = activity.status === ActivityStatus.COMPLETED;
+
+    if (!isCompleted || !isPastActivity) {
+      throw new BadRequestException(
+        'Activity reports can only be uploaded after the activity has taken place and is marked as COMPLETED.',
+      );
+    }
+
+    if (currentUser.role !== UserRole.AP && currentUser.role !== UserRole.PC) {
+      throw new ForbiddenException(
+        'Only coordinators or overseers can upload activity reports.',
+      );
+    }
+
+    if (!file || !file.buffer) {
+      throw new BadRequestException('Report file is required.');
+    }
+
+    // If a report already exists, remove the previous file from Google Drive
+    if (activity.report?.fileId) {
+      await this.driveService.deleteFile(activity.report.fileId);
+    }
+
+    const sanitizedTitle = activity.title.replace(/[^a-zA-Z0-9_-]/g, '_');
+    const uploadResult = await this.driveService.uploadFile({
+      filename: `Report_${sanitizedTitle}_${Date.now()}_${file.originalname}`,
+      mimeType: file.mimetype,
+      content: file.buffer,
+    });
+
+    activity.report = {
+      fileId: uploadResult.fileId,
+      filename: file.originalname,
+      webViewLink: uploadResult.webViewLink,
+      uploadedBy: new Types.ObjectId(currentUser.id),
+      uploadedByName: currentUser.fullName,
+      uploadedAt: new Date(),
+      summary: summary?.trim(),
+    } as any;
+
+    await activity.save();
+
+    return this.mapActivity(activity);
+  }
+
+  /**
+   * Delete an activity report
+   */
+  async deleteReport(
+    activityId: string,
+    currentUser: IAuthUser,
+  ): Promise<IActivity> {
+    if (!Types.ObjectId.isValid(activityId)) {
+      throw new BadRequestException('Invalid activity ID');
+    }
+
+    const activity = await this.activityModel
+      .findOne({ _id: new Types.ObjectId(activityId), isDeleted: false })
+      .exec();
+
+    if (!activity) {
+      throw new NotFoundException(`Activity with ID ${activityId} not found`);
+    }
+
+    if (currentUser.role !== UserRole.AP && currentUser.role !== UserRole.PC) {
+      throw new ForbiddenException(
+        'Only coordinators or overseers can manage reports.',
+      );
+    }
+
+    if (activity.report?.fileId) {
+      await this.driveService.deleteFile(activity.report.fileId);
+      activity.report = undefined;
+      await activity.save();
+    }
+
+    return this.mapActivity(activity);
   }
 }

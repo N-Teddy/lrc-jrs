@@ -29,7 +29,10 @@ export interface IInviteUserDto {
 /**
  * Hook to query paginated, filtered, and searched members
  */
-export function useMembersQuery(query?: IMemberQueryDto) {
+export function useMembersQuery(
+  query?: IMemberQueryDto,
+  options?: { enabled?: boolean },
+) {
   const http = useHttp();
   return useQuery({
     queryKey: queryKeys.users.list(query),
@@ -37,6 +40,7 @@ export function useMembersQuery(query?: IMemberQueryDto) {
       http.get<IPaginatedMembersResponse>('/users', {
         params: query,
       }),
+    enabled: options?.enabled ?? true,
   });
 }
 

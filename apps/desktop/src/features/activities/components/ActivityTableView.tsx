@@ -1,10 +1,12 @@
 import { useTownContext, useTranslation } from '@jrs/client-core';
-import type { IActivity } from '@jrs/shared';
+import { ActivityStatus, type IActivity } from '@jrs/shared';
 import {
   CalendarBlank,
   CaretLeft,
   CaretRight,
+  ChartBar,
   ClockCounterClockwise,
+  CloudArrowUp,
   DotsThreeVertical,
   PencilSimple,
   Trash,
@@ -26,6 +28,8 @@ interface ActivityTableViewProps {
   limit: number;
   onPageChange: (page: number) => void;
   onTrackAttendance: (activity: IActivity) => void;
+  onViewAttendanceDetails: (activity: IActivity) => void;
+  onUploadReport?: (activity: IActivity) => void;
   onEditActivity: (activity: IActivity) => void;
   onViewHistory: (activity: IActivity) => void;
   onDeleteActivity?: (activity: IActivity) => void;
@@ -40,6 +44,8 @@ export const ActivityTableView: React.FC<ActivityTableViewProps> = ({
   limit,
   onPageChange,
   onTrackAttendance,
+  onViewAttendanceDetails,
+  onUploadReport,
   onEditActivity,
   onViewHistory,
   onDeleteActivity,
@@ -200,7 +206,7 @@ export const ActivityTableView: React.FC<ActivityTableViewProps> = ({
 
                       {openMenuId === activity.id && (
                         <div
-                          className="absolute right-0 top-full mt-1 w-44 bg-white rounded-xl border border-[#e8e1dd] shadow-lg py-1 z-30 flex flex-col"
+                          className="absolute right-0 top-full mt-1 w-48 bg-white rounded-xl border border-[#e8e1dd] shadow-lg py-1 z-30 flex flex-col"
                           onMouseLeave={() => setOpenMenuId(null)}
                         >
                           {/* Track Attendance Action */}
@@ -215,6 +221,44 @@ export const ActivityTableView: React.FC<ActivityTableViewProps> = ({
                             <UserCheck size={15} weight="bold" />
                             <span>{t('activities:card.trackAttendance')}</span>
                           </button>
+
+                          {/* Attendance Details Action */}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setOpenMenuId(null);
+                              onViewAttendanceDetails(activity);
+                            }}
+                            className="w-full px-3 py-2 text-left text-xs text-[#1e1b19] hover:bg-[#faf2ee] flex items-center gap-2 font-medium cursor-pointer"
+                          >
+                            <ChartBar
+                              size={15}
+                              weight="bold"
+                              className="text-[#486b52]"
+                            />
+                            <span>Attendance Details</span>
+                          </button>
+
+                          {/* Upload Report to Google Drive Action - STRICTLY ONLY IF PAST & COMPLETED */}
+                          {activity.status === ActivityStatus.COMPLETED &&
+                            new Date() >= new Date(activity.endDate) &&
+                            onUploadReport && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setOpenMenuId(null);
+                                  onUploadReport(activity);
+                                }}
+                                className="w-full px-3 py-2 text-left text-xs text-[#b85028] hover:bg-[#fff2ee] flex items-center gap-2 font-semibold cursor-pointer border-t border-[#f4ece9]"
+                              >
+                                <CloudArrowUp size={15} weight="bold" />
+                                <span>
+                                  {activity.report?.fileId
+                                    ? 'Drive Report'
+                                    : 'Upload Report'}
+                                </span>
+                              </button>
+                            )}
 
                           {canWrite && (
                             <button

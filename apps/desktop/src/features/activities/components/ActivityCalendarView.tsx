@@ -3,6 +3,7 @@ import type { IActivity } from '@jrs/shared';
 import {
   CaretLeft,
   CaretRight,
+  ChartBar,
   Clock,
   MapPin,
   PencilSimple,
@@ -22,6 +23,7 @@ interface ActivityCalendarViewProps {
   selectedMonth?: number;
   onMonthChange?: (year: number, month: number) => void;
   onTrackAttendance: (activity: IActivity) => void;
+  onViewAttendanceDetails?: (activity: IActivity) => void;
   onEditActivity: (activity: IActivity) => void;
 }
 
@@ -38,6 +40,7 @@ export const ActivityCalendarView: React.FC<ActivityCalendarViewProps> = ({
   selectedMonth,
   onMonthChange,
   onTrackAttendance,
+  onViewAttendanceDetails,
   onEditActivity,
 }) => {
   const { canWrite } = useTownContext();
@@ -343,6 +346,26 @@ export const ActivityCalendarView: React.FC<ActivityCalendarViewProps> = ({
                 <UserCheck size={16} weight="bold" />
                 <span>Track Attendance</span>
               </button>
+
+              {onViewAttendanceDetails && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    const act = activeActivityModal;
+                    setActiveActivityModal(null);
+                    onViewAttendanceDetails(act);
+                  }}
+                  className="py-2 px-3 rounded-xl bg-[#faf2ee] border border-[#e8e1dd] text-[#57423b] hover:text-[#1e1b19] font-bold text-xs transition-colors cursor-pointer flex items-center gap-1"
+                  title="View Attendance & KPIs"
+                >
+                  <ChartBar
+                    size={15}
+                    weight="bold"
+                    className="text-[#486b52]"
+                  />
+                  <span>Details</span>
+                </button>
+              )}
 
               {canWrite && (
                 <button

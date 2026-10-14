@@ -62,4 +62,12 @@ export class MemberQueryDto {
   @Type(() => Boolean)
   @IsBoolean()
   isJr?: boolean;
+
+  @ApiPropertyOptional({
+    description: 'Filter only members with or without platform app access',
+  })
+  @IsOptional()
+  @Type(() => Boolean)
+  @IsBoolean()
+  hasAppAccess?: boolean;
 }

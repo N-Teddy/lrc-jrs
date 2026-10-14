@@ -67,6 +67,18 @@ export class Attendance extends BaseDocument {
   @Prop({ default: Date.now })
   recordedAt: Date;
 
+  @Prop({ default: false, index: true })
+  isLocked: boolean;
+
+  @Prop()
+  lockedAt?: Date;
+
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User' })
+  lockedBy?: Types.ObjectId;
+
+  @Prop()
+  lockReason?: string;
+
   @Prop({ type: [AttendanceItemSchema], default: [] })
   attendees: AttendanceItem[];
 }

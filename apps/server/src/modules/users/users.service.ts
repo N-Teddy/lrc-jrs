@@ -222,6 +222,11 @@ export class UsersService {
       filter.isJr = query.isJr;
     }
 
+    // App access filter
+    if (query.hasAppAccess !== undefined) {
+      filter['account.hasAppAccess'] = query.hasAppAccess;
+    }
+
     // Search query matching name, phone, or email
     if (query.search?.trim()) {
       const term = query.search.trim();

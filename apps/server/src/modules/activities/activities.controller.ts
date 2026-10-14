@@ -11,10 +11,14 @@ import {
   Patch,
   Post,
   Query,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import {
   ApiBearerAuth,
+  ApiConsumes,
   ApiOperation,
   ApiResponse,
   ApiTags,
@@ -145,5 +149,60 @@ export class ActivitiesController {
     @CurrentUser() currentUser: IAuthUser,
   ) {
     return this.activitiesService.recordAttendance(id, dto, currentUser);
+  }
+
+  @Post(':id/attendance/lock')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Finalize and lock attendance for an activity' })
+  @ApiResponse({ status: 200, description: 'Attendance locked' })
+  async lockAttendance(
+    @Param('id') id: string,
+    @Body('reason') reason: string,
+    @CurrentUser() currentUser: IAuthUser,
+  ) {
+    return this.activitiesService.lockAttendance(id, currentUser, reason);
+  }
+
+  @Post(':id/attendance/unlock')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Unlock finalized attendance for an activity (AP only)',
+  })
+  @ApiResponse({ status: 200, description: 'Attendance unlocked' })
+  async unlockAttendance(
+    @Param('id') id: string,
+    @Body('reason') reason: string,
+    @CurrentUser() currentUser: IAuthUser,
+  ) {
+    return this.activitiesService.unlockAttendance(id, currentUser, reason);
+  }
+
+  @Post(':id/report')
+  @HttpCode(HttpStatus.OK)
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiConsumes('multipart/form-data')
+  @ApiOperation({
+    summary:
+      'Upload an activity report to Google Drive (only available after activity is completed)',
+  })
+  @ApiResponse({ status: 200, description: 'Report uploaded successfully' })
+  async uploadReport(
+    @Param('id') id: string,
+    @UploadedFile() file: Express.Multer.File,
+    @Body('summary') summary: string,
+    @CurrentUser() currentUser: IAuthUser,
+  ) {
+    return this.activitiesService.uploadReport(id, file, summary, currentUser);
+  }
+
+  @Delete(':id/report')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Delete an activity report from Google Drive' })
+  @ApiResponse({ status: 200, description: 'Report removed' })
+  async deleteReport(
+    @Param('id') id: string,
+    @CurrentUser() currentUser: IAuthUser,
+  ) {
+    return this.activitiesService.deleteReport(id, currentUser);
   }
 }

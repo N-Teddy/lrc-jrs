@@ -132,6 +132,7 @@ export interface IMemberQueryDto {
   townId?: string;
   role?: UserRole;
   isJr?: boolean;
+  hasAppAccess?: boolean;
 }
 
 export interface IMemberStats {

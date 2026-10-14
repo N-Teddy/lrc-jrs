@@ -1,9 +1,12 @@
 import {
   useAttendanceQuery,
+  useAuth,
+  useLockAttendanceMutation,
   useMembersQuery,
   useRecordAttendanceMutation,
   useTownContext,
   useTranslation,
+  useUnlockAttendanceMutation,
 } from '@jrs/client-core';
 import {
   ActivityStatus,
@@ -80,6 +83,9 @@ export const ActivityAttendanceRoster: React.FC<
   const { t, i18n } = useTranslation(['attendance', 'towns', 'common']);
   const isFrench = i18n.language?.startsWith('fr');
   const { canWrite } = useTownContext();
+  const { user } = useAuth();
+  const isCurrentUserAp = user?.role === 'AP';
+  const isPrivileged = user?.role === 'AP' || user?.role === 'PC';
 
   // Active sub-tab: 'members' | 'guests'
   const [activeTab, setActiveTab] = useState<'members' | 'guests'>('members');
@@ -87,20 +93,73 @@ export const ActivityAttendanceRoster: React.FC<
   const [saveSuccessMsg, setSaveSuccessMsg] = useState<string | null>(null);
   const [saveErrorMsg, setSaveErrorMsg] = useState<string | null>(null);
 
+  // Queries
+  const { data: attendanceData, isLoading: isAttendanceLoading } =
+    useAttendanceQuery(activity.id);
+
   // Timing guard & simulation
   const actuallyStarted = isActivityStarted(activity.startDate);
   const [simulatedUnlocked, setSimulatedUnlocked] = useState(false);
   const isUnlocked = actuallyStarted || simulatedUnlocked;
+
+  // Lock status
+  const isAttendanceLocked = Boolean(
+    activity.isAttendanceLocked || attendanceData?.isLocked,
+  );
+  const isEditable = isUnlocked && (!isAttendanceLocked || isCurrentUserAp);
+
+  const lockMutation = useLockAttendanceMutation();
+  const unlockMutation = useUnlockAttendanceMutation();
+
+  const handleLockAttendance = async () => {
+    if (
+      !confirm(
+        'Are you sure you want to finalize and lock attendance for this activity? Further edits will be sealed.',
+      )
+    ) {
+      return;
+    }
+    try {
+      await lockMutation.mutateAsync({
+        activityId: activity.id,
+        reason: 'Roll call finalized',
+      });
+      setSaveSuccessMsg('Attendance finalized and locked successfully');
+    } catch (err: any) {
+      setSaveErrorMsg(
+        err.response?.data?.message ||
+          err.message ||
+          'Failed to lock attendance',
+      );
+    }
+  };
+
+  const handleUnlockAttendance = async () => {
+    const reason = prompt(
+      'Please enter an administrative override reason for unlocking:',
+    );
+    if (!reason?.trim()) return;
+
+    try {
+      await unlockMutation.mutateAsync({
+        activityId: activity.id,
+        reason: reason.trim(),
+      });
+      setSaveSuccessMsg('Attendance unlocked via AP override');
+    } catch (err: any) {
+      setSaveErrorMsg(
+        err.response?.data?.message ||
+          err.message ||
+          'Failed to unlock attendance',
+      );
+    }
+  };
 
   // Modals
   const [isAddGuestModalOpen, setIsAddGuestModalOpen] = useState(false);
   const [guestName, setGuestName] = useState('');
   const [guestPhone, setGuestPhone] = useState('');
   const [guestNotes, setGuestNotes] = useState('');
-
-  // Queries
-  const { data: attendanceData, isLoading: isAttendanceLoading } =
-    useAttendanceQuery(activity.id);
 
   // 1. Local town hub members (default roster)
   const { data: membersData, isLoading: isMembersLoading } = useMembersQuery({
@@ -487,12 +546,37 @@ export const ActivityAttendanceRoster: React.FC<
                 </button>
               )}
 
+              {/* Lock / Unlock Attendance Button */}
+              {isAttendanceLocked
+                ? isCurrentUserAp && (
+                    <button
+                      type="button"
+                      onClick={handleUnlockAttendance}
+                      disabled={unlockMutation.isPending}
+                      className="px-3.5 py-2 rounded-lg bg-white border border-[#ffe082] text-[#812901] hover:bg-[#fffbf0] font-bold text-xs shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <LockOpen size={15} weight="bold" />
+                      <span>Unlock (AP Override)</span>
+                    </button>
+                  )
+                : isPrivileged && (
+                    <button
+                      type="button"
+                      onClick={handleLockAttendance}
+                      disabled={lockMutation.isPending}
+                      className="px-3.5 py-2 rounded-lg bg-[#2c4e37] hover:bg-[#233f2c] text-white font-bold text-xs shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <Lock size={15} weight="bold" />
+                      <span>Finalize & Lock</span>
+                    </button>
+                  )}
+
               {/* Primary Save Attendance Button */}
               <button
                 type="button"
                 onClick={handleSaveAttendance}
                 disabled={
-                  !isUnlocked || recordAttendanceMutation.isPending || !isDirty
+                  !isEditable || recordAttendanceMutation.isPending || !isDirty
                 }
                 title={!isDirty ? 'No changes detected' : undefined}
                 className="px-4 py-2 rounded-lg bg-[#b85028] hover:bg-[#a44520] text-white font-bold text-xs shadow-xs transition-colors flex items-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
@@ -686,6 +770,38 @@ export const ActivityAttendanceRoster: React.FC<
               })}
             </p>
           </div>
+        </div>
+      )}
+
+      {/* Attendance Finalized & Locked Notice */}
+      {isAttendanceLocked && (
+        <div className="bg-[#fff8e1] border border-[#ffe082] rounded-2xl p-4 flex items-center justify-between gap-4 flex-wrap">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-[#ffe082] text-[#812901] flex items-center justify-center shrink-0">
+              <Lock size={20} weight="bold" />
+            </div>
+            <div className="flex flex-col gap-0.5">
+              <h3 className="font-bold text-xs text-[#812901]">
+                Attendance Finalized & Sealed
+              </h3>
+              <p className="text-xs text-[#57423b]">
+                {activity.attendanceLockedByName
+                  ? `Finalized by ${activity.attendanceLockedByName}. Modifying attendance is locked to preserve records.`
+                  : 'Attendance has been officially locked and cannot be edited.'}
+              </p>
+            </div>
+          </div>
+          {isCurrentUserAp && (
+            <button
+              type="button"
+              onClick={handleUnlockAttendance}
+              disabled={unlockMutation.isPending}
+              className="px-3.5 py-1.5 rounded-xl bg-white border border-[#ffe082] text-xs font-bold text-[#812901] hover:bg-[#fffbf0] transition-colors cursor-pointer flex items-center gap-1.5 shadow-2xs"
+            >
+              <LockOpen size={14} weight="bold" />
+              <span>Unlock (AP Override)</span>
+            </button>
+          )}
         </div>
       )}
 

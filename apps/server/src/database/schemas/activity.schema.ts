@@ -38,6 +38,33 @@ export class ActivityChangeLog {
 export const ActivityChangeLogSchema =
   SchemaFactory.createForClass(ActivityChangeLog);
 
+@Schema({ _id: false })
+export class ActivityReport {
+  @Prop({ required: true })
+  fileId: string;
+
+  @Prop({ required: true })
+  filename: string;
+
+  @Prop()
+  webViewLink?: string;
+
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User', required: true })
+  uploadedBy: Types.ObjectId;
+
+  @Prop()
+  uploadedByName?: string;
+
+  @Prop({ default: Date.now })
+  uploadedAt: Date;
+
+  @Prop()
+  summary?: string;
+}
+
+export const ActivityReportSchema =
+  SchemaFactory.createForClass(ActivityReport);
+
 @Schema(baseSchemaOptions)
 export class Activity extends BaseDocument {
   @Prop({ required: true, trim: true })
@@ -88,6 +115,21 @@ export class Activity extends BaseDocument {
 
   @Prop({ type: [ActivityChangeLogSchema], default: [] })
   changeHistory: ActivityChangeLog[];
+
+  @Prop({ default: false, index: true })
+  isAttendanceLocked: boolean;
+
+  @Prop()
+  attendanceLockedAt?: Date;
+
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User' })
+  attendanceLockedBy?: Types.ObjectId;
+
+  @Prop()
+  attendanceLockedByName?: string;
+
+  @Prop({ type: ActivityReportSchema })
+  report?: ActivityReport;
 
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User', required: true })
   createdBy: Types.ObjectId;

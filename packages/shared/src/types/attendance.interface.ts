@@ -36,6 +36,10 @@ export interface IAttendance {
   activity?: IActivity;
   recordedBy: string;
   recordedAt: string;
+  isLocked?: boolean;
+  lockedAt?: string;
+  lockedBy?: string;
+  lockReason?: string;
   attendees: IAttendanceItem[];
   summary: {
     totalPresent: number;

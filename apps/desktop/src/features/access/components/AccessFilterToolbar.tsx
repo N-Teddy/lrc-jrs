@@ -13,12 +13,7 @@ import { useMemo } from 'react';
 import { CustomSelect, type SelectOption } from '../../../components';
 
 export type AccessTabId = 'directory' | 'permissions' | 'audit';
-export type AccountStateFilter =
-  | 'ALL'
-  | 'ACTIVE'
-  | 'PENDING'
-  | 'REVOKED'
-  | 'OFFLINE';
+export type AccountStateFilter = 'ALL' | 'ACTIVE' | 'PENDING' | 'REVOKED';
 
 interface AccessFilterToolbarProps {
   activeTab: AccessTabId;
@@ -72,11 +67,11 @@ export const AccessFilterToolbar: React.FC<AccessFilterToolbarProps> = ({
     () => [
       {
         value: 'ALL',
-        label: t('access:filters.allStates') || 'All Account States',
+        label: t('access:filters.allStates') || 'All App Accounts',
       },
       {
         value: 'ACTIVE',
-        label: t('access:filters.active') || 'Active Only',
+        label: t('access:filters.active') || 'Active Accounts',
       },
       {
         value: 'PENDING',
@@ -84,11 +79,7 @@ export const AccessFilterToolbar: React.FC<AccessFilterToolbarProps> = ({
       },
       {
         value: 'REVOKED',
-        label: t('access:filters.suspended') || 'Suspended',
-      },
-      {
-        value: 'OFFLINE',
-        label: t('access:filters.offline') || 'Offline (No App Access)',
+        label: t('access:filters.suspended') || 'Suspended Access',
       },
     ],
     [t],

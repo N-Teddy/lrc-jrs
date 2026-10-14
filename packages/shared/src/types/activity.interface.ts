@@ -27,6 +27,16 @@ export interface IActivityChangeLog {
   reason?: string;
 }
 
+export interface IActivityReport {
+  fileId: string;
+  filename: string;
+  webViewLink?: string;
+  uploadedBy: string;
+  uploadedByName?: string;
+  uploadedAt: string;
+  summary?: string;
+}
+
 export interface IActivity {
   id: string;
   title: string;
@@ -46,6 +56,11 @@ export interface IActivity {
     guests: number;
     total: number;
   };
+  isAttendanceLocked?: boolean;
+  attendanceLockedAt?: string;
+  attendanceLockedBy?: string;
+  attendanceLockedByName?: string;
+  report?: IActivityReport;
   createdBy: string;
   createdAt: string;
   updatedAt: string;

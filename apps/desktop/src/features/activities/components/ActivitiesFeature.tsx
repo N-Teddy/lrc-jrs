@@ -12,6 +12,7 @@ import {
 import { ActivityStatus, ActivityType, type IActivity } from '@jrs/shared';
 import type React from 'react';
 import { useState } from 'react';
+import { ActivityAttendanceDetailsModal } from './ActivityAttendanceDetailsModal';
 import { ActivityAttendanceRoster } from './ActivityAttendanceRoster';
 import { ActivityAuditLogView } from './ActivityAuditLogView';
 import { ActivityCalendarView } from './ActivityCalendarView';
@@ -21,6 +22,7 @@ import {
   type ActivityViewMode,
 } from './ActivityFilterToolbar';
 import { ActivityFormModal } from './ActivityFormModal';
+import { ActivityReportUploadModal } from './ActivityReportUploadModal';
 import { ActivityStatsOverview } from './ActivityStatsOverview';
 import { ActivityTableView } from './ActivityTableView';
 import { DeleteActivityDialog } from './DeleteActivityDialog';
@@ -60,6 +62,10 @@ export const ActivitiesFeature: React.FC = () => {
   const [deletingActivity, setDeletingActivity] = useState<IActivity | null>(
     null,
   );
+  const [detailsActivity, setDetailsActivity] = useState<IActivity | null>(
+    null,
+  );
+  const [reportActivity, setReportActivity] = useState<IActivity | null>(null);
 
   const { data: townsData } = useTownsQuery();
   const towns = townsData || [];
@@ -242,6 +248,8 @@ export const ActivitiesFeature: React.FC = () => {
           limit={limit}
           onPageChange={setPage}
           onTrackAttendance={handleTrackAttendance}
+          onViewAttendanceDetails={(act) => setDetailsActivity(act)}
+          onUploadReport={(act) => setReportActivity(act)}
           onEditActivity={handleEditActivity}
           onViewHistory={handleViewHistory}
           onDeleteActivity={(act) => setDeletingActivity(act)}
@@ -256,6 +264,8 @@ export const ActivitiesFeature: React.FC = () => {
           limit={limit}
           onPageChange={setPage}
           onTrackAttendance={handleTrackAttendance}
+          onViewAttendanceDetails={(act) => setDetailsActivity(act)}
+          onUploadReport={(act) => setReportActivity(act)}
           onEditActivity={handleEditActivity}
           onViewHistory={handleViewHistory}
           onDeleteActivity={(act) => setDeletingActivity(act)}
@@ -272,6 +282,7 @@ export const ActivitiesFeature: React.FC = () => {
             setMonth(newMonth);
           }}
           onTrackAttendance={handleTrackAttendance}
+          onViewAttendanceDetails={(act) => setDetailsActivity(act)}
           onEditActivity={handleEditActivity}
         />
       )}
@@ -296,6 +307,34 @@ export const ActivitiesFeature: React.FC = () => {
         onConfirmDelete={handleConfirmDelete}
         isDeleting={deleteActivityMutation.isPending}
       />
+
+      {/* Attendance Details Modal */}
+      {detailsActivity && (
+        <ActivityAttendanceDetailsModal
+          isOpen={Boolean(detailsActivity)}
+          onClose={() => setDetailsActivity(null)}
+          activity={
+            activities.find((a) => a.id === detailsActivity.id) ||
+            detailsActivity
+          }
+          onNavigateToRoster={(act) => {
+            setDetailsActivity(null);
+            handleTrackAttendance(act);
+          }}
+        />
+      )}
+
+      {/* Activity Google Drive Report Upload Modal */}
+      {reportActivity && (
+        <ActivityReportUploadModal
+          isOpen={Boolean(reportActivity)}
+          onClose={() => setReportActivity(null)}
+          activity={
+            activities.find((a) => a.id === reportActivity.id) || reportActivity
+          }
+          isPrivileged={isPrivileged}
+        />
+      )}
     </div>
   );
 };

@@ -54,11 +54,12 @@ export const AccessFeature: React.FC = () => {
   const { data: townsData } = useTownsQuery();
   const availableTowns = useMemo(() => townsData ?? [], [townsData]);
 
-  // Members Query
+  // Members Query (Only members with platform app access)
   const queryParams = {
     townId: selectedTownId || undefined,
     role: roleFilter !== 'ALL' ? (roleFilter as UserRole) : undefined,
     search: search.trim() ? search.trim() : undefined,
+    hasAppAccess: true,
     page,
     limit: 50, // Fetch up to 50 items so state filters can filter locally
   };
@@ -69,26 +70,36 @@ export const AccessFeature: React.FC = () => {
     selectedTownId || undefined,
   );
 
-  const rawMembers = membersResponse?.items ?? [];
+  // Offline members for batch onboarding (fetched on demand when modal opens)
+  const { data: offlineMembersResponse } = useMembersQuery(
+    {
+      townId: selectedTownId || undefined,
+      hasAppAccess: false,
+      limit: 100,
+    },
+    { enabled: isBatchInviteOpen },
+  );
 
-  // Local filter by Account Status
+  const rawMembers = membersResponse?.items ?? [];
+  const offlineMembers = offlineMembersResponse?.items ?? [];
+
+  // Local filter by Account Status (within members having app access)
   const filteredMembers = useMemo(() => {
     return rawMembers.filter((m) => {
       const hasAppAccess = m.account?.hasAppAccess ?? false;
+      if (!hasAppAccess) return false;
+
       const isRevoked = m.account?.isAccessRevoked ?? false;
       const isTemp = m.isTemporaryPassword ?? false;
 
       if (stateFilter === 'ACTIVE') {
-        return hasAppAccess && !isRevoked && !isTemp;
+        return !isRevoked && !isTemp;
       }
       if (stateFilter === 'PENDING') {
-        return hasAppAccess && !isRevoked && isTemp;
+        return !isRevoked && isTemp;
       }
       if (stateFilter === 'REVOKED') {
-        return hasAppAccess && isRevoked;
-      }
-      if (stateFilter === 'OFFLINE') {
-        return !hasAppAccess;
+        return isRevoked;
       }
       return true;
     });
@@ -121,11 +132,6 @@ export const AccessFeature: React.FC = () => {
       pendingCount: pending,
       suspendedCount: suspended,
     };
-  }, [rawMembers]);
-
-  // Offline members for batch onboarding
-  const offlineMembers = useMemo(() => {
-    return rawMembers.filter((m) => !m.account?.hasAppAccess);
   }, [rawMembers]);
 
   // Mutations
