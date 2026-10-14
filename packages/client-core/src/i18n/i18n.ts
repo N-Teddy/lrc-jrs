@@ -15,6 +15,7 @@ export const resources = {
     attendance: fr.attendance,
     navigation: fr.navigation,
     dashboard: fr.dashboard,
+    access: fr.access,
   },
   en: {
     common: en.common,
@@ -26,6 +27,7 @@ export const resources = {
     attendance: en.attendance,
     navigation: en.navigation,
     dashboard: en.dashboard,
+    access: en.access,
   },
 } as const;
 
@@ -46,6 +48,7 @@ export function initI18n(initialLanguage = 'fr'): typeof i18n {
         'attendance',
         'navigation',
         'dashboard',
+        'access',
       ],
       interpolation: {
         escapeValue: false,

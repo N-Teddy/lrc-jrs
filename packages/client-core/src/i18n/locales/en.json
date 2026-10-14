@@ -460,5 +460,77 @@
       "reactivateAction": "Reactivate Access",
       "deactivateConfirmation": "Are you sure you want to deactivate {{name}}? They will be archived and will no longer appear in active member rosters."
     }
+  },
+  "access": {
+    "title": "Access & Accounts Command Center",
+    "subtitle": "Manage member platform onboarding, temporary passwords, security freezes, and hub jurisdictions",
+    "tabs": {
+      "directory": "Accounts Directory",
+      "permissions": "Permissions & Hub Delegation",
+      "audit": "Security & Credential Logs"
+    },
+    "stats": {
+      "totalPortal": "Portal Accounts",
+      "totalMembers": "Total Members",
+      "onboardedRatio": "{{count}} of {{total}} onboarded",
+      "activeVerified": "Active & Verified",
+      "permanentPassword": "Permanent password set",
+      "pendingSetup": "Awaiting First Login",
+      "tempPasswordActive": "Temporary password active",
+      "suspended": "Suspended / Revoked",
+      "securityFreeze": "Security access locked"
+    },
+    "filters": {
+      "searchPlaceholder": "Search by name, phone (+237...), email, or identifier...",
+      "allTowns": "All Hubs / Diocesan",
+      "allStates": "All Account States",
+      "active": "Active Only",
+      "pending": "Pending First Login",
+      "suspended": "Suspended",
+      "offline": "Offline (No App Access)",
+      "allRoles": "All Roles",
+      "batchInvite": "Batch Invite"
+    },
+    "table": {
+      "member": "Member & Hub",
+      "credentials": "Login Identifier & Email",
+      "role": "Role",
+      "status": "Portal Status",
+      "crossTownScopes": "Hub Scopes",
+      "actions": "Actions",
+      "homeOnly": "Home Hub Only",
+      "extraHubs": "+{{count}} Hubs ({{codes}})",
+      "active": "Active",
+      "mustChangePassword": "Temp Code Active",
+      "suspended": "Suspended",
+      "noAccess": "Offline",
+      "inviteNow": "Invite",
+      "resend": "Resend Credentials",
+      "manageScopes": "Hub Scopes",
+      "suspend": "Suspend Access",
+      "reactivate": "Reactivate Access",
+      "noAccounts": "No accounts found matching criteria"
+    },
+    "modals": {
+      "batchInviteTitle": "Batch Onboard Fellowship Members",
+      "batchInviteSubtitle": "Select offline members to grant platform access and dispatch temporary credentials",
+      "selectChannel": "Dispatch Channel",
+      "selectAll": "Select All Offline",
+      "selectedCount": "{{count}} members selected",
+      "sendInvites": "Dispatch {{count}} Invitations",
+      "scopesTitle": "Cross-Hub Read Scopes",
+      "scopesSubtitle": "Grant {{name}} read-only access to browse external parish gathering rosters",
+      "saveScopes": "Save Scope Permissions"
+    },
+    "permissions": {
+      "title": "Role & Hierarchy Governance",
+      "subtitle": "Overview of permission boundaries across diocesan ranks",
+      "apRole": "Apostolic Prefect (AP)",
+      "apDesc": "Full executive authority across all towns. Can register and remove members, create and reschedule activities, grant portal accounts, and assign cross-hub scopes.",
+      "pcRole": "Parish Coordinator (PC)",
+      "pcDesc": "Parish-level administrator. Full read/write management within home town hub. Has read-only auditing into assigned external hubs.",
+      "memberRole": "Youth Member",
+      "memberDesc": "Fellowship member. Can view assigned parish gatherings, track attendance history, and engage in mentorship circles."
+    }
   }
 }

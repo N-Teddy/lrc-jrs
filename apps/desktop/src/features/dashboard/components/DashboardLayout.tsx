@@ -8,6 +8,7 @@ import {
   SquaresFour,
 } from '@phosphor-icons/react';
 import type React from 'react';
+import { AccessFeature } from '../../access';
 import { ActivitiesFeature } from '../../activities';
 import { ChangePasswordModal } from '../../auth';
 import { MembersFeature } from '../../members';
@@ -121,6 +122,8 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             <MembersFeature />
           ) : activeTab === 'activities' ? (
             <ActivitiesFeature />
+          ) : activeTab === 'access' ? (
+            <AccessFeature />
           ) : (
             /* Pristine Minimalist Workspace Card */
             <div className="relative w-full min-h-[560px] rounded-3xl bg-white border border-[#e8e1dd] shadow-xs flex flex-col justify-between p-8 sm:p-12 overflow-hidden">

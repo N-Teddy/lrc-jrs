@@ -122,6 +122,7 @@ export interface IUpdateMemberAccessDto {
   isAccessRevoked?: boolean;
   resendInvite?: boolean;
   channel?: 'email' | 'whatsapp';
+  allowedReadTownIds?: string[];
 }
 
 export interface IMemberQueryDto {

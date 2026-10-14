@@ -686,6 +686,10 @@ export class UsersService {
       );
     }
 
+    if (dto.allowedReadTownIds !== undefined) {
+      user.account.allowedReadTownIds = dto.allowedReadTownIds;
+    }
+
     const saved = await user.save();
     const populated = await saved.populate('homeTownId');
     return this.mapUser(populated);

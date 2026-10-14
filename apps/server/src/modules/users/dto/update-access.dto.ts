@@ -23,4 +23,18 @@ export class UpdateAccessDto {
   @IsOptional()
   @IsBoolean()
   resendInvite?: boolean;
+
+  @ApiPropertyOptional({
+    description: 'Preferred channel for sending temporary credentials',
+    enum: ['email', 'whatsapp'],
+  })
+  @IsOptional()
+  channel?: 'email' | 'whatsapp';
+
+  @ApiPropertyOptional({
+    description: 'Permitted external town IDs for cross-hub read access',
+    type: [String],
+  })
+  @IsOptional()
+  allowedReadTownIds?: string[];
 }

@@ -460,5 +460,77 @@
       "reactivateAction": "Réactiver l'Accès",
       "deactivateConfirmation": "Êtes-vous sûr de vouloir désactiver {{name}} ? Le membre sera archivé et n'apparaîtra plus dans les listes actives."
     }
+  },
+  "access": {
+    "title": "Centre de Gestion des Accès et Comptes",
+    "subtitle": "Gérez l'intégration sur la plateforme, les mots de passe temporaires, les suspensions et les juridictions",
+    "tabs": {
+      "directory": "Répertoire des Comptes",
+      "permissions": "Permissions & Délégations",
+      "audit": "Journal de Sécurité & Identifiants"
+    },
+    "stats": {
+      "totalPortal": "Comptes Portail",
+      "totalMembers": "Total Membres",
+      "onboardedRatio": "{{count}} sur {{total}} intégrés",
+      "activeVerified": "Actifs & Vérifiés",
+      "permanentPassword": "Mot de passe permanent défini",
+      "pendingSetup": "En Attente de Connexion",
+      "tempPasswordActive": "Code temporaire actif",
+      "suspended": "Suspendus / Révoqués",
+      "securityFreeze": "Accès verrouillé pour sécurité"
+    },
+    "filters": {
+      "searchPlaceholder": "Rechercher par nom, téléphone (+237...), email...",
+      "allTowns": "Tous les Centres / Diocèse",
+      "allStates": "Tous les États",
+      "active": "Actifs Uniquement",
+      "pending": "En Attente Première Connexion",
+      "suspended": "Suspendus",
+      "offline": "Hors-ligne (Sans Accès)",
+      "allRoles": "Tous les Rôles",
+      "batchInvite": "Inviter en Masse"
+    },
+    "table": {
+      "member": "Membre & Centre",
+      "credentials": "Identifiant & Email",
+      "role": "Rôle",
+      "status": "Statut Portail",
+      "crossTownScopes": "Accès Centres",
+      "actions": "Actions",
+      "homeOnly": "Centre Principal Uniquement",
+      "extraHubs": "+{{count}} Centres ({{codes}})",
+      "active": "Actif",
+      "mustChangePassword": "Code Temporaire Actif",
+      "suspended": "Suspendu",
+      "noAccess": "Hors-ligne",
+      "inviteNow": "Inviter",
+      "resend": "Renvoyer Identifiants",
+      "manageScopes": "Accès Centres",
+      "suspend": "Suspendre Accès",
+      "reactivate": "Réactiver Accès",
+      "noAccounts": "Aucun compte trouvé correspondant aux critères"
+    },
+    "modals": {
+      "batchInviteTitle": "Intégration Groupée des Membres",
+      "batchInviteSubtitle": "Sélectionnez les membres hors-ligne pour leur accorder un accès et envoyer les codes temporaires",
+      "selectChannel": "Canal d'Envoi",
+      "selectAll": "Tout Sélectionner",
+      "selectedCount": "{{count}} membres sélectionnés",
+      "sendInvites": "Envoyer {{count}} Invitations",
+      "scopesTitle": "Juridictions & Centres Autorisés",
+      "scopesSubtitle": "Accorder à {{name}} un accès en lecture seule pour consulter les rassemblements d'autres centres",
+      "saveScopes": "Enregistrer les Permissions"
+    },
+    "permissions": {
+      "title": "Gouvernance des Rôles & Permissions",
+      "subtitle": "Aperçu des droits et limites par niveau diocésain",
+      "apRole": "Animateur Principal (AP)",
+      "apDesc": "Autorité diocésaine complète. Gestion de tous les centres, création et modification des activités, attribution des comptes et permissions.",
+      "pcRole": "Coordinateur Paroissial (PC)",
+      "pcDesc": "Gestion complète au sein de son centre paroissial d'attache. Consultation en lecture seule sur les centres autorisés.",
+      "memberRole": "Membre de la Jeunesse",
+      "memberDesc": "Accès individuel aux activités, suivi de présence et cercles de partage."
+    }
   }
 }
