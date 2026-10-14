@@ -140,46 +140,46 @@ export const ActivityFormModal: React.FC<ActivityFormModalProps> = ({
   const activityTypeOptions: SelectOption<ActivityType>[] = [
     {
       value: ActivityType.MONTHLY_MEETING,
-      label: 'Monthly Meeting',
+      label: t('activities:types.MONTHLY_MEETING'),
     },
     {
       value: ActivityType.SERVICE,
-      label: 'Service',
+      label: t('activities:types.SERVICE'),
     },
     {
       value: ActivityType.CONFERENCE,
-      label: 'Conference',
+      label: t('activities:types.CONFERENCE'),
     },
     {
       value: ActivityType.RECREATIONAL,
-      label: 'Recreational Activity',
+      label: t('activities:types.RECREATIONAL'),
     },
     {
       value: ActivityType.CAUSERIE,
-      label: 'Causerie',
+      label: t('activities:types.CAUSERIE'),
     },
     {
       value: ActivityType.JPO,
-      label: 'JPO',
+      label: t('activities:types.JPO'),
     },
   ];
 
   const statusOptions: SelectOption<ActivityStatus>[] = [
     {
       value: ActivityStatus.SCHEDULED,
-      label: 'Scheduled',
+      label: t('activities:statuses.SCHEDULED'),
     },
     {
       value: ActivityStatus.IN_PROGRESS,
-      label: 'In Progress / Live',
+      label: t('activities:statuses.IN_PROGRESS'),
     },
     {
       value: ActivityStatus.COMPLETED,
-      label: 'Completed',
+      label: t('activities:statuses.COMPLETED'),
     },
     {
       value: ActivityStatus.CANCELLED,
-      label: 'Cancelled',
+      label: t('activities:statuses.CANCELLED'),
     },
   ];
 

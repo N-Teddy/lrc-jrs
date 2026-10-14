@@ -102,8 +102,11 @@ export const ActivityTableView: React.FC<ActivityTableViewProps> = ({
           </thead>
           <tbody className="divide-y divide-[#e8e1dd] text-xs text-[#1e1b19]">
             {activities.map((activity) => {
-              const typeConfig = getActivityTypeConfig(activity.activityType);
-              const statusConfig = getActivityStatusConfig(activity.status);
+              const typeConfig = getActivityTypeConfig(
+                activity.activityType,
+                t,
+              );
+              const statusConfig = getActivityStatusConfig(activity.status, t);
               const dateInfo = formatActivityDateRange(
                 activity.startDate,
                 activity.endDate,

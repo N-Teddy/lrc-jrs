@@ -96,8 +96,8 @@ export const ActivityCardGridView: React.FC<ActivityCardGridViewProps> = ({
     <div className="flex flex-col gap-5">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {activities.map((activity) => {
-          const typeConfig = getActivityTypeConfig(activity.activityType);
-          const statusConfig = getActivityStatusConfig(activity.status);
+          const typeConfig = getActivityTypeConfig(activity.activityType, t);
+          const statusConfig = getActivityStatusConfig(activity.status, t);
           const dateInfo = formatActivityDateRange(
             activity.startDate,
             activity.endDate,

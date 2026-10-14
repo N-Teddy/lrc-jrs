@@ -1,4 +1,7 @@
-import { useMemberAttendanceHistoryQuery } from '@jrs/client-core';
+import {
+  useMemberAttendanceHistoryQuery,
+  useTranslation,
+} from '@jrs/client-core';
 import {
   ActivityType,
   AttendanceStatus,
@@ -22,6 +25,7 @@ import {
 } from '@phosphor-icons/react';
 import type React from 'react';
 import { useMemo, useState } from 'react';
+import { CustomSelect, type SelectOption } from '../../../components';
 import { getActivityTypeConfig } from '../../activities/utils/activity-ui.utils';
 import { getCleanDigitsForWhatsApp } from '../utils/member-ui.utils';
 
@@ -125,6 +129,8 @@ export const MemberAttendanceHistoryTab: React.FC<
     refetch,
   } = useMemberAttendanceHistoryQuery(member.id);
 
+  const { t, i18n } = useTranslation();
+
   // Filters state
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'ALL' | AttendanceStatus>(
@@ -136,6 +142,59 @@ export const MemberAttendanceHistoryTab: React.FC<
   const [selectedHubFilter, setSelectedHubFilter] = useState<string | null>(
     null,
   );
+  const [selectedYear, setSelectedYear] = useState<string>('ALL');
+  const [selectedMonth, setSelectedMonth] = useState<string>('ALL');
+
+  // Year options dynamically derived from history items
+  const yearOptions: SelectOption<string>[] = useMemo(() => {
+    const yearsSet = new Set<number>([2026, 2025, 2024]);
+    if (history?.items) {
+      for (const item of history.items) {
+        if (item.startDate) {
+          const yr = new Date(item.startDate).getFullYear();
+          if (!Number.isNaN(yr)) yearsSet.add(yr);
+        }
+      }
+    }
+    const sortedYears = Array.from(yearsSet).sort((a, b) => b - a);
+    return [
+      {
+        value: 'ALL',
+        label: t('activities:filters.year')
+          ? `${t('activities:filters.year')}: All`
+          : 'All Years',
+      },
+      ...sortedYears.map((yr) => ({
+        value: String(yr),
+        label: `${yr}`,
+      })),
+    ];
+  }, [history?.items, t]);
+
+  // Month options localized
+  const monthOptions: SelectOption<string>[] = useMemo(() => {
+    const lang = i18n.language || 'en';
+    const months = Array.from({ length: 12 }, (_, i) => {
+      const monthNum = i + 1;
+      const monthName = new Date(2026, i, 1).toLocaleString(lang, {
+        month: 'short',
+      });
+      const capitalized =
+        monthName.charAt(0).toUpperCase() + monthName.slice(1);
+      return {
+        value: String(monthNum),
+        label: capitalized,
+      };
+    });
+
+    return [
+      {
+        value: 'ALL',
+        label: t('activities:filters.allMonths') || 'All Months',
+      },
+      ...months,
+    ];
+  }, [t, i18n.language]);
 
   // Filtered attendance items
   const filteredItems = useMemo(() => {
@@ -173,6 +232,22 @@ export const MemberAttendanceHistoryTab: React.FC<
         return false;
       }
 
+      // 5. Year filter
+      if (selectedYear !== 'ALL' && item.startDate) {
+        const itemYear = new Date(item.startDate).getFullYear().toString();
+        if (itemYear !== selectedYear) {
+          return false;
+        }
+      }
+
+      // 6. Month filter
+      if (selectedMonth !== 'ALL' && item.startDate) {
+        const itemMonth = (new Date(item.startDate).getMonth() + 1).toString();
+        if (itemMonth !== selectedMonth) {
+          return false;
+        }
+      }
+
       return true;
     });
   }, [
@@ -181,19 +256,25 @@ export const MemberAttendanceHistoryTab: React.FC<
     statusFilter,
     scopeFilter,
     selectedHubFilter,
+    selectedYear,
+    selectedMonth,
   ]);
 
   const hasActiveFilters =
     Boolean(searchQuery.trim()) ||
     statusFilter !== 'ALL' ||
     scopeFilter !== 'ALL' ||
-    Boolean(selectedHubFilter);
+    Boolean(selectedHubFilter) ||
+    selectedYear !== 'ALL' ||
+    selectedMonth !== 'ALL';
 
   const handleClearFilters = () => {
     setSearchQuery('');
     setStatusFilter('ALL');
     setScopeFilter('ALL');
     setSelectedHubFilter(null);
+    setSelectedYear('ALL');
+    setSelectedMonth('ALL');
   };
 
   const cleanDigits = getCleanDigitsForWhatsApp(member.phoneNumber);
@@ -515,6 +596,23 @@ export const MemberAttendanceHistoryTab: React.FC<
               </button>
             ))}
           </div>
+
+          {/* Year and Month CustomSelect Filters */}
+          <CustomSelect<string>
+            value={selectedYear}
+            onChange={setSelectedYear}
+            options={yearOptions}
+            size="sm"
+            className="w-28"
+          />
+
+          <CustomSelect<string>
+            value={selectedMonth}
+            onChange={setSelectedMonth}
+            options={monthOptions}
+            size="sm"
+            className="w-28"
+          />
 
           {/* Reset button if active */}
           {hasActiveFilters && (

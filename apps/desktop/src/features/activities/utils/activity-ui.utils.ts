@@ -93,11 +93,12 @@ export function getActivityTypeConfig(
 
 export function getActivityStatusConfig(
   status: ActivityStatus,
+  t?: (key: string, options?: any) => string,
 ): ActivityStatusConfig {
   switch (status) {
     case ActivityStatus.SCHEDULED:
       return {
-        label: 'Scheduled',
+        label: t ? t('activities:statuses.SCHEDULED') : 'Scheduled',
         badgeBg: 'bg-[#faf2ee]',
         badgeText: 'text-[#b85028]',
         badgeBorder: 'border-[#ffdbcf]',
@@ -105,7 +106,7 @@ export function getActivityStatusConfig(
       };
     case ActivityStatus.IN_PROGRESS:
       return {
-        label: 'In Progress / Live',
+        label: t ? t('activities:statuses.IN_PROGRESS') : 'In Progress / Live',
         badgeBg: 'bg-[#edf3ee]',
         badgeText: 'text-[#486b52]',
         badgeBorder: 'border-[#c2e9ca]',
@@ -114,7 +115,7 @@ export function getActivityStatusConfig(
       };
     case ActivityStatus.COMPLETED:
       return {
-        label: 'Completed',
+        label: t ? t('activities:statuses.COMPLETED') : 'Completed',
         badgeBg: 'bg-[#edf3ee]',
         badgeText: 'text-[#486b52]',
         badgeBorder: 'border-[#c2e9ca]',
@@ -122,7 +123,7 @@ export function getActivityStatusConfig(
       };
     case ActivityStatus.CANCELLED:
       return {
-        label: 'Cancelled',
+        label: t ? t('activities:statuses.CANCELLED') : 'Cancelled',
         badgeBg: 'bg-[#ffdad6]/50',
         badgeText: 'text-[#ba1a1a]',
         badgeBorder: 'border-[#ffb4a8]',

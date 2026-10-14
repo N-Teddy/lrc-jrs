@@ -9,6 +9,7 @@ import {
   Table,
 } from '@phosphor-icons/react';
 import type React from 'react';
+import { useMemo } from 'react';
 import { CustomSelect, type SelectOption } from '../../../components';
 
 export type ActivityViewMode = 'table' | 'grid' | 'calendar';
@@ -30,25 +31,6 @@ interface ActivityFilterToolbarProps {
   onClearFilters: () => void;
 }
 
-const PERIOD_OPTIONS: SelectOption[] = [
-  { value: 'all', label: 'All Dates' },
-  { value: '2026-all', label: 'Cycle 2026 (Full Year)' },
-  { value: '2026-1', label: 'January 2026' },
-  { value: '2026-2', label: 'February 2026' },
-  { value: '2026-3', label: 'March 2026' },
-  { value: '2026-4', label: 'April 2026' },
-  { value: '2026-5', label: 'May 2026' },
-  { value: '2026-6', label: 'June 2026' },
-  { value: '2026-7', label: 'July 2026' },
-  { value: '2026-8', label: 'August 2026' },
-  { value: '2026-9', label: 'September 2026' },
-  { value: '2026-10', label: 'October 2026' },
-  { value: '2026-11', label: 'November 2026' },
-  { value: '2026-12', label: 'December 2026' },
-  { value: '2025-all', label: 'Cycle 2025 (Archive)' },
-  { value: '2024-all', label: 'Cycle 2024 (Archive)' },
-];
-
 export const ActivityFilterToolbar: React.FC<ActivityFilterToolbarProps> = ({
   search,
   onSearchChange,
@@ -65,26 +47,86 @@ export const ActivityFilterToolbar: React.FC<ActivityFilterToolbarProps> = ({
   onOpenCreateModal,
   onClearFilters,
 }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { canWrite } = useTownContext();
 
-  const typeOptions: SelectOption[] = [
-    { value: 'all', label: t('activities:filters.allTypes') },
-    { value: ActivityType.MONTHLY_MEETING, label: 'Monthly Meeting' },
-    { value: ActivityType.SERVICE, label: 'Service' },
-    { value: ActivityType.CONFERENCE, label: 'Conference' },
-    { value: ActivityType.RECREATIONAL, label: 'Recreational' },
-    { value: ActivityType.CAUSERIE, label: 'Causerie' },
-    { value: ActivityType.JPO, label: 'JPO' },
-  ];
+  const periodOptions: SelectOption[] = useMemo(() => {
+    const lang = i18n.language || 'en';
+    const months = Array.from({ length: 12 }, (_, i) => {
+      const monthNum = i + 1;
+      const monthName = new Date(2026, i, 1).toLocaleString(lang, {
+        month: 'long',
+      });
+      const capitalized =
+        monthName.charAt(0).toUpperCase() + monthName.slice(1);
+      return {
+        value: `2026-${monthNum}`,
+        label: `${capitalized} 2026`,
+      };
+    });
 
-  const statusOptions: SelectOption[] = [
-    { value: 'all', label: t('activities:filters.allStatuses') },
-    { value: ActivityStatus.SCHEDULED, label: 'Scheduled' },
-    { value: ActivityStatus.IN_PROGRESS, label: 'In Progress / Live' },
-    { value: ActivityStatus.COMPLETED, label: 'Completed' },
-    { value: ActivityStatus.CANCELLED, label: 'Cancelled' },
-  ];
+    return [
+      { value: 'all', label: t('activities:filters.allDates') },
+      {
+        value: '2026-all',
+        label: t('activities:filters.fullYear', { year: 2026 }),
+      },
+      ...months,
+      {
+        value: '2025-all',
+        label: t('activities:filters.archiveYear', { year: 2025 }),
+      },
+      {
+        value: '2024-all',
+        label: t('activities:filters.archiveYear', { year: 2024 }),
+      },
+    ];
+  }, [t, i18n.language]);
+
+  const typeOptions: SelectOption[] = useMemo(
+    () => [
+      { value: 'all', label: t('activities:filters.allTypes') },
+      {
+        value: ActivityType.MONTHLY_MEETING,
+        label: t('activities:types.MONTHLY_MEETING'),
+      },
+      { value: ActivityType.SERVICE, label: t('activities:types.SERVICE') },
+      {
+        value: ActivityType.CONFERENCE,
+        label: t('activities:types.CONFERENCE'),
+      },
+      {
+        value: ActivityType.RECREATIONAL,
+        label: t('activities:types.RECREATIONAL'),
+      },
+      { value: ActivityType.CAUSERIE, label: t('activities:types.CAUSERIE') },
+      { value: ActivityType.JPO, label: t('activities:types.JPO') },
+    ],
+    [t],
+  );
+
+  const statusOptions: SelectOption[] = useMemo(
+    () => [
+      { value: 'all', label: t('activities:filters.allStatuses') },
+      {
+        value: ActivityStatus.SCHEDULED,
+        label: t('activities:statuses.SCHEDULED'),
+      },
+      {
+        value: ActivityStatus.IN_PROGRESS,
+        label: t('activities:statuses.IN_PROGRESS'),
+      },
+      {
+        value: ActivityStatus.COMPLETED,
+        label: t('activities:statuses.COMPLETED'),
+      },
+      {
+        value: ActivityStatus.CANCELLED,
+        label: t('activities:statuses.CANCELLED'),
+      },
+    ],
+    [t],
+  );
 
   // Combined period value
   const currentPeriodValue =
@@ -141,7 +183,7 @@ export const ActivityFilterToolbar: React.FC<ActivityFilterToolbarProps> = ({
         <CustomSelect
           value={currentPeriodValue}
           onChange={handlePeriodChange}
-          options={PERIOD_OPTIONS}
+          options={periodOptions}
           size="md"
         />
 
@@ -169,7 +211,7 @@ export const ActivityFilterToolbar: React.FC<ActivityFilterToolbarProps> = ({
             className="h-10 px-3.5 bg-[#faf2ee] hover:bg-[#f4ece9] rounded-lg border border-[#e8e1dd] text-[#8a726a] hover:text-[#b85028] text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
           >
             <ArrowCounterClockwise size={14} weight="bold" />
-            <span>Clear</span>
+            <span>{t('activities:filters.clear')}</span>
           </button>
         )}
       </div>
