@@ -5,6 +5,7 @@ import {
   AttendeeType,
   type IActivity,
   type IActivityChangeLog,
+  type IActivityReport,
   type IActivityStats,
   type IAttendance,
   type IAttendanceItem,
@@ -122,6 +123,44 @@ export class ActivitiesService {
       }),
     );
 
+    const rawReports = (doc as any).reports || [];
+    let reports: IActivityReport[] = rawReports.map((r: any) => ({
+      fileId: r.fileId,
+      filename: r.filename,
+      webViewLink: r.webViewLink,
+      uploadedBy: r.uploadedBy?.toString() || '',
+      uploadedByName: r.uploadedByName,
+      uploadedAt: r.uploadedAt
+        ? r.uploadedAt instanceof Date
+          ? r.uploadedAt.toISOString()
+          : new Date(r.uploadedAt).toISOString()
+        : new Date().toISOString(),
+      summary: r.summary,
+      folderId: r.folderId,
+      fileSize: r.fileSize,
+    }));
+
+    if (reports.length === 0 && doc.report?.fileId) {
+      reports = [
+        {
+          fileId: doc.report.fileId,
+          filename: doc.report.filename,
+          webViewLink: doc.report.webViewLink,
+          uploadedBy: doc.report.uploadedBy?.toString() || '',
+          uploadedByName: doc.report.uploadedByName,
+          uploadedAt: doc.report.uploadedAt
+            ? doc.report.uploadedAt.toISOString()
+            : new Date().toISOString(),
+          summary: doc.report.summary,
+          folderId: (doc.report as any).folderId,
+          fileSize: (doc.report as any).fileSize,
+        },
+      ];
+    }
+
+    const latestReport =
+      reports.length > 0 ? reports[reports.length - 1] : undefined;
+
     return {
       id: doc._id.toString(),
       title: doc.title,
@@ -157,19 +196,8 @@ export class ActivitiesService {
       attendanceLockedAt: doc.attendanceLockedAt?.toISOString(),
       attendanceLockedBy: doc.attendanceLockedBy?.toString(),
       attendanceLockedByName: doc.attendanceLockedByName,
-      report: doc.report
-        ? {
-            fileId: doc.report.fileId,
-            filename: doc.report.filename,
-            webViewLink: doc.report.webViewLink,
-            uploadedBy: doc.report.uploadedBy?.toString() || '',
-            uploadedByName: doc.report.uploadedByName,
-            uploadedAt: doc.report.uploadedAt
-              ? doc.report.uploadedAt.toISOString()
-              : new Date().toISOString(),
-            summary: doc.report.summary,
-          }
-        : undefined,
+      report: latestReport,
+      reports,
       createdBy: doc.createdBy?.toString() || '',
       createdAt: (doc as any).createdAt
         ? (doc as any).createdAt.toISOString()
@@ -1206,12 +1234,12 @@ export class ActivitiesService {
   }
 
   /**
-   * Upload an activity report file to Google Drive
+   * Upload one or multiple activity report files to Google Drive
    * (Strictly only available after the activity and if completed)
    */
-  async uploadReport(
+  async uploadReports(
     activityId: string,
-    file: Express.Multer.File,
+    files: Express.Multer.File[],
     summary: string | undefined,
     currentUser: IAuthUser,
     folderId?: string,
@@ -1245,45 +1273,59 @@ export class ActivitiesService {
       );
     }
 
-    if (!file || !file.buffer) {
-      throw new BadRequestException('Report file is required.');
+    const validFiles = (files || []).filter((f) => f?.buffer);
+    if (validFiles.length === 0) {
+      throw new BadRequestException('At least one report file is required.');
     }
 
-    // If a report already exists, remove the previous file from Google Drive
-    if (activity.report?.fileId) {
-      await this.driveService.deleteFile(activity.report.fileId);
+    if (!activity.reports) {
+      activity.reports = [];
     }
 
-    const sanitizedTitle = activity.title.replace(/[^a-zA-Z0-9_-]/g, '_');
-    const uploadResult = await this.driveService.uploadFile({
-      filename: `Report_${sanitizedTitle}_${Date.now()}_${file.originalname}`,
-      mimeType: file.mimetype,
-      content: file.buffer,
-      folderId: folderId?.trim() || undefined,
-    });
+    // Preserve existing single report if not yet in reports array
+    if (
+      activity.report?.fileId &&
+      !activity.reports.some((r) => r.fileId === activity.report?.fileId)
+    ) {
+      activity.reports.push(activity.report as any);
+    }
 
-    activity.report = {
-      fileId: uploadResult.fileId,
-      filename: file.originalname,
-      webViewLink: uploadResult.webViewLink,
-      uploadedBy: new Types.ObjectId(currentUser.id),
-      uploadedByName: currentUser.fullName,
-      uploadedAt: new Date(),
-      summary: summary?.trim(),
-      folderId: folderId?.trim() || undefined,
-    } as any;
+    for (const file of validFiles) {
+      const sanitizedTitle = activity.title.replace(/[^a-zA-Z0-9_-]/g, '_');
+      const uploadResult = await this.driveService.uploadFile({
+        filename: `Report_${sanitizedTitle}_${Date.now()}_${file.originalname}`,
+        mimeType: file.mimetype,
+        content: file.buffer,
+        folderId: folderId?.trim() || undefined,
+      });
+
+      const reportItem = {
+        fileId: uploadResult.fileId,
+        filename: file.originalname,
+        webViewLink: uploadResult.webViewLink,
+        uploadedBy: new Types.ObjectId(currentUser.id),
+        uploadedByName: currentUser.fullName,
+        uploadedAt: new Date(),
+        summary: summary?.trim(),
+        folderId: folderId?.trim() || undefined,
+        fileSize: file.size,
+      };
+
+      activity.reports.push(reportItem as any);
+      activity.report = reportItem as any;
+    }
 
     await activity.save();
-
     return this.mapActivity(activity);
   }
 
   /**
-   * Delete an activity report
+   * Delete an activity report file (or all reports if fileId not specified)
    */
   async deleteReport(
     activityId: string,
     currentUser: IAuthUser,
+    fileId?: string,
   ): Promise<IActivity> {
     if (!Types.ObjectId.isValid(activityId)) {
       throw new BadRequestException('Invalid activity ID');
@@ -1303,12 +1345,36 @@ export class ActivitiesService {
       );
     }
 
-    if (activity.report?.fileId) {
-      await this.driveService.deleteFile(activity.report.fileId);
+    if (fileId) {
+      // Delete specific file from Google Drive
+      await this.driveService.deleteFile(fileId);
+
+      // Remove from reports array
+      activity.reports = (activity.reports || []).filter(
+        (r) => r.fileId !== fileId,
+      );
+
+      // If active single report was this file, update to last report or clear
+      if (activity.report?.fileId === fileId) {
+        activity.report =
+          activity.reports.length > 0
+            ? activity.reports[activity.reports.length - 1]
+            : undefined;
+      }
+    } else {
+      // Bulk delete all reports for this activity
+      if (activity.reports?.length) {
+        for (const rep of activity.reports) {
+          if (rep.fileId) await this.driveService.deleteFile(rep.fileId);
+        }
+      } else if (activity.report?.fileId) {
+        await this.driveService.deleteFile(activity.report.fileId);
+      }
+      activity.reports = [];
       activity.report = undefined;
-      await activity.save();
     }
 
+    await activity.save();
     return this.mapActivity(activity);
   }
 }

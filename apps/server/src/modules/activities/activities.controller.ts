@@ -11,11 +11,11 @@ import {
   Patch,
   Post,
   Query,
-  UploadedFile,
+  UploadedFiles,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { AnyFilesInterceptor } from '@nestjs/platform-express';
 import {
   ApiBearerAuth,
   ApiConsumes,
@@ -188,37 +188,52 @@ export class ActivitiesController {
 
   @Post(':id/report')
   @HttpCode(HttpStatus.OK)
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(AnyFilesInterceptor())
   @ApiConsumes('multipart/form-data')
   @ApiOperation({
     summary:
-      'Upload an activity report to Google Drive (only available after activity is completed)',
+      'Upload one or multiple activity reports to Google Drive (only available after activity is completed)',
   })
-  @ApiResponse({ status: 200, description: 'Report uploaded successfully' })
+  @ApiResponse({ status: 200, description: 'Reports uploaded successfully' })
   async uploadReport(
     @Param('id') id: string,
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFiles() files: Express.Multer.File[],
     @Body('summary') summary: string,
     @Body('folderId') folderId: string,
     @CurrentUser() currentUser: IAuthUser,
   ) {
-    return this.activitiesService.uploadReport(
+    return this.activitiesService.uploadReports(
       id,
-      file,
+      files,
       summary,
       currentUser,
       folderId,
     );
   }
 
-  @Delete(':id/report')
+  @Delete(':id/report/:fileId')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Delete an activity report from Google Drive' })
-  @ApiResponse({ status: 200, description: 'Report removed' })
-  async deleteReport(
+  @ApiOperation({
+    summary: 'Delete a specific activity report file from Google Drive',
+  })
+  @ApiResponse({ status: 200, description: 'Report file removed' })
+  async deleteReportFile(
     @Param('id') id: string,
+    @Param('fileId') fileId: string,
     @CurrentUser() currentUser: IAuthUser,
   ) {
-    return this.activitiesService.deleteReport(id, currentUser);
+    return this.activitiesService.deleteReport(id, currentUser, fileId);
+  }
+
+  @Delete(':id/report')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Delete activity reports from Google Drive' })
+  @ApiResponse({ status: 200, description: 'Reports removed' })
+  async deleteReport(
+    @Param('id') id: string,
+    @Query('fileId') fileId: string | undefined,
+    @CurrentUser() currentUser: IAuthUser,
+  ) {
+    return this.activitiesService.deleteReport(id, currentUser, fileId);
   }
 }

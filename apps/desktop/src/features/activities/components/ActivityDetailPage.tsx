@@ -1,6 +1,7 @@
 import {
   useAttendanceQuery,
   useAuth,
+  useDeleteActivityReportMutation,
   useLockAttendanceMutation,
   useTownContext,
   useTranslation,
@@ -11,6 +12,7 @@ import {
   AttendanceStatus,
   AttendeeType,
   type IActivity,
+  type IActivityReport,
 } from '@jrs/shared';
 import {
   ArrowLeft,
@@ -29,10 +31,12 @@ import {
   MagnifyingGlass,
   MapPin,
   PencilSimple,
+  Plus,
   Trash,
   UserCheck,
   Users,
   WarningCircle,
+  X,
 } from '@phosphor-icons/react';
 import type React from 'react';
 import { useMemo, useState } from 'react';
@@ -75,6 +79,9 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
     'ALL',
   );
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const [reportToDelete, setReportToDelete] = useState<IActivityReport | null>(
+    null,
+  );
   const [lockPromptOpen, setLockPromptOpen] = useState(false);
   const [lockReason, setLockReason] = useState('');
 
@@ -84,6 +91,7 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
 
   const lockMutation = useLockAttendanceMutation();
   const unlockMutation = useUnlockAttendanceMutation();
+  const deleteReportMutation = useDeleteActivityReportMutation();
 
   const isCurrentUserAp = user?.role === 'AP';
   const isLocked = Boolean(
@@ -95,6 +103,14 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
   const isPastActivity = now >= new Date(activity.endDate);
   const isCompleted = activity.status === ActivityStatus.COMPLETED;
   const canShowReportUi = isCompleted && isPastActivity;
+
+  // Existing reports list
+  const reports: IActivityReport[] = useMemo(() => {
+    if (activity.reports && activity.reports.length > 0) {
+      return activity.reports;
+    }
+    return activity.report?.fileId ? [activity.report] : [];
+  }, [activity.reports, activity.report]);
 
   // Attendees & Turnout KPIs
   const attendees = attendanceData?.attendees || [];
@@ -330,7 +346,9 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
                 className="text-[#b85028]"
               />
               <span>
-                {activity.report?.fileId ? 'Manage Report' : 'Upload Report'}
+                {reports.length > 0
+                  ? `Manage Reports (${reports.length})`
+                  : 'Upload Report'}
               </span>
             </button>
           )}
@@ -378,7 +396,10 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
               }`}
             >
               <HardDrives size={15} weight="bold" />
-              <span>Activity Report {activity.report?.fileId ? '✓' : ''}</span>
+              <span>
+                Activity Reports{' '}
+                {reports.length > 0 ? `(${reports.length})` : ''}
+              </span>
             </button>
           )}
 
@@ -752,21 +773,21 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
         </div>
       )}
 
-      {/* TAB 3: ACTIVITY REPORT (STRICTLY IF COMPLETED & PAST) */}
+      {/* TAB 3: ACTIVITY REPORTS (STRICTLY IF COMPLETED & PAST) */}
       {canShowReportUi && activeTab === 'report' && (
         <div className="bg-white rounded-3xl border border-[#e8e1dd] shadow-xs p-6 sm:p-8 flex flex-col gap-6 animate-in fade-in duration-150">
-          <div className="flex items-center justify-between gap-4 border-b border-[#f4ece9] pb-5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#f4ece9] pb-5">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-2xl bg-[#fff2ee] border border-[#ffdbcf] text-[#b85028] flex items-center justify-center">
+              <div className="w-12 h-12 rounded-2xl bg-[#fff2ee] border border-[#ffdbcf] text-[#b85028] flex items-center justify-center shrink-0">
                 <HardDrives size={24} weight="duotone" />
               </div>
               <div className="flex flex-col">
                 <h3 className="text-base font-bold text-[#1e1b19]">
-                  Google Drive Activity Report
+                  Google Drive Activity Reports ({reports.length})
                 </h3>
                 <p className="text-xs text-[#8a726a]">
-                  Archived fellowship minutes, attendance summaries, and photos
-                  stored on Google Cloud Drive.
+                  Archived fellowship minutes, attendance summaries, photos, and
+                  documents.
                 </p>
               </div>
             </div>
@@ -775,62 +796,89 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
               <button
                 type="button"
                 onClick={() => setIsReportModalOpen(true)}
-                className="px-4 py-2 rounded-xl bg-[#b85028] hover:bg-[#a44520] text-xs font-bold text-white transition-all flex items-center gap-1.5 shadow-2xs cursor-pointer"
+                className="px-4 py-2.5 rounded-xl bg-[#b85028] hover:bg-[#a44520] text-xs font-bold text-white transition-all flex items-center gap-2 shadow-2xs cursor-pointer self-start sm:self-auto"
               >
-                <CloudArrowUp size={16} weight="bold" />
+                <Plus size={15} weight="bold" />
                 <span>
-                  {activity.report?.fileId ? 'Replace Report' : 'Upload Report'}
+                  {reports.length > 0
+                    ? 'Upload More Reports'
+                    : 'Upload Reports'}
                 </span>
               </button>
             )}
           </div>
 
-          {activity.report?.fileId ? (
-            <div className="flex flex-col gap-6">
-              {/* Existing Report Details */}
-              <div className="p-5 rounded-2xl bg-[#faf2ee]/50 border border-[#e8e1dd] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div className="flex items-center gap-3.5 min-w-0">
-                  {getFileIcon(activity.report.filename)}
-                  <div className="flex flex-col min-w-0">
-                    <span className="font-bold text-sm text-[#1e1b19] truncate">
-                      {activity.report.filename}
-                    </span>
-                    <span className="text-xs text-[#8a726a]">
-                      Uploaded by{' '}
-                      {activity.report.uploadedByName || 'Coordinator'} ·{' '}
-                      {activity.report.uploadedAt
-                        ? new Date(activity.report.uploadedAt).toLocaleString()
-                        : 'Recently'}
-                    </span>
-                  </div>
-                </div>
+          {reports.length > 0 ? (
+            <div className="flex flex-col gap-4">
+              {reports.map((rep) => (
+                <div
+                  key={rep.fileId}
+                  className="p-5 rounded-2xl bg-white border border-[#e8e1dd] hover:border-[#b85028]/40 shadow-2xs hover:shadow-xs transition-all flex flex-col gap-3 group"
+                >
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div className="flex items-center gap-3.5 min-w-0">
+                      <div className="w-11 h-11 rounded-xl bg-[#faf2ee] flex items-center justify-center shrink-0 border border-[#e8e1dd]">
+                        {getFileIcon(rep.filename)}
+                      </div>
+                      <div className="flex flex-col min-w-0">
+                        <span className="font-bold text-sm text-[#1e1b19] truncate group-hover:text-[#b85028] transition-colors">
+                          {rep.filename}
+                        </span>
+                        <div className="flex items-center gap-2 text-xs text-[#8a726a] flex-wrap mt-0.5">
+                          <span>
+                            Uploaded by {rep.uploadedByName || 'Coordinator'}
+                          </span>
+                          <span>•</span>
+                          <span>
+                            {rep.uploadedAt
+                              ? new Date(rep.uploadedAt).toLocaleString()
+                              : 'Recently'}
+                          </span>
+                          {rep.fileSize && (
+                            <>
+                              <span>•</span>
+                              <span>
+                                {(rep.fileSize / 1024 / 1024).toFixed(2)} MB
+                              </span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    </div>
 
-                <div className="flex items-center gap-2 shrink-0">
-                  {activity.report.webViewLink && (
-                    <a
-                      href={activity.report.webViewLink}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="px-4 py-2 rounded-xl bg-white border border-[#e8e1dd] hover:bg-[#faf2ee] text-xs font-bold text-[#1e1b19] flex items-center gap-1.5 transition-colors shadow-2xs"
-                    >
-                      <span>Open in Drive</span>
-                      <ArrowSquareOut size={14} />
-                    </a>
+                    <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
+                      {rep.webViewLink && (
+                        <a
+                          href={rep.webViewLink}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="px-3.5 py-1.5 rounded-xl bg-[#faf2ee] hover:bg-[#f4ece9] border border-[#e8e1dd] text-[#1e1b19] text-xs font-bold transition-all flex items-center gap-1.5 shadow-2xs"
+                        >
+                          <span>Open in Drive</span>
+                          <ArrowSquareOut size={13} />
+                        </a>
+                      )}
+                      {isPrivileged && (
+                        <button
+                          type="button"
+                          onClick={() => setReportToDelete(rep)}
+                          className="px-3.5 py-1.5 rounded-xl bg-[#ffdad6]/40 hover:bg-[#ffdad6] text-[#ba1a1a] text-xs font-bold transition-colors cursor-pointer flex items-center gap-1.5"
+                          title="Delete this report from Google Drive"
+                        >
+                          <Trash size={14} />
+                          <span>Delete</span>
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {rep.summary && (
+                    <div className="p-3.5 rounded-xl bg-[#faf2ee]/40 border border-[#f4ece9] text-xs text-[#57423b] leading-relaxed whitespace-pre-wrap">
+                      {rep.summary}
+                    </div>
                   )}
                 </div>
-              </div>
-
-              {/* Fellowship Summary / Notes */}
-              {activity.report.summary && (
-                <div className="flex flex-col gap-2">
-                  <h4 className="text-xs font-bold text-[#1e1b19]">
-                    Session Narrative / Notes
-                  </h4>
-                  <div className="p-4 rounded-2xl bg-[#faf2ee]/30 border border-[#f4ece9] text-xs text-[#57423b] leading-relaxed whitespace-pre-wrap">
-                    {activity.report.summary}
-                  </div>
-                </div>
-              )}
+              ))}
             </div>
           ) : (
             <div className="p-12 rounded-2xl border-2 border-dashed border-[#e8e1dd] flex flex-col items-center justify-center text-center gap-3 bg-[#faf2ee]/20">
@@ -838,12 +886,12 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
                 <CloudArrowUp size={24} weight="duotone" />
               </div>
               <h4 className="text-sm font-bold text-[#1e1b19]">
-                No Report Attached Yet
+                No Reports Attached Yet
               </h4>
               <p className="text-xs text-[#8a726a] max-w-sm">
                 This activity has concluded. Parish coordinators can upload
-                session minutes, attendance sheets, or photos directly to Google
-                Drive.
+                session minutes, attendance summaries, photos, or pastoral notes
+                directly to Google Drive.
               </p>
               {isPrivileged && (
                 <button
@@ -851,8 +899,8 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
                   onClick={() => setIsReportModalOpen(true)}
                   className="mt-2 px-5 py-2.5 rounded-xl bg-[#b85028] hover:bg-[#a44520] text-xs font-bold text-white transition-all shadow-xs cursor-pointer flex items-center gap-2"
                 >
-                  <CloudArrowUp size={16} weight="bold" />
-                  <span>Upload Activity Report</span>
+                  <Plus size={16} weight="bold" />
+                  <span>Upload Activity Reports</span>
                 </button>
               )}
             </div>
@@ -916,6 +964,76 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
           activity={activity}
           isPrivileged={isPrivileged}
         />
+      )}
+
+      {/* Direct Report Delete Confirmation Modal */}
+      {reportToDelete && (
+        <div className="fixed inset-0 z-50 bg-[#1e1b19]/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="w-full max-w-md bg-white rounded-3xl border border-[#e8e1dd] shadow-2xl overflow-hidden flex flex-col">
+            <div className="p-6 border-b border-[#f4ece9] flex items-start justify-between bg-[#fffbf9]">
+              <div className="flex items-center gap-3">
+                <div className="w-11 h-11 rounded-2xl bg-[#ffdad6] border border-[#ffb4ab] text-[#ba1a1a] flex items-center justify-center shrink-0">
+                  <Trash size={22} weight="bold" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-[#1e1b19]">
+                    Delete Report File
+                  </h3>
+                  <p className="text-xs text-[#8a726a] truncate max-w-xs">
+                    {reportToDelete.filename}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setReportToDelete(null)}
+                className="w-8 h-8 rounded-lg bg-[#faf2ee] hover:bg-[#f4ece9] border border-[#e8e1dd] flex items-center justify-center text-[#8a726a] hover:text-[#1e1b19] cursor-pointer"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <div className="p-6 flex flex-col gap-4">
+              <p className="text-xs text-[#57423b] leading-relaxed">
+                Are you sure you want to permanently delete this report file
+                from Google Drive and remove it from this activity record?
+              </p>
+
+              <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-[#f4ece9]">
+                <button
+                  type="button"
+                  onClick={() => setReportToDelete(null)}
+                  className="px-4 py-2 rounded-xl bg-white border border-[#e8e1dd] text-[#57423b] font-bold text-xs hover:bg-[#faf2ee] cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    try {
+                      await deleteReportMutation.mutateAsync({
+                        activityId: activity.id,
+                        fileId: reportToDelete.fileId,
+                      });
+                      setReportToDelete(null);
+                    } catch {
+                      // Handled by mutation error state
+                    }
+                  }}
+                  disabled={deleteReportMutation.isPending}
+                  className="px-5 py-2 rounded-xl bg-[#ba1a1a] hover:bg-[#93000a] text-white font-bold text-xs shadow-xs cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
+                >
+                  <Trash size={14} weight="bold" />
+                  <span>
+                    {deleteReportMutation.isPending
+                      ? 'Deleting...'
+                      : 'Confirm Delete'}
+                  </span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

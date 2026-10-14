@@ -60,6 +60,12 @@ export class ActivityReport {
 
   @Prop()
   summary?: string;
+
+  @Prop()
+  folderId?: string;
+
+  @Prop()
+  fileSize?: number;
 }
 
 export const ActivityReportSchema =
@@ -130,6 +136,9 @@ export class Activity extends BaseDocument {
 
   @Prop({ type: ActivityReportSchema })
   report?: ActivityReport;
+
+  @Prop({ type: [ActivityReportSchema], default: [] })
+  reports: ActivityReport[];
 
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User', required: true })
   createdBy: Types.ObjectId;

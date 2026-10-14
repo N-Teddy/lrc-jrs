@@ -35,6 +35,8 @@ export interface IActivityReport {
   uploadedByName?: string;
   uploadedAt: string;
   summary?: string;
+  folderId?: string;
+  fileSize?: number;
 }
 
 export interface IActivity {
@@ -61,6 +63,7 @@ export interface IActivity {
   attendanceLockedBy?: string;
   attendanceLockedByName?: string;
   report?: IActivityReport;
+  reports?: IActivityReport[];
   createdBy: string;
   createdAt: string;
   updatedAt: string;

@@ -139,9 +139,20 @@ export function useDeleteActivityReportMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (activityId: string) =>
-      http.delete<IActivity>(`/activities/${activityId}/report`),
-    onSuccess: (_, activityId) => {
+    mutationFn: (
+      variables: string | { activityId: string; fileId?: string },
+    ) => {
+      const activityId =
+        typeof variables === 'string' ? variables : variables.activityId;
+      const fileId =
+        typeof variables === 'string' ? undefined : variables.fileId;
+      return fileId
+        ? http.delete<IActivity>(`/activities/${activityId}/report/${fileId}`)
+        : http.delete<IActivity>(`/activities/${activityId}/report`);
+    },
+    onSuccess: (_, variables) => {
+      const activityId =
+        typeof variables === 'string' ? variables : variables.activityId;
       queryClient.invalidateQueries({
         queryKey: queryKeys.activities.detail(activityId),
       });
