@@ -1,4 +1,4 @@
-import { useTranslation } from '@jrs/client-core';
+import { useTownContext, useTranslation } from '@jrs/client-core';
 import type { IUser } from '@jrs/shared';
 import {
   ChatCircleText,
@@ -47,6 +47,7 @@ export const MemberTableView: React.FC<MemberTableViewProps> = ({
   isCurrentUserAp,
 }) => {
   const { t } = useTranslation();
+  const { canWrite } = useTownContext();
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const totalPages = Math.ceil(total / limit) || 1;
@@ -222,31 +223,35 @@ export const MemberTableView: React.FC<MemberTableViewProps> = ({
                       >
                         <Eye size={16} />
                       </button>
-                      <button
-                        type="button"
-                        onClick={() => onEditMember(m)}
-                        title={t('members:table.editRecord')}
-                        className="w-7 h-7 rounded-lg hover:bg-[#faf2ee] flex items-center justify-center text-[#8a726a] hover:text-[#b85028] transition-colors cursor-pointer"
-                      >
-                        <PencilSimple size={16} />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => onManageAccess(m)}
-                        title={t('members:table.manageAccess')}
-                        className="w-7 h-7 rounded-lg hover:bg-[#faf2ee] flex items-center justify-center text-[#8a726a] hover:text-[#b85028] transition-colors cursor-pointer"
-                      >
-                        <Key size={16} />
-                      </button>
-                      {isCurrentUserAp && onDeleteMember && (
-                        <button
-                          type="button"
-                          onClick={() => onDeleteMember(m)}
-                          title={t('members:table.deactivateMember')}
-                          className="w-7 h-7 rounded-lg hover:bg-[#ffdad6] flex items-center justify-center text-[#8a726a] hover:text-[#ba1a1a] transition-colors cursor-pointer"
-                        >
-                          <Trash size={16} />
-                        </button>
+                      {canWrite && (
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => onEditMember(m)}
+                            title={t('members:table.editRecord')}
+                            className="w-7 h-7 rounded-lg hover:bg-[#faf2ee] flex items-center justify-center text-[#8a726a] hover:text-[#b85028] transition-colors cursor-pointer"
+                          >
+                            <PencilSimple size={16} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => onManageAccess(m)}
+                            title={t('members:table.manageAccess')}
+                            className="w-7 h-7 rounded-lg hover:bg-[#faf2ee] flex items-center justify-center text-[#8a726a] hover:text-[#b85028] transition-colors cursor-pointer"
+                          >
+                            <Key size={16} />
+                          </button>
+                          {isCurrentUserAp && onDeleteMember && (
+                            <button
+                              type="button"
+                              onClick={() => onDeleteMember(m)}
+                              title={t('members:table.deactivateMember')}
+                              className="w-7 h-7 rounded-lg hover:bg-[#ffdad6] flex items-center justify-center text-[#8a726a] hover:text-[#ba1a1a] transition-colors cursor-pointer"
+                            >
+                              <Trash size={16} />
+                            </button>
+                          )}
+                        </>
                       )}
                     </div>
                   </td>

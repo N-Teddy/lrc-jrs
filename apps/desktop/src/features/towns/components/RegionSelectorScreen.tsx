@@ -1,6 +1,6 @@
 import { useTranslation } from '@jrs/client-core';
 import type { IAuthUser, ITown } from '@jrs/shared';
-import { ArrowRight, MapPin, SignOut, Sparkle } from '@phosphor-icons/react';
+import { ArrowRight, MapPin, SignOut } from '@phosphor-icons/react';
 import type React from 'react';
 import {
   ComposableMap,
@@ -80,10 +80,6 @@ export const RegionSelectorScreen: React.FC<RegionSelectorScreenProps> = ({
 
       {/* Top Left Floating Title Overlay */}
       <div className="absolute top-6 left-8 z-20">
-        <div className="mb-2 inline-flex items-center gap-1.5 rounded-lg border border-[#e8e1dd] bg-white/85 px-3 py-1 text-xs font-semibold text-[#b85028] shadow-xs backdrop-blur-md">
-          <Sparkle size={14} weight="fill" />
-          <span>{t('common:fullAppName')}</span>
-        </div>
         <h1 className="text-2xl font-black tracking-tight text-[#1e1b19] sm:text-3xl">
           {t('towns:selectHubTitle')}
         </h1>
@@ -94,9 +90,9 @@ export const RegionSelectorScreen: React.FC<RegionSelectorScreenProps> = ({
 
       {/* Top Right Floating Profile & Sign Out Controls */}
       <div className="absolute top-6 right-8 z-20 flex items-center gap-3">
-        <LanguageToggle />
+        <LanguageToggle size="md" />
 
-        <div className="flex items-center gap-2 rounded-lg border border-[#e8e1dd] bg-white/85 px-3.5 py-1.5 text-xs shadow-xs backdrop-blur-md">
+        <div className="h-10 flex items-center gap-2.5 rounded-lg border border-[#e8e1dd] bg-white/90 px-3.5 text-xs shadow-xs backdrop-blur-md">
           <span className="rounded bg-[#edf3ee] px-2 py-0.5 text-[11px] font-bold text-[#486b52]">
             {user.role}
           </span>
@@ -106,7 +102,7 @@ export const RegionSelectorScreen: React.FC<RegionSelectorScreenProps> = ({
         <button
           type="button"
           onClick={() => signOut()}
-          className="flex cursor-pointer items-center gap-1.5 rounded-lg border border-[#e8e1dd] bg-[#ffdad6] px-3.5 py-1.5 text-xs font-bold text-[#ba1a1a] shadow-xs backdrop-blur-md transition hover:bg-[#ffb4a8]"
+          className="h-10 flex cursor-pointer items-center gap-2 rounded-lg border border-[#ffb4a8] bg-[#fff2ee] px-3.5 text-xs font-bold text-[#ba1a1a] shadow-xs backdrop-blur-md transition hover:bg-[#ffdad6]"
           title={t('common:signOut')}
         >
           <SignOut size={16} weight="bold" />
@@ -116,12 +112,12 @@ export const RegionSelectorScreen: React.FC<RegionSelectorScreenProps> = ({
 
       {/* Main Expansive Center Map Canvas */}
       <div className="relative flex h-full w-full flex-1 items-center justify-center p-4 sm:p-6 lg:p-8">
-        <div className="relative flex h-full w-full max-h-[94vh] max-w-5xl items-center justify-center">
+        <div className="relative flex h-full w-full max-h-[94vh] max-w-6xl items-center justify-center">
           <ComposableMap
             projection="geoMercator"
             projectionConfig={{
               center: [12.5, 7.35],
-              scale: 3950,
+              scale: 4500,
             }}
             width={1000}
             height={900}

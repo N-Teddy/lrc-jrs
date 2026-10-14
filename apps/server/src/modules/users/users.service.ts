@@ -555,6 +555,14 @@ export class UsersService {
       user.account.hasAppAccess = dto.hasAppAccess;
     }
 
+    if (dto.gender !== undefined) {
+      user.gender = dto.gender;
+    }
+
+    if (dto.integrationDate !== undefined) {
+      user.integrationDate = dto.integrationDate;
+    }
+
     const saved = await user.save();
 
     // Recalculate town PC count

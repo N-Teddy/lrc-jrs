@@ -13,7 +13,6 @@ import {
   Key,
   MapPin,
   PencilSimple,
-  Phone,
   ShieldCheck,
   Swap,
   Trash,
@@ -47,7 +46,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
   isCurrentUserAp,
 }) => {
   const { t } = useTranslation();
-  const { activeTown } = useTownContext();
+  const { activeTown, canWrite } = useTownContext();
   const { data: member, isLoading, error } = useMemberDetailQuery(memberId);
 
   const [activeDetailTab, setActiveDetailTab] = useState<
@@ -80,7 +79,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
         <button
           type="button"
           onClick={onBack}
-          className="px-4 py-2 rounded-xl bg-[#faf2ee] hover:bg-[#f4ece9] text-xs font-bold text-[#1e1b19] transition-colors cursor-pointer"
+          className="px-4 py-2 rounded-lg bg-[#faf2ee] hover:bg-[#f4ece9] text-xs font-bold text-[#1e1b19] transition-colors cursor-pointer"
         >
           {t('members:detail.backToMembers')}
         </button>
@@ -181,7 +180,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
               href={`https://wa.me/${cleanDigits}`}
               target="_blank"
               rel="noreferrer"
-              className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#c2e9ca] hover:bg-[#a9d0b2] text-[#2c4e37] text-xs font-bold transition-colors cursor-pointer shadow-2xs"
+              className="flex items-center gap-2 px-3.5 py-2 rounded-lg bg-[#c2e9ca] hover:bg-[#a9d0b2] text-[#2c4e37] text-xs font-bold transition-colors cursor-pointer shadow-2xs"
             >
               <ChatCircleText size={18} weight="fill" />
               <span>WhatsApp</span>
@@ -189,32 +188,36 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
           )}
 
           {/* Edit Profile */}
-          <button
-            type="button"
-            onClick={() => onEdit(member)}
-            className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white hover:bg-[#faf2ee] border border-[#e8e1dd] text-[#1e1b19] text-xs font-bold transition-colors cursor-pointer"
-          >
-            <PencilSimple size={16} />
-            <span>{t('common:edit')}</span>
-          </button>
+          {canWrite && (
+            <button
+              type="button"
+              onClick={() => onEdit(member)}
+              className="flex items-center gap-2 px-3.5 py-2 rounded-lg bg-white hover:bg-[#faf2ee] border border-[#e8e1dd] text-[#1e1b19] text-xs font-bold transition-colors cursor-pointer"
+            >
+              <PencilSimple size={16} />
+              <span>{t('common:edit')}</span>
+            </button>
+          )}
 
           {/* Manage Access */}
-          <button
-            type="button"
-            onClick={() => onManageAccess(member)}
-            className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#fff2ee] hover:bg-[#ffdbcf] border border-[#ffb59c] text-[#b85028] text-xs font-bold transition-colors cursor-pointer shadow-2xs"
-          >
-            <Key size={16} weight="bold" />
-            <span>{t('members:table.manageAccess')}</span>
-          </button>
+          {canWrite && (
+            <button
+              type="button"
+              onClick={() => onManageAccess(member)}
+              className="flex items-center gap-2 px-3.5 py-2 rounded-lg bg-[#fff2ee] hover:bg-[#ffdbcf] border border-[#ffb59c] text-[#b85028] text-xs font-bold transition-colors cursor-pointer shadow-2xs"
+            >
+              <Key size={16} weight="bold" />
+              <span>{t('members:table.manageAccess')}</span>
+            </button>
+          )}
 
-          {/* Deactivate (AP Only) */}
-          {isCurrentUserAp && onDelete && (
+          {/* Deactivate (AP Only & canWrite) */}
+          {canWrite && isCurrentUserAp && onDelete && (
             <button
               type="button"
               onClick={() => onDelete(member)}
               title={t('members:table.deactivateMember')}
-              className="w-9 h-9 rounded-xl hover:bg-[#ffdad6] text-[#8a726a] hover:text-[#ba1a1a] flex items-center justify-center transition-colors cursor-pointer"
+              className="w-9 h-9 rounded-lg hover:bg-[#ffdad6] text-[#8a726a] hover:text-[#ba1a1a] flex items-center justify-center transition-colors cursor-pointer"
             >
               <Trash size={18} />
             </button>
@@ -223,11 +226,11 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
       </section>
 
       {/* 3. Detail Tabs Strip */}
-      <div className="flex items-center justify-center gap-2 p-1.5 rounded-2xl bg-[#faf2ee] w-fit mx-auto shadow-2xs border border-[#e8e1dd]">
+      <div className="flex items-center justify-center gap-1.5 p-1 rounded-xl bg-[#faf2ee] w-fit mx-auto border border-[#e8e1dd]">
         <button
           type="button"
           onClick={() => setActiveDetailTab('identity')}
-          className={`flex items-center justify-center min-w-[140px] gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+          className={`flex items-center justify-center min-w-[140px] gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
             activeDetailTab === 'identity'
               ? 'bg-white text-[#b85028] shadow-xs border border-[#e8e1dd]'
               : 'text-[#8a726a] hover:text-[#57423b] hover:bg-[#f4ece9] border border-transparent'
@@ -243,7 +246,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
         <button
           type="button"
           onClick={() => setActiveDetailTab('transfers')}
-          className={`flex items-center justify-center min-w-[140px] gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+          className={`flex items-center justify-center min-w-[140px] gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
             activeDetailTab === 'transfers'
               ? 'bg-white text-[#b85028] shadow-xs border border-[#e8e1dd]'
               : 'text-[#8a726a] hover:text-[#57423b] hover:bg-[#f4ece9] border border-transparent'
@@ -259,9 +262,13 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
 
       {/* 4. Tab 1: Personal Identity & Credentials */}
       {activeDetailTab === 'identity' && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div
+          className={`grid grid-cols-1 ${hasAppAccess ? 'lg:grid-cols-3' : ''} gap-6`}
+        >
           {/* Identity & Canonical Status */}
-          <div className="lg:col-span-2 flex flex-col gap-6">
+          <div
+            className={`${hasAppAccess ? 'lg:col-span-2' : 'w-full'} flex flex-col gap-6`}
+          >
             <div className="bg-white rounded-3xl border border-[#e8e1dd] p-6 shadow-xs flex flex-col gap-5">
               <h3 className="text-sm font-bold text-[#1e1b19] uppercase tracking-wider text-[#8a726a]">
                 Identity & Demographic Credentials
@@ -276,6 +283,16 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
                 </div>
 
                 <div className="p-3.5 rounded-2xl bg-[#faf2ee] border border-[#e8e1dd] flex flex-col gap-1">
+                  <span className="text-[#8a726a] font-medium">Gender</span>
+                  <span className="font-bold text-[#1e1b19] text-sm">
+                    {member.gender
+                      ? member.gender.charAt(0) +
+                        member.gender.slice(1).toLowerCase()
+                      : 'Not recorded'}
+                  </span>
+                </div>
+
+                <div className="p-3.5 rounded-2xl bg-[#faf2ee] border border-[#e8e1dd] flex flex-col gap-1">
                   <span className="text-[#8a726a] font-medium">
                     Date of Birth
                   </span>
@@ -285,6 +302,23 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
                           'en-GB',
                           {
                             day: 'numeric',
+                            month: 'long',
+                            year: 'numeric',
+                          },
+                        )
+                      : 'Not recorded'}
+                  </span>
+                </div>
+
+                <div className="p-3.5 rounded-2xl bg-[#faf2ee] border border-[#e8e1dd] flex flex-col gap-1">
+                  <span className="text-[#8a726a] font-medium">
+                    Integration Date
+                  </span>
+                  <span className="font-bold text-[#1e1b19] text-sm">
+                    {member.integrationDate
+                      ? new Date(member.integrationDate).toLocaleDateString(
+                          'en-GB',
+                          {
                             month: 'long',
                             year: 'numeric',
                           },
@@ -342,73 +376,77 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
             </div>
           </div>
 
-          {/* Account Portal Credentials Side Card */}
-          <div className="flex flex-col gap-6">
-            <div className="bg-white rounded-3xl border border-[#e8e1dd] p-6 shadow-xs flex flex-col gap-4">
-              <div className="flex items-center gap-2">
-                <ShieldCheck size={20} className="text-[#b85028]" />
-                <h3 className="text-sm font-bold text-[#1e1b19]">
-                  {t('members:detail.credentials')}
-                </h3>
-              </div>
-
-              <div className="flex flex-col gap-3 text-xs">
-                <div className="flex items-center justify-between py-2 border-b border-[#f4ece9]">
-                  <span className="text-[#8a726a]">Portal Account</span>
-                  <span
-                    className={`font-bold ${
-                      hasAppAccess && !isRevoked
-                        ? 'text-[#486b52]'
-                        : 'text-[#8a726a]'
-                    }`}
-                  >
-                    {hasAppAccess && !isRevoked
-                      ? t('members:detail.granted')
-                      : t('members:detail.notGranted')}
-                  </span>
+          {/* Account Portal Credentials Side Card (Only for members with app access) */}
+          {hasAppAccess && (
+            <div className="flex flex-col gap-6">
+              <div className="bg-white rounded-3xl border border-[#e8e1dd] p-6 shadow-xs flex flex-col gap-4">
+                <div className="flex items-center gap-2">
+                  <ShieldCheck size={20} className="text-[#b85028]" />
+                  <h3 className="text-sm font-bold text-[#1e1b19]">
+                    {t('members:detail.credentials')}
+                  </h3>
                 </div>
 
-                <div className="flex items-center justify-between py-2 border-b border-[#f4ece9]">
-                  <span className="text-[#8a726a]">Account Status</span>
-                  <span
-                    className={`font-bold ${
-                      isRevoked
-                        ? 'text-[#ba1a1a]'
-                        : hasAppAccess
+                <div className="flex flex-col gap-3 text-xs">
+                  <div className="flex items-center justify-between py-2 border-b border-[#f4ece9]">
+                    <span className="text-[#8a726a]">Portal Account</span>
+                    <span
+                      className={`font-bold ${
+                        hasAppAccess && !isRevoked
                           ? 'text-[#486b52]'
                           : 'text-[#8a726a]'
-                    }`}
+                      }`}
+                    >
+                      {hasAppAccess && !isRevoked
+                        ? t('members:detail.granted')
+                        : t('members:detail.notGranted')}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between py-2 border-b border-[#f4ece9]">
+                    <span className="text-[#8a726a]">Account Status</span>
+                    <span
+                      className={`font-bold ${
+                        isRevoked
+                          ? 'text-[#ba1a1a]'
+                          : hasAppAccess
+                            ? 'text-[#486b52]'
+                            : 'text-[#8a726a]'
+                      }`}
+                    >
+                      {isRevoked
+                        ? 'Suspended'
+                        : hasAppAccess
+                          ? 'Active'
+                          : 'Offline Only'}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between py-2 border-b border-[#f4ece9]">
+                    <span className="text-[#8a726a]">
+                      {t('members:detail.registeredOn')}
+                    </span>
+                    <span className="font-medium text-[#1e1b19]">
+                      {member.createdAt
+                        ? new Date(member.createdAt).toLocaleDateString('en-GB')
+                        : '—'}
+                    </span>
+                  </div>
+                </div>
+
+                {canWrite && (
+                  <button
+                    type="button"
+                    onClick={() => onManageAccess(member)}
+                    className="w-full mt-2 py-2.5 px-4 rounded-lg bg-[#faf2ee] hover:bg-[#f4ece9] border border-[#e8e1dd] text-[#b85028] text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer"
                   >
-                    {isRevoked
-                      ? 'Suspended'
-                      : hasAppAccess
-                        ? 'Active'
-                        : 'Offline Only'}
-                  </span>
-                </div>
-
-                <div className="flex items-center justify-between py-2 border-b border-[#f4ece9]">
-                  <span className="text-[#8a726a]">
-                    {t('members:detail.registeredOn')}
-                  </span>
-                  <span className="font-medium text-[#1e1b19]">
-                    {member.createdAt
-                      ? new Date(member.createdAt).toLocaleDateString('en-GB')
-                      : '—'}
-                  </span>
-                </div>
+                    <Key size={16} />
+                    <span>{t('members:table.manageAccess')}</span>
+                  </button>
+                )}
               </div>
-
-              <button
-                type="button"
-                onClick={() => onManageAccess(member)}
-                className="w-full mt-2 py-2.5 px-4 rounded-xl bg-[#faf2ee] hover:bg-[#f4ece9] border border-[#e8e1dd] text-[#b85028] text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer"
-              >
-                <Key size={16} />
-                <span>{t('members:table.manageAccess')}</span>
-              </button>
             </div>
-          </div>
+          )}
         </div>
       )}
 

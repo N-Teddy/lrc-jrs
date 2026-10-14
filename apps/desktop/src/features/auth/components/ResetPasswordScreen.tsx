@@ -166,7 +166,8 @@ export const ResetPasswordScreen: React.FC<ResetPasswordScreenProps> = ({
                   htmlFor="reset-new-password"
                   className="text-xs font-semibold uppercase tracking-wider text-[#1e1b19]"
                 >
-                  {t('auth:resetPassword.newPasswordLabel')}
+                  {t('auth:resetPassword.newPasswordLabel')}{' '}
+                  <span className="text-[#b85028]">*</span>
                 </label>
                 <div className="relative flex items-center">
                   <div className="pointer-events-none absolute left-3.5 text-[#8a726a]">
@@ -211,7 +212,8 @@ export const ResetPasswordScreen: React.FC<ResetPasswordScreenProps> = ({
                   htmlFor="reset-confirm-password"
                   className="text-xs font-semibold uppercase tracking-wider text-[#1e1b19]"
                 >
-                  {t('auth:resetPassword.confirmPasswordLabel')}
+                  {t('auth:resetPassword.confirmPasswordLabel')}{' '}
+                  <span className="text-[#b85028]">*</span>
                 </label>
                 <div className="relative flex items-center">
                   <div className="pointer-events-none absolute left-3.5 text-[#8a726a]">

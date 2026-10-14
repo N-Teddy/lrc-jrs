@@ -122,7 +122,7 @@ export const ActivityFilterToolbar: React.FC<ActivityFilterToolbarProps> = ({
       {/* Left Filter Controls */}
       <div className="flex flex-wrap items-center gap-2.5 flex-1">
         {/* Search Input */}
-        <div className="relative w-full sm:w-80 md:w-96 flex-initial">
+        <div className="relative w-full sm:w-96 md:w-[420px] lg:w-[460px] flex-initial">
           <MagnifyingGlass
             size={16}
             weight="bold"

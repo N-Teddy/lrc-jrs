@@ -94,6 +94,7 @@ export interface ICreateMemberDto {
   avatarUrl?: string;
   gender?: Gender;
   dateOfBirth: string;
+  integrationDate?: string;
   role?: UserRole;
   homeTownId?: string;
   hasAppAccess?: boolean;
@@ -106,6 +107,7 @@ export interface IUpdateMemberDto {
   avatarUrl?: string;
   gender?: Gender;
   dateOfBirth?: string;
+  integrationDate?: string;
   role?: UserRole;
   isActivePC?: boolean;
   homeTownId?: string;

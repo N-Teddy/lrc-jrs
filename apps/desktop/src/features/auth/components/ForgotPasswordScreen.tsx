@@ -100,11 +100,9 @@ export const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({
                   htmlFor="reset-identifier"
                   className="text-xs font-semibold uppercase tracking-wider text-[#1e1b19]"
                 >
-                  {t('auth:forgotPassword.identifierLabel')}
+                  {t('auth:forgotPassword.identifierLabel')}{' '}
+                  <span className="text-[#b85028]">*</span>
                 </label>
-                <span className="text-xs text-[#8a726a]">
-                  {t('common:required')}
-                </span>
               </div>
               <div className="relative flex items-center">
                 <div className="pointer-events-none absolute left-3.5 text-[#8a726a]">

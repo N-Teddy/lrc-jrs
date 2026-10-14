@@ -83,9 +83,9 @@ export function CustomSelect<T extends string = string>({
       : 'bg-[#faf2ee] hover:bg-[#f4ece9] border-[#e8e1dd] hover:border-[#ddc0b7]';
 
   const sizeStyles = {
-    sm: 'py-1.5 px-3 text-xs rounded-lg',
-    md: 'py-2.5 px-3.5 text-xs rounded-xl',
-    lg: 'py-3 px-4 text-sm rounded-xl',
+    sm: 'h-8 px-2.5 text-xs rounded-lg',
+    md: 'h-10 px-3.5 text-xs rounded-lg',
+    lg: 'h-11 px-4 text-sm rounded-lg',
   }[size];
 
   return (
@@ -134,7 +134,7 @@ export function CustomSelect<T extends string = string>({
         <div
           role="listbox"
           tabIndex={-1}
-          className="absolute z-50 mt-1.5 min-w-[190px] w-full max-h-64 overflow-y-auto bg-white rounded-2xl border border-[#e8e1dd] shadow-xl p-1.5 animate-in fade-in zoom-in-95 duration-150 focus:outline-none"
+          className="absolute z-50 mt-1.5 min-w-[190px] w-full max-h-64 overflow-y-auto bg-white rounded-xl border border-[#e8e1dd] shadow-xl p-1.5 animate-in fade-in zoom-in-95 duration-150 focus:outline-none"
         >
           {options.map((option) => {
             const isSelected = option.value === value;
@@ -146,7 +146,7 @@ export function CustomSelect<T extends string = string>({
                 aria-selected={isSelected}
                 disabled={option.disabled}
                 onClick={() => handleSelect(option)}
-                className={`w-full text-left flex items-center justify-between gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold cursor-pointer transition-all ${
+                className={`w-full text-left flex items-center justify-between gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold cursor-pointer transition-all ${
                   option.disabled
                     ? 'opacity-40 cursor-not-allowed text-[#8a726a]'
                     : isSelected

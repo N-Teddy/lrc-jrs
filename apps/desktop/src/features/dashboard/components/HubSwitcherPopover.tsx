@@ -48,15 +48,15 @@ export const HubSwitcherPopover: React.FC<HubSwitcherPopoverProps> = ({
 
       {/* Floating Card Positioned next to the Sidebar Switch */}
       <div
-        className={`fixed top-18 z-50 w-84 sm:w-92 rounded-xl bg-white shadow-2xl border border-[#e8e1dd] overflow-hidden animate-in fade-in zoom-in-95 duration-150 flex flex-col transition-all ${
+        className={`fixed top-18 z-50 w-88 sm:w-96 rounded-2xl bg-white shadow-2xl border border-[#e8e1dd] overflow-hidden animate-in fade-in zoom-in-95 duration-150 flex flex-col transition-all ${
           isSidebarCollapsed ? 'left-[80px]' : 'left-[268px]'
         }`}
       >
         {/* Header */}
-        <div className="p-3.5 bg-[#faf2ee] border-b border-[#e8e1dd] flex items-center justify-between">
+        <div className="p-4 bg-[#faf2ee] border-b border-[#e8e1dd] flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-md bg-[#b85028] text-white flex items-center justify-center shadow-xs">
-              <MapPin size={16} weight="fill" />
+            <div className="w-8 h-8 rounded-lg bg-[#b85028] text-white flex items-center justify-center shadow-xs">
+              <MapPin size={17} weight="fill" />
             </div>
             <div>
               <h3 className="font-bold text-xs text-[#1e1b19] leading-tight">
@@ -69,7 +69,7 @@ export const HubSwitcherPopover: React.FC<HubSwitcherPopoverProps> = ({
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="px-2 py-0.5 rounded bg-[#edf3ee] text-[#486b52] text-[10px] font-bold">
+            <span className="px-2 py-0.5 rounded-full bg-[#edf3ee] text-[#486b52] text-[10px] font-bold">
               {t('dashboard:hubSwitcher.activeCount', {
                 count: availableTowns.length,
               })}
@@ -77,7 +77,7 @@ export const HubSwitcherPopover: React.FC<HubSwitcherPopoverProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="p-1 rounded-md text-[#8a726a] hover:bg-white hover:text-[#1e1b19] transition cursor-pointer"
+              className="w-7 h-7 rounded-lg bg-white border border-[#e8e1dd] text-[#8a726a] hover:text-[#1e1b19] hover:border-[#b85028] flex items-center justify-center transition cursor-pointer"
             >
               <X size={14} weight="bold" />
             </button>

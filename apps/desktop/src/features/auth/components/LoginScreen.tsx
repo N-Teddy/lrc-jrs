@@ -71,190 +71,194 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
           <LanguageToggle showIcon />
         </div>
 
-        <div className="mx-auto w-full max-w-[480px] py-8">
-          {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold tracking-tight text-[#1e1b19] sm:text-4xl">
-              {t('auth:login.title')}
-            </h1>
-            <p className="mt-2.5 text-sm sm:text-base leading-relaxed text-[#57423b]">
-              {t('auth:login.subtitle')}
-            </p>
-          </div>
-
-          {/* First-time logging in info box */}
-          <div className="mb-7 rounded-2xl border border-[#eddcd4] bg-[#faf2ee] p-5 text-xs sm:text-sm text-[#57423b]">
-            <div className="flex items-start gap-3.5">
-              <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[#983912]">
-                <Info size={20} weight="bold" />
-              </div>
-              <div>
-                <p className="font-semibold text-[#1e1b19]">
-                  {t('auth:login.firstTimeNoticeTitle')}
-                </p>
-                <p className="mt-1 leading-relaxed text-[#57423b]">
-                  {t('auth:login.firstTimeNoticeDesc')}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Error Notification */}
-          {errorMessage && (
-            <div className="mb-6 rounded-xl border border-[#ba1a1a]/20 bg-[#ffdad6] p-4 text-xs sm:text-sm text-[#93000a]">
-              <div className="flex items-start gap-3">
-                <WarningCircle
-                  size={20}
-                  weight="fill"
-                  className="mt-0.5 shrink-0"
-                />
-                <div className="flex-1">
-                  <p className="font-semibold">{errorMessage}</p>
-                  {isTempExpired && (
-                    <button
-                      type="button"
-                      onClick={() => onForgotPasswordClick?.(identifier)}
-                      className="mt-1.5 inline-flex items-center text-xs font-bold underline hover:text-[#ba1a1a]"
-                    >
-                      {t('auth:login.resetNow')}
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Identifier Input */}
-            <div>
-              <label
-                htmlFor="identifier"
-                className="block text-xs font-semibold uppercase tracking-wider text-[#1e1b19]"
-              >
-                {t('auth:login.identifierLabel')}
-              </label>
-              <div className="relative mt-2">
-                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-[#8a726a]">
-                  {isPhoneInput ? (
-                    <Phone size={20} weight="bold" />
-                  ) : isEmailInput ? (
-                    <EnvelopeSimple size={20} weight="bold" />
-                  ) : (
-                    <At size={20} weight="bold" />
-                  )}
-                </div>
-                <input
-                  id="identifier"
-                  type="text"
-                  required
-                  autoComplete="username"
-                  value={identifier}
-                  onChange={(e) => setIdentifier(e.target.value)}
-                  placeholder={t('auth:login.identifierPlaceholder')}
-                  className="w-full rounded-xl border border-[#e8e1dd] bg-white py-3.5 pl-12 pr-4 text-sm sm:text-base text-[#1e1b19] placeholder-[#8a726a] transition focus:border-[#b85028] focus:outline-none focus:ring-2 focus:ring-[#b85028]/15"
-                />
-              </div>
-              <p className="mt-1.5 text-xs text-[#8a726a]">
-                {t('auth:login.identifierHelper')}
+        <div className="mx-auto w-full max-w-[500px] py-8">
+          <div className="bg-white rounded-3xl border border-[#e8e1dd] p-7 sm:p-10 shadow-sm">
+            {/* Header */}
+            <div className="mb-7">
+              <h1 className="text-2xl font-bold tracking-tight text-[#1e1b19] sm:text-3xl">
+                {t('auth:login.title')}
+              </h1>
+              <p className="mt-2 text-xs sm:text-sm leading-relaxed text-[#57423b]">
+                {t('auth:login.subtitle')}
               </p>
             </div>
 
-            {/* Password Input */}
-            <div>
-              <div className="flex items-center justify-between">
-                <label
-                  htmlFor="password"
-                  className="block text-xs font-semibold uppercase tracking-wider text-[#1e1b19]"
-                >
-                  {t('auth:login.passwordLabel')}
-                </label>
-                <button
-                  type="button"
-                  onClick={() => onForgotPasswordClick?.(identifier)}
-                  className="text-xs font-semibold text-[#b85028] transition hover:text-[#983912]"
-                >
-                  {t('auth:login.forgotPassword')}
-                </button>
-              </div>
-              <div className="relative mt-2">
-                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-[#8a726a]">
-                  <Lock size={20} weight="bold" />
+            {/* First-time logging in info box */}
+            <div className="mb-6 rounded-xl border border-[#eddcd4] bg-[#faf2ee] p-4 text-xs text-[#57423b]">
+              <div className="flex items-start gap-3">
+                <div className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-[#983912]">
+                  <Info size={17} weight="bold" />
                 </div>
-                <input
-                  id="password"
-                  type={showPassword ? 'text' : 'password'}
-                  required
-                  autoComplete="current-password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder={t('auth:login.passwordPlaceholder')}
-                  className="w-full rounded-xl border border-[#e8e1dd] bg-white py-3.5 pl-12 pr-12 text-sm sm:text-base text-[#1e1b19] placeholder-[#8a726a] transition focus:border-[#b85028] focus:outline-none focus:ring-2 focus:ring-[#b85028]/15"
-                />
-                <button
-                  type="button"
-                  onClick={toggleShowPassword}
-                  className="absolute inset-y-0 right-0 flex items-center pr-4 text-[#8a726a] hover:text-[#1e1b19]"
-                  tabIndex={-1}
+                <div>
+                  <p className="font-semibold text-[#1e1b19]">
+                    {t('auth:login.firstTimeNoticeTitle')}
+                  </p>
+                  <p className="mt-0.5 leading-relaxed text-[#57423b]">
+                    {t('auth:login.firstTimeNoticeDesc')}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Error Notification */}
+            {errorMessage && (
+              <div className="mb-5 rounded-lg border border-[#ba1a1a]/20 bg-[#ffdad6] p-3.5 text-xs text-[#93000a]">
+                <div className="flex items-start gap-2.5">
+                  <WarningCircle
+                    size={18}
+                    weight="fill"
+                    className="mt-0.5 shrink-0"
+                  />
+                  <div className="flex-1">
+                    <p className="font-semibold">{errorMessage}</p>
+                    {isTempExpired && (
+                      <button
+                        type="button"
+                        onClick={() => onForgotPasswordClick?.(identifier)}
+                        className="mt-1 inline-flex items-center text-xs font-bold underline hover:text-[#ba1a1a]"
+                      >
+                        {t('auth:login.resetNow')}
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Form */}
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Identifier Input */}
+              <div>
+                <label
+                  htmlFor="identifier"
+                  className="block text-xs font-bold text-[#1e1b19]"
                 >
-                  {showPassword ? (
-                    <EyeSlash size={20} weight="bold" />
+                  {t('auth:login.identifierLabel')}{' '}
+                  <span className="text-[#b85028]">*</span>
+                </label>
+                <div className="relative mt-1.5">
+                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-[#8a726a]">
+                    {isPhoneInput ? (
+                      <Phone size={18} weight="bold" />
+                    ) : isEmailInput ? (
+                      <EnvelopeSimple size={18} weight="bold" />
+                    ) : (
+                      <At size={18} weight="bold" />
+                    )}
+                  </div>
+                  <input
+                    id="identifier"
+                    type="text"
+                    required
+                    autoComplete="username"
+                    value={identifier}
+                    onChange={(e) => setIdentifier(e.target.value)}
+                    placeholder={t('auth:login.identifierPlaceholder')}
+                    className="w-full h-11 rounded-lg border border-[#e8e1dd] bg-[#faf2ee] pl-10 pr-3.5 text-xs text-[#1e1b19] placeholder-[#8a726a] transition focus:bg-white focus:border-[#b85028] focus:outline-none focus:ring-2 focus:ring-[#b85028]/15"
+                  />
+                </div>
+                <p className="mt-1 text-[11px] text-[#8a726a]">
+                  {t('auth:login.identifierHelper')}
+                </p>
+              </div>
+
+              {/* Password Input */}
+              <div>
+                <div className="flex items-center justify-between">
+                  <label
+                    htmlFor="password"
+                    className="block text-xs font-bold text-[#1e1b19]"
+                  >
+                    {t('auth:login.passwordLabel')}{' '}
+                    <span className="text-[#b85028]">*</span>
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => onForgotPasswordClick?.(identifier)}
+                    className="text-xs font-semibold text-[#b85028] transition hover:text-[#983912]"
+                  >
+                    {t('auth:login.forgotPassword')}
+                  </button>
+                </div>
+                <div className="relative mt-1.5">
+                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-[#8a726a]">
+                    <Lock size={18} weight="bold" />
+                  </div>
+                  <input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    required
+                    autoComplete="current-password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder={t('auth:login.passwordPlaceholder')}
+                    className="w-full h-11 rounded-lg border border-[#e8e1dd] bg-[#faf2ee] pl-10 pr-11 text-xs text-[#1e1b19] placeholder-[#8a726a] transition focus:bg-white focus:border-[#b85028] focus:outline-none focus:ring-2 focus:ring-[#b85028]/15"
+                  />
+                  <button
+                    type="button"
+                    onClick={toggleShowPassword}
+                    className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-[#8a726a] hover:text-[#1e1b19]"
+                    tabIndex={-1}
+                  >
+                    {showPassword ? (
+                      <EyeSlash size={18} weight="bold" />
+                    ) : (
+                      <Eye size={18} weight="bold" />
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              {/* Keep me signed in Checkbox */}
+              <div className="pt-0.5">
+                <label
+                  htmlFor="keepSignedIn"
+                  className="inline-flex cursor-pointer items-center gap-2.5"
+                >
+                  <input
+                    type="checkbox"
+                    id="keepSignedIn"
+                    checked={keepSignedIn}
+                    onChange={(e) => setKeepSignedIn(e.target.checked)}
+                    className="sr-only"
+                  />
+                  <div
+                    className={`flex h-4 w-4 items-center justify-center rounded border transition ${
+                      keepSignedIn
+                        ? 'border-[#43664d] bg-[#43664d] text-white'
+                        : 'border-[#ddc0b7] bg-white text-transparent'
+                    }`}
+                  >
+                    <Check size={12} weight="bold" />
+                  </div>
+                  <span className="text-xs font-medium text-[#1e1b19]">
+                    {t('auth:login.keepSignedIn')}
+                  </span>
+                </label>
+              </div>
+
+              {/* Primary Action Button: "Sign In →" */}
+              <div className="pt-2">
+                <button
+                  type="submit"
+                  disabled={isLoading || !identifier.trim() || !password}
+                  className="flex w-full h-11 items-center justify-center gap-2 rounded-lg bg-[#b85028] px-5 text-xs font-bold text-white shadow-xs transition hover:bg-[#983912] active:bg-[#812901] disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
+                >
+                  {isLoading ? (
+                    <>
+                      <CircleNotch size={18} className="animate-spin" />
+                      <span>{t('auth:login.signingIn')}</span>
+                    </>
                   ) : (
-                    <Eye size={20} weight="bold" />
+                    <>
+                      <span>{t('auth:login.signInButton')}</span>
+                      <ArrowRight size={18} weight="bold" />
+                    </>
                   )}
                 </button>
               </div>
-            </div>
-
-            {/* Keep me signed in Checkbox */}
-            <div className="pt-1">
-              <label
-                htmlFor="keepSignedIn"
-                className="inline-flex cursor-pointer items-center gap-3"
-              >
-                <input
-                  type="checkbox"
-                  id="keepSignedIn"
-                  checked={keepSignedIn}
-                  onChange={(e) => setKeepSignedIn(e.target.checked)}
-                  className="sr-only"
-                />
-                <div
-                  className={`flex h-5 w-5 items-center justify-center rounded-md border transition ${
-                    keepSignedIn
-                      ? 'border-[#43664d] bg-[#43664d] text-white'
-                      : 'border-[#ddc0b7] bg-white text-transparent'
-                  }`}
-                >
-                  <Check size={14} weight="bold" />
-                </div>
-                <span className="text-xs sm:text-sm font-medium text-[#1e1b19]">
-                  {t('auth:login.keepSignedIn')}
-                </span>
-              </label>
-            </div>
-
-            {/* Primary Action Button: "Sign In →" */}
-            <div className="pt-2">
-              <button
-                type="submit"
-                disabled={isLoading || !identifier.trim() || !password}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#b85028] px-5 py-4 text-sm sm:text-base font-semibold text-white shadow-sm transition hover:bg-[#983912] active:bg-[#812901] disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {isLoading ? (
-                  <>
-                    <CircleNotch size={20} className="animate-spin" />
-                    <span>{t('auth:login.signingIn')}</span>
-                  </>
-                ) : (
-                  <>
-                    <span>{t('auth:login.signInButton')}</span>
-                    <ArrowRight size={20} weight="bold" />
-                  </>
-                )}
-              </button>
-            </div>
-          </form>
+            </form>
+          </div>
         </div>
       </div>
 

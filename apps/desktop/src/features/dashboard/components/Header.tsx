@@ -93,13 +93,13 @@ export const Header: React.FC<HeaderProps> = ({
 
       {/* 3. Right: Language Switcher & User Profile Button */}
       <div className="flex items-center gap-3 shrink-0">
-        <LanguageToggle />
+        <LanguageToggle size="md" />
 
         <div className="relative">
           <button
             type="button"
             onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
-            className="flex items-center gap-2.5 px-3 py-1.5 rounded-lg border border-[#e8e1dd] bg-white hover:bg-[#faf2ee] transition cursor-pointer"
+            className="h-10 flex items-center gap-2.5 px-3 rounded-lg border border-[#e8e1dd] bg-white hover:bg-[#faf2ee] transition cursor-pointer"
           >
             <div className="w-8 h-8 rounded-md bg-[#b85028] text-white flex items-center justify-center font-bold text-xs shadow-xs shrink-0">
               {initials}
