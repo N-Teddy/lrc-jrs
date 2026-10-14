@@ -133,11 +133,12 @@ export class MediaService implements OnModuleInit {
   }
 
   /**
-   * Generates a unique cartoon illustration avatar (SVG) based on a user's name/identifier, and persists it.
+   * Generates a unique cartoon illustration avatar (SVG) based on a user's name/identifier and gender, and persists it.
    */
   async generateAndSaveDefaultAvatar(
     seedName: string,
     identifier?: string,
+    gender?: 'MALE' | 'FEMALE' | string,
   ): Promise<string> {
     const chosenStyleKey = (
       this.configService.get<string>('MEDIA_AVATAR_STYLE', 'avataaars') ||
@@ -146,7 +147,11 @@ export class MediaService implements OnModuleInit {
 
     const selectedStyle = AVATAR_STYLES[chosenStyleKey] || avataaars;
 
-    const avatar = createAvatar(selectedStyle, {
+    const normalizedGender = gender ? gender.toUpperCase() : undefined;
+    const isMale = normalizedGender === 'MALE';
+    const isFemale = normalizedGender === 'FEMALE';
+
+    const avatarOptions: Record<string, any> = {
       seed: seedName || identifier || 'Member',
       backgroundColor: [
         'b6e3f4',
@@ -158,7 +163,70 @@ export class MediaService implements OnModuleInit {
         'e2d4f9',
         'fed1d6',
       ],
-    });
+    };
+
+    if (chosenStyleKey === 'avataaars') {
+      if (isMale) {
+        avatarOptions.top = [
+          'shortCurly',
+          'shortFlat',
+          'shortRound',
+          'shortWaved',
+          'theCaesar',
+          'theCaesarAndSidePart',
+          'shavedSides',
+          'sides',
+          'dreads01',
+          'dreads02',
+          'frizzle',
+          'shaggy',
+          'shaggyMullet',
+        ];
+        avatarOptions.facialHair = [
+          'beardLight',
+          'beardMedium',
+          'beardMajestic',
+          'moustacheFancy',
+          'moustacheMagnum',
+        ];
+        avatarOptions.facialHairProbability = 35;
+      } else if (isFemale) {
+        avatarOptions.top = [
+          'longButNotTooLong',
+          'straight01',
+          'straight02',
+          'straightAndStrand',
+          'curvy',
+          'curly',
+          'bob',
+          'bun',
+          'miaWallace',
+          'fro',
+          'froBand',
+          'dreads',
+          'bigHair',
+        ];
+        avatarOptions.facialHairProbability = 0;
+      }
+    } else if (chosenStyleKey === 'lorelei') {
+      if (isMale) {
+        avatarOptions.beardProbability = 35;
+        avatarOptions.hairAccessoriesProbability = 0;
+        avatarOptions.earringsProbability = 5;
+      } else if (isFemale) {
+        avatarOptions.beardProbability = 0;
+        avatarOptions.hairAccessoriesProbability = 40;
+        avatarOptions.earringsProbability = 60;
+      }
+    } else if (chosenStyleKey === 'personas') {
+      if (isMale) {
+        avatarOptions.facialHairProbability = 35;
+      } else if (isFemale) {
+        avatarOptions.facialHairProbability = 0;
+      }
+    }
+
+    const avatar = createAvatar(selectedStyle, avatarOptions);
 
     const svgString = avatar.toString();
     const buffer = Buffer.from(svgString, 'utf-8');

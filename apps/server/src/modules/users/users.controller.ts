@@ -11,10 +11,14 @@ import {
   Patch,
   Post,
   Query,
+  UploadedFiles,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import {
   ApiBearerAuth,
+  ApiConsumes,
   ApiOperation,
   ApiResponse,
   ApiTags,
@@ -73,29 +77,59 @@ export class UsersController {
   @Post()
   @TownScope('homeTownId')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Register a new fellowship member' })
+  @UseInterceptors(
+    FileFieldsInterceptor([
+      { name: 'avatar', maxCount: 1 },
+      { name: 'image', maxCount: 1 },
+    ]),
+  )
+  @ApiConsumes('multipart/form-data', 'application/json')
+  @ApiOperation({
+    summary: 'Register a new fellowship member with optional avatar upload',
+  })
   @ApiResponse({ status: 201, description: 'Member registered successfully' })
   @ApiResponse({ status: 400, description: 'Age rule or quota violation' })
   @ApiResponse({ status: 409, description: 'Phone or email already exists' })
   async create(
     @Body() dto: CreateMemberDto,
+    @UploadedFiles()
+    files: {
+      avatar?: Express.Multer.File[];
+      image?: Express.Multer.File[];
+    },
     @CurrentUser() currentUser: IAuthUser,
     @Headers('x-town-id') xTownId?: string,
   ) {
-    return this.usersService.createMember(dto, currentUser, xTownId);
+    const file = files?.avatar?.[0] || files?.image?.[0];
+    return this.usersService.createMember(dto, currentUser, xTownId, file);
   }
 
   @Patch(':id')
-  @ApiOperation({ summary: 'Update member profile information' })
+  @UseInterceptors(
+    FileFieldsInterceptor([
+      { name: 'avatar', maxCount: 1 },
+      { name: 'image', maxCount: 1 },
+    ]),
+  )
+  @ApiConsumes('multipart/form-data', 'application/json')
+  @ApiOperation({
+    summary: 'Update member profile information with optional avatar upload',
+  })
   @ApiResponse({ status: 200, description: 'Member updated successfully' })
   @ApiResponse({ status: 400, description: 'Validation or quota error' })
   @ApiResponse({ status: 404, description: 'Member not found' })
   async update(
     @Param('id') id: string,
     @Body() dto: UpdateMemberDto,
+    @UploadedFiles()
+    files: {
+      avatar?: Express.Multer.File[];
+      image?: Express.Multer.File[];
+    },
     @CurrentUser() currentUser: IAuthUser,
   ) {
-    return this.usersService.updateMember(id, dto, currentUser);
+    const file = files?.avatar?.[0] || files?.image?.[0];
+    return this.usersService.updateMember(id, dto, currentUser, file);
   }
 
   @Patch(':id/access')

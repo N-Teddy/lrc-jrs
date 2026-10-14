@@ -11,11 +11,11 @@ import {
 } from '@phosphor-icons/react';
 import type React from 'react';
 import { useState } from 'react';
+import { UserAvatar } from '../../../components';
 import {
   calculateAge,
   formatCameroonPhone,
   getCleanDigitsForWhatsApp,
-  getInitials,
   getRoleDisplayInfo,
 } from '../utils/member-ui.utils';
 
@@ -107,7 +107,6 @@ export const MemberTableView: React.FC<MemberTableViewProps> = ({
             {members.map((m) => {
               const age = calculateAge(m.dateOfBirth);
               const roleInfo = getRoleDisplayInfo(m.role);
-              const initials = getInitials(m.fullName);
               const formattedPhone = formatCameroonPhone(m.phoneNumber);
               const cleanDigits = getCleanDigitsForWhatsApp(m.phoneNumber);
               const isEligibleJr =
@@ -121,9 +120,11 @@ export const MemberTableView: React.FC<MemberTableViewProps> = ({
                   {/* 1. Member Name & Age */}
                   <td className="py-3.5 px-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-xl bg-[#faf2ee] border border-[#e8e1dd] text-[#b85028] text-xs font-bold flex items-center justify-center shrink-0 group-hover:bg-[#fff2ee] transition-colors">
-                        {initials}
-                      </div>
+                      <UserAvatar
+                        avatarUrl={m.avatarUrl}
+                        name={m.fullName}
+                        size="md"
+                      />
                       <div className="flex flex-col min-w-0">
                         <span className="font-bold text-[#1e1b19] truncate group-hover:text-[#b85028] transition-colors">
                           {m.fullName}

@@ -8,8 +8,8 @@ import {
 } from '@phosphor-icons/react';
 import type React from 'react';
 import { useState } from 'react';
-import { LanguageToggle } from '../../../components/LanguageToggle';
-import { formatDashboardDate, getUserInitials } from '../utils/dashboard.utils';
+import { LanguageToggle, UserAvatar } from '../../../components';
+import { formatDashboardDate } from '../utils/dashboard.utils';
 
 interface HeaderProps {
   isSidebarCollapsed: boolean;
@@ -29,7 +29,6 @@ export const Header: React.FC<HeaderProps> = ({
   const { activeTown } = useTownContext();
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
 
-  const initials = getUserInitials(user?.fullName);
   const todayFormatted = formatDashboardDate(new Date(), i18n.language);
 
   return (
@@ -101,9 +100,11 @@ export const Header: React.FC<HeaderProps> = ({
             onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
             className="h-10 flex items-center gap-2.5 px-3 rounded-lg border border-[#e8e1dd] bg-white hover:bg-[#faf2ee] transition cursor-pointer"
           >
-            <div className="w-8 h-8 rounded-md bg-[#b85028] text-white flex items-center justify-center font-bold text-xs shadow-xs shrink-0">
-              {initials}
-            </div>
+            <UserAvatar
+              avatarUrl={user?.avatarUrl}
+              name={user?.fullName}
+              size="sm"
+            />
 
             {/* User Name & Role always visible */}
             <div className="flex flex-col text-left leading-tight">

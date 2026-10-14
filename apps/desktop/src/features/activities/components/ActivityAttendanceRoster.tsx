@@ -34,6 +34,7 @@ import {
 } from '@phosphor-icons/react';
 import type React from 'react';
 import { useEffect, useMemo, useState } from 'react';
+import { UserAvatar } from '../../../components';
 import {
   formatActivityDateRange,
   getActivityTypeConfig,
@@ -845,40 +846,16 @@ export const ActivityAttendanceRoster: React.FC<
                       >
                         {/* Member Card Header */}
                         <div className="flex items-start gap-2.5 min-w-0">
-                          <div
-                            className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs shrink-0 border overflow-hidden ${
+                          <UserAvatar
+                            avatarUrl={member.avatarUrl}
+                            name={member.fullName}
+                            size="sm"
+                            className={
                               isPresent
                                 ? 'bg-[#c2e9ca] text-[#2c4e37] border-[#a9d0b2]'
                                 : 'bg-[#faf2ee] text-[#b85028] border-[#e8e1dd]'
-                            }`}
-                          >
-                            {member.avatarUrl ? (
-                              <img
-                                src={member.avatarUrl}
-                                alt={member.fullName}
-                                className="w-full h-full object-cover"
-                                onError={(e) => {
-                                  e.currentTarget.style.display = 'none';
-                                  if (e.currentTarget.parentElement) {
-                                    e.currentTarget.parentElement.innerText =
-                                      member.fullName
-                                        ?.split(' ')
-                                        .map((n) => n[0])
-                                        .slice(0, 2)
-                                        .join('')
-                                        .toUpperCase() || 'M';
-                                  }
-                                }}
-                              />
-                            ) : (
-                              member.fullName
-                                ?.split(' ')
-                                .map((n) => n[0])
-                                .slice(0, 2)
-                                .join('')
-                                .toUpperCase()
-                            )}
-                          </div>
+                            }
+                          />
 
                           <div className="flex flex-col min-w-0 flex-1">
                             <span

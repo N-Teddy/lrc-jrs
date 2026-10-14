@@ -1,5 +1,6 @@
 import { UserRole } from '@jrs/shared';
 import { ApiPropertyOptional } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 import {
   IsBoolean,
   IsDateString,
@@ -54,6 +55,11 @@ export class UpdateMemberDto {
     description: 'Whether user is an active PC for their town',
   })
   @IsOptional()
+  @Transform(({ value }) => {
+    if (value === 'true' || value === true) return true;
+    if (value === 'false' || value === false) return false;
+    return value;
+  })
   @IsBoolean()
   isActivePC?: boolean;
 
@@ -68,8 +74,21 @@ export class UpdateMemberDto {
     description: 'Whether user has app login access',
   })
   @IsOptional()
+  @Transform(({ value }) => {
+    if (value === 'true' || value === true) return true;
+    if (value === 'false' || value === false) return false;
+    return value;
+  })
   @IsBoolean()
   hasAppAccess?: boolean;
+
+  @ApiPropertyOptional({
+    example: 'https://example.com/avatar.svg',
+    description: 'Direct avatar image URL if already uploaded',
+  })
+  @IsOptional()
+  @IsString()
+  avatarUrl?: string;
 
   @ApiPropertyOptional({
     example: 'MALE',

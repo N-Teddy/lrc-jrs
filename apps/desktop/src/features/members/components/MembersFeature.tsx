@@ -76,14 +76,24 @@ export const MembersFeature: React.FC = () => {
 
   const isCurrentUserAp = user?.role === 'AP';
 
-  const handleCreateMember = async (dto: ICreateMemberDto) => {
-    await createMemberMutation.mutateAsync({
-      ...dto,
-      homeTownId: activeTownId || undefined,
-    });
+  const handleCreateMember = async (dto: ICreateMemberDto | FormData) => {
+    if (typeof FormData !== 'undefined' && dto instanceof FormData) {
+      if (activeTownId && !dto.has('homeTownId')) {
+        dto.append('homeTownId', activeTownId);
+      }
+      await createMemberMutation.mutateAsync(dto);
+    } else {
+      await createMemberMutation.mutateAsync({
+        ...(dto as ICreateMemberDto),
+        homeTownId: activeTownId || undefined,
+      });
+    }
   };
 
-  const handleUpdateMember = async (id: string, dto: IUpdateMemberDto) => {
+  const handleUpdateMember = async (
+    id: string,
+    dto: IUpdateMemberDto | FormData,
+  ) => {
     await updateMemberMutation.mutateAsync({ id, dto });
   };
 

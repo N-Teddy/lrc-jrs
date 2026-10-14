@@ -69,6 +69,14 @@ export class HttpService {
           reqConfig.headers['Accept-Language'] = this.getLanguage();
         }
 
+        // Allow browser / axios to automatically set multipart/form-data boundary when sending FormData
+        if (
+          typeof FormData !== 'undefined' &&
+          reqConfig.data instanceof FormData
+        ) {
+          delete reqConfig.headers['Content-Type'];
+        }
+
         return reqConfig;
       },
       (error) => Promise.reject(error),

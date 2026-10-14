@@ -74,7 +74,8 @@ export function useCreateMemberMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (dto: ICreateMemberDto) => http.post<IUser>('/users', dto),
+    mutationFn: (dto: ICreateMemberDto | FormData) =>
+      http.post<IUser>('/users', dto),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.users.all });
       queryClient.invalidateQueries({ queryKey: ['users', 'stats'] });
@@ -91,8 +92,13 @@ export function useUpdateMemberMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, dto }: { id: string; dto: IUpdateMemberDto }) =>
-      http.patch<IUser>(`/users/${id}`, dto),
+    mutationFn: ({
+      id,
+      dto,
+    }: {
+      id: string;
+      dto: IUpdateMemberDto | FormData;
+    }) => http.patch<IUser>(`/users/${id}`, dto),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.users.all });
       queryClient.invalidateQueries({ queryKey: ['users', 'stats'] });

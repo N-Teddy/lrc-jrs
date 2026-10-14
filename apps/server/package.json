@@ -13,6 +13,8 @@
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
     "seed": "ts-node -r tsconfig-paths/register src/database/seeds/seed.ts",
+    "seed:avatars": "ts-node -r tsconfig-paths/register src/database/seeds/generate-user-avatars.ts",
+    "seed:attendance": "ts-node -r tsconfig-paths/register src/database/seeds/assign-past-attendance.ts",
     "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js",
     "test:watch": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --watch",
     "test:cov": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --coverage",

@@ -1,22 +1,25 @@
 import { useTranslation } from '@jrs/client-core';
 import { type ICreateMemberDto, UserRole } from '@jrs/shared';
 import {
+  Camera,
   CheckCircle,
   IdentificationBadge,
   Key,
   MapPin,
+  Trash,
+  UploadSimple,
   Warning,
   X,
 } from '@phosphor-icons/react';
 import type React from 'react';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { DatePicker, MonthYearPicker } from '../../../components/DatePicker';
 import { calculateAge, getAgeCategory } from '../utils/member-ui.utils';
 
 interface RegisterMemberModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (dto: ICreateMemberDto) => Promise<void>;
+  onSubmit: (dto: ICreateMemberDto | FormData) => Promise<void>;
   activeTownName: string;
   activeTownCode: string;
   activePcCount: number;
@@ -33,6 +36,10 @@ export const RegisterMemberModal: React.FC<RegisterMemberModalProps> = ({
   isSubmitting,
 }) => {
   const { t } = useTranslation();
+
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
 
   const [fullName, setFullName] = useState('');
   const [gender, setGender] = useState<'MALE' | 'FEMALE'>('MALE');
@@ -53,6 +60,30 @@ export const RegisterMemberModal: React.FC<RegisterMemberModalProps> = ({
   const handlePhoneChange = (val: string) => {
     const cleaned = val.replace(/\D/g, '').slice(0, 9);
     setPhoneDigits(cleaned);
+  };
+
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        setErrorMsg('Image size must be less than 5MB');
+        return;
+      }
+      setAvatarFile(file);
+      const url = URL.createObjectURL(file);
+      setAvatarPreview(url);
+    }
+  };
+
+  const handleRemoveAvatar = () => {
+    setAvatarFile(null);
+    if (avatarPreview) {
+      URL.revokeObjectURL(avatarPreview);
+      setAvatarPreview(null);
+    }
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -78,16 +109,31 @@ export const RegisterMemberModal: React.FC<RegisterMemberModalProps> = ({
     }
 
     try {
-      await onSubmit({
-        fullName: fullName.trim(),
-        gender,
-        dateOfBirth,
-        integrationDate: integrationDate || undefined,
-        phoneNumber: `+237${phoneDigits}`,
-        email: email.trim() ? email.trim() : undefined,
-        role,
-        hasAppAccess,
-      });
+      if (avatarFile) {
+        const formData = new FormData();
+        formData.append('fullName', fullName.trim());
+        formData.append('gender', gender);
+        formData.append('dateOfBirth', dateOfBirth);
+        if (integrationDate)
+          formData.append('integrationDate', integrationDate);
+        formData.append('phoneNumber', `+237${phoneDigits}`);
+        if (email.trim()) formData.append('email', email.trim());
+        formData.append('role', role);
+        formData.append('hasAppAccess', String(hasAppAccess));
+        formData.append('avatar', avatarFile);
+        await onSubmit(formData);
+      } else {
+        await onSubmit({
+          fullName: fullName.trim(),
+          gender,
+          dateOfBirth,
+          integrationDate: integrationDate || undefined,
+          phoneNumber: `+237${phoneDigits}`,
+          email: email.trim() ? email.trim() : undefined,
+          role,
+          hasAppAccess,
+        });
+      }
       onClose();
     } catch (err: any) {
       setErrorMsg(
@@ -144,6 +190,78 @@ export const RegisterMemberModal: React.FC<RegisterMemberModalProps> = ({
               <span className="text-xs font-bold text-[#8a726a] uppercase tracking-wider">
                 {t('members:modal.sectionIdentity')}
               </span>
+            </div>
+
+            {/* Avatar Upload Banner */}
+            <div className="flex items-center gap-4 p-3.5 rounded-2xl bg-[#faf2ee]/80 border border-[#e8e1dd]">
+              <div className="relative group shrink-0">
+                <div className="w-16 h-16 rounded-2xl border-2 border-dashed border-[#d1c4bf] bg-white flex items-center justify-center overflow-hidden shadow-2xs">
+                  {avatarPreview ? (
+                    <img
+                      src={avatarPreview}
+                      alt="Avatar preview"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex flex-col items-center justify-center text-[#8a726a] gap-1">
+                      <Camera
+                        size={22}
+                        weight="bold"
+                        className="text-[#b85028]"
+                      />
+                      <span className="text-[9px] font-bold uppercase tracking-wider text-[#b85028]">
+                        {gender === 'FEMALE' ? 'Female' : 'Male'}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-1 min-w-0 flex-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold text-[#1e1b19]">
+                    Member Profile Picture
+                  </span>
+                  <span className="text-[10px] font-medium text-[#8a726a]">
+                    (Optional)
+                  </span>
+                </div>
+                <p className="text-[11px] text-[#8a726a] leading-tight">
+                  {avatarPreview
+                    ? 'Custom photo selected. Will be saved on submission.'
+                    : `Upload a photo or leave empty to automatically generate a custom ${gender === 'FEMALE' ? 'female' : 'male'} SVG avatar.`}
+                </p>
+                <div className="flex items-center gap-2 mt-1">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                    onChange={handleAvatarChange}
+                    className="hidden"
+                    id="reg-avatar-input"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="px-2.5 py-1 rounded-md bg-white border border-[#e8e1dd] hover:bg-[#fff2ee] hover:border-[#b85028] text-[#1e1b19] hover:text-[#b85028] text-[11px] font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <UploadSimple size={13} weight="bold" />
+                    <span>
+                      {avatarPreview ? 'Change Photo' : 'Upload Photo'}
+                    </span>
+                  </button>
+                  {avatarPreview && (
+                    <button
+                      type="button"
+                      onClick={handleRemoveAvatar}
+                      className="px-2.5 py-1 rounded-md bg-[#ffdad6] hover:bg-[#ffb4a8] text-[#ba1a1a] text-[11px] font-bold transition-all flex items-center gap-1 cursor-pointer"
+                    >
+                      <Trash size={13} weight="bold" />
+                      <span>Remove</span>
+                    </button>
+                  )}
+                </div>
+              </div>
             </div>
 
             {/* Row 1: Full Name & Gender */}

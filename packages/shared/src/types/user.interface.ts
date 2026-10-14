@@ -49,6 +49,8 @@ export interface IAuthUser {
   homeTownId: string;
   isActivePC: boolean;
   account: IUserAccount;
+  avatarUrl?: string;
+  gender?: Gender;
 }
 
 export interface ILoginResponse {

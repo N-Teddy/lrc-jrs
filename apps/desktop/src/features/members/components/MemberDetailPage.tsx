@@ -20,11 +20,11 @@ import {
 } from '@phosphor-icons/react';
 import type React from 'react';
 import { useState } from 'react';
+import { UserAvatar } from '../../../components';
 import {
   calculateAge,
   formatCameroonPhone,
   getCleanDigitsForWhatsApp,
-  getInitials,
   getRoleDisplayInfo,
 } from '../utils/member-ui.utils';
 
@@ -89,7 +89,6 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
 
   const age = calculateAge(member.dateOfBirth);
   const roleInfo = getRoleDisplayInfo(member.role);
-  const initials = getInitials(member.fullName);
   const formattedPhone = formatCameroonPhone(member.phoneNumber);
   const cleanDigits = getCleanDigitsForWhatsApp(member.phoneNumber);
   const isEligibleJr = member.isJr ?? (age !== null && age >= 18 && age <= 30);
@@ -125,9 +124,11 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
       {/* 2. Hero Profile Card */}
       <section className="bg-white rounded-3xl border border-[#e8e1dd] p-6 sm:p-8 shadow-xs flex flex-col xl:flex-row xl:items-center justify-between gap-6">
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
-          <div className="w-20 h-20 rounded-2xl bg-[#faf2ee] border border-[#e8e1dd] flex items-center justify-center text-[#b85028] text-2xl font-black shadow-xs shrink-0">
-            {initials}
-          </div>
+          <UserAvatar
+            avatarUrl={member.avatarUrl}
+            name={member.fullName}
+            size="2xl"
+          />
           <div className="flex flex-col gap-1.5">
             <div className="flex flex-wrap items-center gap-2">
               <h1 className="text-xl sm:text-2xl font-bold text-[#1e1b19] tracking-tight">

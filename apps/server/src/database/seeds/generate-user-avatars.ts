@@ -10,11 +10,12 @@ import { SeedModule } from './seed.module';
 
 async function bootstrap() {
   const logger = new Logger('GenerateAvatars');
-  const force = process.argv.includes('--force');
-  const clean = process.argv.includes('--clean') || force;
+  const missingOnly = process.argv.includes('--missing-only');
+  const force = !missingOnly || process.argv.includes('--force');
+  const clean = process.argv.includes('--clean');
 
   logger.log(
-    `Starting avatar generation script for existing users (Force: ${force}, Clean: ${clean})...`,
+    `Starting avatar generation script for existing users (Replace all: ${force}, Missing only: ${missingOnly})...`,
   );
 
   const app = await NestFactory.createApplicationContext(SeedModule, {
@@ -63,6 +64,7 @@ async function bootstrap() {
         const avatarUrl = await mediaService.generateAndSaveDefaultAvatar(
           user.fullName,
           identifier,
+          user.gender,
         );
 
         user.avatarUrl = avatarUrl;

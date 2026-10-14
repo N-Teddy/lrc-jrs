@@ -57,6 +57,8 @@ export class AuthService {
       role: user.role,
       homeTownId: user.homeTownId.toString(),
       isActivePC: user.isActivePC,
+      avatarUrl: user.avatarUrl,
+      gender: user.gender,
       account: {
         status: user.account?.status || AccountStatus.ACTIVE,
         hasAppAccess: user.account?.hasAppAccess ?? true,

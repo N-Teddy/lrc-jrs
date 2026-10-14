@@ -27,6 +27,7 @@ import {
   type UserDocument,
 } from '../../database/schemas';
 import { EmailService } from '../../services/email.service';
+import { MediaService } from '../../services/media.service';
 import { WhatsAppService } from '../../services/whatsapp.service';
 import type {
   CreateMemberDto,
@@ -44,6 +45,7 @@ export class UsersService {
     @InjectModel(Town.name) private readonly townModel: Model<TownDocument>,
     private readonly emailService: EmailService,
     private readonly whatsAppService: WhatsAppService,
+    private readonly mediaService: MediaService,
   ) {}
 
   /**
@@ -84,6 +86,10 @@ export class UsersService {
       fullName: doc.fullName,
       phoneNumber: doc.phoneNumber,
       email: doc.email,
+      avatarUrl: doc.avatarUrl,
+      gender: doc.gender,
+      integrationDate: doc.integrationDate,
+      isWhatsappVerified: doc.isWhatsappVerified,
       dateOfBirth: doc.dateOfBirth,
       isJr: doc.isJr,
       homeTownId: townObj
@@ -322,6 +328,7 @@ export class UsersService {
     dto: CreateMemberDto,
     currentUser: IAuthUser,
     activeTownId?: string,
+    file?: Express.Multer.File,
   ): Promise<IUser> {
     // 1. Resolve target town
     const targetTownIdentifier =
@@ -415,10 +422,23 @@ export class UsersService {
     const isWhatsappVerified =
       await this.whatsAppService.checkContact(sanitizedPhone);
 
+    // 6.5 Resolve avatar: uploaded file or generated DiceBear avatar based on gender
+    let avatarUrl = dto.avatarUrl;
+    if (file) {
+      avatarUrl = await this.mediaService.uploadAvatar(file);
+    } else if (!avatarUrl) {
+      avatarUrl = await this.mediaService.generateAndSaveDefaultAvatar(
+        dto.fullName.trim(),
+        sanitizedPhone,
+        dto.gender,
+      );
+    }
+
     const createdUser = new this.userModel({
       fullName: dto.fullName.trim(),
       phoneNumber: sanitizedPhone,
       email: normalizedEmail || undefined,
+      avatarUrl,
       passwordHash,
       tempPasswordHash,
       tempPasswordExpiresAt,
@@ -474,6 +494,7 @@ export class UsersService {
     id: string,
     dto: UpdateMemberDto,
     _currentUser: IAuthUser,
+    file?: Express.Multer.File,
   ): Promise<IUser> {
     const user = await this.userModel.findById(id).exec();
     if (!user) {
@@ -561,6 +582,23 @@ export class UsersService {
 
     if (dto.integrationDate !== undefined) {
       user.integrationDate = dto.integrationDate;
+    }
+
+    // Handle avatar image update or regeneration if gender changed
+    if (file) {
+      user.avatarUrl = await this.mediaService.uploadAvatar(file);
+    } else if (dto.avatarUrl !== undefined) {
+      user.avatarUrl = dto.avatarUrl;
+    } else if (dto.gender !== undefined) {
+      // If gender was updated and user has an auto-generated SVG avatar (or no avatar), update it to match new gender
+      if (!user.avatarUrl || user.avatarUrl.includes('/uploads/avatars/')) {
+        const identifier = user.phoneNumber || user._id.toString();
+        user.avatarUrl = await this.mediaService.generateAndSaveDefaultAvatar(
+          user.fullName,
+          identifier,
+          dto.gender,
+        );
+      }
     }
 
     const saved = await user.save();
