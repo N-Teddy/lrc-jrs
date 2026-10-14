@@ -372,7 +372,14 @@
       "gridView": "Vue Grille",
       "activeStatus": "Actif",
       "mustSetPassword": "Doit Définir Mot de Passe",
-      "offlineOnly": "Hors-ligne Uniquement"
+      "offlineOnly": "Hors-ligne Uniquement",
+      "allHubs": "Tous les Centres",
+      "homeHub": "Centre Principal",
+      "externalVisits": "Visites Externes",
+      "allYears": "Toutes les Années",
+      "allMonths": "Tous les Mois",
+      "present": "Présent(e)",
+      "absent": "Absent(e)"
     },
     "table": {
       "member": "Membre",

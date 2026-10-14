@@ -4,6 +4,7 @@ import {
   ArrowRight,
   Cake,
   ChatCircleText,
+  DotsThreeVertical,
   EnvelopeSimple,
   Key,
   PencilSimple,
@@ -12,6 +13,7 @@ import {
   User,
 } from '@phosphor-icons/react';
 import type React from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { UserAvatar } from '../../../components';
 import {
   calculateAge,
@@ -49,6 +51,33 @@ export const MemberCardGridView: React.FC<MemberCardGridViewProps> = ({
 }) => {
   const { t } = useTranslation();
   const totalPages = Math.ceil(total / limit) || 1;
+
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  // Close three-dot menu on click outside or Escape
+  useEffect(() => {
+    if (!openMenuId) return;
+
+    const handleClickOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setOpenMenuId(null);
+      }
+    };
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setOpenMenuId(null);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [openMenuId]);
 
   if (isLoading) {
     return (
@@ -131,36 +160,74 @@ export const MemberCardGridView: React.FC<MemberCardGridViewProps> = ({
                     </div>
                   </div>
 
-                  {/* Actions Dropdown / Quick Icons */}
+                  {/* Three-dot Action Menu */}
                   <div
-                    className="flex items-center gap-0.5"
+                    className="relative shrink-0"
                     onClick={(e) => e.stopPropagation()}
+                    ref={openMenuId === m.id ? menuRef : undefined}
                   >
                     <button
                       type="button"
-                      onClick={() => onEditMember(m)}
-                      title={t('members:table.editRecord')}
-                      className="w-7 h-7 rounded-lg text-[#8a726a] hover:text-[#b85028] hover:bg-[#faf2ee] flex items-center justify-center transition-colors cursor-pointer"
+                      onClick={() =>
+                        setOpenMenuId(openMenuId === m.id ? null : m.id)
+                      }
+                      title={t('members:table.actions')}
+                      className="w-7 h-7 rounded-lg text-[#8a726a] hover:text-[#1e1b19] hover:bg-[#faf2ee] flex items-center justify-center transition-colors cursor-pointer"
                     >
-                      <PencilSimple size={15} />
+                      <DotsThreeVertical size={16} weight="bold" />
                     </button>
-                    <button
-                      type="button"
-                      onClick={() => onManageAccess(m)}
-                      title={t('members:table.manageAccess')}
-                      className="w-7 h-7 rounded-lg text-[#8a726a] hover:text-[#b85028] hover:bg-[#faf2ee] flex items-center justify-center transition-colors cursor-pointer"
-                    >
-                      <Key size={15} />
-                    </button>
-                    {isCurrentUserAp && onDeleteMember && (
-                      <button
-                        type="button"
-                        onClick={() => onDeleteMember(m)}
-                        title={t('members:table.deactivateMember')}
-                        className="w-7 h-7 rounded-lg text-[#8a726a] hover:text-[#ba1a1a] hover:bg-[#ffdad6] flex items-center justify-center transition-colors cursor-pointer"
-                      >
-                        <Trash size={15} />
-                      </button>
+
+                    {openMenuId === m.id && (
+                      <div className="absolute right-0 top-full mt-1 w-44 bg-white rounded-xl border border-[#e8e1dd] shadow-lg py-1 z-30 flex flex-col animate-in fade-in zoom-in-95 duration-100">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setOpenMenuId(null);
+                            onEditMember(m);
+                          }}
+                          className="w-full px-3 py-1.5 text-left text-xs text-[#1e1b19] hover:bg-[#faf2ee] flex items-center gap-2 font-medium cursor-pointer"
+                        >
+                          <PencilSimple
+                            size={14}
+                            weight="bold"
+                            className="text-[#8a726a]"
+                          />
+                          <span>{t('members:table.editRecord')}</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setOpenMenuId(null);
+                            onManageAccess(m);
+                          }}
+                          className="w-full px-3 py-1.5 text-left text-xs text-[#1e1b19] hover:bg-[#faf2ee] flex items-center gap-2 font-medium cursor-pointer"
+                        >
+                          <Key
+                            size={14}
+                            weight="bold"
+                            className="text-[#8a726a]"
+                          />
+                          <span>{t('members:table.manageAccess')}</span>
+                        </button>
+
+                        {isCurrentUserAp && onDeleteMember && (
+                          <>
+                            <div className="my-1 border-t border-[#f4ece9]" />
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setOpenMenuId(null);
+                                onDeleteMember(m);
+                              }}
+                              className="w-full px-3 py-1.5 text-left text-xs text-[#ba1a1a] hover:bg-[#ffdad6]/40 flex items-center gap-2 font-medium cursor-pointer"
+                            >
+                              <Trash size={14} weight="bold" />
+                              <span>{t('members:table.deactivateMember')}</span>
+                            </button>
+                          </>
+                        )}
+                      </div>
                     )}
                   </div>
                 </div>

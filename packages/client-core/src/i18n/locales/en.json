@@ -372,7 +372,14 @@
       "gridView": "Grid View",
       "activeStatus": "Active",
       "mustSetPassword": "Must Set Password",
-      "offlineOnly": "Offline Only"
+      "offlineOnly": "Offline Only",
+      "allHubs": "All Hubs",
+      "homeHub": "Home Hub",
+      "externalVisits": "External Visits",
+      "allYears": "All Years",
+      "allMonths": "All Months",
+      "present": "Present",
+      "absent": "Absent"
     },
     "table": {
       "member": "Member",

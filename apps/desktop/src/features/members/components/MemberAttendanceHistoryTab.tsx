@@ -119,6 +119,18 @@ function getAttendanceStatusBadge(status: AttendanceStatus) {
   }
 }
 
+function getFilterLabel(
+  t: (key: string) => string,
+  key: string,
+  fallback: string,
+): string {
+  const val = t(key);
+  if (!val || val === key || val.includes(':')) {
+    return fallback;
+  }
+  return val;
+}
+
 export const MemberAttendanceHistoryTab: React.FC<
   MemberAttendanceHistoryTabProps
 > = ({ member }) => {
@@ -129,7 +141,12 @@ export const MemberAttendanceHistoryTab: React.FC<
     refetch,
   } = useMemberAttendanceHistoryQuery(member.id);
 
-  const { t, i18n } = useTranslation();
+  const { t, i18n } = useTranslation([
+    'members',
+    'activities',
+    'attendance',
+    'common',
+  ]);
 
   // Filters state
   const [searchQuery, setSearchQuery] = useState('');
@@ -160,9 +177,7 @@ export const MemberAttendanceHistoryTab: React.FC<
     return [
       {
         value: 'ALL',
-        label: t('activities:filters.year')
-          ? `${t('activities:filters.year')}: All`
-          : 'All Years',
+        label: getFilterLabel(t, 'members:filters.allYears', 'All Years'),
       },
       ...sortedYears.map((yr) => ({
         value: String(yr),
@@ -171,13 +186,13 @@ export const MemberAttendanceHistoryTab: React.FC<
     ];
   }, [history?.items, t]);
 
-  // Month options localized
+  // Month options localized with full month names
   const monthOptions: SelectOption<string>[] = useMemo(() => {
     const lang = i18n.language || 'en';
     const months = Array.from({ length: 12 }, (_, i) => {
       const monthNum = i + 1;
       const monthName = new Date(2026, i, 1).toLocaleString(lang, {
-        month: 'short',
+        month: 'long',
       });
       const capitalized =
         monthName.charAt(0).toUpperCase() + monthName.slice(1);
@@ -190,11 +205,53 @@ export const MemberAttendanceHistoryTab: React.FC<
     return [
       {
         value: 'ALL',
-        label: t('activities:filters.allMonths') || 'All Months',
+        label: getFilterLabel(t, 'members:filters.allMonths', 'All Months'),
       },
       ...months,
     ];
   }, [t, i18n.language]);
+
+  // Status options localized
+  const statusOptions: SelectOption<string>[] = useMemo(
+    () => [
+      {
+        value: 'ALL',
+        label: getFilterLabel(t, 'members:filters.allStatuses', 'All Statuses'),
+      },
+      {
+        value: AttendanceStatus.PRESENT,
+        label: getFilterLabel(t, 'members:filters.present', 'Present'),
+      },
+      {
+        value: AttendanceStatus.ABSENT,
+        label: getFilterLabel(t, 'members:filters.absent', 'Absent'),
+      },
+    ],
+    [t],
+  );
+
+  // Scope options localized
+  const scopeOptions: SelectOption<string>[] = useMemo(
+    () => [
+      {
+        value: 'ALL',
+        label: getFilterLabel(t, 'members:filters.allHubs', 'All Hubs'),
+      },
+      {
+        value: 'HOME',
+        label: getFilterLabel(t, 'members:filters.homeHub', 'Home Hub'),
+      },
+      {
+        value: 'EXTERNAL',
+        label: getFilterLabel(
+          t,
+          'members:filters.externalVisits',
+          'External Visits',
+        ),
+      },
+    ],
+    [t],
+  );
 
   // Filtered attendance items
   const filteredItems = useMemo(() => {
@@ -549,53 +606,25 @@ export const MemberAttendanceHistoryTab: React.FC<
 
         {/* Filter controls */}
         <div className="flex flex-wrap items-center gap-2">
-          {/* Status selector */}
-          <div className="flex items-center p-1 rounded-xl bg-[#faf2ee] border border-[#e8e1dd] text-xs">
-            {(
-              [
-                { id: 'ALL', label: 'All Status' },
-                { id: AttendanceStatus.PRESENT, label: 'Present' },
-                { id: AttendanceStatus.ABSENT, label: 'Absent' },
-              ] as const
-            ).map((opt) => (
-              <button
-                key={opt.id}
-                type="button"
-                onClick={() => setStatusFilter(opt.id)}
-                className={`px-2.5 py-1 rounded-lg font-bold text-xs transition-colors cursor-pointer ${
-                  statusFilter === opt.id
-                    ? 'bg-white text-[#b85028] shadow-xs'
-                    : 'text-[#8a726a] hover:text-[#1e1b19]'
-                }`}
-              >
-                {opt.label}
-              </button>
-            ))}
-          </div>
+          {/* Status CustomSelect Filter */}
+          <CustomSelect<string>
+            value={statusFilter}
+            onChange={(val) => setStatusFilter(val as 'ALL' | AttendanceStatus)}
+            options={statusOptions}
+            size="sm"
+            className="w-36"
+          />
 
-          {/* Scope selector */}
-          <div className="flex items-center p-1 rounded-xl bg-[#faf2ee] border border-[#e8e1dd] text-xs">
-            {(
-              [
-                { id: 'ALL', label: 'All Hubs' },
-                { id: 'HOME', label: 'Home Hub' },
-                { id: 'EXTERNAL', label: 'External Visits' },
-              ] as const
-            ).map((opt) => (
-              <button
-                key={opt.id}
-                type="button"
-                onClick={() => setScopeFilter(opt.id)}
-                className={`px-2.5 py-1 rounded-lg font-bold text-xs transition-colors cursor-pointer ${
-                  scopeFilter === opt.id
-                    ? 'bg-white text-[#b85028] shadow-xs'
-                    : 'text-[#8a726a] hover:text-[#1e1b19]'
-                }`}
-              >
-                {opt.label}
-              </button>
-            ))}
-          </div>
+          {/* Scope CustomSelect Filter */}
+          <CustomSelect<string>
+            value={scopeFilter}
+            onChange={(val) =>
+              setScopeFilter(val as 'ALL' | 'HOME' | 'EXTERNAL')
+            }
+            options={scopeOptions}
+            size="sm"
+            className="w-36"
+          />
 
           {/* Year and Month CustomSelect Filters */}
           <CustomSelect<string>
@@ -603,7 +632,7 @@ export const MemberAttendanceHistoryTab: React.FC<
             onChange={setSelectedYear}
             options={yearOptions}
             size="sm"
-            className="w-28"
+            className="w-32"
           />
 
           <CustomSelect<string>
@@ -611,7 +640,7 @@ export const MemberAttendanceHistoryTab: React.FC<
             onChange={setSelectedMonth}
             options={monthOptions}
             size="sm"
-            className="w-28"
+            className="w-40"
           />
 
           {/* Reset button if active */}
