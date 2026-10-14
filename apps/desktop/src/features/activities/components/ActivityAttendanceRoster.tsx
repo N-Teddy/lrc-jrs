@@ -111,20 +111,20 @@ export const ActivityAttendanceRoster: React.FC<
   const lockMutation = useLockAttendanceMutation();
   const unlockMutation = useUnlockAttendanceMutation();
 
-  const handleLockAttendance = async () => {
-    if (
-      !confirm(
-        'Are you sure you want to finalize and lock attendance for this activity? Further edits will be sealed.',
-      )
-    ) {
-      return;
-    }
+  const [isLockModalOpen, setIsLockModalOpen] = useState(false);
+  const [isUnlockModalOpen, setIsUnlockModalOpen] = useState(false);
+  const [lockReason, setLockReason] = useState('');
+  const [unlockReason, setUnlockReason] = useState('');
+
+  const handleConfirmLock = async () => {
     try {
       await lockMutation.mutateAsync({
         activityId: activity.id,
-        reason: 'Roll call finalized',
+        reason: lockReason.trim() || 'Roll call finalized',
       });
       setSaveSuccessMsg('Attendance finalized and locked successfully');
+      setIsLockModalOpen(false);
+      setLockReason('');
     } catch (err: any) {
       setSaveErrorMsg(
         err.response?.data?.message ||
@@ -134,18 +134,16 @@ export const ActivityAttendanceRoster: React.FC<
     }
   };
 
-  const handleUnlockAttendance = async () => {
-    const reason = prompt(
-      'Please enter an administrative override reason for unlocking:',
-    );
-    if (!reason?.trim()) return;
-
+  const handleConfirmUnlock = async () => {
+    if (!unlockReason.trim()) return;
     try {
       await unlockMutation.mutateAsync({
         activityId: activity.id,
-        reason: reason.trim(),
+        reason: unlockReason.trim(),
       });
       setSaveSuccessMsg('Attendance unlocked via AP override');
+      setIsUnlockModalOpen(false);
+      setUnlockReason('');
     } catch (err: any) {
       setSaveErrorMsg(
         err.response?.data?.message ||
@@ -551,7 +549,7 @@ export const ActivityAttendanceRoster: React.FC<
                 ? isCurrentUserAp && (
                     <button
                       type="button"
-                      onClick={handleUnlockAttendance}
+                      onClick={() => setIsUnlockModalOpen(true)}
                       disabled={unlockMutation.isPending}
                       className="px-3.5 py-2 rounded-lg bg-white border border-[#ffe082] text-[#812901] hover:bg-[#fffbf0] font-bold text-xs shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer"
                     >
@@ -562,7 +560,7 @@ export const ActivityAttendanceRoster: React.FC<
                 : isPrivileged && (
                     <button
                       type="button"
-                      onClick={handleLockAttendance}
+                      onClick={() => setIsLockModalOpen(true)}
                       disabled={lockMutation.isPending}
                       className="px-3.5 py-2 rounded-lg bg-[#2c4e37] hover:bg-[#233f2c] text-white font-bold text-xs shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer"
                     >
@@ -794,7 +792,7 @@ export const ActivityAttendanceRoster: React.FC<
           {isCurrentUserAp && (
             <button
               type="button"
-              onClick={handleUnlockAttendance}
+              onClick={() => setIsUnlockModalOpen(true)}
               disabled={unlockMutation.isPending}
               className="px-3.5 py-1.5 rounded-xl bg-white border border-[#ffe082] text-xs font-bold text-[#812901] hover:bg-[#fffbf0] transition-colors cursor-pointer flex items-center gap-1.5 shadow-2xs"
             >
@@ -1334,6 +1332,166 @@ export const ActivityAttendanceRoster: React.FC<
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Custom Lock Attendance Modal */}
+      {isLockModalOpen && (
+        <div className="fixed inset-0 z-50 bg-[#1e1b19]/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="w-full max-w-md bg-white rounded-3xl border border-[#e8e1dd] shadow-2xl overflow-hidden flex flex-col">
+            <div className="p-6 border-b border-[#f4ece9] flex items-start justify-between bg-[#fffbf9]">
+              <div className="flex items-center gap-3">
+                <div className="w-11 h-11 rounded-2xl bg-[#fff8e1] border border-[#ffe082] text-[#812901] flex items-center justify-center shrink-0">
+                  <Lock size={22} weight="bold" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-[#1e1b19]">
+                    Finalize & Lock Attendance
+                  </h3>
+                  <p className="text-xs text-[#8a726a] truncate max-w-xs">
+                    {activity.title}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsLockModalOpen(false)}
+                className="w-8 h-8 rounded-lg bg-[#faf2ee] hover:bg-[#f4ece9] border border-[#e8e1dd] flex items-center justify-center text-[#8a726a] hover:text-[#1e1b19] cursor-pointer"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <div className="p-6 flex flex-col gap-4">
+              <p className="text-xs text-[#57423b] leading-relaxed">
+                Are you sure you want to finalize and seal attendance for this
+                activity? Once locked, check-in records are preserved and cannot
+                be altered without an
+                <strong className="text-[#1e1b19]">
+                  {' '}
+                  Apostolic Prefect (AP)
+                </strong>{' '}
+                override.
+              </p>
+
+              <div className="flex flex-col gap-1.5">
+                <label
+                  htmlFor="lock-notes-input"
+                  className="text-xs font-bold text-[#1e1b19]"
+                >
+                  Closing Notes or Summary (Optional)
+                </label>
+                <input
+                  id="lock-notes-input"
+                  type="text"
+                  value={lockReason}
+                  onChange={(e) => setLockReason(e.target.value)}
+                  placeholder="e.g. Roll call finalized by coordinator"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-[#faf2ee]/60 border border-[#e8e1dd] text-xs text-[#1e1b19] focus:outline-none focus:border-[#b85028]"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-[#f4ece9]">
+                <button
+                  type="button"
+                  onClick={() => setIsLockModalOpen(false)}
+                  className="px-4 py-2 rounded-xl bg-white border border-[#e8e1dd] text-[#57423b] font-bold text-xs hover:bg-[#faf2ee] cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleConfirmLock}
+                  disabled={lockMutation.isPending}
+                  className="px-5 py-2 rounded-xl bg-[#2c4e37] hover:bg-[#233f2c] text-white font-bold text-xs shadow-xs cursor-pointer flex items-center gap-1.5"
+                >
+                  <Lock size={14} weight="bold" />
+                  <span>
+                    {lockMutation.isPending ? 'Sealing...' : 'Confirm & Lock'}
+                  </span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Custom Unlock Attendance Modal */}
+      {isUnlockModalOpen && (
+        <div className="fixed inset-0 z-50 bg-[#1e1b19]/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="w-full max-w-md bg-white rounded-3xl border border-[#e8e1dd] shadow-2xl overflow-hidden flex flex-col">
+            <div className="p-6 border-b border-[#f4ece9] flex items-start justify-between bg-[#fffbf9]">
+              <div className="flex items-center gap-3">
+                <div className="w-11 h-11 rounded-2xl bg-[#fff2ee] border border-[#ffdbcf] text-[#b85028] flex items-center justify-center shrink-0">
+                  <LockOpen size={22} weight="bold" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-[#1e1b19]">
+                    AP Attendance Unlock
+                  </h3>
+                  <p className="text-xs text-[#8a726a] truncate max-w-xs">
+                    Administrative Override
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsUnlockModalOpen(false)}
+                className="w-8 h-8 rounded-lg bg-[#faf2ee] hover:bg-[#f4ece9] border border-[#e8e1dd] flex items-center justify-center text-[#8a726a] hover:text-[#1e1b19] cursor-pointer"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <div className="p-6 flex flex-col gap-4">
+              <p className="text-xs text-[#57423b] leading-relaxed">
+                Unlocking will reopen roll call for coordinator editing. An
+                administrative audit record will be permanently logged with your
+                Apostolic Prefect credentials.
+              </p>
+
+              <div className="flex flex-col gap-1.5">
+                <label
+                  htmlFor="unlock-reason-input"
+                  className="text-xs font-bold text-[#1e1b19]"
+                >
+                  Administrative Justification{' '}
+                  <span className="text-[#ba1a1a]">*</span>
+                </label>
+                <textarea
+                  id="unlock-reason-input"
+                  rows={3}
+                  value={unlockReason}
+                  onChange={(e) => setUnlockReason(e.target.value)}
+                  placeholder="Provide detailed justification (e.g. Correcting late attendance recorded in error)..."
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-[#faf2ee]/60 border border-[#e8e1dd] text-xs text-[#1e1b19] focus:outline-none focus:border-[#b85028] resize-none"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-[#f4ece9]">
+                <button
+                  type="button"
+                  onClick={() => setIsUnlockModalOpen(false)}
+                  className="px-4 py-2 rounded-xl bg-white border border-[#e8e1dd] text-[#57423b] font-bold text-xs hover:bg-[#faf2ee] cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleConfirmUnlock}
+                  disabled={unlockMutation.isPending || !unlockReason.trim()}
+                  className="px-5 py-2 rounded-xl bg-[#b85028] hover:bg-[#a44520] text-white font-bold text-xs shadow-xs cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5"
+                >
+                  <LockOpen size={14} weight="bold" />
+                  <span>
+                    {unlockMutation.isPending
+                      ? 'Unlocking...'
+                      : 'Confirm Unlock'}
+                  </span>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

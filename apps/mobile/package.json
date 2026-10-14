@@ -4,7 +4,7 @@
   "main": "index.ts",
   "scripts": {
     "start": "expo start",
-    "android": "expo start --android",
+    "android": "node scripts/start-android.mjs",
     "ios": "expo start --ios",
     "web": "expo start --web",
     "check-types": "tsc --noEmit"

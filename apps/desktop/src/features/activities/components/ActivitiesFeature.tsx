@@ -161,142 +161,136 @@ export const ActivitiesFeature: React.FC = () => {
   const activities = activitiesData?.items || [];
   const total = activitiesData?.total || 0;
 
-  // 1. Activity Detail Screen View (with tabs)
-  if (subView === 'details' && selectedActivity) {
-    const currentActivity =
-      activities.find((a) => a.id === selectedActivity.id) || selectedActivity;
-    return (
-      <ActivityDetailPage
-        activity={currentActivity}
-        onBack={() => setSubView('list')}
-        onTrackAttendance={handleTrackAttendance}
-        onEditActivity={handleEditActivity}
-        onDeleteActivity={(act) => setDeletingActivity(act)}
-        isPrivileged={isPrivileged}
-      />
-    );
-  }
+  const currentActivity = selectedActivity
+    ? activities.find((a) => a.id === selectedActivity.id) || selectedActivity
+    : null;
 
-  // 2. Attendance Roster View
-  if (subView === 'attendance' && selectedActivity) {
-    return (
-      <ActivityAttendanceRoster
-        activity={selectedActivity}
-        onBack={() => setSubView('details')}
-      />
-    );
-  }
-
-  // 3. Audit History View
-  if (subView === 'audit-log' && selectedActivity) {
-    return (
-      <ActivityAuditLogView
-        activity={selectedActivity}
-        onBack={() => setSubView('details')}
-        onEditActivity={handleEditActivity}
-      />
-    );
-  }
-
-  // 4. Main Activities Hub View
   const hubName = activeTown?.name || 'Cameroon';
 
   return (
     <div className="w-full flex flex-col gap-6 animate-in fade-in duration-200">
-      {/* Page Header Strip matching mockups */}
-      <section className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-extrabold text-[#1e1b19] tracking-tight">
-            {t('activities:title')}
-          </h1>
-        </div>
-      </section>
-
-      {/* KPI Overview Metrics */}
-      <ActivityStatsOverview
-        stats={statsData}
-        isLoading={isStatsLoading}
-        hubName={hubName}
-      />
-
-      {/* Filter & Navigation Toolbar */}
-      <ActivityFilterToolbar
-        search={search}
-        onSearchChange={(v) => {
-          setSearch(v);
-          setPage(1);
-        }}
-        year={year}
-        onYearChange={(v) => {
-          setYear(v);
-          setPage(1);
-        }}
-        month={month}
-        onMonthChange={(v) => {
-          setMonth(v);
-          setPage(1);
-        }}
-        activityType={activityTypeFilter}
-        onActivityTypeChange={(v) => {
-          setActivityTypeFilter(v);
-          setPage(1);
-        }}
-        status={statusFilter}
-        onStatusChange={(v) => {
-          setStatusFilter(v);
-          setPage(1);
-        }}
-        viewMode={viewMode}
-        onViewModeChange={(mode) => {
-          setViewMode(mode);
-          setPage(1);
-        }}
-        onOpenCreateModal={handleOpenCreateModal}
-        onClearFilters={handleClearFilters}
-      />
-
-      {/* Multi-View Content */}
-      {viewMode === 'table' ? (
-        <ActivityTableView
-          activities={activities}
-          isLoading={isActivitiesLoading}
-          total={total}
-          page={page}
-          limit={limit}
-          onPageChange={setPage}
-          onViewDetails={handleViewDetails}
+      {/* 1. Activity Detail Screen View (with tabs) */}
+      {subView === 'details' && currentActivity ? (
+        <ActivityDetailPage
+          activity={currentActivity}
+          onBack={() => setSubView('list')}
+          onTrackAttendance={handleTrackAttendance}
           onEditActivity={handleEditActivity}
-          onViewHistory={handleViewHistory}
           onDeleteActivity={(act) => setDeletingActivity(act)}
           isPrivileged={isPrivileged}
         />
-      ) : viewMode === 'grid' ? (
-        <ActivityCardGridView
-          activities={activities}
-          isLoading={isActivitiesLoading}
-          total={total}
-          page={page}
-          limit={limit}
-          onPageChange={setPage}
-          onViewDetails={handleViewDetails}
+      ) : subView === 'attendance' && selectedActivity ? (
+        /* 2. Attendance Roster View */
+        <ActivityAttendanceRoster
+          activity={selectedActivity}
+          onBack={() => setSubView('details')}
+        />
+      ) : subView === 'audit-log' && selectedActivity ? (
+        /* 3. Audit History View */
+        <ActivityAuditLogView
+          activity={selectedActivity}
+          onBack={() => setSubView('details')}
           onEditActivity={handleEditActivity}
-          onViewHistory={handleViewHistory}
-          onDeleteActivity={(act) => setDeletingActivity(act)}
-          isPrivileged={isPrivileged}
         />
       ) : (
-        <ActivityCalendarView
-          activities={activities}
-          isLoading={isActivitiesLoading}
-          selectedYear={calendarActiveYear}
-          selectedMonth={calendarActiveMonth}
-          onMonthChange={(newYear, newMonth) => {
-            setYear(newYear);
-            setMonth(newMonth);
-          }}
-          onViewDetails={handleViewDetails}
-          onEditActivity={handleEditActivity}
-        />
+        /* 4. Main Activities Hub View */
+        <>
+          {/* Page Header Strip matching mockups */}
+          <section className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
+            <div className="flex flex-col gap-1">
+              <h1 className="text-2xl font-extrabold text-[#1e1b19] tracking-tight">
+                {t('activities:title')}
+              </h1>
+            </div>
+          </section>
+
+          {/* KPI Overview Metrics */}
+          <ActivityStatsOverview
+            stats={statsData}
+            isLoading={isStatsLoading}
+            hubName={hubName}
+          />
+
+          {/* Filter & Navigation Toolbar */}
+          <ActivityFilterToolbar
+            search={search}
+            onSearchChange={(v) => {
+              setSearch(v);
+              setPage(1);
+            }}
+            year={year}
+            onYearChange={(v) => {
+              setYear(v);
+              setPage(1);
+            }}
+            month={month}
+            onMonthChange={(v) => {
+              setMonth(v);
+              setPage(1);
+            }}
+            activityType={activityTypeFilter}
+            onActivityTypeChange={(v) => {
+              setActivityTypeFilter(v);
+              setPage(1);
+            }}
+            status={statusFilter}
+            onStatusChange={(v) => {
+              setStatusFilter(v);
+              setPage(1);
+            }}
+            viewMode={viewMode}
+            onViewModeChange={(mode) => {
+              setViewMode(mode);
+              setPage(1);
+            }}
+            onOpenCreateModal={handleOpenCreateModal}
+            onClearFilters={handleClearFilters}
+          />
+
+          {/* Multi-View Content */}
+          {viewMode === 'table' ? (
+            <ActivityTableView
+              activities={activities}
+              isLoading={isActivitiesLoading}
+              total={total}
+              page={page}
+              limit={limit}
+              onPageChange={setPage}
+              onViewDetails={handleViewDetails}
+              onEditActivity={handleEditActivity}
+              onViewHistory={handleViewHistory}
+              onDeleteActivity={(act) => setDeletingActivity(act)}
+              isPrivileged={isPrivileged}
+            />
+          ) : viewMode === 'grid' ? (
+            <ActivityCardGridView
+              activities={activities}
+              isLoading={isActivitiesLoading}
+              total={total}
+              page={page}
+              limit={limit}
+              onPageChange={setPage}
+              onViewDetails={handleViewDetails}
+              onEditActivity={handleEditActivity}
+              onViewHistory={handleViewHistory}
+              onDeleteActivity={(act) => setDeletingActivity(act)}
+              isPrivileged={isPrivileged}
+            />
+          ) : (
+            <ActivityCalendarView
+              activities={activities}
+              isLoading={isActivitiesLoading}
+              selectedYear={calendarActiveYear}
+              selectedMonth={calendarActiveMonth}
+              onMonthChange={(newYear, newMonth) => {
+                setYear(newYear);
+                setMonth(newMonth);
+              }}
+              onViewDetails={handleViewDetails}
+              onEditActivity={handleEditActivity}
+            />
+          )}
+        </>
       )}
 
       {/* Modals */}

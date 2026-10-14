@@ -149,3 +149,18 @@ export function useDeleteActivityReportMutation() {
     },
   });
 }
+
+export interface IDriveFolderOption {
+  id: string;
+  name: string;
+  path: string;
+}
+
+export function useDriveFoldersQuery() {
+  const http = useHttp();
+  return useQuery({
+    queryKey: ['activities', 'report-folders'],
+    queryFn: () => http.get<IDriveFolderOption[]>('/activities/report/folders'),
+    staleTime: 5 * 60 * 1000,
+  });
+}

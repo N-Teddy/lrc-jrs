@@ -18,6 +18,7 @@ export interface IAttendanceMemberSummary {
   email?: string;
   role: UserRole;
   homeTownId: string;
+  avatarUrl?: string;
 }
 
 export interface IAttendanceItem {

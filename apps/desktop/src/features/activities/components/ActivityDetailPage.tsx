@@ -71,9 +71,9 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
 
   const [activeTab, setActiveTab] = useState<ActivityDetailTab>('overview');
   const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState<
-    'ALL' | 'PRESENT' | 'ABSENT' | 'GUESTS'
-  >('ALL');
+  const [attendanceFilter, setAttendanceFilter] = useState<'ALL' | 'GUESTS'>(
+    'ALL',
+  );
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [lockPromptOpen, setLockPromptOpen] = useState(false);
   const [lockReason, setLockReason] = useState('');
@@ -117,9 +117,20 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
       ? Math.round((summary.membersPresent / membersCount) * 100)
       : 0;
 
-  // Filtered Attendees list
+  // Only display those who attended (status === PRESENT)
+  const attendedAttendees = useMemo(() => {
+    return attendees.filter((item) => item.status === AttendanceStatus.PRESENT);
+  }, [attendees]);
+
+  const attendedGuests = useMemo(() => {
+    return attendedAttendees.filter(
+      (item) => item.attendeeType === AttendeeType.GUEST,
+    );
+  }, [attendedAttendees]);
+
+  // Filtered Attendees list (cards)
   const filteredAttendees = useMemo(() => {
-    return attendees.filter((item) => {
+    return attendedAttendees.filter((item) => {
       const name =
         item.member?.fullName || item.guestInfo?.fullName || 'Anonymous';
       const phone =
@@ -132,16 +143,13 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
         if (!matchesName && !matchesPhone) return false;
       }
 
-      if (statusFilter === 'PRESENT')
-        return item.status === AttendanceStatus.PRESENT;
-      if (statusFilter === 'ABSENT')
-        return item.status === AttendanceStatus.ABSENT;
-      if (statusFilter === 'GUESTS')
+      if (attendanceFilter === 'GUESTS') {
         return item.attendeeType === AttendeeType.GUEST;
+      }
 
       return true;
     });
-  }, [attendees, search, statusFilter]);
+  }, [attendedAttendees, search, attendanceFilter]);
 
   const typeConfig = getActivityTypeConfig(activity.activityType, t);
   const statusConfig = getActivityStatusConfig(activity.status, t);
@@ -182,7 +190,7 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
   };
 
   return (
-    <div className="flex flex-col gap-6 max-w-6xl mx-auto w-full animate-in fade-in duration-200">
+    <div className="w-full flex flex-col gap-6 animate-in fade-in duration-200">
       {/* 1. Top Navigation & Breadcrumbs */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <button
@@ -581,57 +589,6 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
               </p>
             )}
           </div>
-
-          {/* Google Drive Report Card snippet (STRICTLY IF COMPLETED & PAST) */}
-          {canShowReportUi && (
-            <div className="bg-white rounded-3xl border border-[#e8e1dd] p-6 shadow-xs flex items-center justify-between gap-4 flex-wrap">
-              <div className="flex items-center gap-3.5 min-w-0">
-                <div className="w-11 h-11 rounded-xl bg-[#fff2ee] border border-[#ffdbcf] text-[#b85028] flex items-center justify-center shrink-0">
-                  <HardDrives size={22} weight="duotone" />
-                </div>
-                <div className="flex flex-col min-w-0">
-                  <span className="font-bold text-sm text-[#1e1b19]">
-                    {activity.report?.fileId
-                      ? 'Activity Report Synced to Google Drive'
-                      : 'Post-Activity Report Pending'}
-                  </span>
-                  <span className="text-xs text-[#8a726a] truncate">
-                    {activity.report?.fileId
-                      ? `${activity.report.filename} • Uploaded by ${activity.report.uploadedByName || 'Coordinator'}`
-                      : 'Upload session minutes, photos, or pastoral summary to Google Drive'}
-                  </span>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2">
-                {activity.report?.webViewLink && (
-                  <a
-                    href={activity.report.webViewLink}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="px-3.5 py-2 rounded-xl bg-[#faf2ee] hover:bg-[#f4ece9] border border-[#e8e1dd] text-xs font-bold text-[#1e1b19] flex items-center gap-1.5 transition-colors"
-                  >
-                    <span>View in Google Drive</span>
-                    <ArrowSquareOut size={13} />
-                  </a>
-                )}
-                {isPrivileged && (
-                  <button
-                    type="button"
-                    onClick={() => setActiveTab('report')}
-                    className="px-4 py-2 rounded-xl bg-[#b85028] hover:bg-[#a44520] text-xs font-bold text-white transition-all flex items-center gap-1.5 shadow-2xs cursor-pointer"
-                  >
-                    <CloudArrowUp size={15} weight="bold" />
-                    <span>
-                      {activity.report?.fileId
-                        ? 'Manage Report'
-                        : 'Upload Report'}
-                    </span>
-                  </button>
-                )}
-              </div>
-            </div>
-          )}
         </div>
       )}
 
@@ -655,28 +612,23 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
             </div>
 
             <div className="flex items-center gap-2 flex-wrap">
-              {/* Status Filters */}
+              {/* Only ALL and GUESTS filters */}
               <div className="inline-flex p-1 rounded-xl bg-[#faf2ee] border border-[#e8e1dd] gap-1">
                 {(
                   [
-                    { id: 'ALL', label: `All (${attendees.length})` },
-                    {
-                      id: 'PRESENT',
-                      label: `Present (${summary.totalPresent})`,
-                    },
-                    { id: 'ABSENT', label: `Absent (${absentCount})` },
+                    { id: 'ALL', label: `All (${attendedAttendees.length})` },
                     {
                       id: 'GUESTS',
-                      label: `Guests (${summary.guestsPresent})`,
+                      label: `Guests (${attendedGuests.length})`,
                     },
                   ] as const
                 ).map((tab) => (
                   <button
                     key={tab.id}
                     type="button"
-                    onClick={() => setStatusFilter(tab.id)}
+                    onClick={() => setAttendanceFilter(tab.id)}
                     className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                      statusFilter === tab.id
+                      attendanceFilter === tab.id
                         ? 'bg-white text-[#1e1b19] shadow-2xs'
                         : 'text-[#8a726a] hover:text-[#1e1b19]'
                     }`}
@@ -704,109 +656,97 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
             </div>
           </div>
 
-          {/* Attendees Table */}
-          <div className="border border-[#e8e1dd] rounded-2xl overflow-hidden">
+          {/* Attendees Cards Grid */}
+          <div>
             {isAttendanceLoading ? (
               <div className="p-12 text-center text-xs text-[#8a726a] animate-pulse">
                 Loading attendance records...
               </div>
             ) : filteredAttendees.length === 0 ? (
-              <div className="p-12 text-center flex flex-col items-center justify-center text-xs text-[#8a726a]">
-                <Users size={28} className="text-[#b85028]/60 mb-2" />
-                <span>No attendees matching the filter criteria.</span>
+              <div className="p-12 text-center flex flex-col items-center justify-center text-xs text-[#8a726a] border border-[#e8e1dd] rounded-2xl bg-[#faf2ee]/30">
+                <Users size={32} className="text-[#b85028]/60 mb-2" />
+                <span className="font-bold text-[#1e1b19]">
+                  No Attendees Recorded
+                </span>
+                <span className="mt-1 text-[11px]">
+                  {search
+                    ? 'No attendees match your search query.'
+                    : 'No members or guests have been recorded as present for this activity yet.'}
+                </span>
               </div>
             ) : (
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="bg-[#faf2ee] border-b border-[#e8e1dd] text-[11px] font-bold text-[#8a726a] uppercase tracking-wider">
-                    <th className="py-3 px-4">Attendee</th>
-                    <th className="py-3 px-3">Role / Hub</th>
-                    <th className="py-3 px-3">Check-In Time</th>
-                    <th className="py-3 px-4 text-right">Status</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[#f4ece9] text-xs text-[#1e1b19]">
-                  {filteredAttendees.map((att) => {
-                    const name =
-                      att.member?.fullName ||
-                      att.guestInfo?.fullName ||
-                      'Anonymous';
-                    const phone =
-                      att.member?.phoneNumber ||
-                      att.guestInfo?.phoneNumber ||
-                      '';
-                    const isPresent = att.status === AttendanceStatus.PRESENT;
-                    const checkIn = att.checkInTime
-                      ? new Date(att.checkInTime).toLocaleTimeString([], {
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })
-                      : '—';
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                {filteredAttendees.map((att) => {
+                  const name =
+                    att.member?.fullName ||
+                    att.guestInfo?.fullName ||
+                    'Anonymous';
+                  const phone =
+                    att.member?.phoneNumber || att.guestInfo?.phoneNumber || '';
+                  const avatarUrl = att.member?.avatarUrl;
+                  const role =
+                    att.attendeeType === AttendeeType.GUEST
+                      ? 'Guest'
+                      : att.member?.role || 'Member';
+                  const checkIn = att.checkInTime
+                    ? new Date(att.checkInTime).toLocaleTimeString([], {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })
+                    : '—';
 
-                    return (
-                      <tr
-                        key={att.id || att.memberId || name}
-                        className="hover:bg-[#fffbf9] transition-colors"
-                      >
-                        <td className="py-3 px-4">
-                          <div className="flex items-center gap-3">
-                            <UserAvatar name={name} size="sm" />
-                            <div className="flex flex-col min-w-0">
-                              <span className="font-bold truncate text-[#1e1b19]">
-                                {name}
-                              </span>
-                              {phone && (
-                                <span className="text-[10px] text-[#8a726a] font-mono">
-                                  {formatCameroonPhone(phone)}
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        </td>
-
-                        <td className="py-3 px-3">
-                          <span className="px-2.5 py-0.5 rounded text-[10px] font-bold bg-[#faf2ee] text-[#57423b] border border-[#e8e1dd]">
-                            {att.attendeeType === AttendeeType.GUEST
-                              ? 'Guest'
-                              : att.member?.role || 'Member'}
+                  return (
+                    <div
+                      key={att.id || att.memberId || name}
+                      className="bg-white rounded-2xl border border-[#e8e1dd] hover:border-[#b85028]/40 p-4 flex flex-col gap-3 shadow-2xs hover:shadow-xs transition-all group"
+                    >
+                      <div className="flex items-center gap-3">
+                        <UserAvatar
+                          name={name}
+                          avatarUrl={avatarUrl}
+                          size="lg"
+                          className="rounded-xl shadow-2xs shrink-0"
+                        />
+                        <div className="flex flex-col min-w-0 flex-1">
+                          <span className="font-bold text-xs text-[#1e1b19] truncate group-hover:text-[#b85028] transition-colors">
+                            {name}
                           </span>
-                        </td>
-
-                        <td className="py-3 px-3 font-mono text-[11px] text-[#57423b]">
-                          {isPresent ? (
-                            <div className="flex items-center gap-1.5">
-                              <Clock
-                                size={14}
-                                className="text-[#486b52] shrink-0"
-                              />
-                              <span>{checkIn}</span>
-                            </div>
+                          {phone ? (
+                            <span className="text-[10px] text-[#8a726a] font-mono mt-0.5 truncate">
+                              {formatCameroonPhone(phone)}
+                            </span>
                           ) : (
-                            <span className="text-[#8a726a]">—</span>
+                            <span className="text-[10px] text-[#8a726a] italic mt-0.5">
+                              No phone
+                            </span>
                           )}
-                        </td>
+                        </div>
+                      </div>
 
-                        <td className="py-3 px-4 text-right">
-                          <span
-                            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold ${
-                              isPresent
-                                ? 'bg-[#c2e9ca] text-[#2c4e37]'
-                                : 'bg-[#f4ece9] text-[#8a726a]'
-                            }`}
-                          >
-                            <span
-                              className={`w-1.5 h-1.5 rounded-full ${
-                                isPresent ? 'bg-[#2c4e37]' : 'bg-[#8a726a]'
-                              }`}
-                            />
-                            <span>{isPresent ? 'Present' : 'Absent'}</span>
-                          </span>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+                      <div className="pt-2 border-t border-[#f4ece9] flex items-center justify-between text-xs">
+                        <span
+                          className={`px-2 py-0.5 rounded-md text-[10px] font-bold border ${
+                            att.attendeeType === AttendeeType.GUEST
+                              ? 'bg-[#f4ece9] text-[#715b53] border-[#e8e1dd]'
+                              : 'bg-[#faf2ee] text-[#b85028] border-[#ffdbcf]'
+                          }`}
+                        >
+                          {role}
+                        </span>
+
+                        <div className="flex items-center gap-1.5 text-[11px] font-mono text-[#57423b]">
+                          <Clock
+                            size={13}
+                            className="text-[#486b52]"
+                            weight="bold"
+                          />
+                          <span>{checkIn}</span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             )}
           </div>
         </div>

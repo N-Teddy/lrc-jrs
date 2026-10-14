@@ -774,7 +774,7 @@ export class ActivitiesService {
       .findOne({ activityId: activity._id })
       .populate({
         path: 'attendees.memberId',
-        select: 'fullName phoneNumber email role homeTownId',
+        select: 'fullName phoneNumber email role homeTownId avatarUrl',
       })
       .exec();
 
@@ -811,6 +811,7 @@ export class ActivitiesService {
                 email: rawMember.email,
                 role: rawMember.role,
                 homeTownId: rawMember.homeTownId?.toString() || '',
+                avatarUrl: rawMember.avatarUrl,
               }
             : undefined;
 
@@ -1198,6 +1199,13 @@ export class ActivitiesService {
   }
 
   /**
+   * List available Google Drive destination folders
+   */
+  async getReportFolders() {
+    return this.driveService.listFolders();
+  }
+
+  /**
    * Upload an activity report file to Google Drive
    * (Strictly only available after the activity and if completed)
    */
@@ -1206,6 +1214,7 @@ export class ActivitiesService {
     file: Express.Multer.File,
     summary: string | undefined,
     currentUser: IAuthUser,
+    folderId?: string,
   ): Promise<IActivity> {
     if (!Types.ObjectId.isValid(activityId)) {
       throw new BadRequestException('Invalid activity ID');
@@ -1250,6 +1259,7 @@ export class ActivitiesService {
       filename: `Report_${sanitizedTitle}_${Date.now()}_${file.originalname}`,
       mimeType: file.mimetype,
       content: file.buffer,
+      folderId: folderId?.trim() || undefined,
     });
 
     activity.report = {
@@ -1260,6 +1270,7 @@ export class ActivitiesService {
       uploadedByName: currentUser.fullName,
       uploadedAt: new Date(),
       summary: summary?.trim(),
+      folderId: folderId?.trim() || undefined,
     } as any;
 
     await activity.save();

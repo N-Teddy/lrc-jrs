@@ -88,6 +88,15 @@ export class ActivitiesController {
     return this.activitiesService.getMemberAttendanceHistory(memberId);
   }
 
+  @Get('report/folders')
+  @ApiOperation({
+    summary: 'List available Google Drive destination subfolders',
+  })
+  @ApiResponse({ status: 200, description: 'Folder list' })
+  async getReportFolders() {
+    return this.activitiesService.getReportFolders();
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Get single activity details' })
   @ApiResponse({ status: 200, description: 'Activity details' })
@@ -190,9 +199,16 @@ export class ActivitiesController {
     @Param('id') id: string,
     @UploadedFile() file: Express.Multer.File,
     @Body('summary') summary: string,
+    @Body('folderId') folderId: string,
     @CurrentUser() currentUser: IAuthUser,
   ) {
-    return this.activitiesService.uploadReport(id, file, summary, currentUser);
+    return this.activitiesService.uploadReport(
+      id,
+      file,
+      summary,
+      currentUser,
+      folderId,
+    );
   }
 
   @Delete(':id/report')

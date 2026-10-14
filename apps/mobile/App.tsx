@@ -1,10 +1,10 @@
 import { CoreProviders } from '@jrs/client-core';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View } from 'react-native';
+import { getApiBaseUrl } from './src/config/api.config';
 import { mobileSecureStoreAdapter } from './src/storage/secure-store.adapter';
 
-const API_BASE_URL =
-  process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000/api';
+const API_BASE_URL = getApiBaseUrl();
 
 function AppContent() {
   return (
