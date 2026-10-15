@@ -3,24 +3,28 @@
   "version": "1.0.0",
   "main": "index.ts",
   "scripts": {
-    "start": "expo start",
-    "android": "node scripts/start-android.mjs",
-    "ios": "expo start --ios",
+    "start": "expo start --dev-client",
+    "android": "node scripts/start-android.mjs --dev-client",
+    "ios": "expo start --dev-client --ios",
     "web": "expo start --web",
+    "start:expo-go": "expo start",
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
-    "@jrs/shared": "workspace:*",
     "@jrs/api-client": "workspace:*",
     "@jrs/client-core": "workspace:*",
+    "@jrs/shared": "workspace:*",
     "@tanstack/react-query": "^5.67.0",
+    "buffer": "^6.0.3",
     "expo": "~57.0.27",
-    "expo-secure-store": "~14.0.1",
+    "expo-dev-client": "~57.0.20",
+    "expo-secure-store": "~57.0.4",
     "expo-status-bar": "~57.0.1",
     "phosphor-react-native": "^2.1.0",
     "react": "19.2.3",
     "react-native": "0.86.3",
-    "react-native-svg": "15.11.2"
+    "react-native-safe-area-context": "^5.10.1",
+    "react-native-svg": "15.15.4"
   },
   "devDependencies": {
     "@types/react": "~19.2.2",
