@@ -28,6 +28,7 @@ import {
   TreeStructure,
   X,
 } from '@phosphor-icons/react';
+import { openUrl } from '@tauri-apps/plugin-opener';
 import type React from 'react';
 import { useMemo, useState } from 'react';
 import {
@@ -691,6 +692,7 @@ export const DriveExplorerFeature: React.FC = () => {
                         setPreviewFile({
                           fileId: rep.fileId,
                           filename: rep.filename,
+                          mimeType: rep.mimeType,
                           webViewLink: rep.webViewLink,
                           fileSize: rep.fileSize,
                           uploadedAt: rep.uploadedAt,
@@ -704,26 +706,39 @@ export const DriveExplorerFeature: React.FC = () => {
                     </button>
 
                     {rep.webViewLink && (
-                      <a
-                        href={rep.webViewLink}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="p-2 rounded-xl bg-[#faf2ee] hover:bg-[#f4ece9] border border-[#e8e1dd] text-[#1e1b19] transition-all flex items-center justify-center shadow-2xs"
-                        title="Open in Google Drive"
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const target = rep.webViewLink;
+                          if (!target) return;
+                          openUrl(target).catch(() => {
+                            window.open(
+                              target,
+                              '_blank',
+                              'noopener,noreferrer',
+                            );
+                          });
+                        }}
+                        className="p-2 rounded-xl bg-[#faf2ee] hover:bg-[#f4ece9] border border-[#e8e1dd] text-[#1e1b19] transition-all flex items-center justify-center shadow-2xs cursor-pointer"
+                        title="Open in Google Drive (External Browser)"
                       >
                         <ArrowSquareOut size={16} />
-                      </a>
+                      </button>
                     )}
 
-                    <a
-                      href={`https://drive.google.com/uc?export=download&id=${rep.fileId}`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="p-2 rounded-xl bg-[#faf2ee] hover:bg-[#f4ece9] border border-[#e8e1dd] text-[#1e1b19] transition-all flex items-center justify-center shadow-2xs"
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const target = `http://localhost:3500/api/activities/report/drive-file/${rep.fileId}/download`;
+                        openUrl(target).catch(() => {
+                          window.open(target, '_blank', 'noopener,noreferrer');
+                        });
+                      }}
+                      className="p-2 rounded-xl bg-[#faf2ee] hover:bg-[#f4ece9] border border-[#e8e1dd] text-[#1e1b19] transition-all flex items-center justify-center shadow-2xs cursor-pointer"
                       title="Download file"
                     >
                       <DownloadSimple size={16} />
-                    </a>
+                    </button>
                   </div>
                 </div>
               ))}

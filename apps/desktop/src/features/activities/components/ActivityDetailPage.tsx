@@ -39,6 +39,7 @@ import {
   WarningCircle,
   X,
 } from '@phosphor-icons/react';
+import { openUrl } from '@tauri-apps/plugin-opener';
 import type React from 'react';
 import { useMemo, useState } from 'react';
 import { UserAvatar } from '../../../components';
@@ -933,15 +934,24 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
                       <span>Preview File</span>
                     </button>
                     {rep.webViewLink && (
-                      <a
-                        href={rep.webViewLink}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="p-2 rounded-xl bg-[#faf2ee] hover:bg-[#f4ece9] border border-[#e8e1dd] text-[#1e1b19] transition-all flex items-center justify-center shadow-2xs"
-                        title="Open in Google Drive"
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const target = rep.webViewLink;
+                          if (!target) return;
+                          openUrl(target).catch(() => {
+                            window.open(
+                              target,
+                              '_blank',
+                              'noopener,noreferrer',
+                            );
+                          });
+                        }}
+                        className="p-2 rounded-xl bg-[#faf2ee] hover:bg-[#f4ece9] border border-[#e8e1dd] text-[#1e1b19] transition-all flex items-center justify-center shadow-2xs cursor-pointer"
+                        title="Open in Google Drive (External Browser)"
                       >
                         <ArrowSquareOut size={16} />
-                      </a>
+                      </button>
                     )}
                   </div>
                 </div>

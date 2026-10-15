@@ -474,4 +474,80 @@ export class DriveService {
       return false;
     }
   }
+
+  /**
+   * Retrieves a readable stream and metadata for a Google Drive file
+   */
+  async getFileStream(fileId: string): Promise<{
+    stream: NodeJS.ReadableStream;
+    filename: string;
+    mimeType: string;
+    size?: number;
+  } | null> {
+    if (fileId.startsWith('mock-drive-') || fileId.startsWith('drive-')) {
+      const { Readable } = await import('node:stream');
+      const content = Buffer.from(
+        '%PDF-1.4\n1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj\n3 0 obj<</Type/Page/MediaBox[0 0 612 792]/Parent 2 0 R/Resources<<>>>>endobj\nxref\n0 4\n0000000000 65535 f\n0000000010 00000 n\n0000000053 00000 n\n0000000102 00000 n\ntrailer<</Size 4/Root 1 0 R>>\nstartxref\n178\n%%EOF',
+      );
+      return {
+        stream: Readable.from(content),
+        filename: 'report.pdf',
+        mimeType: 'application/pdf',
+        size: content.length,
+      };
+    }
+
+    const accessToken = await this.getAccessToken();
+    if (!accessToken) {
+      return null;
+    }
+
+    try {
+      // 1. Get metadata
+      const metaRes = await axios.get(
+        `https://www.googleapis.com/drive/v3/files/${fileId}?fields=id,name,mimeType,size&supportsAllDrives=true`,
+        {
+          headers: { Authorization: `Bearer ${accessToken}` },
+          httpsAgent: this.httpsAgent,
+          timeout: 8000,
+        },
+      );
+
+      const meta = metaRes.data;
+      const isGoogleDoc = meta.mimeType?.startsWith(
+        'application/vnd.google-apps',
+      );
+
+      let downloadUrl = `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&supportsAllDrives=true`;
+      let mimeType = meta.mimeType || 'application/octet-stream';
+      let filename = meta.name || 'document';
+
+      if (isGoogleDoc) {
+        downloadUrl = `https://www.googleapis.com/drive/v3/files/${fileId}/export?mimeType=application/pdf&supportsAllDrives=true`;
+        mimeType = 'application/pdf';
+        if (!filename.toLowerCase().endsWith('.pdf')) {
+          filename += '.pdf';
+        }
+      }
+
+      const streamRes = await axios.get(downloadUrl, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+        responseType: 'stream',
+        httpsAgent: this.httpsAgent,
+        timeout: 25000,
+      });
+
+      return {
+        stream: streamRes.data,
+        filename,
+        mimeType,
+        size: meta.size ? parseInt(meta.size, 10) : undefined,
+      };
+    } catch (err: any) {
+      this.logger.error(
+        `Failed to get file stream for Google Drive file ${fileId}: ${err.message}`,
+      );
+      return null;
+    }
+  }
 }

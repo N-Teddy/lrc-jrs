@@ -11,6 +11,7 @@ import {
   Patch,
   Post,
   Query,
+  Res,
   UploadedFiles,
   UseGuards,
   UseInterceptors,
@@ -23,7 +24,9 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import type { Response } from 'express';
 import { CurrentUser } from '../../core/decorators/current-user.decorator';
+import { Public } from '../../core/decorators/public.decorator';
 import { TownScope } from '../../core/decorators/town-scope.decorator';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
 import { TownScopeGuard } from '../../core/guards/town-scope.guard';
@@ -104,6 +107,55 @@ export class ActivitiesController {
   @ApiResponse({ status: 200, description: 'Drive files list' })
   async getDriveFiles(@Query('folderId') folderId?: string) {
     return this.activitiesService.getDriveFiles(folderId);
+  }
+
+  @Public()
+  @Get('report/drive-file/:fileId/stream')
+  @ApiOperation({
+    summary:
+      'Stream a Google Drive file for in-app preview without cookie restrictions',
+  })
+  async streamDriveFile(@Param('fileId') fileId: string, @Res() res: Response) {
+    const fileData = await this.activitiesService.getDriveFileStream(fileId);
+    if (!fileData) {
+      return res
+        .status(HttpStatus.NOT_FOUND)
+        .json({ message: 'File not found or unreachable' });
+    }
+
+    res.setHeader('Content-Type', fileData.mimeType);
+    res.setHeader(
+      'Content-Disposition',
+      `inline; filename="${encodeURIComponent(fileData.filename)}"`,
+    );
+    if (fileData.size) {
+      res.setHeader('Content-Length', fileData.size);
+    }
+    fileData.stream.pipe(res);
+  }
+
+  @Public()
+  @Get('report/drive-file/:fileId/download')
+  @ApiOperation({
+    summary: 'Download a Google Drive file directly',
+  })
+  async downloadDriveFile(
+    @Param('fileId') fileId: string,
+    @Res() res: Response,
+  ) {
+    const fileData = await this.activitiesService.getDriveFileStream(fileId);
+    if (!fileData) {
+      return res
+        .status(HttpStatus.NOT_FOUND)
+        .json({ message: 'File not found or unreachable' });
+    }
+
+    res.setHeader('Content-Type', fileData.mimeType);
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="${encodeURIComponent(fileData.filename)}"`,
+    );
+    fileData.stream.pipe(res);
   }
 
   @Get(':id')

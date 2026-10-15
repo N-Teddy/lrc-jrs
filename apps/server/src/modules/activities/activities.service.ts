@@ -1234,6 +1234,13 @@ export class ActivitiesService {
   }
 
   /**
+   * Retrieves a file stream and metadata from Google Drive for direct preview/download
+   */
+  async getDriveFileStream(fileId: string) {
+    return this.driveService.getFileStream(fileId);
+  }
+
+  /**
    * List files from Google Drive and cross-reference with activity records
    */
   async getDriveFiles(folderId?: string) {
