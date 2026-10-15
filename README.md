@@ -1,159 +1,128 @@
-# Turborepo starter
+# LRC JRS · Community & Fellowship Platform
 
-This Turborepo starter is maintained by the Turborepo core team.
+[![Turborepo](https://img.shields.io/badge/monorepo-Turborepo-0284c7?style=flat&logo=turborepo)](https://turbo.build/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue?style=flat&logo=typescript)](https://www.typescriptlang.org/)
+[![Biome](https://img.shields.io/badge/linter-Biome-60a5fa?style=flat&logo=biome)](https://biomejs.dev/)
+[![Tauri](https://img.shields.io/badge/desktop-Tauri_v2-24c8db?style=flat&logo=tauri)](https://tauri.app/)
+[![NestJS](https://img.shields.io/badge/backend-NestJS-ea2845?style=flat&logo=nestjs)](https://nestjs.com/)
+[![License](https://img.shields.io/badge/license-Private-gray.svg)](#)
 
-## Using this example
+> **LRC JRS** is an enterprise-grade, cross-platform youth fellowship and community management system. It provides real-time hub tracking, canonical membership registries, activity attendance tracking, inter-hub relocation ledgers, Google Drive document integration, and bilingual (English/French) support.
 
-Run the following command:
+---
 
-```sh
-npx create-turbo@latest
+## 🏛️ System Architecture
+
+The project is structured as a high-performance **Turborepo** monorepo using **pnpm workspaces**:
+
+```
+jrs/
+├── apps/
+│   ├── desktop/          # Tauri v2 + React 19 desktop application
+│   ├── mobile/           # Expo / React Native mobile application
+│   ├── server/           # NestJS 11 backend with Prisma ORM & PostgreSQL
+│   └── e2e/              # Adversarial end-to-end API test suite
+│
+├── packages/
+│   ├── shared/           # Cross-platform types, DTOs, and Enums
+│   ├── api-client/       # Type-safe HTTP client SDK
+│   └── client-core/      # React Query hooks, auth context, and i18n
+│
+├── docs/
+│   └── onboarding/       # Detailed developer onboarding guides
+│
+└── JULES.md              # Autonomous agent directive & QA standards
 ```
 
-## What's inside?
+### Monorepo Packages Breakdown
 
-This Turborepo includes the following packages/apps:
+| Workspace Package | Type | Description |
+| :--- | :--- | :--- |
+| **`@jrs/desktop`** | Application | Tauri v2 desktop app with native Canvas PDF rendering & Tailwind CSS |
+| **`@jrs/mobile`** | Application | Cross-platform mobile app built with React Native and Expo |
+| **`@jrs/server`** | Application | NestJS REST API with PostgreSQL, Prisma, and Google Service Account |
+| **`@jrs/e2e`** | Application | Adversarial E2E API penetration and boundary test harness |
+| **`@jrs/client-core`** | Library | Shared React Query hooks, authentication state, and bilingual i18n |
+| **`@jrs/api-client`** | Library | Strongly typed HTTP client communicating with `@jrs/server` |
+| **`@jrs/shared`** | Library | Universal TypeScript interfaces, enums, validation DTOs |
 
-### Apps and Packages
+---
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `@next/eslint-plugin-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+## ✨ Core Features
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+- **Regional Hub Management:** Dynamic jurisdiction scoping across Cameroon town hubs with real-time switching.
+- **Canonical Membership Directory:** Complete member lifecycle tracking, age verification (18–30), contact cards, and account access controls.
+- **Activity Planning & Attendance Roster:** Schedule community activities, log real-time attendance, and track participation statistics.
+- **Town Transfer Management:** Inter-hub member relocation requests with chronological audit ledgers and route tracking.
+- **Google Drive Integration & In-App PDF Canvas:** Secure file streaming via Google Service Account and canvas document preview.
+- **Bilingual Localization:** 100% internationalization coverage in English and French.
 
-### Utilities
+---
 
-This Turborepo has some additional tools already setup for you:
+## 🚀 Quick Start
 
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
+### 1. Prerequisites
+- **Node.js**: `v22.0.0` or higher
+- **pnpm**: `v10.0.0` or higher (`corepack enable pnpm`)
+- **Docker**: For local PostgreSQL and Maildev containers
+- **Rust Toolchain**: Required for compiling the Tauri desktop app
 
-### Build
+### 2. Installation & Setup
+```bash
+# Clone the repository
+git clone <repo-url>
+cd jrs
 
-To build all apps and packages, run the following command:
+# Install all monorepo dependencies
+pnpm install
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
+# Setup backend environment variables
+cp apps/server/.env.example apps/server/.env
 
-```sh
-cd my-turborepo
-turbo build
+# Run Prisma database migrations
+pnpm --filter @jrs/server prisma migrate dev
 ```
 
-Without global `turbo`, use your package manager:
+### 3. Launch Development Environments
+```bash
+# Start all apps simultaneously via Turborepo
+pnpm dev
 
-```sh
-cd my-turborepo
-npx turbo build
-pnpm exec turbo build
-pnpm exec turbo build
+# Or launch specific targets:
+pnpm backend   # NestJS Server on http://localhost:3500
+pnpm desktop   # Tauri Desktop App
+pnpm mobile    # Expo Mobile Dev Server
+pnpm maildev   # Local email testing interface on http://localhost:1080
 ```
 
-You can build a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
+---
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
+## 🛠️ CLI Commands & Quality Gates
 
-```sh
-turbo build --filter=docs
-```
+| Command | Action |
+| :--- | :--- |
+| `pnpm biome check --write` | Format and lint all files with Biome |
+| `pnpm check-types` | Run TypeScript type checks across all 7 packages |
+| `pnpm --filter @jrs/server test` | Run backend unit tests |
+| `pnpm --filter @jrs/e2e test` | Run adversarial end-to-end API test suite |
+| `pnpm build` | Build production bundles for all packages |
 
-Without global `turbo`:
+---
 
-```sh
-npx turbo build --filter=docs
-pnpm exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
-```
+## 📚 Developer Onboarding Guides
 
-### Develop
+For detailed, step-by-step setup guides, explore the `docs/onboarding/` directory:
 
-To develop all apps and packages, run the following command:
+- 📖 [Monorepo Architecture Overview](docs/onboarding/overview.md)
+- ⚙️ [Backend (`apps/server`) Guide](docs/onboarding/server.md)
+- 🖥️ [Desktop (`apps/desktop`) Guide](docs/onboarding/desktop.md)
+- 🧪 [Adversarial E2E Testing Guide](docs/onboarding/testing.md)
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
+---
 
-```sh
-cd my-turborepo
-turbo dev
-```
+## 🛡️ Coding Standards
 
-Without global `turbo`, use your package manager:
-
-```sh
-cd my-turborepo
-npx turbo dev
-pnpm exec turbo dev
-pnpm exec turbo dev
-```
-
-You can develop a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo dev --filter=web
-```
-
-Without global `turbo`:
-
-```sh
-npx turbo dev --filter=web
-pnpm exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
-```
-
-### Remote Caching
-
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
-
-Turborepo can use a technique known as [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo login
-```
-
-Without global `turbo`, use your package manager:
-
-```sh
-cd my-turborepo
-npx turbo login
-pnpm exec turbo login
-pnpm exec turbo login
-```
-
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo link
-```
-
-Without global `turbo`:
-
-```sh
-npx turbo link
-pnpm exec turbo link
-pnpm exec turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turborepo.dev/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.dev/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.dev/docs/reference/configuration)
-- [CLI Usage](https://turborepo.dev/docs/reference/command-line-reference)
+- **Zero `any` Types:** All code must be strictly typed.
+- **Clean Separation:** UI components are presentational; state and data fetching belong in headless hooks.
+- **Zero Scratch Files:** Temporary scripts must be removed prior to git staging.
+- **Conventional Commits:** Enforced on all commit messages via Husky.
