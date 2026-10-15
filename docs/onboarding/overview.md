@@ -13,7 +13,7 @@ jrs/
 ├── apps/
 │   ├── desktop/         # Tauri v2 + React desktop application
 │   ├── mobile/          # Expo / React Native mobile application
-│   ├── server/          # NestJS backend API with Prisma ORM & PostgreSQL
+│   ├── server/          # NestJS backend API with Mongoose ODM & MongoDB
 │   └── e2e/             # Dedicated end-to-end adversarial API test suite
 │
 ├── packages/
@@ -65,7 +65,8 @@ Ensure you have the following installed on your development machine:
 
 - **Node.js**: `v22.0.0` or higher
 - **pnpm**: `v10.0.0` or higher (`corepack enable pnpm`)
-- **Docker & Docker Compose**: For local PostgreSQL and Maildev containers
+- **MongoDB**: Local MongoDB instance running on `localhost:27017`
+- **Maildev**: Local email testing server on port 1025 / 1080 (`pnpm maildev`)
 - **Rust toolchain & Cargo**: For Tauri v2 desktop compilation (`curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh`)
 - **Linux libraries** (if developing on Ubuntu/Debian):
   ```bash
@@ -87,10 +88,11 @@ Copy the example environment files in each app:
 cp apps/server/.env.example apps/server/.env
 ```
 
-### Step 3: Run Database Migrations
-Start your PostgreSQL database and run Prisma migrations:
+### Step 3: Seed Database
+Ensure MongoDB is running, then run initial seed scripts:
 ```bash
-pnpm --filter @jrs/server prisma migrate dev
+pnpm --filter @jrs/server seed
+pnpm --filter @jrs/server seed:transfers
 ```
 
 ### Step 4: Run Development Servers

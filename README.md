@@ -5,6 +5,7 @@
 [![Biome](https://img.shields.io/badge/linter-Biome-60a5fa?style=flat&logo=biome)](https://biomejs.dev/)
 [![Tauri](https://img.shields.io/badge/desktop-Tauri_v2-24c8db?style=flat&logo=tauri)](https://tauri.app/)
 [![NestJS](https://img.shields.io/badge/backend-NestJS-ea2845?style=flat&logo=nestjs)](https://nestjs.com/)
+[![MongoDB](https://img.shields.io/badge/database-MongoDB-47a248?style=flat&logo=mongodb)](https://www.mongodb.com/)
 [![License](https://img.shields.io/badge/license-Private-gray.svg)](#)
 
 > **LRC JRS** is an enterprise-grade, cross-platform youth fellowship and community management system. It provides real-time hub tracking, canonical membership registries, activity attendance tracking, inter-hub relocation ledgers, Google Drive document integration, and bilingual (English/French) support.
@@ -20,7 +21,7 @@ jrs/
 ├── apps/
 │   ├── desktop/          # Tauri v2 + React 19 desktop application
 │   ├── mobile/           # Expo / React Native mobile application
-│   ├── server/           # NestJS 11 backend with Prisma ORM & PostgreSQL
+│   ├── server/           # NestJS 11 backend with Mongoose ODM & MongoDB
 │   └── e2e/              # Adversarial end-to-end API test suite
 │
 ├── packages/
@@ -40,7 +41,7 @@ jrs/
 | :--- | :--- | :--- |
 | **`@jrs/desktop`** | Application | Tauri v2 desktop app with native Canvas PDF rendering & Tailwind CSS |
 | **`@jrs/mobile`** | Application | Cross-platform mobile app built with React Native and Expo |
-| **`@jrs/server`** | Application | NestJS REST API with PostgreSQL, Prisma, and Google Service Account |
+| **`@jrs/server`** | Application | NestJS REST API with MongoDB, Mongoose, and Google Service Account |
 | **`@jrs/e2e`** | Application | Adversarial E2E API penetration and boundary test harness |
 | **`@jrs/client-core`** | Library | Shared React Query hooks, authentication state, and bilingual i18n |
 | **`@jrs/api-client`** | Library | Strongly typed HTTP client communicating with `@jrs/server` |
@@ -64,7 +65,7 @@ jrs/
 ### 1. Prerequisites
 - **Node.js**: `v22.0.0` or higher
 - **pnpm**: `v10.0.0` or higher (`corepack enable pnpm`)
-- **Docker**: For local PostgreSQL and Maildev containers
+- **MongoDB**: Local MongoDB instance on `localhost:27017`
 - **Rust Toolchain**: Required for compiling the Tauri desktop app
 
 ### 2. Installation & Setup
@@ -79,8 +80,8 @@ pnpm install
 # Setup backend environment variables
 cp apps/server/.env.example apps/server/.env
 
-# Run Prisma database migrations
-pnpm --filter @jrs/server prisma migrate dev
+# Seed initial database records
+pnpm --filter @jrs/server seed
 ```
 
 ### 3. Launch Development Environments

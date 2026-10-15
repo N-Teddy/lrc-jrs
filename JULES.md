@@ -10,7 +10,7 @@
 ## 1. Prime Directives & Non-Negotiable Quality Gates
 
 ### 1.1 Strict Zero `any` & No Unused Code Policy
-- **No `any` types allowed anywhere in the monorepo.** The use of `any`, `unknown as any`, or implicit `any` is strictly prohibited. If a type is complex, define a proper generic, interface, or union type in `@jrs/shared` or in the feature's `types/` directory.
+- **No `any` types allowed anywhere in the monorepo.** The use of `any`, `unknown as any`, or implicit `any` is strictly prohibited. If a type is complex, define a proper generic, interface, or union type in `@jrs/shared` or in the module's `types/` directory.
 - **No unused variables, parameters, or imports.** Any unused variable, function, or imported symbol must be removed.
 - **Enforcement:** No commit is permitted if `pnpm check-types` or `pnpm biome check` fails.
 
@@ -20,18 +20,21 @@
 
 ### 1.3 Atomic Milestone Commits
 - Do not accumulate a massive single diff.
-- Organise work so that after **each major milestone**, you run the linters, type checks, and commit your work using [Conventional Commits](https://www.conventionalcommits.org/):
+- Organise work so that after **each major milestone**, you run linters, type checks, and commit your work using [Conventional Commits](https://www.conventionalcommits.org/):
   - `refactor(desktop): extract presentation components from ActivityDetailPage`
+  - `refactor(server): implement strategy pattern for notification channels`
   - `fix(i18n): remove pastoral terminology and fix AP/PC labels`
+  - `perf(server): add mongoose indexes and lean queries`
   - `docs(onboarding): add developer guides for server and desktop`
   - `test(e2e): setup apps/e2e adversarial endpoint suite`
 
 ### 1.4 Strict Task Order
 Execute tasks in this exact sequence:
 1. **Terminology & i18n Normalization** (Remove pastoral terms, fix AP/PC role labels, ensure `t()` coverage).
-2. **Frontend Component & Logic Separation** (Extract inline UI into dumb components, headless hooks, pure utils).
-3. **Developer Documentation & Onboarding Guides** (`docs/onboarding/` and professional `README.md`).
-4. **Adversarial E2E Testing App** (Create `apps/e2e` as the **FINAL task**, run adversarial tests, and fix all discovered issues).
+2. **Backend Architecture & Optimizations** (Strategy pattern for notifications, Mongoose indexes, RBAC guards, DTO whitelisting).
+3. **Frontend Component & Logic Separation** (Extract inline UI into dumb components, headless hooks, pure utils).
+4. **Developer Documentation & Onboarding Guides** (`docs/onboarding/` and professional `README.md`).
+5. **Adversarial E2E Testing App** (Create `apps/e2e` as the **FINAL task**, run adversarial tests, and fix all discovered issues).
 
 ---
 
@@ -67,13 +70,70 @@ The application is a modern youth fellowship community platform. Replace all pas
 
 ---
 
-## 3. Frontend Architecture: Strict 4-Layer Separation
+## 3. Backend Architecture Standards & Tasks (`apps/server`)
 
-### 3.1 Purity of Files (No Inline UI inside Coordinators)
+> **Database & ORM:** The backend uses **MongoDB** with **Mongoose** (`@nestjs/mongoose`, `mongoose`).
+
+Jules must perform the following explicit backend tasks:
+
+### Task B1: Strategy Pattern for Notification Channels
+Currently, notifications are sent through separate services (`whatsapp.service.ts` and `email.service.ts`). Jules must refactor this into a formal **Strategy Pattern**:
+1. Create a `NotificationStrategy` interface:
+   ```typescript
+   export interface NotificationStrategy {
+     readonly channel: 'whatsapp' | 'email';
+     send(recipient: string, message: string, metadata?: Record<string, unknown>): Promise<boolean>;
+   }
+   ```
+2. Refactor `WhatsAppService` to implement `NotificationStrategy` (sending via the JifiHub WhatsApp API).
+3. Refactor `EmailService` to implement `NotificationStrategy` (sending via Nodemailer/Maildev).
+4. Create a unified `NotificationDispatcher` or `NotificationService` that selects and executes the appropriate strategy based on user preferences or onboarding channel options, with automatic fallback support.
+
+### Task B2: Mongoose Schema Optimization & Index Auditing
+1. Audit all schemas in `apps/server/src/modules/*/schemas/*.schema.ts` (`User`, `Activity`, `Town`, `Transfer`).
+2. Add explicit compound and single-field Mongoose indexes for frequently queried columns:
+   - `UserSchema`: Index on `{ townId: 1, role: 1 }`, `{ phoneNumber: 1 }`, `{ email: 1 }`, `{ 'account.hasAppAccess': 1 }`.
+   - `ActivitySchema`: Index on `{ townId: 1, startDate: -1 }`, `{ status: 1 }`.
+   - `TransferSchema`: Index on `{ memberId: 1, createdAt: -1 }`, `{ originTownId: 1 }`, `{ destinationTownId: 1 }`.
+3. Eliminate N+1 queries by leveraging Mongoose `.populate()`, lean queries (`.lean()`), and projection queries that fetch only the necessary fields for listing tables.
+
+### Task B3: Strict RBAC & Hub Jurisdiction Guarding
+1. Ensure all controller classes and endpoints across all modules (`users`, `activities`, `towns`, `transfers`) are protected with `@UseGuards(JwtAuthGuard, RolesGuard)`.
+2. Apply `TownScopeGuard` to ensure operational users (`PC` and `MEMBER`) can **only query, edit, or register records within their assigned hub IDs** (`allowedReadTownIds` / `allowedWriteTownIds`). Only `AP` has global inter-hub authority.
+3. Ensure `@Public()` metadata decorator is strictly restricted to intentionally public routes (e.g., login, password setup, and public activity report stream links).
+
+### Task B4: Input Sanitization & DTO Whitelisting
+1. Ensure the global `ValidationPipe` in `main.ts` is configured with:
+   ```typescript
+   new ValidationPipe({
+     whitelist: true,
+     forbidNonWhitelisted: true,
+     transform: true,
+   })
+   ```
+2. Ensure every request payload is validated using explicit `class-validator` decorated DTOs so no arbitrary or malicious fields can be persisted to MongoDB.
+
+### Task B5: Response Normalization & Global Error Handling
+1. Ensure all successful API responses are transformed uniformly via `TransformResponseInterceptor` (`{ success: true, data: ..., timestamp: ... }`).
+2. Ensure all unhandled errors and Mongoose validation errors are caught cleanly by `AllExceptionsFilter` and `HttpExceptionFilter`, returning structured JSON error responses rather than unhandled 500 stack traces.
+
+### Task B6: Memory Safety & File Streaming
+1. In `drive.service.ts` and `activities.controller.ts`, ensure files uploaded to Google Drive or exported as PDFs are **streamed directly** to the HTTP response pipe.
+2. Never buffer entire document binary blobs into Node.js server RAM.
+
+### Task B7: Dependency & Secret Security Audit
+1. Run `pnpm audit` in `apps/server` and update any vulnerable dependencies.
+2. Verify that all secrets (JWT secret, MongoDB URI, Google Service Account credentials, WhatsApp API keys) are strictly loaded via `ConfigService` with runtime type validation in `env.validation.ts`. No hardcoded credentials.
+
+---
+
+## 4. Frontend Architecture: Strict 4-Layer Separation
+
+### 4.1 Purity of Files (No Inline UI inside Coordinators)
 - Any file that coordinates a feature or manages state must **never contain inline UI trees** or large embedded sub-components.
 - Large monolithic views (e.g. `ActivityDetailPage.tsx`, `ActivityAttendanceRoster.tsx`, `DriveExplorerFeature.tsx`) must be refactored into distinct, modular files.
 
-### 3.2 The 4-Layer Directory Standard
+### 4.2 The 4-Layer Directory Standard
 Every feature in `apps/desktop/src/features/<feature>/` or `apps/mobile/src/features/<feature>/` must follow this structure:
 
 ```
@@ -101,30 +161,18 @@ features/<feature-name>/
 
 ---
 
-## 4. Backend Standards (NestJS / Prisma)
-
-1. **Layered Flow:** Controller $\rightarrow$ Service $\rightarrow$ Prisma.
-2. **DTO Strictness:** All incoming request bodies must use DTO classes decorated with `class-validator` (`@IsString()`, `@IsUUID()`, `@IsOptional()`, etc.).
-3. **Authorization & RBAC:**
-   - Every controller must be guarded with `@UseGuards(JwtAuthGuard, RolesGuard)`.
-   - Public endpoints (like file streams or health checks) must explicitly use the `@Public()` metadata decorator.
-   - Hub jurisdiction must be validated: Users with role `PC` or `MEMBER` cannot manipulate or view records outside their authorized hub IDs (`allowedReadTownIds`). Only `AP` has global diocesan-wide access.
-4. **Streaming for Large Files:** Never buffer large files (Google Drive exports, PDFs) entirely in memory. Stream them directly through the NestJS `Response` object using pipes.
-
----
-
 ## 5. Developer Onboarding Guides & Professional Documentation
 
-Jules must create a dedicated `docs/onboarding/` directory with comprehensive, beautifully formatted Markdown guides:
+Jules must verify and maintain the comprehensive developer onboarding guides in `docs/onboarding/`:
 
 1. **`docs/onboarding/overview.md`**:
    - Monorepo structure (Turborepo + pnpm workspaces).
    - Package dependency graph (`@jrs/shared` $\rightarrow$ `@jrs/api-client` $\rightarrow$ `@jrs/client-core` $\rightarrow$ Apps).
-   - Prerequisites (Node.js $\ge 22$, pnpm $\ge 10$, Docker, Rust for Tauri).
-   - Environment variables setup (`.env.example`).
+   - Prerequisites (Node.js $\ge 22$, pnpm $\ge 10$, MongoDB, Rust for Tauri).
+   - Environment variables setup.
 2. **`docs/onboarding/server.md`**:
-   - NestJS architecture, modules, and guards.
-   - Prisma schema, PostgreSQL setup, and migrations (`pnpm prisma migrate dev`).
+   - NestJS architecture, Mongoose schemas, and database connection.
+   - RBAC guards (`JwtAuthGuard`, `RolesGuard`, `TownScopeGuard`).
    - Google Drive Service Account integration and file streaming.
    - Notification strategy (WhatsApp / Maildev).
 3. **`docs/onboarding/desktop.md`**:
@@ -139,14 +187,14 @@ Jules must create a dedicated `docs/onboarding/` directory with comprehensive, b
 5. **`docs/onboarding/testing.md`**:
    - How to run and extend the E2E test suite.
    - Mocking authentication and test database teardown.
-6. **Root `README.md` Modernization**:
-   - Completely replace the default Turborepo starter template with a GitHub-ready, professional README containing badges, architecture overview, quickstart instructions, package table, and development workflows.
+6. **Root `README.md`**:
+   - Professional GitHub-ready documentation with architecture diagrams, package table, and command reference.
 
 ---
 
 ## 6. FINAL TASK: Adversarial E2E Testing App (`apps/e2e`)
 
-> **IMPORTANT:** This must be performed as the **LAST task** after all refactoring, cleanup, and documentation are complete.
+> **IMPORTANT:** This must be performed as the **LAST task** after all backend optimizations, frontend refactorings, terminology cleanup, and documentation are complete.
 
 ### 6.1 Package Architecture
 Create a dedicated application in `apps/e2e`:
@@ -164,12 +212,12 @@ Do not write trivial "happy path only" tests. You must think like an adversarial
 2. **Boundary & Malformed Inputs:**
    - Members registry: Submit birthdates outside youth range (age 17 or age 31). Verify rejection.
    - Submit malformed Cameroon phone numbers (invalid prefix, letters, too short/long). Verify `400 Bad Request`.
-   - Submit oversized payloads, XSS strings (`<script>alert(1)</script>`), and SQL injection patterns in search parameters.
+   - Submit oversized payloads, XSS strings (`<script>alert(1)</script>`), and NoSQL injection patterns (`{ "$gt": "" }`) in search parameters.
 3. **Town Scopes & Hub Jurisdiction:**
    - Use a `PC` token scoped to "Town A" to view, edit, or transfer members belonging to "Town B". Verify strictly blocked with `403 Forbidden`.
 4. **Concurrency & Race Conditions:**
    - Double-transfer attempts: Trigger two simultaneous relocation requests for the same member. Ensure idempotency and ledger integrity.
-   - Double-attendance marking: Concurrently mark the same member as present multiple times for the same activity. Ensure no duplicate records.
+   - Double-attendance marking: Concurrently mark the same member as present multiple times for the same activity session. Ensure no duplicate records.
 5. **File Streaming & Drive Integration:**
    - Test `GET /api/activities/report/drive-file/:fileId/stream` with nonexistent file IDs. Ensure it responds with a clean `404 Not Found` JSON, never an unhandled 500 server crash.
 
