@@ -9,4 +9,5 @@ export * from './components/MemberStatsOverview';
 export * from './components/MembersFeature';
 export * from './components/MemberTableView';
 export * from './components/RegisterMemberModal';
+export * from './components/TransferTownModal';
 export * from './utils/member-ui.utils';

@@ -32,6 +32,7 @@ import { WhatsAppService } from '../../services/whatsapp.service';
 import type {
   CreateMemberDto,
   MemberQueryDto,
+  TransferTownDto,
   UpdateAccessDto,
   UpdateMemberDto,
 } from './dto';
@@ -728,6 +729,85 @@ export class UsersService {
 
   async deleteAll(): Promise<void> {
     await this.userModel.deleteMany({}).exec();
+  }
+
+  /**
+   * Transfer a member to a new town hub with full audit trail
+   */
+  async transferMember(
+    userId: string,
+    dto: TransferTownDto,
+    currentUser: IAuthUser,
+  ): Promise<IUser> {
+    if (!Types.ObjectId.isValid(userId)) {
+      throw new BadRequestException('Invalid member ID');
+    }
+    if (!Types.ObjectId.isValid(dto.toTownId)) {
+      throw new BadRequestException('Invalid destination town ID');
+    }
+
+    const user = await this.userModel.findById(userId).exec();
+    if (!user) {
+      throw new NotFoundException(`Member with ID ${userId} not found`);
+    }
+
+    const currentTownIdStr = user.homeTownId?.toString();
+    const destTownIdStr = dto.toTownId.toString();
+
+    if (currentTownIdStr === destTownIdStr) {
+      throw new BadRequestException(
+        'Member is already assigned to this town hub',
+      );
+    }
+
+    const destTown = await this.townModel.findById(dto.toTownId).exec();
+    if (!destTown) {
+      throw new NotFoundException('Destination town hub does not exist');
+    }
+
+    // Role check: AP can transfer anyone; PC can only transfer members out of their assigned hub
+    const isAP = currentUser.role === UserRole.AP;
+    const isPC = currentUser.role === UserRole.PC;
+    if (!isAP && !isPC) {
+      throw new ForbiddenException(
+        'Only Coordinators or Overseers can transfer members between hubs',
+      );
+    }
+
+    if (isPC && !isAP && currentTownIdStr !== currentUser.homeTownId) {
+      throw new ForbiddenException(
+        'You can only initiate transfers for members within your home hub',
+      );
+    }
+
+    // Build transfer record
+    const transferRecord = {
+      fromTownId: currentTownIdStr,
+      toTownId: destTownIdStr,
+      transferredAt: new Date().toISOString(),
+      transferredBy: currentUser.fullName || currentUser.id,
+      reason: dto.reason?.trim() || undefined,
+    };
+
+    if (!user.transferHistory) {
+      user.transferHistory = [];
+    }
+    user.transferHistory.push(transferRecord as any);
+
+    // Update member's home town
+    user.homeTownId = new Types.ObjectId(destTownIdStr) as any;
+
+    // If member was PC in old town, reset PC status in new town to avoid exceeding quota
+    if (user.isActivePC) {
+      user.isActivePC = false;
+      if (user.role === UserRole.PC) {
+        user.role = UserRole.MEMBER;
+      }
+    }
+
+    await user.save();
+    user.homeTownId = destTown as any;
+    return this.mapUser(user);
   }
 
   /**

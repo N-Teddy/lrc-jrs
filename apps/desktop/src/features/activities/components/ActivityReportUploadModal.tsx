@@ -6,7 +6,6 @@ import {
 import type { IActivity, IActivityReport } from '@jrs/shared';
 import {
   ArrowSquareOut,
-  CaretDown,
   CloudArrowUp,
   FileDoc,
   FilePdf,
@@ -19,7 +18,8 @@ import {
   X,
 } from '@phosphor-icons/react';
 import type React from 'react';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { CustomSelect, type SelectOption } from '../../../components';
 
 interface ActivityReportUploadModalProps {
   isOpen: boolean;
@@ -53,6 +53,17 @@ export const ActivityReportUploadModal: React.FC<
       : activity.report?.fileId
         ? [activity.report]
         : [];
+
+  const folderOptions: SelectOption[] = useMemo(() => {
+    if (!driveFolders || driveFolders.length === 0) {
+      return [{ value: '', label: 'JRs (Default Root Folder)' }];
+    }
+    return driveFolders.map((f) => ({
+      value: f.id,
+      label: f.path || f.name,
+      description: f.path !== f.name ? f.name : undefined,
+    }));
+  }, [driveFolders]);
 
   // Smart folder pre-selection based on activity properties
   useEffect(() => {
@@ -332,29 +343,14 @@ export const ActivityReportUploadModal: React.FC<
                   </span>
                 )}
               </label>
-              <div className="relative">
-                <select
-                  id="activity-report-folder-select"
-                  value={selectedFolderId}
-                  onChange={(e) => setSelectedFolderId(e.target.value)}
-                  className="w-full pl-3.5 pr-8 py-2.5 rounded-xl bg-[#faf2ee]/70 border border-[#e8e1dd] text-xs font-semibold text-[#1e1b19] focus:outline-none focus:border-[#b85028] transition-colors cursor-pointer appearance-none"
-                >
-                  {driveFolders && driveFolders.length > 0 ? (
-                    driveFolders.map((folder) => (
-                      <option key={folder.id} value={folder.id}>
-                        📁 {folder.path}
-                      </option>
-                    ))
-                  ) : (
-                    <option value="">📁 JRs (Default Root)</option>
-                  )}
-                </select>
-                <CaretDown
-                  size={14}
-                  weight="bold"
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8a726a] pointer-events-none"
-                />
-              </div>
+              <CustomSelect
+                value={selectedFolderId}
+                onChange={(val) => setSelectedFolderId(val)}
+                options={folderOptions}
+                variant="form"
+                size="md"
+                placeholder="Select Destination Folder..."
+              />
             </div>
 
             {/* Multiple File Upload Dropzone */}

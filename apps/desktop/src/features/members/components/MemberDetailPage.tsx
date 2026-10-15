@@ -1,11 +1,13 @@
 import {
   useMemberDetailQuery,
   useTownContext,
+  useTownsQuery,
   useTranslation,
 } from '@jrs/client-core';
 import type { IUser } from '@jrs/shared';
 import {
   ArrowLeft,
+  ArrowsLeftRight,
   CalendarCheck,
   ChatCircleText,
   CheckCircle,
@@ -20,7 +22,7 @@ import {
   User,
 } from '@phosphor-icons/react';
 import type React from 'react';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { UserAvatar } from '../../../components';
 import {
   calculateAge,
@@ -29,6 +31,7 @@ import {
   getRoleDisplayInfo,
 } from '../utils/member-ui.utils';
 import { MemberAttendanceHistoryTab } from './MemberAttendanceHistoryTab';
+import { TransferTownModal } from './TransferTownModal';
 
 interface MemberDetailPageProps {
   memberId: string;
@@ -50,11 +53,15 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
   const { t } = useTranslation();
   const { activeTown, canWrite } = useTownContext();
   const { data: member, isLoading, error } = useMemberDetailQuery(memberId);
+  const { data: towns = [] } = useTownsQuery();
 
   const [activeDetailTab, setActiveDetailTab] = useState<
     'identity' | 'transfers' | 'attendance'
   >('identity');
   const [copiedEmail, setCopiedEmail] = useState(false);
+  const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
+
+  const townsMap = useMemo(() => new Map(towns.map((t) => [t.id, t])), [towns]);
 
   if (isLoading) {
     return (
@@ -199,6 +206,22 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
             >
               <PencilSimple size={16} />
               <span>{t('common:edit')}</span>
+            </button>
+          )}
+
+          {/* Transfer Hub */}
+          {canWrite && (
+            <button
+              type="button"
+              onClick={() => setIsTransferModalOpen(true)}
+              className="flex items-center gap-2 px-3.5 py-2 rounded-lg bg-white hover:bg-[#faf2ee] border border-[#e8e1dd] text-[#1e1b19] text-xs font-bold transition-colors cursor-pointer"
+            >
+              <ArrowsLeftRight
+                size={16}
+                weight="bold"
+                className="text-[#b85028]"
+              />
+              <span>Transfer Hub</span>
             </button>
           )}
 
@@ -472,6 +495,35 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
       {/* 5. Tab 2: Town Registry & Transfer History */}
       {activeDetailTab === 'transfers' && (
         <div className="flex flex-col gap-6">
+          {/* Header Action Card */}
+          <div className="bg-white rounded-3xl border border-[#e8e1dd] p-6 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-3.5">
+              <div className="w-11 h-11 rounded-2xl bg-[#fff2ee] border border-[#ffdbcf] text-[#b85028] flex items-center justify-center shrink-0">
+                <ArrowsLeftRight size={22} weight="duotone" />
+              </div>
+              <div className="flex flex-col">
+                <h3 className="text-base font-bold text-[#1e1b19]">
+                  Town Registry & Relocation Records
+                </h3>
+                <p className="text-xs text-[#8a726a]">
+                  Track member regional jurisdiction and inter-hub transfer
+                  history across Cameroon.
+                </p>
+              </div>
+            </div>
+
+            {canWrite && (
+              <button
+                type="button"
+                onClick={() => setIsTransferModalOpen(true)}
+                className="px-4 py-2.5 rounded-xl bg-[#b85028] hover:bg-[#9c421f] text-white text-xs font-bold transition-all flex items-center gap-2 shadow-2xs cursor-pointer self-start sm:self-auto"
+              >
+                <ArrowsLeftRight size={16} weight="bold" />
+                <span>Transfer to Another Hub</span>
+              </button>
+            )}
+          </div>
+
           {/* Side-by-side Hub Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Current Resident Hub */}
@@ -501,13 +553,19 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
                   {t('members:detail.originHub')}
                 </span>
                 <span className="text-xl font-black text-[#8a726a]/40 font-mono">
-                  {member.homeTown?.code ?? activeTown?.code ?? 'HUB'}
+                  {member.transferHistory && member.transferHistory.length > 0
+                    ? townsMap.get(member.transferHistory[0].fromTownId)
+                        ?.code || 'HUB'
+                    : (member.homeTown?.code ?? activeTown?.code ?? 'HUB')}
                 </span>
               </div>
               <h4 className="text-xl font-bold text-[#1e1b19]">
-                {member.homeTown?.name ??
-                  activeTown?.name ??
-                  'Mother Sanctuary'}
+                {member.transferHistory && member.transferHistory.length > 0
+                  ? townsMap.get(member.transferHistory[0].fromTownId)?.name ||
+                    'Origin Hub'
+                  : (member.homeTown?.name ??
+                    activeTown?.name ??
+                    'Mother Sanctuary')}
               </h4>
               <p className="text-xs text-[#8a726a] mt-1">
                 Initial Registration Registry
@@ -529,7 +587,54 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
 
             {/* Illustrated Timeline */}
             <div className="relative pl-6 before:content-[''] before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-[#e8e1dd] flex flex-col gap-6">
-              {/* Event 1: Initial Enrollment */}
+              {/* Dynamic Transfer History Events (most recent first) */}
+              {member.transferHistory &&
+                member.transferHistory.length > 0 &&
+                [...member.transferHistory].reverse().map((record, idx) => {
+                  const fromTown = townsMap.get(record.fromTownId);
+                  const toTown = townsMap.get(record.toTownId);
+                  return (
+                    <div
+                      key={`${record.transferredAt}-${idx}`}
+                      className="relative flex items-start gap-4"
+                    >
+                      <div className="absolute -left-6 top-0.5 w-5 h-5 rounded-full bg-[#b85028] text-white flex items-center justify-center ring-4 ring-white shadow-xs">
+                        <ArrowsLeftRight size={11} weight="bold" />
+                      </div>
+                      <div className="p-4 rounded-2xl bg-[#faf2ee]/70 border border-[#e8e1dd] flex-1 flex flex-col gap-2">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                          <span className="text-xs font-bold text-[#1e1b19]">
+                            Transferred from {fromTown?.name || 'Previous Hub'}{' '}
+                            ({fromTown?.code || '—'}) to{' '}
+                            {toTown?.name || 'New Hub'} ({toTown?.code || '—'})
+                          </span>
+                          <span className="text-[11px] font-semibold text-[#8a726a]">
+                            {record.transferredAt
+                              ? new Date(
+                                  record.transferredAt,
+                                ).toLocaleDateString('en-GB')
+                              : 'Recent'}
+                          </span>
+                        </div>
+
+                        <div className="text-[11px] text-[#8a726a]">
+                          Authorized by{' '}
+                          <span className="font-semibold text-[#57423b]">
+                            {record.transferredBy}
+                          </span>
+                        </div>
+
+                        {record.reason && (
+                          <div className="p-2.5 rounded-xl bg-white border border-[#e8e1dd] text-xs text-[#57423b] leading-relaxed">
+                            {record.reason}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+
+              {/* Base Event: Initial Enrollment */}
               <div className="relative flex items-start gap-4">
                 <div className="absolute -left-6 top-0.5 w-5 h-5 rounded-full bg-[#486b52] text-white flex items-center justify-center ring-4 ring-white shadow-xs">
                   <CheckCircle size={14} weight="fill" />
@@ -538,7 +643,11 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-[#1e1b19]">
                       Canonical Enrollment at{' '}
-                      {member.homeTown?.name ?? 'Active Hub'}
+                      {member.transferHistory &&
+                      member.transferHistory.length > 0
+                        ? townsMap.get(member.transferHistory[0].fromTownId)
+                            ?.name || 'Active Hub'
+                        : (member.homeTown?.name ?? 'Active Hub')}
                     </span>
                     <span className="text-[11px] font-semibold text-[#8a726a]">
                       {member.createdAt
@@ -561,6 +670,13 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
       {activeDetailTab === 'attendance' && (
         <MemberAttendanceHistoryTab member={member} />
       )}
+
+      {/* Transfer Town Modal */}
+      <TransferTownModal
+        isOpen={isTransferModalOpen}
+        onClose={() => setIsTransferModalOpen(false)}
+        member={member}
+      />
     </div>
   );
 };

@@ -773,7 +773,7 @@ export const ActivityAttendanceRoster: React.FC<
 
       {/* Attendance Finalized & Locked Notice */}
       {isAttendanceLocked && (
-        <div className="bg-[#fff8e1] border border-[#ffe082] rounded-2xl p-4 flex items-center justify-between gap-4 flex-wrap">
+        <div className="max-w-2xl bg-[#fffbf2] border border-[#fde8bb] rounded-2xl p-4 flex items-center justify-between gap-4 flex-wrap shadow-2xs">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-[#ffe082] text-[#812901] flex items-center justify-center shrink-0">
               <Lock size={20} weight="bold" />

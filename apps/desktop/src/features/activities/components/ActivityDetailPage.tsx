@@ -21,6 +21,7 @@ import {
   Clock,
   ClockCounterClockwise,
   CloudArrowUp,
+  Eye,
   FileDoc,
   FilePdf,
   FileText,
@@ -49,6 +50,7 @@ import {
   getActivityTypeConfig,
 } from '../utils/activity-ui.utils';
 import { ActivityReportUploadModal } from './ActivityReportUploadModal';
+import { DriveFilePreviewModal } from './DriveFilePreviewModal';
 
 interface ActivityDetailPageProps {
   activity: IActivity;
@@ -82,6 +84,7 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
   const [reportToDelete, setReportToDelete] = useState<IActivityReport | null>(
     null,
   );
+  const [previewFile, setPreviewFile] = useState<IActivityReport | null>(null);
   const [lockPromptOpen, setLockPromptOpen] = useState(false);
   const [lockReason, setLockReason] = useState('');
 
@@ -477,9 +480,9 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
 
           {/* Lock Status & Roll Call Banner */}
           <div
-            className={`p-5 rounded-2xl border flex items-center justify-between gap-4 flex-wrap shadow-2xs ${
+            className={`p-4 sm:p-5 rounded-2xl border flex items-center justify-between gap-4 flex-wrap shadow-2xs max-w-2xl ${
               isLocked
-                ? 'bg-[#fff8e1] border-[#ffe082] text-[#812901]'
+                ? 'bg-[#fffbf2] border-[#fde8bb] text-[#812901]'
                 : 'bg-[#eef7f0] border-[#c2e9ca] text-[#2c4e37]'
             }`}
           >
@@ -808,75 +811,139 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
             )}
           </div>
 
+          {reports.length > 0 && (
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="p-3.5 rounded-2xl bg-[#faf2ee]/60 border border-[#e8e1dd] flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-white border border-[#e8e1dd] text-[#b85028] flex items-center justify-center font-bold text-xs">
+                  {reports.length}
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-[10px] font-bold text-[#8a726a] uppercase tracking-wider">
+                    Total Documents
+                  </span>
+                  <span className="text-xs font-semibold text-[#1e1b19]">
+                    {reports.length} {reports.length === 1 ? 'file' : 'files'}{' '}
+                    archived
+                  </span>
+                </div>
+              </div>
+              <div className="p-3.5 rounded-2xl bg-[#faf2ee]/60 border border-[#e8e1dd] flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-white border border-[#e8e1dd] text-[#b85028] flex items-center justify-center font-bold text-xs">
+                  MB
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-[10px] font-bold text-[#8a726a] uppercase tracking-wider">
+                    Total Size
+                  </span>
+                  <span className="text-xs font-semibold text-[#1e1b19]">
+                    {(
+                      reports.reduce((acc, r) => acc + (r.fileSize || 0), 0) /
+                      (1024 * 1024)
+                    ).toFixed(2)}{' '}
+                    MB stored
+                  </span>
+                </div>
+              </div>
+              <div className="p-3.5 rounded-2xl bg-[#faf2ee]/60 border border-[#e8e1dd] flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-white border border-[#e8e1dd] text-[#b85028] flex items-center justify-center">
+                  <Clock size={16} weight="bold" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-[10px] font-bold text-[#8a726a] uppercase tracking-wider">
+                    Latest Upload
+                  </span>
+                  <span className="text-xs font-semibold text-[#1e1b19]">
+                    {reports[reports.length - 1]?.uploadedAt
+                      ? new Date(
+                          reports[reports.length - 1].uploadedAt,
+                        ).toLocaleDateString()
+                      : 'Recently'}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
+
           {reports.length > 0 ? (
-            <div className="flex flex-col gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
               {reports.map((rep) => (
                 <div
                   key={rep.fileId}
-                  className="p-5 rounded-2xl bg-white border border-[#e8e1dd] hover:border-[#b85028]/40 shadow-2xs hover:shadow-xs transition-all flex flex-col gap-3 group"
+                  className="p-5 rounded-2xl bg-white border border-[#e8e1dd] hover:border-[#b85028]/40 shadow-2xs hover:shadow-xs transition-all flex flex-col justify-between gap-3 group"
                 >
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                    <div className="flex items-center gap-3.5 min-w-0">
-                      <div className="w-11 h-11 rounded-xl bg-[#faf2ee] flex items-center justify-center shrink-0 border border-[#e8e1dd]">
+                  <div className="flex flex-col gap-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-[#faf2ee] flex items-center justify-center shrink-0 border border-[#e8e1dd] text-[#b85028]">
                         {getFileIcon(rep.filename)}
                       </div>
-                      <div className="flex flex-col min-w-0">
-                        <span className="font-bold text-sm text-[#1e1b19] truncate group-hover:text-[#b85028] transition-colors">
-                          {rep.filename}
-                        </span>
-                        <div className="flex items-center gap-2 text-xs text-[#8a726a] flex-wrap mt-0.5">
-                          <span>
-                            Uploaded by {rep.uploadedByName || 'Coordinator'}
-                          </span>
-                          <span>•</span>
-                          <span>
-                            {rep.uploadedAt
-                              ? new Date(rep.uploadedAt).toLocaleString()
-                              : 'Recently'}
-                          </span>
-                          {rep.fileSize && (
-                            <>
-                              <span>•</span>
-                              <span>
-                                {(rep.fileSize / 1024 / 1024).toFixed(2)} MB
-                              </span>
-                            </>
-                          )}
-                        </div>
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        {isPrivileged && (
+                          <button
+                            type="button"
+                            onClick={() => setReportToDelete(rep)}
+                            className="p-1.5 rounded-lg text-[#ba1a1a]/70 hover:text-[#ba1a1a] hover:bg-[#ffdad6]/40 transition-colors cursor-pointer"
+                            title="Delete this report from Google Drive"
+                          >
+                            <Trash size={15} />
+                          </button>
+                        )}
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
-                      {rep.webViewLink && (
-                        <a
-                          href={rep.webViewLink}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="px-3.5 py-1.5 rounded-xl bg-[#faf2ee] hover:bg-[#f4ece9] border border-[#e8e1dd] text-[#1e1b19] text-xs font-bold transition-all flex items-center gap-1.5 shadow-2xs"
-                        >
-                          <span>Open in Drive</span>
-                          <ArrowSquareOut size={13} />
-                        </a>
-                      )}
-                      {isPrivileged && (
-                        <button
-                          type="button"
-                          onClick={() => setReportToDelete(rep)}
-                          className="px-3.5 py-1.5 rounded-xl bg-[#ffdad6]/40 hover:bg-[#ffdad6] text-[#ba1a1a] text-xs font-bold transition-colors cursor-pointer flex items-center gap-1.5"
-                          title="Delete this report from Google Drive"
-                        >
-                          <Trash size={14} />
-                          <span>Delete</span>
-                        </button>
-                      )}
+                    <div>
+                      <h4
+                        className="font-bold text-sm text-[#1e1b19] line-clamp-1 group-hover:text-[#b85028] transition-colors"
+                        title={rep.filename}
+                      >
+                        {rep.filename}
+                      </h4>
+                      <div className="flex items-center gap-1.5 text-[11px] text-[#8a726a] flex-wrap mt-1">
+                        <span>{rep.uploadedByName || 'Coordinator'}</span>
+                        <span>•</span>
+                        <span>
+                          {rep.uploadedAt
+                            ? new Date(rep.uploadedAt).toLocaleDateString()
+                            : 'Recently'}
+                        </span>
+                        {rep.fileSize && (
+                          <>
+                            <span>•</span>
+                            <span>
+                              {(rep.fileSize / 1024 / 1024).toFixed(2)} MB
+                            </span>
+                          </>
+                        )}
+                      </div>
                     </div>
+
+                    {rep.summary && (
+                      <div className="p-3 rounded-xl bg-[#faf2ee]/40 border border-[#f4ece9] text-xs text-[#57423b] leading-relaxed line-clamp-2">
+                        {rep.summary}
+                      </div>
+                    )}
                   </div>
 
-                  {rep.summary && (
-                    <div className="p-3.5 rounded-xl bg-[#faf2ee]/40 border border-[#f4ece9] text-xs text-[#57423b] leading-relaxed whitespace-pre-wrap">
-                      {rep.summary}
-                    </div>
-                  )}
+                  <div className="flex items-center gap-2 pt-3 border-t border-[#f4ece9]">
+                    <button
+                      type="button"
+                      onClick={() => setPreviewFile(rep)}
+                      className="flex-1 py-2 px-3.5 rounded-xl bg-[#b85028] hover:bg-[#9c421f] text-white text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer"
+                    >
+                      <Eye size={15} weight="bold" />
+                      <span>Preview File</span>
+                    </button>
+                    {rep.webViewLink && (
+                      <a
+                        href={rep.webViewLink}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="p-2 rounded-xl bg-[#faf2ee] hover:bg-[#f4ece9] border border-[#e8e1dd] text-[#1e1b19] transition-all flex items-center justify-center shadow-2xs"
+                        title="Open in Google Drive"
+                      >
+                        <ArrowSquareOut size={16} />
+                      </a>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
@@ -1035,6 +1102,13 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
           </div>
         </div>
       )}
+
+      {/* Google Drive Document In-App Preview Modal */}
+      <DriveFilePreviewModal
+        isOpen={Boolean(previewFile)}
+        onClose={() => setPreviewFile(null)}
+        file={previewFile}
+      />
     </div>
   );
 };

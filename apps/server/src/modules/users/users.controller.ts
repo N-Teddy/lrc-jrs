@@ -30,6 +30,7 @@ import { TownScopeGuard } from '../../core/guards/town-scope.guard';
 import {
   CreateMemberDto,
   MemberQueryDto,
+  TransferTownDto,
   UpdateAccessDto,
   UpdateMemberDto,
 } from './dto';
@@ -142,6 +143,20 @@ export class UsersController {
     @CurrentUser() currentUser: IAuthUser,
   ) {
     return this.usersService.updateAccess(id, dto, currentUser);
+  }
+
+  @Post(':id/transfer')
+  @ApiOperation({ summary: 'Transfer a fellowship member to another town hub' })
+  @ApiResponse({ status: 200, description: 'Member transferred successfully' })
+  @ApiResponse({ status: 400, description: 'Invalid transfer parameters' })
+  @ApiResponse({ status: 403, description: 'Forbidden transfer' })
+  @ApiResponse({ status: 404, description: 'Member or town not found' })
+  async transfer(
+    @Param('id') id: string,
+    @Body() dto: TransferTownDto,
+    @CurrentUser() currentUser: IAuthUser,
+  ) {
+    return this.usersService.transferMember(id, dto, currentUser);
   }
 
   @Delete(':id')
