@@ -9,7 +9,6 @@ import {
   MapPin,
   MapTrifold,
   SignOut,
-  UserCheck,
   Users,
   X,
 } from 'phosphor-react-native';
@@ -18,7 +17,6 @@ import {
   ActivityIndicator,
   Animated,
   Modal,
-  Platform,
   ScrollView,
   StatusBar,
   StyleSheet,
@@ -30,6 +28,12 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { colors } from '../../../theme/colors';
+import {
+  AddMemberScreen,
+  EditMemberScreen,
+  MemberDetailScreen,
+  MembersListScreen,
+} from '../../members';
 
 interface MainAppTabBarProps {
   onSwitchTown?: () => void;
@@ -42,7 +46,7 @@ export const MainAppTabBar: React.FC<MainAppTabBarProps> = ({
 }) => {
   const { user, signOut } = useAuth();
   const { activeTown } = useTownContext();
-  const { t, i18n } = useTranslation();
+  const { i18n } = useTranslation();
   const isFrench = i18n.language?.startsWith('fr');
 
   const { width: windowWidth } = useWindowDimensions();
@@ -56,6 +60,10 @@ export const MainAppTabBar: React.FC<MainAppTabBarProps> = ({
   const [activeTab, setActiveTab] = useState<
     'home' | 'members' | 'activities' | 'settings'
   >('home');
+  const [memberSubScreen, setMemberSubScreen] = useState<
+    'list' | 'detail' | 'add' | 'edit'
+  >('list');
+  const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
 
   const openSidebar = () => {
     setIsSidebarOpen(true);
@@ -106,6 +114,9 @@ export const MainAppTabBar: React.FC<MainAppTabBarProps> = ({
 
   const navigateTab = (tab: 'home' | 'members' | 'activities' | 'settings') => {
     setActiveTab(tab);
+    if (tab === 'members') {
+      setMemberSubScreen('list');
+    }
     closeSidebar();
   };
 
@@ -270,38 +281,48 @@ export const MainAppTabBar: React.FC<MainAppTabBarProps> = ({
           </View>
         )}
 
-        {/* TAB 2: MEMBERS (Members comes BEFORE Activities!) */}
+        {/* TAB 2: MEMBERS */}
         {activeTab === 'members' && (
-          <ScrollView
-            contentContainerStyle={styles.scrollContent}
-            showsVerticalScrollIndicator={false}
-          >
-            <View style={styles.sectionHeader}>
-              <View style={styles.sectionIconCircle}>
-                <Users size={28} weight="fill" color={colors.primary} />
-              </View>
-              <Text style={styles.sectionTitle}>
-                {isFrench ? 'Registre des Membres' : 'Members Directory'}
-              </Text>
-              <Text style={styles.sectionSubtitle}>
-                {activeTown
-                  ? `${activeTown.name} Hub • ${user?.role || 'MEMBER'}`
-                  : 'Fellowship Members'}
-              </Text>
-            </View>
+          <View style={styles.membersContainer}>
+            {memberSubScreen === 'list' && (
+              <MembersListScreen
+                onViewMember={(id) => {
+                  setSelectedMemberId(id);
+                  setMemberSubScreen('detail');
+                }}
+                onAddMember={() => {
+                  setMemberSubScreen('add');
+                }}
+              />
+            )}
 
-            <View style={styles.placeholderCard}>
-              <UserCheck size={40} weight="duotone" color={colors.primary} />
-              <Text style={styles.placeholderTitle}>
-                {isFrench ? 'Membres JR' : 'JR Members'}
-              </Text>
-              <Text style={styles.placeholderSubtitle}>
-                {isFrench
-                  ? `Les membres enregistrés pour le hub de ${activeTown?.name || 'votre région'} seront affichés ici.`
-                  : `Registered fellowship members for ${activeTown?.name || 'your region'} will appear here.`}
-              </Text>
-            </View>
-          </ScrollView>
+            {memberSubScreen === 'detail' && selectedMemberId && (
+              <MemberDetailScreen
+                memberId={selectedMemberId}
+                onBack={() => setMemberSubScreen('list')}
+                onEdit={() => setMemberSubScreen('edit')}
+              />
+            )}
+
+            {memberSubScreen === 'add' && (
+              <AddMemberScreen
+                onBack={() => setMemberSubScreen('list')}
+                onSuccess={() => setMemberSubScreen('list')}
+              />
+            )}
+
+            {memberSubScreen === 'edit' && selectedMemberId && (
+              <EditMemberScreen
+                memberId={selectedMemberId}
+                onBack={() => setMemberSubScreen('detail')}
+                onSuccess={() => setMemberSubScreen('detail')}
+                onDeleted={() => {
+                  setSelectedMemberId(null);
+                  setMemberSubScreen('list');
+                }}
+              />
+            )}
+          </View>
         )}
 
         {/* TAB 3: ACTIVITIES */}
@@ -456,7 +477,10 @@ export const MainAppTabBar: React.FC<MainAppTabBarProps> = ({
         {/* TAB 2: MEMBERS (comes before activities) */}
         <TouchableOpacity
           style={styles.tabItem}
-          onPress={() => setActiveTab('members')}
+          onPress={() => {
+            setActiveTab('members');
+            setMemberSubScreen('list');
+          }}
         >
           <Users
             size={24}
@@ -792,6 +816,9 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   homeContainer: {
+    flex: 1,
+  },
+  membersContainer: {
     flex: 1,
   },
   homeHeader: {

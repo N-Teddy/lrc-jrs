@@ -12,6 +12,8 @@
     "desktop": "WEBKIT_DISABLE_DMABUF_RENDERER=1 WEBKIT_DISABLE_SANDBOX_THIS_IS_DANGEROUS=1 pnpm --filter @jrs/desktop tauri dev",
     "mobile": "pnpm --filter @jrs/mobile start",
     "android": "pnpm --filter @jrs/mobile android",
+    "android:dev": "pnpm --filter @jrs/mobile android:dev",
+    "android:build": "pnpm --filter @jrs/mobile android:build",
     "server": "pnpm --filter @jrs/server start:dev",
     "backend": "pnpm --filter @jrs/server start:dev",
     "maildev": "maildev",
