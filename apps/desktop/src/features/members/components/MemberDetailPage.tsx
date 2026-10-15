@@ -7,8 +7,11 @@ import {
 import type { IUser } from '@jrs/shared';
 import {
   ArrowLeft,
+  ArrowRight,
   ArrowsLeftRight,
+  Buildings,
   CalendarCheck,
+  Certificate,
   ChatCircleText,
   CheckCircle,
   Copy,
@@ -17,6 +20,7 @@ import {
   MapPin,
   PencilSimple,
   ShieldCheck,
+  Sparkle,
   Swap,
   Trash,
   User,
@@ -492,123 +496,203 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
         </div>
       )}
 
-      {/* 5. Tab 2: Town Registry & Transfer History */}
+      {/* 5. Tab 2: Town Registry & Relocation Records */}
       {activeDetailTab === 'transfers' && (
-        <div className="flex flex-col gap-6">
-          {/* Header Action Card */}
-          <div className="bg-white rounded-3xl border border-[#e8e1dd] p-6 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="flex items-center gap-3.5">
-              <div className="w-11 h-11 rounded-2xl bg-[#fff2ee] border border-[#ffdbcf] text-[#b85028] flex items-center justify-center shrink-0">
-                <ArrowsLeftRight size={22} weight="duotone" />
+        <div className="flex flex-col gap-6 animate-in fade-in duration-200">
+          {/* Canonical Hub Registry Passport Header Card */}
+          <div className="relative bg-gradient-to-br from-white via-[#fffaf7] to-white rounded-3xl border-2 border-[#ffdbcf]/70 p-6 sm:p-8 shadow-sm overflow-hidden flex flex-col gap-6">
+            {/* Background Subtle Watermark */}
+            <div className="absolute -right-8 -bottom-8 pointer-events-none opacity-[0.04] text-[#b85028]">
+              <Certificate size={220} weight="fill" />
+            </div>
+
+            {/* Passport Top Banner */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-[#f4ece9] relative z-10">
+              <div className="flex items-center gap-3.5">
+                <div className="w-12 h-12 rounded-2xl bg-[#fff2ee] border border-[#ffdbcf] text-[#b85028] flex items-center justify-center shrink-0 shadow-2xs">
+                  <Certificate size={24} weight="duotone" />
+                </div>
+                <div className="flex flex-col">
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-base font-black text-[#1e1b19] tracking-tight">
+                      Canonical Hub Registry & Passport
+                    </h3>
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#ffdbcf]/60 text-[#812901] border border-[#ffb59c]/50">
+                      Deanery Roll
+                    </span>
+                  </div>
+                  <p className="text-xs text-[#8a726a] mt-0.5">
+                    Official ecclesiastical jurisdiction and inter-city pastoral
+                    relocation ledger across Cameroon.
+                  </p>
+                </div>
               </div>
-              <div className="flex flex-col">
+
+              {canWrite && (
+                <button
+                  type="button"
+                  onClick={() => setIsTransferModalOpen(true)}
+                  className="px-4 py-2.5 rounded-xl bg-[#b85028] hover:bg-[#9c421f] text-white text-xs font-bold transition-all flex items-center gap-2 shadow-2xs cursor-pointer self-start sm:self-auto shrink-0"
+                >
+                  <ArrowsLeftRight size={16} weight="bold" />
+                  <span>Transfer Member Hub</span>
+                </button>
+              )}
+            </div>
+
+            {/* Canonical Dual Pillars: Current Resident Hub <-> Origin Hub */}
+            <div className="grid grid-cols-1 lg:grid-cols-7 gap-4 items-center relative z-10">
+              {/* Pillar 1: Current Resident Hub (3 cols) */}
+              <div className="lg:col-span-3 p-5 rounded-2xl bg-white border border-[#c2e9ca] shadow-2xs flex flex-col justify-between gap-3 relative overflow-hidden group">
+                <div className="absolute top-0 left-0 right-0 h-1 bg-[#486b52]" />
+                <div className="flex items-center justify-between gap-2">
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#eef7f0] text-[#2c4e37] border border-[#c2e9ca]">
+                    <span className="w-2 h-2 rounded-full bg-[#486b52] animate-pulse" />
+                    Active Jurisdiction
+                  </span>
+                  <span className="text-sm font-mono font-black text-[#486b52] bg-[#eef7f0] px-2.5 py-0.5 rounded-lg border border-[#c2e9ca]">
+                    {member.homeTown?.code ?? activeTown?.code ?? 'HUB'}
+                  </span>
+                </div>
+
+                <div>
+                  <h4 className="text-xl font-black text-[#1e1b19] tracking-tight">
+                    {member.homeTown?.name ??
+                      activeTown?.name ??
+                      'Assigned Hub'}
+                  </h4>
+                  <div className="flex items-center gap-1.5 text-xs text-[#8a726a] mt-1">
+                    <Buildings size={14} className="text-[#486b52]" />
+                    <span>Canonical Resident Seat in Cameroon</span>
+                  </div>
+                </div>
+
+                <div className="pt-2 border-t border-[#f4ece9] flex items-center justify-between text-[11px] text-[#57423b]">
+                  <span className="font-medium">Jurisdiction Status:</span>
+                  <span className="font-bold text-[#2c4e37]">
+                    Active Roll Member
+                  </span>
+                </div>
+              </div>
+
+              {/* Central Journey Indicator (1 col) */}
+              <div className="lg:col-span-1 flex flex-col items-center justify-center gap-1.5 py-2">
+                <div className="w-10 h-10 rounded-2xl bg-[#faf2ee] border border-[#e8e1dd] text-[#b85028] flex items-center justify-center shadow-2xs">
+                  <ArrowsLeftRight size={18} weight="bold" />
+                </div>
+                <span className="text-[10px] font-black uppercase tracking-wider text-[#8a726a] text-center">
+                  {member.transferHistory && member.transferHistory.length > 0
+                    ? `${member.transferHistory.length} ${member.transferHistory.length === 1 ? 'Relocation' : 'Relocations'}`
+                    : 'Native Seat'}
+                </span>
+              </div>
+
+              {/* Pillar 2: Mother Sanctuary / Origin Hub (3 cols) */}
+              <div className="lg:col-span-3 p-5 rounded-2xl bg-white border border-[#ffdbcf] shadow-2xs flex flex-col justify-between gap-3 relative overflow-hidden group">
+                <div className="absolute top-0 left-0 right-0 h-1 bg-[#b85028]" />
+                <div className="flex items-center justify-between gap-2">
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#fff2ee] text-[#812901] border border-[#ffdbcf]">
+                    <Sparkle
+                      size={12}
+                      weight="fill"
+                      className="text-[#b85028]"
+                    />
+                    Mother Sanctuary
+                  </span>
+                  <span className="text-sm font-mono font-black text-[#b85028] bg-[#fff2ee] px-2.5 py-0.5 rounded-lg border border-[#ffdbcf]">
+                    {member.transferHistory && member.transferHistory.length > 0
+                      ? townsMap.get(member.transferHistory[0].fromTownId)
+                          ?.code || 'HUB'
+                      : (member.homeTown?.code ?? activeTown?.code ?? 'HUB')}
+                  </span>
+                </div>
+
+                <div>
+                  <h4 className="text-xl font-black text-[#1e1b19] tracking-tight">
+                    {member.transferHistory && member.transferHistory.length > 0
+                      ? townsMap.get(member.transferHistory[0].fromTownId)
+                          ?.name || 'Origin Hub'
+                      : (member.homeTown?.name ??
+                        activeTown?.name ??
+                        'Mother Sanctuary')}
+                  </h4>
+                  <div className="flex items-center gap-1.5 text-xs text-[#8a726a] mt-1">
+                    <ShieldCheck size={14} className="text-[#b85028]" />
+                    <span>Original Fellowship Inception</span>
+                  </div>
+                </div>
+
+                <div className="pt-2 border-t border-[#f4ece9] flex items-center justify-between text-[11px] text-[#57423b]">
+                  <span className="font-medium">Inscribed On:</span>
+                  <span className="font-bold text-[#1e1b19]">
+                    {member.createdAt
+                      ? new Date(member.createdAt).toLocaleDateString('en-GB')
+                      : 'Initial Roll'}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Chronological Relocation Ledger */}
+          <div className="bg-white rounded-3xl border border-[#e8e1dd] p-6 sm:p-8 shadow-xs flex flex-col gap-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 border-b border-[#f4ece9]">
+              <div>
                 <h3 className="text-base font-bold text-[#1e1b19]">
-                  Town Registry & Relocation Records
+                  Canonical Relocation Ledger & Pastoral Endorsements
                 </h3>
-                <p className="text-xs text-[#8a726a]">
-                  Track member regional jurisdiction and inter-hub transfer
-                  history across Cameroon.
+                <p className="text-xs text-[#8a726a] mt-0.5">
+                  Complete chronological audit record of fellowship transfers,
+                  inter-city relocations, and pastoral authorizations.
                 </p>
               </div>
-            </div>
 
-            {canWrite && (
-              <button
-                type="button"
-                onClick={() => setIsTransferModalOpen(true)}
-                className="px-4 py-2.5 rounded-xl bg-[#b85028] hover:bg-[#9c421f] text-white text-xs font-bold transition-all flex items-center gap-2 shadow-2xs cursor-pointer self-start sm:self-auto"
-              >
-                <ArrowsLeftRight size={16} weight="bold" />
-                <span>Transfer to Another Hub</span>
-              </button>
-            )}
-          </div>
-
-          {/* Side-by-side Hub Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Current Resident Hub */}
-            <div className="relative bg-white rounded-3xl border border-[#e8e1dd] p-6 shadow-xs overflow-hidden">
-              <div className="absolute top-0 right-0 h-full w-1.5 bg-[#486b52]" />
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-xs font-bold text-[#486b52] uppercase tracking-wider">
-                  {t('members:detail.residentHub')}
-                </span>
-                <span className="text-xl font-black text-[#8a726a]/40 font-mono">
-                  {member.homeTown?.code ?? activeTown?.code ?? 'HUB'}
-                </span>
-              </div>
-              <h4 className="text-xl font-bold text-[#1e1b19]">
-                {member.homeTown?.name ?? activeTown?.name ?? 'Assigned Hub'}
-              </h4>
-              <p className="text-xs text-[#8a726a] mt-1">
-                Canonical Deanery Jurisdiction
-              </p>
-            </div>
-
-            {/* Origin Registration Hub */}
-            <div className="relative bg-white rounded-3xl border border-[#e8e1dd] p-6 shadow-xs overflow-hidden">
-              <div className="absolute top-0 right-0 h-full w-1.5 bg-[#b85028]" />
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-xs font-bold text-[#b85028] uppercase tracking-wider">
-                  {t('members:detail.originHub')}
-                </span>
-                <span className="text-xl font-black text-[#8a726a]/40 font-mono">
-                  {member.transferHistory && member.transferHistory.length > 0
-                    ? townsMap.get(member.transferHistory[0].fromTownId)
-                        ?.code || 'HUB'
-                    : (member.homeTown?.code ?? activeTown?.code ?? 'HUB')}
-                </span>
-              </div>
-              <h4 className="text-xl font-bold text-[#1e1b19]">
-                {member.transferHistory && member.transferHistory.length > 0
-                  ? townsMap.get(member.transferHistory[0].fromTownId)?.name ||
-                    'Origin Hub'
-                  : (member.homeTown?.name ??
-                    activeTown?.name ??
-                    'Mother Sanctuary')}
-              </h4>
-              <p className="text-xs text-[#8a726a] mt-1">
-                Initial Registration Registry
-              </p>
-            </div>
-          </div>
-
-          {/* Chronological Audit Trail Timeline */}
-          <div className="bg-white rounded-3xl border border-[#e8e1dd] p-6 sm:p-8 shadow-xs flex flex-col gap-6">
-            <div>
-              <h3 className="text-base font-bold text-[#1e1b19]">
-                {t('members:detail.transferHistory')}
-              </h3>
-              <p className="text-xs text-[#8a726a] mt-0.5">
-                Chronological record of inter-hub relocations and pastoral
-                endorsements across Cameroon.
-              </p>
+              <span className="text-xs font-bold text-[#8a726a] px-3 py-1 rounded-full bg-[#faf2ee] border border-[#e8e1dd] self-start sm:self-auto">
+                {(member.transferHistory?.length || 0) + 1} Historical Events
+              </span>
             </div>
 
             {/* Illustrated Timeline */}
-            <div className="relative pl-6 before:content-[''] before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-[#e8e1dd] flex flex-col gap-6">
+            <div className="relative pl-6 before:content-[''] before:absolute before:left-2 before:top-3 before:bottom-3 before:w-0.5 before:bg-[#e8e1dd] flex flex-col gap-6">
               {/* Dynamic Transfer History Events (most recent first) */}
-              {member.transferHistory &&
-                member.transferHistory.length > 0 &&
+              {member.transferHistory && member.transferHistory.length > 0 ? (
                 [...member.transferHistory].reverse().map((record, idx) => {
                   const fromTown = townsMap.get(record.fromTownId);
                   const toTown = townsMap.get(record.toTownId);
+                  const transferIndex = member.transferHistory.length - idx;
+
                   return (
                     <div
                       key={`${record.transferredAt}-${idx}`}
                       className="relative flex items-start gap-4"
                     >
-                      <div className="absolute -left-6 top-0.5 w-5 h-5 rounded-full bg-[#b85028] text-white flex items-center justify-center ring-4 ring-white shadow-xs">
+                      <div className="absolute -left-6 top-1 w-5 h-5 rounded-full bg-[#b85028] text-white flex items-center justify-center ring-4 ring-white shadow-xs">
                         <ArrowsLeftRight size={11} weight="bold" />
                       </div>
-                      <div className="p-4 rounded-2xl bg-[#faf2ee]/70 border border-[#e8e1dd] flex-1 flex flex-col gap-2">
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                          <span className="text-xs font-bold text-[#1e1b19]">
-                            Transferred from {fromTown?.name || 'Previous Hub'}{' '}
-                            ({fromTown?.code || '—'}) to{' '}
-                            {toTown?.name || 'New Hub'} ({toTown?.code || '—'})
-                          </span>
-                          <span className="text-[11px] font-semibold text-[#8a726a]">
+                      <div className="p-5 rounded-2xl bg-white border border-[#e8e1dd] hover:border-[#b85028]/40 shadow-2xs hover:shadow-xs transition-all flex-1 flex flex-col gap-3 group">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-[#fff2ee] text-[#b85028] border border-[#ffdbcf]">
+                              Relocation #{transferIndex}
+                            </span>
+                            <div className="flex items-center gap-2 font-bold text-sm text-[#1e1b19]">
+                              <span>{fromTown?.name || 'Previous Hub'}</span>
+                              <span className="text-xs font-mono text-[#8a726a]">
+                                ({fromTown?.code || '—'})
+                              </span>
+                              <ArrowRight
+                                size={14}
+                                weight="bold"
+                                className="text-[#b85028]"
+                              />
+                              <span>{toTown?.name || 'New Hub'}</span>
+                              <span className="text-xs font-mono text-[#8a726a]">
+                                ({toTown?.code || '—'})
+                              </span>
+                            </div>
+                          </div>
+
+                          <span className="text-xs font-bold text-[#8a726a] shrink-0">
                             {record.transferredAt
                               ? new Date(
                                   record.transferredAt,
@@ -617,47 +701,75 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
                           </span>
                         </div>
 
-                        <div className="text-[11px] text-[#8a726a]">
-                          Authorized by{' '}
-                          <span className="font-semibold text-[#57423b]">
-                            {record.transferredBy}
+                        <div className="flex items-center gap-2 text-xs text-[#8a726a]">
+                          <ShieldCheck
+                            size={16}
+                            weight="bold"
+                            className="text-[#486b52]"
+                          />
+                          <span>
+                            Authorized by{' '}
+                            <strong className="text-[#1e1b19] font-bold">
+                              {record.transferredBy}
+                            </strong>
                           </span>
                         </div>
 
                         {record.reason && (
-                          <div className="p-2.5 rounded-xl bg-white border border-[#e8e1dd] text-xs text-[#57423b] leading-relaxed">
+                          <div className="p-3 rounded-xl bg-[#faf2ee]/60 border border-[#f4ece9] text-xs text-[#57423b] leading-relaxed">
+                            <span className="font-bold text-[#812901] block mb-0.5">
+                              Pastoral Note:
+                            </span>
                             {record.reason}
                           </div>
                         )}
                       </div>
                     </div>
                   );
-                })}
+                })
+              ) : (
+                /* Uninterrupted Native Residency Callout if 0 transfers */
+                <div className="relative flex items-start gap-4">
+                  <div className="absolute -left-6 top-1 w-5 h-5 rounded-full bg-[#486b52] text-white flex items-center justify-center ring-4 ring-white shadow-xs">
+                    <ShieldCheck size={13} weight="bold" />
+                  </div>
+                  <div className="p-4 rounded-2xl bg-[#eef7f0]/60 border border-[#c2e9ca] flex-1 flex flex-col gap-1">
+                    <span className="text-xs font-bold text-[#2c4e37]">
+                      Unbroken Native Hub Residency
+                    </span>
+                    <p className="text-xs text-[#57423b]">
+                      This member has remained in continuous, uninterrupted
+                      fellowship with their mother sanctuary since enrollment.
+                      No inter-hub relocations have taken place.
+                    </p>
+                  </div>
+                </div>
+              )}
 
               {/* Base Event: Initial Enrollment */}
               <div className="relative flex items-start gap-4">
-                <div className="absolute -left-6 top-0.5 w-5 h-5 rounded-full bg-[#486b52] text-white flex items-center justify-center ring-4 ring-white shadow-xs">
+                <div className="absolute -left-6 top-1 w-5 h-5 rounded-full bg-[#486b52] text-white flex items-center justify-center ring-4 ring-white shadow-xs">
                   <CheckCircle size={14} weight="fill" />
                 </div>
-                <div className="p-4 rounded-2xl bg-[#faf2ee] border border-[#e8e1dd] flex-1 flex flex-col gap-1">
-                  <div className="flex items-center justify-between">
+                <div className="p-5 rounded-2xl bg-[#faf2ee]/70 border border-[#e8e1dd] flex-1 flex flex-col gap-2">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
                     <span className="text-xs font-bold text-[#1e1b19]">
-                      Canonical Enrollment at{' '}
+                      Canonical Inception & First Enrollment at{' '}
                       {member.transferHistory &&
                       member.transferHistory.length > 0
                         ? townsMap.get(member.transferHistory[0].fromTownId)
                             ?.name || 'Active Hub'
                         : (member.homeTown?.name ?? 'Active Hub')}
                     </span>
-                    <span className="text-[11px] font-semibold text-[#8a726a]">
+                    <span className="text-xs font-semibold text-[#8a726a]">
                       {member.createdAt
                         ? new Date(member.createdAt).toLocaleDateString('en-GB')
                         : 'Active'}
                     </span>
                   </div>
-                  <p className="text-xs text-[#57423b]">
-                    Enrolled into Youth Fellowship registry under active
-                    pastoral care.
+                  <p className="text-xs text-[#57423b] leading-relaxed">
+                    Formally registered into the Cameroon Youth Fellowship roll
+                    under active pastoral care and episcopal oversight.
                   </p>
                 </div>
               </div>

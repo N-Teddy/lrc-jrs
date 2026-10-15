@@ -97,6 +97,15 @@ export class ActivitiesController {
     return this.activitiesService.getReportFolders();
   }
 
+  @Get('report/drive-files')
+  @ApiOperation({
+    summary: 'List files stored in Google Drive optionally filtered by folder',
+  })
+  @ApiResponse({ status: 200, description: 'Drive files list' })
+  async getDriveFiles(@Query('folderId') folderId?: string) {
+    return this.activitiesService.getDriveFiles(folderId);
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Get single activity details' })
   @ApiResponse({ status: 200, description: 'Activity details' })

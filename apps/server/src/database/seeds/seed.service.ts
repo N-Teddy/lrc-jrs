@@ -1,6 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ActivitiesSeeder } from './seeders/activities.seeder';
 import { TownsSeeder } from './seeders/towns.seeder';
+import {
+  type TransferredMemberSummary,
+  TransfersSeeder,
+} from './seeders/transfers.seeder';
 import { type SeededUserSummary, UsersSeeder } from './seeders/users.seeder';
 
 export interface SeedRunOptions {
@@ -17,6 +21,7 @@ export class SeedService {
     private readonly townsSeeder: TownsSeeder,
     private readonly usersSeeder: UsersSeeder,
     private readonly activitiesSeeder: ActivitiesSeeder,
+    private readonly transfersSeeder: TransfersSeeder,
   ) {}
 
   async run(options: SeedRunOptions = {}): Promise<void> {
@@ -58,6 +63,19 @@ export class SeedService {
         this.logger.log(
           `✅ Seeded ${activityStats.totalActivities} activities (~50 per year) and ${activityStats.totalAttendances} attendance sheets.`,
         );
+
+        // 4. Seed Town Transfers strictly for Non-AP and Non-PC Members
+        this.logger.log(
+          '🔄 Phase 4: Initiating Town Transfers for Non-AP / Non-PC Members...',
+        );
+        const transferStats = await this.transfersSeeder.seed(townMap, {
+          clean,
+        });
+        this.logger.log(
+          `✅ Initiated transfers for ${transferStats.transferredMembersCount} members (${transferStats.totalTransfersCount} total historical records created).`,
+        );
+
+        this.printTransfersTable(transferStats.summaries);
       }
 
       const elapsed = ((Date.now() - startTime) / 1000).toFixed(2);
@@ -70,6 +88,29 @@ export class SeedService {
       this.logger.error('❌ Database seeding failed:', error);
       throw error;
     }
+  }
+
+  private printTransfersTable(transfers: TransferredMemberSummary[]): void {
+    if (!transfers.length) return;
+
+    console.log(
+      '\n🔄 SEEDED TOWN TRANSFERS (STRICTLY NON-AP & NON-PC MEMBERS):\n',
+    );
+    console.table(
+      transfers.map((t) => ({
+        Name: t.fullName,
+        Phone: t.phoneNumber,
+        Role: t.role,
+        'Origin Hub': t.originTownCode,
+        'Resident Hub': t.currentTownCode,
+        Transfers: t.totalTransfers,
+        Initiator: t.transferredBy,
+        'Pastoral Reason':
+          t.lastReason.length > 55
+            ? `${t.lastReason.substring(0, 52)}...`
+            : t.lastReason,
+      })),
+    );
   }
 
   private printCredentialsTable(users: SeededUserSummary[]): void {

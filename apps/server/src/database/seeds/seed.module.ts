@@ -20,6 +20,7 @@ import {
 import { SeedService } from './seed.service';
 import { ActivitiesSeeder } from './seeders/activities.seeder';
 import { TownsSeeder } from './seeders/towns.seeder';
+import { TransfersSeeder } from './seeders/transfers.seeder';
 import { UsersSeeder } from './seeders/users.seeder';
 
 @Module({
@@ -40,7 +41,13 @@ import { UsersSeeder } from './seeders/users.seeder';
       { name: Attendance.name, schema: AttendanceSchema },
     ]),
   ],
-  providers: [TownsSeeder, UsersSeeder, ActivitiesSeeder, SeedService],
-  exports: [SeedService],
+  providers: [
+    TownsSeeder,
+    UsersSeeder,
+    ActivitiesSeeder,
+    TransfersSeeder,
+    SeedService,
+  ],
+  exports: [TransfersSeeder, SeedService],
 })
 export class SeedModule {}

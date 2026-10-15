@@ -165,6 +165,22 @@ export interface IDriveFolderOption {
   id: string;
   name: string;
   path: string;
+  parentId?: string;
+}
+
+export interface IDriveFileVaultItem {
+  fileId: string;
+  filename: string;
+  mimeType?: string;
+  webViewLink?: string;
+  fileSize?: number;
+  uploadedAt?: string;
+  folderId?: string;
+  activityId?: string;
+  activityTitle?: string;
+  activityDate?: string;
+  uploadedByName?: string;
+  summary?: string;
 }
 
 export function useDriveFoldersQuery() {
@@ -173,5 +189,17 @@ export function useDriveFoldersQuery() {
     queryKey: ['activities', 'report-folders'],
     queryFn: () => http.get<IDriveFolderOption[]>('/activities/report/folders'),
     staleTime: 5 * 60 * 1000,
+  });
+}
+
+export function useDriveFilesQuery(folderId?: string) {
+  const http = useHttp();
+  return useQuery({
+    queryKey: ['activities', 'drive-files', folderId],
+    queryFn: () =>
+      http.get<IDriveFileVaultItem[]>('/activities/report/drive-files', {
+        params: folderId && folderId !== 'ALL' ? { folderId } : undefined,
+      }),
+    staleTime: 60 * 1000,
   });
 }

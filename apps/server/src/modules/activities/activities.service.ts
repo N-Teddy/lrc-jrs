@@ -1234,6 +1234,107 @@ export class ActivitiesService {
   }
 
   /**
+   * List files from Google Drive and cross-reference with activity records
+   */
+  async getDriveFiles(folderId?: string) {
+    const driveFiles = await this.driveService.listFiles(folderId);
+
+    // Retrieve all activities with reports to enrich file metadata
+    const activitiesWithReports = await this.activityModel
+      .find({
+        isDeleted: false,
+        $or: [
+          { 'reports.0': { $exists: true } },
+          { 'report.fileId': { $exists: true } },
+        ],
+      })
+      .select('title startDate townId reports report')
+      .lean()
+      .exec();
+
+    // Build lookup by fileId
+    const reportMetaMap = new Map<
+      string,
+      {
+        activityId: string;
+        activityTitle: string;
+        activityDate: string;
+        uploadedByName?: string;
+        summary?: string;
+      }
+    >();
+
+    for (const act of activitiesWithReports as any[]) {
+      const reps = act.reports || [];
+      if (reps.length > 0) {
+        for (const r of reps) {
+          if (r.fileId) {
+            reportMetaMap.set(r.fileId, {
+              activityId: act._id.toString(),
+              activityTitle: act.title,
+              activityDate: act.startDate?.toISOString() || act.startDate,
+              uploadedByName: r.uploadedByName,
+              summary: r.summary,
+            });
+          }
+        }
+      } else if (act.report?.fileId) {
+        reportMetaMap.set(act.report.fileId, {
+          activityId: act._id.toString(),
+          activityTitle: act.title,
+          activityDate: act.startDate?.toISOString() || act.startDate,
+          uploadedByName: act.report.uploadedByName,
+          summary: act.report.summary,
+        });
+      }
+    }
+
+    // Merge drive files with activity metadata
+    const mergedList = driveFiles.map((df) => {
+      const meta = reportMetaMap.get(df.fileId);
+      return {
+        ...df,
+        activityId: meta?.activityId,
+        activityTitle: meta?.activityTitle,
+        activityDate: meta?.activityDate,
+        uploadedByName: meta?.uploadedByName,
+        summary: meta?.summary,
+      };
+    });
+
+    // Also include any database reports that might not have been returned by Drive API (e.g. mock or different permissions)
+    for (const [fileId, meta] of reportMetaMap.entries()) {
+      if (!mergedList.some((f) => f.fileId === fileId)) {
+        const act = activitiesWithReports.find(
+          (a: any) =>
+            (a.reports || []).some((r: any) => r.fileId === fileId) ||
+            a.report?.fileId === fileId,
+        ) as any;
+        const rep =
+          (act?.reports || []).find((r: any) => r.fileId === fileId) ||
+          act?.report;
+        if (rep) {
+          mergedList.push({
+            fileId: rep.fileId,
+            filename: rep.filename,
+            webViewLink: rep.webViewLink,
+            fileSize: rep.fileSize,
+            uploadedAt: rep.uploadedAt,
+            folderId: rep.folderId,
+            activityId: meta.activityId,
+            activityTitle: meta.activityTitle,
+            activityDate: meta.activityDate,
+            uploadedByName: meta.uploadedByName,
+            summary: meta.summary,
+          });
+        }
+      }
+    }
+
+    return mergedList;
+  }
+
+  /**
    * Upload one or multiple activity report files to Google Drive
    * (Strictly only available after the activity and if completed)
    */

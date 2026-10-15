@@ -13,6 +13,7 @@ import { ActivitiesFeature } from '../../activities';
 import { ChangePasswordModal } from '../../auth';
 import { DriveExplorerFeature } from '../../drive';
 import { MembersFeature } from '../../members';
+import { TransfersFeature } from '../../transfers';
 import { useDashboardLayout } from '../hooks/use-dashboard-layout';
 import { Header } from './Header';
 import { HubSwitcherPopover } from './HubSwitcherPopover';
@@ -127,6 +128,8 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             <AccessFeature />
           ) : activeTab === 'reports' ? (
             <DriveExplorerFeature />
+          ) : activeTab === 'transfers' ? (
+            <TransfersFeature />
           ) : (
             /* Pristine Minimalist Workspace Card */
             <div className="relative w-full min-h-[560px] rounded-3xl bg-white border border-[#e8e1dd] shadow-xs flex flex-col justify-between p-8 sm:p-12 overflow-hidden">

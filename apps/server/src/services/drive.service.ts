@@ -22,6 +22,17 @@ export interface IDriveFolderItem {
   id: string;
   name: string;
   path: string;
+  parentId?: string;
+}
+
+export interface IDriveFileItem {
+  fileId: string;
+  filename: string;
+  mimeType?: string;
+  webViewLink?: string;
+  fileSize?: number;
+  uploadedAt?: string;
+  folderId?: string;
 }
 
 @Injectable()
@@ -131,46 +142,66 @@ export class DriveService {
    * Retrieves subfolders within the designated Google Drive root folder hierarchy
    */
   async listFolders(): Promise<IDriveFolderItem[]> {
+    const rootId = this.rootFolderId || 'mock-root';
     const defaultFallbackFolders: IDriveFolderItem[] = [
       {
-        id: this.rootFolderId || 'mock-root',
+        id: rootId,
         name: 'JRs (Root)',
         path: 'JRs',
+      },
+      {
+        id: 'mock-reunions',
+        name: 'Rapport Reunions Mensuelle',
+        path: 'Rapport Reunions Mensuelle',
+        parentId: rootId,
       },
       {
         id: 'mock-minutes-2026',
         name: '2026',
         path: 'Rapport Reunions Mensuelle / 2026',
+        parentId: 'mock-reunions',
       },
       {
         id: 'mock-minutes-2025',
         name: '2025',
         path: 'Rapport Reunions Mensuelle / 2025',
+        parentId: 'mock-reunions',
+      },
+      {
+        id: 'mock-conference',
+        name: 'Conference',
+        path: 'Conference',
+        parentId: rootId,
       },
       {
         id: 'mock-conf-2026',
         name: '2026',
         path: 'Conference / 2026',
+        parentId: 'mock-conference',
       },
       {
         id: 'mock-conf-2025',
         name: '2025',
         path: 'Conference / 2025',
+        parentId: 'mock-conference',
       },
       {
         id: 'mock-format',
         name: 'Format des Rapport',
         path: 'Format des Rapport',
+        parentId: rootId,
       },
       {
         id: 'mock-propositions',
         name: 'Programme Activitees / Propositions',
         path: 'Programme Activitees / Propositions',
+        parentId: rootId,
       },
       {
         id: 'mock-autres',
         name: 'Autres',
         path: 'Autres',
+        parentId: rootId,
       },
     ];
 
@@ -234,15 +265,21 @@ export class DriveService {
         id: this.rootFolderId || 'root',
         name: 'JRs (Root)',
         path: 'JRs',
+        parentId: undefined,
       });
 
       for (const f of files) {
         if (f.id === this.rootFolderId) continue;
         const fullPath = getFullPath(f.id);
+        const rawParent = f.parents?.[0];
         folderList.push({
           id: f.id,
           name: f.name,
           path: fullPath || f.name,
+          parentId:
+            rawParent === this.rootFolderId
+              ? this.rootFolderId || 'root'
+              : rawParent,
         });
       }
 
@@ -259,6 +296,59 @@ export class DriveService {
         `Failed to list Google Drive folders: ${err.message}. Returning fallback folders.`,
       );
       return defaultFallbackFolders;
+    }
+  }
+
+  /**
+   * Retrieves files within Google Drive, optionally filtered by folder
+   */
+  async listFiles(folderId?: string): Promise<IDriveFileItem[]> {
+    const accessToken = await this.getAccessToken();
+    if (!accessToken) {
+      return [];
+    }
+
+    try {
+      let q =
+        "trashed = false and mimeType != 'application/vnd.google-apps.folder'";
+      if (folderId && folderId !== 'ALL' && folderId !== 'root') {
+        q += ` and '${folderId}' in parents`;
+      }
+
+      const response = await axios.get(
+        'https://www.googleapis.com/drive/v3/files',
+        {
+          params: {
+            q,
+            fields:
+              'files(id, name, mimeType, webViewLink, webContentLink, size, createdTime, modifiedTime, parents)',
+            supportsAllDrives: true,
+            includeItemsFromAllDrives: true,
+            pageSize: 200,
+            orderBy: 'modifiedTime desc',
+          },
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+          httpsAgent: this.httpsAgent,
+          timeout: 10000,
+        },
+      );
+
+      const files: any[] = response.data.files || [];
+      return files.map((f) => ({
+        fileId: f.id,
+        filename: f.name,
+        mimeType: f.mimeType,
+        webViewLink:
+          f.webViewLink || `https://drive.google.com/file/d/${f.id}/view`,
+        fileSize: f.size ? parseInt(f.size, 10) : undefined,
+        uploadedAt: f.createdTime || f.modifiedTime,
+        folderId: f.parents?.[0],
+      }));
+    } catch (err: any) {
+      this.logger.warn(`Failed to list Google Drive files: ${err.message}`);
+      return [];
     }
   }
 

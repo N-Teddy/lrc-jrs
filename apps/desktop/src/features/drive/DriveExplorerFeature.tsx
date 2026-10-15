@@ -1,12 +1,17 @@
 import {
+  type IDriveFileVaultItem,
+  type IDriveFolderOption,
   useActivitiesQuery,
+  useDriveFilesQuery,
   useDriveFoldersQuery,
   useTownContext,
 } from '@jrs/client-core';
-import type { IActivity, IActivityReport } from '@jrs/shared';
+import type { IActivity } from '@jrs/shared';
 import {
   ArrowSquareOut,
   CalendarBlank,
+  CaretDown,
+  CaretRight,
   CloudArrowUp,
   DownloadSimple,
   Eye,
@@ -30,10 +35,9 @@ import {
   type IDriveFilePreview,
 } from '../activities/components/DriveFilePreviewModal';
 
-interface IIndexedReport extends IActivityReport {
-  activityId: string;
-  activityTitle: string;
-  activityDate: string;
+interface IFolderTreeNode extends IDriveFolderOption {
+  children: IFolderTreeNode[];
+  level: number;
 }
 
 export const DriveExplorerFeature: React.FC = () => {
@@ -47,9 +51,16 @@ export const DriveExplorerFeature: React.FC = () => {
     null,
   );
 
+  // Expanded tree nodes
+  const [expandedFolderIds, setExpandedFolderIds] = useState<Set<string>>(
+    new Set(['root', 'ALL']),
+  );
+
   // Queries
   const { data: folders = [], isLoading: isFoldersLoading } =
     useDriveFoldersQuery();
+  const { data: driveVaultFiles = [], isLoading: isDriveFilesLoading } =
+    useDriveFilesQuery(selectedFolderId);
   const { data: activitiesResponse, isLoading: isActivitiesLoading } =
     useActivitiesQuery({
       limit: 150,
@@ -60,33 +71,56 @@ export const DriveExplorerFeature: React.FC = () => {
     return activitiesResponse?.items || [];
   }, [activitiesResponse]);
 
-  // Flatten and index all reports across activities
-  const allReports: IIndexedReport[] = useMemo(() => {
-    const list: IIndexedReport[] = [];
+  // Combine live Drive API files with database activity reports
+  const allReports: IDriveFileVaultItem[] = useMemo(() => {
+    const list: IDriveFileVaultItem[] = [...driveVaultFiles];
+    const existingFileIds = new Set(list.map((f) => f.fileId));
+
     for (const act of activities) {
       const actReports = act.reports || [];
       if (actReports.length > 0) {
         for (const rep of actReports) {
-          list.push({
-            ...rep,
-            activityId: act.id,
-            activityTitle: act.title,
-            activityDate: act.startDate,
-          });
+          if (!existingFileIds.has(rep.fileId)) {
+            list.push({
+              fileId: rep.fileId,
+              filename: rep.filename,
+              webViewLink: rep.webViewLink,
+              fileSize: rep.fileSize,
+              uploadedAt: rep.uploadedAt,
+              folderId: rep.folderId,
+              activityId: act.id,
+              activityTitle: act.title,
+              activityDate: act.startDate,
+              uploadedByName: rep.uploadedByName,
+              summary: rep.summary,
+            });
+            existingFileIds.add(rep.fileId);
+          }
         }
-      } else if (act.report?.fileId) {
+      } else if (
+        act.report?.fileId &&
+        !existingFileIds.has(act.report.fileId)
+      ) {
         list.push({
-          ...act.report,
+          fileId: act.report.fileId,
+          filename: act.report.filename,
+          webViewLink: act.report.webViewLink,
+          fileSize: act.report.fileSize,
+          uploadedAt: act.report.uploadedAt,
+          folderId: act.report.folderId,
           activityId: act.id,
           activityTitle: act.title,
           activityDate: act.startDate,
+          uploadedByName: act.report.uploadedByName,
+          summary: act.report.summary,
         });
+        existingFileIds.add(act.report.fileId);
       }
     }
     return list;
-  }, [activities]);
+  }, [driveVaultFiles, activities]);
 
-  // Helper: map folderId to folder path
+  // Helper: map folderId to folder path & name
   const folderMap = useMemo(() => {
     const map = new Map<string, string>();
     for (const f of folders) {
@@ -95,12 +129,111 @@ export const DriveExplorerFeature: React.FC = () => {
     return map;
   }, [folders]);
 
+  // Build hierarchical tree structure from flat folder list
+  const { treeRoots, allFolderDescendantsMap } = useMemo(() => {
+    const folderById = new Map<string, IDriveFolderOption>();
+    for (const f of folders) {
+      folderById.set(f.id, f);
+    }
+
+    const childrenByParent = new Map<string, IDriveFolderOption[]>();
+    const roots: IDriveFolderOption[] = [];
+
+    for (const f of folders) {
+      if (f.parentId && folderById.has(f.parentId) && f.parentId !== f.id) {
+        const list = childrenByParent.get(f.parentId) || [];
+        list.push(f);
+        childrenByParent.set(f.parentId, list);
+      } else {
+        roots.push(f);
+      }
+    }
+
+    const buildTree = (
+      item: IDriveFolderOption,
+      level: number,
+    ): IFolderTreeNode => {
+      const childItems = childrenByParent.get(item.id) || [];
+      return {
+        ...item,
+        level,
+        children: childItems.map((c) => buildTree(c, level + 1)),
+      };
+    };
+
+    const tree = roots.map((r) => buildTree(r, 0));
+
+    // Compute descendant folder IDs map for each folder
+    const descendantsMap = new Map<string, Set<string>>();
+    const getDescendants = (node: IFolderTreeNode): Set<string> => {
+      const set = new Set<string>();
+      for (const child of node.children) {
+        set.add(child.id);
+        const childDescendants = getDescendants(child);
+        for (const cd of childDescendants) {
+          set.add(cd);
+        }
+      }
+      descendantsMap.set(node.id, set);
+      return set;
+    };
+
+    for (const r of tree) {
+      getDescendants(r);
+    }
+
+    return { treeRoots: tree, allFolderDescendantsMap: descendantsMap };
+  }, [folders]);
+
+  // Count files per folder (including files in child subfolders)
+  const fileCountsMap = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const f of folders) {
+      const descendants = allFolderDescendantsMap.get(f.id) || new Set();
+      const count = allReports.filter(
+        (r) =>
+          r.folderId === f.id || (r.folderId && descendants.has(r.folderId)),
+      ).length;
+      map.set(f.id, count);
+    }
+    return map;
+  }, [folders, allReports, allFolderDescendantsMap]);
+
+  // Toggle folder expansion
+  const toggleFolderExpand = (folderId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setExpandedFolderIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(folderId)) {
+        next.delete(folderId);
+      } else {
+        next.add(folderId);
+      }
+      return next;
+    });
+  };
+
+  // Determine allowed folder IDs for selected filter
+  const targetFolderIds = useMemo(() => {
+    if (selectedFolderId === 'ALL') return null;
+    const set = new Set<string>([selectedFolderId]);
+    const descendants = allFolderDescendantsMap.get(selectedFolderId);
+    if (descendants) {
+      for (const d of descendants) {
+        set.add(d);
+      }
+    }
+    return set;
+  }, [selectedFolderId, allFolderDescendantsMap]);
+
   // Filtered reports
   const filteredReports = useMemo(() => {
     return allReports.filter((rep) => {
-      // 1. Folder match
-      if (selectedFolderId !== 'ALL') {
-        if (rep.folderId !== selectedFolderId) return false;
+      // 1. Folder match: matches selected folder OR any of its subfolders
+      if (targetFolderIds) {
+        if (!rep.folderId || !targetFolderIds.has(rep.folderId)) {
+          return false;
+        }
       }
 
       // 2. Search match
@@ -109,7 +242,8 @@ export const DriveExplorerFeature: React.FC = () => {
         const matchesName = rep.filename.toLowerCase().includes(query);
         const matchesSummary =
           rep.summary?.toLowerCase().includes(query) ?? false;
-        const matchesActivity = rep.activityTitle.toLowerCase().includes(query);
+        const matchesActivity =
+          rep.activityTitle?.toLowerCase().includes(query) ?? false;
         const matchesUploader =
           rep.uploadedByName?.toLowerCase().includes(query) ?? false;
         if (
@@ -148,7 +282,7 @@ export const DriveExplorerFeature: React.FC = () => {
 
       return true;
     });
-  }, [allReports, selectedFolderId, searchTerm, fileTypeFilter]);
+  }, [allReports, targetFolderIds, searchTerm, fileTypeFilter]);
 
   // Aggregate stats
   const totalSizeBytes = useMemo(() => {
@@ -178,7 +312,94 @@ export const DriveExplorerFeature: React.FC = () => {
     return <FileText size={24} weight="duotone" className="text-[#57423b]" />;
   };
 
-  const isLoading = isActivitiesLoading || isFoldersLoading;
+  const isLoading =
+    isActivitiesLoading || isFoldersLoading || isDriveFilesLoading;
+
+  // Render a recursive folder tree node
+  const renderTreeNode = (node: IFolderTreeNode) => {
+    const hasChildren = node.children.length > 0;
+    const isExpanded = expandedFolderIds.has(node.id);
+    const isSelected = selectedFolderId === node.id;
+    const count = fileCountsMap.get(node.id) || 0;
+
+    return (
+      <div key={node.id} className="flex flex-col">
+        <div
+          style={{ paddingLeft: `${node.level * 14 + 8}px` }}
+          className={`flex items-center justify-between py-1 pr-2 rounded-xl text-xs font-bold transition-all select-none group ${
+            isSelected
+              ? 'bg-[#b85028] text-white shadow-2xs'
+              : 'hover:bg-[#faf2ee] text-[#57423b]'
+          }`}
+          title={node.path || node.name}
+        >
+          <div className="flex items-center gap-1 min-w-0 flex-1">
+            {/* Expand / Collapse Chevron */}
+            {hasChildren ? (
+              <button
+                type="button"
+                onClick={(e) => toggleFolderExpand(node.id, e)}
+                className={`p-1 rounded hover:bg-black/10 transition-transform cursor-pointer shrink-0 ${
+                  isSelected ? 'text-white' : 'text-[#8a726a]'
+                }`}
+                title={isExpanded ? 'Collapse subfolders' : 'Expand subfolders'}
+              >
+                {isExpanded ? (
+                  <CaretDown size={12} weight="bold" />
+                ) : (
+                  <CaretRight size={12} weight="bold" />
+                )}
+              </button>
+            ) : (
+              <span className="w-5 shrink-0" />
+            )}
+
+            {/* Folder Select Action */}
+            <button
+              type="button"
+              onClick={() => setSelectedFolderId(node.id)}
+              className="flex items-center gap-1.5 min-w-0 flex-1 text-left cursor-pointer py-1"
+            >
+              {isSelected || isExpanded ? (
+                <FolderOpen
+                  size={16}
+                  weight="fill"
+                  className={`shrink-0 ${isSelected ? 'text-white' : 'text-[#b85028]'}`}
+                />
+              ) : (
+                <Folder
+                  size={16}
+                  weight="bold"
+                  className={`shrink-0 ${isSelected ? 'text-white' : 'text-[#8a726a]'}`}
+                />
+              )}
+              <span className="truncate">{node.name}</span>
+            </button>
+          </div>
+
+          {/* Count Badge */}
+          {count > 0 && (
+            <span
+              className={`text-[10px] px-1.5 py-0.5 rounded-md shrink-0 ml-1.5 ${
+                isSelected
+                  ? 'bg-white/20 text-white font-bold'
+                  : 'bg-[#faf2ee] text-[#8a726a]'
+              }`}
+            >
+              {count}
+            </span>
+          )}
+        </div>
+
+        {/* Recursive Children with Tree Indentation */}
+        {hasChildren && isExpanded && (
+          <div className="flex flex-col border-l border-[#e8e1dd]/60 ml-4 my-0.5">
+            {node.children.map((child) => renderTreeNode(child))}
+          </div>
+        )}
+      </div>
+    );
+  };
 
   return (
     <div className="flex flex-col gap-6 animate-in fade-in duration-200">
@@ -322,7 +543,7 @@ export const DriveExplorerFeature: React.FC = () => {
           </div>
 
           <div className="flex flex-col gap-1 max-h-[600px] overflow-y-auto pr-1">
-            {/* "All Documents" Root */}
+            {/* "All Vault Documents" Root */}
             <button
               type="button"
               onClick={() => setSelectedFolderId('ALL')}
@@ -336,14 +557,18 @@ export const DriveExplorerFeature: React.FC = () => {
                 {selectedFolderId === 'ALL' ? (
                   <FolderOpen size={16} weight="fill" />
                 ) : (
-                  <Folder size={16} weight="bold" className="text-[#8a726a]" />
+                  <FolderSimple
+                    size={16}
+                    weight="bold"
+                    className="text-[#8a726a]"
+                  />
                 )}
-                <span className="truncate">All Documents</span>
+                <span className="truncate">All Vault Documents</span>
               </div>
               <span
                 className={`text-[10px] px-2 py-0.5 rounded-md ${
                   selectedFolderId === 'ALL'
-                    ? 'bg-white/20 text-white'
+                    ? 'bg-white/20 text-white font-bold'
                     : 'bg-[#faf2ee] text-[#8a726a]'
                 }`}
               >
@@ -351,50 +576,10 @@ export const DriveExplorerFeature: React.FC = () => {
               </span>
             </button>
 
-            {/* Subfolders */}
-            {folders.map((f) => {
-              const count = allReports.filter(
-                (r) => r.folderId === f.id,
-              ).length;
-              const isSelected = selectedFolderId === f.id;
-              return (
-                <button
-                  key={f.id}
-                  type="button"
-                  onClick={() => setSelectedFolderId(f.id)}
-                  className={`w-full flex items-center justify-between p-2.5 rounded-xl text-xs font-bold text-left transition-all cursor-pointer ${
-                    isSelected
-                      ? 'bg-[#b85028] text-white shadow-2xs'
-                      : 'hover:bg-[#faf2ee] text-[#57423b]'
-                  }`}
-                  title={f.path || f.name}
-                >
-                  <div className="flex items-center gap-2 min-w-0">
-                    {isSelected ? (
-                      <FolderOpen size={16} weight="fill" />
-                    ) : (
-                      <FolderSimple
-                        size={16}
-                        weight="bold"
-                        className="text-[#8a726a]"
-                      />
-                    )}
-                    <span className="truncate text-left">{f.name}</span>
-                  </div>
-                  {count > 0 && (
-                    <span
-                      className={`text-[10px] px-1.5 py-0.5 rounded-md shrink-0 ${
-                        isSelected
-                          ? 'bg-white/20 text-white'
-                          : 'bg-[#faf2ee] text-[#8a726a]'
-                      }`}
-                    >
-                      {count}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
+            {/* Hierarchical Folder Tree */}
+            <div className="flex flex-col gap-0.5 mt-1 pt-1 border-t border-[#f4ece9]">
+              {treeRoots.map((node) => renderTreeNode(node))}
+            </div>
           </div>
         </div>
 
@@ -406,7 +591,7 @@ export const DriveExplorerFeature: React.FC = () => {
               <span>Viewing:</span>
               <span className="font-bold text-[#1e1b19]">
                 {selectedFolderId === 'ALL'
-                  ? 'All Documents'
+                  ? 'All Vault Documents'
                   : folderMap.get(selectedFolderId) || 'Selected Folder'}
               </span>
               <span>•</span>
@@ -439,7 +624,7 @@ export const DriveExplorerFeature: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
               {filteredReports.map((rep) => (
                 <div
-                  key={`${rep.activityId}-${rep.fileId}`}
+                  key={`${rep.activityId || 'drive'}-${rep.fileId}`}
                   className="p-5 rounded-2xl bg-white border border-[#e8e1dd] hover:border-[#b85028]/40 shadow-2xs hover:shadow-xs transition-all flex flex-col justify-between gap-3 group"
                 >
                   <div className="flex flex-col gap-3">
@@ -463,13 +648,15 @@ export const DriveExplorerFeature: React.FC = () => {
                         {rep.filename}
                       </h4>
 
-                      {/* Associated Activity Badge */}
-                      <div className="mt-1.5 flex items-center gap-1.5 text-[11px] text-[#8a726a]">
-                        <CalendarBlank size={13} weight="bold" />
-                        <span className="truncate font-semibold text-[#57423b]">
-                          {rep.activityTitle}
-                        </span>
-                      </div>
+                      {/* Associated Activity Badge (if attached) */}
+                      {rep.activityTitle && (
+                        <div className="mt-1.5 flex items-center gap-1.5 text-[11px] text-[#8a726a]">
+                          <CalendarBlank size={13} weight="bold" />
+                          <span className="truncate font-semibold text-[#57423b]">
+                            {rep.activityTitle}
+                          </span>
+                        </div>
+                      )}
 
                       <div className="flex items-center gap-1.5 text-[11px] text-[#8a726a] flex-wrap mt-1">
                         <span>{rep.uploadedByName || 'Coordinator'}</span>
@@ -500,7 +687,16 @@ export const DriveExplorerFeature: React.FC = () => {
                   <div className="flex items-center gap-2 pt-3 border-t border-[#f4ece9]">
                     <button
                       type="button"
-                      onClick={() => setPreviewFile(rep)}
+                      onClick={() =>
+                        setPreviewFile({
+                          fileId: rep.fileId,
+                          filename: rep.filename,
+                          webViewLink: rep.webViewLink,
+                          fileSize: rep.fileSize,
+                          uploadedAt: rep.uploadedAt,
+                          uploadedByName: rep.uploadedByName,
+                        })
+                      }
                       className="flex-1 py-2 px-3.5 rounded-xl bg-[#b85028] hover:bg-[#9c421f] text-white text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer"
                     >
                       <Eye size={15} weight="bold" />
@@ -541,8 +737,8 @@ export const DriveExplorerFeature: React.FC = () => {
                 No Documents Found
               </h4>
               <p className="text-xs text-[#8a726a] max-w-sm">
-                No activity reports match the selected folder or search query.
-                Try choosing another folder or clearing search filters.
+                No activity reports or Google Drive documents match the selected
+                folder or search query.
               </p>
             </div>
           )}

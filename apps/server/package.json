@@ -13,6 +13,7 @@
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
     "seed": "ts-node -r tsconfig-paths/register src/database/seeds/seed.ts",
+    "seed:transfers": "ts-node -r tsconfig-paths/register src/database/seeds/seed-transfers.ts",
     "seed:avatars": "ts-node -r tsconfig-paths/register src/database/seeds/generate-user-avatars.ts",
     "seed:attendance": "ts-node -r tsconfig-paths/register src/database/seeds/assign-past-attendance.ts",
     "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js",
