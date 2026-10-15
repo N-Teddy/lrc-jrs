@@ -84,6 +84,16 @@ export function AuthProvider({ children, storage, http }: AuthProviderProps) {
     };
   }, [storage, http]);
 
+  // Synchronize state when session is terminated by http service
+  useEffect(() => {
+    const unsubscribe = http.onUnauthorizedEvent(() => {
+      setUser(null);
+      setIsAuthenticated(false);
+      queryClient.clear();
+    });
+    return unsubscribe;
+  }, [http, queryClient]);
+
   const signIn = useCallback(
     async (identifier: string, password: string): Promise<ILoginResponse> => {
       const res = await http.post<ILoginResponse>('/auth/login', {

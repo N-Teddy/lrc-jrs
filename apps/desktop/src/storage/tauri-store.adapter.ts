@@ -17,10 +17,15 @@ export class TauriStoreAdapter implements IStorageAdapter {
     try {
       if (this.store) {
         const val = await this.store.get<string>(key);
-        return val ?? null;
+        if (val !== undefined && val !== null) {
+          return val;
+        }
       }
     } catch {
       // Graceful fallback for non-Tauri browser preview environments
+    }
+    if (typeof window !== 'undefined' && window.localStorage) {
+      return window.localStorage.getItem(key);
     }
     return this.memoryFallback.get(key) ?? null;
   }
@@ -35,6 +40,10 @@ export class TauriStoreAdapter implements IStorageAdapter {
     } catch {
       // Fallback
     }
+    if (typeof window !== 'undefined' && window.localStorage) {
+      window.localStorage.setItem(key, value);
+      return;
+    }
     this.memoryFallback.set(key, value);
   }
 
@@ -48,6 +57,10 @@ export class TauriStoreAdapter implements IStorageAdapter {
     } catch {
       // Fallback
     }
+    if (typeof window !== 'undefined' && window.localStorage) {
+      window.localStorage.removeItem(key);
+      return;
+    }
     this.memoryFallback.delete(key);
   }
 
@@ -60,6 +73,10 @@ export class TauriStoreAdapter implements IStorageAdapter {
       }
     } catch {
       // Fallback
+    }
+    if (typeof window !== 'undefined' && window.localStorage) {
+      window.localStorage.clear();
+      return;
     }
     this.memoryFallback.clear();
   }

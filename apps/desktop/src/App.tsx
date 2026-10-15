@@ -56,77 +56,86 @@ function AppContent() {
     );
   }
 
-  // 1. Authenticated Flow
-  if (isAuthenticated && user) {
-    if (shouldShowRegionSelector) {
+  const renderScreenContent = () => {
+    // 1. Authenticated Flow
+    if (isAuthenticated && user) {
+      if (shouldShowRegionSelector) {
+        return (
+          <RegionSelectorScreen
+            user={user}
+            onTownSelected={handleTownSelected}
+          />
+        );
+      }
+
       return (
-        <RegionSelectorScreen user={user} onTownSelected={handleTownSelected} />
+        <DashboardLayout
+          user={user}
+          hasMultiTownAccess={hasMultiTownAccess}
+          onSwitchRegion={handleSwitchRegion}
+        />
       );
     }
 
-    return (
-      <DashboardLayout
-        user={user}
-        hasMultiTownAccess={hasMultiTownAccess}
-        onSwitchRegion={handleSwitchRegion}
-      />
-    );
-  }
+    // 2. Setup Screen (Temporary Password login requires mandatory password change)
+    if (currentScreen === 'setup' && setupData) {
+      return (
+        <FirstTimeSetupScreen
+          setupToken={setupData.setupToken}
+          user={setupData.user}
+          onCancel={handleCancelSetup}
+          onSetupComplete={handleSetupComplete}
+        />
+      );
+    }
 
-  // 2. Setup Screen (Temporary Password login requires mandatory password change)
-  if (currentScreen === 'setup' && setupData) {
-    return (
-      <FirstTimeSetupScreen
-        setupToken={setupData.setupToken}
-        user={setupData.user}
-        onCancel={handleCancelSetup}
-        onSetupComplete={handleSetupComplete}
-      />
-    );
-  }
+    // 3. Forgot Password Screen
+    if (currentScreen === 'forgot-password') {
+      return (
+        <ForgotPasswordScreen
+          initialIdentifier={recoveryIdentifier}
+          onBackToSignIn={handleBackToSignIn}
+          onCodeSent={handleCodeSent}
+        />
+      );
+    }
 
-  // 3. Forgot Password Screen
-  if (currentScreen === 'forgot-password') {
-    return (
-      <ForgotPasswordScreen
-        initialIdentifier={recoveryIdentifier}
-        onBackToSignIn={handleBackToSignIn}
-        onCodeSent={handleCodeSent}
-      />
-    );
-  }
+    // 4. 6-Digit OTP Verification Screen
+    if (currentScreen === 'verify-otp') {
+      return (
+        <VerifyOtpScreen
+          identifier={recoveryIdentifier}
+          channel={recoveryChannel}
+          onBackToChangeContact={handleBackToChangeContact}
+          onCodeVerified={handleCodeVerified}
+        />
+      );
+    }
 
-  // 4. 6-Digit OTP Verification Screen
-  if (currentScreen === 'verify-otp') {
-    return (
-      <VerifyOtpScreen
-        identifier={recoveryIdentifier}
-        channel={recoveryChannel}
-        onBackToChangeContact={handleBackToChangeContact}
-        onCodeVerified={handleCodeVerified}
-      />
-    );
-  }
+    // 5. Set New Password Screen
+    if (currentScreen === 'reset-password') {
+      return (
+        <ResetPasswordScreen
+          resetToken={resetToken}
+          identifier={recoveryIdentifier}
+          onBackToSignIn={handleBackToSignIn}
+          onPasswordResetComplete={handlePasswordResetComplete}
+        />
+      );
+    }
 
-  // 5. Set New Password Screen
-  if (currentScreen === 'reset-password') {
+    // 6. Default: Universal Sign-In Screen
     return (
-      <ResetPasswordScreen
-        resetToken={resetToken}
-        identifier={recoveryIdentifier}
-        onBackToSignIn={handleBackToSignIn}
-        onPasswordResetComplete={handlePasswordResetComplete}
-      />
-    );
-  }
-
-  // 6. Default: Universal Sign-In Screen
-  return (
-    <>
       <LoginScreen
         onRequiresPasswordChange={handleRequiresPasswordChange}
         onForgotPasswordClick={handleForgotPasswordClick}
       />
+    );
+  };
+
+  return (
+    <>
+      {renderScreenContent()}
 
       <SessionTerminatedModal
         isOpen={isSessionTerminated}

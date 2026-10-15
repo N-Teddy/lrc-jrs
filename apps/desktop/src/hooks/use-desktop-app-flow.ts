@@ -1,4 +1,4 @@
-import { useAuth, useTownContext } from '@jrs/client-core';
+import { useAuth, useHttp, useTownContext } from '@jrs/client-core';
 import type { IAuthUser, ITown } from '@jrs/shared';
 import { useEffect, useMemo, useState } from 'react';
 
@@ -11,6 +11,7 @@ export type AuthScreenState =
 
 export function useDesktopAppFlow() {
   const { user, isAuthenticated, isLoading } = useAuth();
+  const http = useHttp();
   const { isLoadingTowns } = useTownContext();
 
   // Navigation State Machine for Auth
@@ -36,6 +37,15 @@ export function useDesktopAppFlow() {
 
   // Security Cutoff Modal State
   const [isSessionTerminated, setIsSessionTerminated] = useState(false);
+
+  // Listen for session termination events from HTTP client (expired/revoked refresh token)
+  useEffect(() => {
+    const unsubscribe = http.onUnauthorizedEvent(() => {
+      setIsSessionTerminated(true);
+      setCurrentScreen('login');
+    });
+    return unsubscribe;
+  }, [http]);
 
   // Reset town selection state on logout so next login always prompts map
   useEffect(() => {
