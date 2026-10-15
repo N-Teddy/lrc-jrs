@@ -24,7 +24,16 @@
     "remaining": "restant",
     "expired": "Expiré",
     "close": "Fermer",
-    "loadingPortal": "Chargement du portail LRC JRS..."
+    "loadingPortal": "Chargement du portail LRC JRS...",
+    "prev": "Préc.",
+    "next": "Suiv.",
+    "previous": "Préc.",
+    "showing": "Affichage de",
+    "of": "sur",
+    "showingMembers": "Affichage de {{count}} sur {{total}} membres enregistrés",
+    "showingActivities": "Affichage de {{start}} - {{end}} sur {{total}} activités",
+    "showingTransfers": "Affichage de {{count}} sur {{total}} mutations enregistrées",
+    "showingAccounts": "Affichage de {{count}} sur {{total}} membres enregistrés"
   },
   "auth": {
     "login": {

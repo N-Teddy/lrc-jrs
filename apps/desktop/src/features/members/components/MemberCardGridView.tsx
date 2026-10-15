@@ -305,7 +305,8 @@ export const MemberCardGridView: React.FC<MemberCardGridViewProps> = ({
       {totalPages > 1 && (
         <div className="p-4 bg-white rounded-2xl border border-[#e8e1dd] shadow-xs flex items-center justify-between text-xs text-[#8a726a]">
           <div>
-            Showing {members.length} of {total} registered members
+            {t('common:showingMembers', { count: members.length, total }) ||
+              `Showing ${members.length} of ${total} registered members`}
           </div>
           <div className="flex items-center gap-1">
             <button
@@ -314,7 +315,7 @@ export const MemberCardGridView: React.FC<MemberCardGridViewProps> = ({
               onClick={() => onPageChange(page - 1)}
               className="px-2.5 py-1 rounded-md bg-[#faf2ee] border border-[#e8e1dd] text-[#1e1b19] font-medium disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
             >
-              Prev
+              {t('common:prev') || 'Prev'}
             </button>
             <span className="px-3 py-1 font-bold text-[#1e1b19]">
               {page} / {totalPages}
@@ -325,7 +326,7 @@ export const MemberCardGridView: React.FC<MemberCardGridViewProps> = ({
               onClick={() => onPageChange(page + 1)}
               className="px-2.5 py-1 rounded-md bg-[#faf2ee] border border-[#e8e1dd] text-[#1e1b19] font-medium disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
             >
-              Next
+              {t('common:next') || 'Next'}
             </button>
           </div>
         </div>

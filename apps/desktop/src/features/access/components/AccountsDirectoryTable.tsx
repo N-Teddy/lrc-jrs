@@ -366,29 +366,30 @@ export const AccountsDirectoryTable: React.FC<AccountsDirectoryTableProps> = ({
 
       {/* Pagination Footer */}
       {totalPages > 1 && (
-        <div className="p-4 bg-white border-t border-[#e8e1dd] flex items-center justify-between text-xs text-[#8a726a]">
+        <div className="p-4 bg-white border-t border-[#e8e1dd] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#8a726a]">
           <div>
-            Showing {members.length} of {total} registered members
+            {t('common:showingAccounts', { count: members.length, total }) ||
+              `Showing ${members.length} of ${total} registered members`}
           </div>
           <div className="flex items-center gap-1">
             <button
               type="button"
               disabled={page <= 1}
               onClick={() => onPageChange(page - 1)}
-              className="px-3 py-1.5 rounded-lg bg-[#faf2ee] border border-[#e8e1dd] text-[#1e1b19] font-medium disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+              className="px-2.5 py-1 rounded-md bg-[#faf2ee] hover:bg-[#f4ece9] border border-[#e8e1dd] text-[#1e1b19] font-medium disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
             >
-              Previous
+              {t('common:prev') || 'Prev'}
             </button>
-            <span className="px-2 text-xs font-semibold">
+            <span className="px-3 py-1 font-bold text-[#1e1b19]">
               {page} / {totalPages}
             </span>
             <button
               type="button"
               disabled={page >= totalPages}
               onClick={() => onPageChange(page + 1)}
-              className="px-3 py-1.5 rounded-lg bg-[#faf2ee] border border-[#e8e1dd] text-[#1e1b19] font-medium disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+              className="px-2.5 py-1 rounded-md bg-[#faf2ee] hover:bg-[#f4ece9] border border-[#e8e1dd] text-[#1e1b19] font-medium disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
             >
-              Next
+              {t('common:next') || 'Next'}
             </button>
           </div>
         </div>

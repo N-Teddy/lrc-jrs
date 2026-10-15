@@ -24,7 +24,16 @@
     "remaining": "remaining",
     "expired": "Expired",
     "close": "Close",
-    "loadingPortal": "Loading LRC JRS Portal..."
+    "loadingPortal": "Loading LRC JRS Portal...",
+    "prev": "Prev",
+    "next": "Next",
+    "previous": "Prev",
+    "showing": "Showing",
+    "of": "of",
+    "showingMembers": "Showing {{count}} of {{total}} registered members",
+    "showingActivities": "Showing {{start}} - {{end}} of {{total}} activities",
+    "showingTransfers": "Showing {{count}} of {{total}} recorded relocations",
+    "showingAccounts": "Showing {{count}} of {{total}} registered members"
   },
   "auth": {
     "login": {

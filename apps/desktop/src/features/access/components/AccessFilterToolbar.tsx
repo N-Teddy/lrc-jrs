@@ -1,23 +1,13 @@
 import { useTranslation } from '@jrs/client-core';
 import type { ITown } from '@jrs/shared';
-import {
-  ClockCounterClockwise,
-  MagnifyingGlass,
-  PaperPlaneTilt,
-  ShieldCheck,
-  Users,
-  X,
-} from '@phosphor-icons/react';
+import { MagnifyingGlass, PaperPlaneTilt, X } from '@phosphor-icons/react';
 import type React from 'react';
 import { useMemo } from 'react';
 import { CustomSelect, type SelectOption } from '../../../components';
 
-export type AccessTabId = 'directory' | 'permissions' | 'audit';
 export type AccountStateFilter = 'ALL' | 'ACTIVE' | 'PENDING' | 'REVOKED';
 
 interface AccessFilterToolbarProps {
-  activeTab: AccessTabId;
-  onSelectTab: (tab: AccessTabId) => void;
   search: string;
   onSearchChange: (value: string) => void;
   selectedTownId: string | null;
@@ -32,8 +22,6 @@ interface AccessFilterToolbarProps {
 }
 
 export const AccessFilterToolbar: React.FC<AccessFilterToolbarProps> = ({
-  activeTab,
-  onSelectTab,
   search,
   onSearchChange,
   selectedTownId,
@@ -108,50 +96,62 @@ export const AccessFilterToolbar: React.FC<AccessFilterToolbarProps> = ({
     [t],
   );
 
-  const navTabs: { id: AccessTabId; label: string; icon: React.ElementType }[] =
-    [
-      {
-        id: 'directory',
-        label: t('access:tabs.directory') || 'Accounts Directory',
-        icon: Users,
-      },
-      {
-        id: 'permissions',
-        label: t('access:tabs.permissions') || 'Permissions & Scopes',
-        icon: ShieldCheck,
-      },
-      {
-        id: 'audit',
-        label: t('access:tabs.audit') || 'Security & Credential Logs',
-        icon: ClockCounterClockwise,
-      },
-    ];
-
   return (
-    <div className="flex flex-col gap-4">
-      {/* 1. Sub-Navigation Segmented Tabs */}
-      <div className="flex items-center justify-between flex-wrap gap-4">
-        <div className="inline-flex p-1 rounded-2xl bg-[#faf2ee] border border-[#e8e1dd] shadow-2xs">
-          {navTabs.map((tab) => {
-            const Icon = tab.icon;
-            const isActive = activeTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => onSelectTab(tab.id)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                  isActive
-                    ? 'bg-white text-[#b85028] shadow-xs'
-                    : 'text-[#8a726a] hover:text-[#1e1b19]'
-                }`}
-              >
-                <Icon size={16} weight={isActive ? 'bold' : 'regular'} />
-                <span>{tab.label}</span>
-              </button>
-            );
-          })}
-        </div>
+    <div className="bg-white rounded-2xl border border-[#e8e1dd] p-3.5 shadow-xs flex flex-wrap items-center justify-between gap-3">
+      {/* Search Input */}
+      <div className="relative flex-1 min-w-[240px]">
+        <MagnifyingGlass
+          size={16}
+          className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8a726a]"
+        />
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => onSearchChange(e.target.value)}
+          placeholder={
+            t('access:filters.searchPlaceholder') ||
+            'Search by name, phone (+237...), email, or identifier...'
+          }
+          className="w-full h-10 pl-9 pr-8 rounded-lg bg-[#faf2ee] border border-transparent focus:border-[#b85028] focus:bg-white text-xs text-[#1e1b19] placeholder-[#8a726a] outline-none transition-all"
+        />
+        {search && (
+          <button
+            type="button"
+            onClick={() => onSearchChange('')}
+            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#8a726a] hover:text-[#1e1b19] p-1 cursor-pointer"
+          >
+            <X size={14} weight="bold" />
+          </button>
+        )}
+      </div>
+
+      <div className="flex flex-wrap items-center gap-2.5">
+        {/* Hub Select */}
+        <CustomSelect<string>
+          value={selectedTownId || 'ALL'}
+          onChange={(val) => onTownChange(val === 'ALL' ? null : val)}
+          options={townOptions}
+          size="md"
+          className="w-44"
+        />
+
+        {/* Account State Select */}
+        <CustomSelect<AccountStateFilter>
+          value={stateFilter}
+          onChange={onStateFilterChange}
+          options={stateOptions}
+          size="md"
+          className="w-44"
+        />
+
+        {/* Role Select */}
+        <CustomSelect<string>
+          value={roleFilter}
+          onChange={onRoleFilterChange}
+          options={roleOptions}
+          size="md"
+          className="w-40"
+        />
 
         {/* Batch Invite Button (AP or PC) */}
         {isPrivileged && (
@@ -165,65 +165,6 @@ export const AccessFilterToolbar: React.FC<AccessFilterToolbarProps> = ({
           </button>
         )}
       </div>
-
-      {/* 2. Filter & Search Controls (Only applicable in Directory tab) */}
-      {activeTab === 'directory' && (
-        <div className="bg-white rounded-2xl border border-[#e8e1dd] p-3 shadow-xs flex flex-wrap items-center justify-between gap-3">
-          {/* Search Input */}
-          <div className="relative flex-1 min-w-[240px]">
-            <MagnifyingGlass
-              size={16}
-              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8a726a]"
-            />
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => onSearchChange(e.target.value)}
-              placeholder={
-                t('access:filters.searchPlaceholder') ||
-                'Search by name, phone (+237...), email, or identifier...'
-              }
-              className="w-full h-10 pl-9 pr-8 rounded-lg bg-[#faf2ee] border border-transparent focus:border-[#b85028] focus:bg-white text-xs text-[#1e1b19] placeholder-[#8a726a] outline-none transition-all"
-            />
-            {search && (
-              <button
-                type="button"
-                onClick={() => onSearchChange('')}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#8a726a] hover:text-[#1e1b19] p-1 cursor-pointer"
-              >
-                <X size={14} weight="bold" />
-              </button>
-            )}
-          </div>
-
-          {/* Hub Select */}
-          <CustomSelect<string>
-            value={selectedTownId || 'ALL'}
-            onChange={(val) => onTownChange(val === 'ALL' ? null : val)}
-            options={townOptions}
-            size="md"
-            className="w-44"
-          />
-
-          {/* Account State Select */}
-          <CustomSelect<AccountStateFilter>
-            value={stateFilter}
-            onChange={onStateFilterChange}
-            options={stateOptions}
-            size="md"
-            className="w-44"
-          />
-
-          {/* Role Select */}
-          <CustomSelect<string>
-            value={roleFilter}
-            onChange={onRoleFilterChange}
-            options={roleOptions}
-            size="md"
-            className="w-40"
-          />
-        </div>
-      )}
     </div>
   );
 };

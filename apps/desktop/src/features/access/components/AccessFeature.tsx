@@ -14,14 +14,11 @@ import { ManageAccessModal } from '../../members/components/ManageAccessModal';
 import { MemberDetailPage } from '../../members/components/MemberDetailPage';
 import {
   AccessFilterToolbar,
-  type AccessTabId,
   type AccountStateFilter,
 } from './AccessFilterToolbar';
 import { AccessStatsOverview } from './AccessStatsOverview';
 import { AccountsDirectoryTable } from './AccountsDirectoryTable';
 import { BatchInviteModal } from './BatchInviteModal';
-import { PermissionsMatrixView } from './PermissionsMatrixView';
-import { SecurityAuditFeedView } from './SecurityAuditFeedView';
 import { TownScopeModal } from './TownScopeModal';
 
 export const AccessFeature: React.FC = () => {
@@ -30,7 +27,6 @@ export const AccessFeature: React.FC = () => {
   const { activeTownId } = useTownContext();
 
   // Navigation State
-  const [activeTab, setActiveTab] = useState<AccessTabId>('directory');
   const [selectedMemberDetailId, setSelectedMemberDetailId] = useState<
     string | null
   >(null);
@@ -205,10 +201,8 @@ export const AccessFeature: React.FC = () => {
         isLoading={isStatsLoading}
       />
 
-      {/* 3. Sub-Navigation Tabs & Filters Toolbar */}
+      {/* 3. Filters Toolbar */}
       <AccessFilterToolbar
-        activeTab={activeTab}
-        onSelectTab={setActiveTab}
         search={search}
         onSearchChange={setSearch}
         selectedTownId={selectedTownId}
@@ -231,34 +225,20 @@ export const AccessFeature: React.FC = () => {
         isPrivileged={isPrivileged}
       />
 
-      {/* 4. Active Tab Content View */}
-      {activeTab === 'directory' ? (
-        <AccountsDirectoryTable
-          members={paginatedMembers}
-          isLoading={isMembersLoading}
-          total={filteredMembers.length}
-          page={page}
-          limit={limit}
-          onPageChange={setPage}
-          onOpenManageAccess={(m) => setAccessMember(m)}
-          onOpenScopeModal={(m) => setScopeMember(m)}
-          onViewMemberDetail={(id) => setSelectedMemberDetailId(id)}
-          availableTowns={availableTowns}
-          isCurrentUserAp={isCurrentUserAp}
-        />
-      ) : activeTab === 'permissions' ? (
-        <PermissionsMatrixView
-          members={rawMembers}
-          availableTowns={availableTowns}
-          onOpenScopeModal={(m) => setScopeMember(m)}
-          isCurrentUserAp={isCurrentUserAp}
-        />
-      ) : (
-        <SecurityAuditFeedView
-          members={rawMembers}
-          onOpenManageAccess={(m) => setAccessMember(m)}
-        />
-      )}
+      {/* 4. Accounts Directory View */}
+      <AccountsDirectoryTable
+        members={paginatedMembers}
+        isLoading={isMembersLoading}
+        total={filteredMembers.length}
+        page={page}
+        limit={limit}
+        onPageChange={setPage}
+        onOpenManageAccess={(m) => setAccessMember(m)}
+        onOpenScopeModal={(m) => setScopeMember(m)}
+        onViewMemberDetail={(id) => setSelectedMemberDetailId(id)}
+        availableTowns={availableTowns}
+        isCurrentUserAp={isCurrentUserAp}
+      />
 
       {/* 5. Modals */}
       {/* Individual Access Modal */}

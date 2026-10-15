@@ -327,7 +327,7 @@ export const DriveExplorerFeature: React.FC = () => {
       <div key={node.id} className="flex flex-col">
         <div
           style={{ paddingLeft: `${node.level * 14 + 8}px` }}
-          className={`flex items-center justify-between py-1 pr-2 rounded-xl text-xs font-bold transition-all select-none group ${
+          className={`flex items-center justify-between py-1 pr-2 rounded-lg text-xs font-bold transition-all select-none group ${
             isSelected
               ? 'bg-[#b85028] text-white shadow-2xs'
               : 'hover:bg-[#faf2ee] text-[#57423b]'
@@ -526,7 +526,7 @@ export const DriveExplorerFeature: React.FC = () => {
       {/* 3. Main Workspace: Split View with Folder Tree & Files Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
         {/* Left Column: Google Drive Hierarchy Tree */}
-        <div className="lg:col-span-1 bg-white rounded-3xl border border-[#e8e1dd] shadow-xs p-5 flex flex-col gap-3 sticky top-20">
+        <div className="lg:col-span-1 bg-white rounded-xl border border-[#e8e1dd] shadow-xs p-4 flex flex-col gap-3 sticky top-20">
           <div className="flex items-center justify-between pb-3 border-b border-[#f4ece9]">
             <div className="flex items-center gap-2">
               <TreeStructure
@@ -548,7 +548,7 @@ export const DriveExplorerFeature: React.FC = () => {
             <button
               type="button"
               onClick={() => setSelectedFolderId('ALL')}
-              className={`w-full flex items-center justify-between p-2.5 rounded-xl text-xs font-bold text-left transition-all cursor-pointer ${
+              className={`w-full flex items-center justify-between p-2 rounded-lg text-xs font-bold text-left transition-all cursor-pointer ${
                 selectedFolderId === 'ALL'
                   ? 'bg-[#b85028] text-white shadow-2xs'
                   : 'hover:bg-[#faf2ee] text-[#1e1b19]'

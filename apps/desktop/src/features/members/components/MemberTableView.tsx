@@ -266,7 +266,8 @@ export const MemberTableView: React.FC<MemberTableViewProps> = ({
       {/* Pagination Footer */}
       <div className="p-4 bg-[#faf2ee] border-t border-[#e8e1dd] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#8a726a]">
         <div>
-          Showing {members.length} of {total} registered members
+          {t('common:showingMembers', { count: members.length, total }) ||
+            `Showing ${members.length} of ${total} registered members`}
         </div>
         {totalPages > 1 && (
           <div className="flex items-center gap-1">
@@ -276,7 +277,7 @@ export const MemberTableView: React.FC<MemberTableViewProps> = ({
               onClick={() => onPageChange(page - 1)}
               className="px-2.5 py-1 rounded-md bg-white border border-[#e8e1dd] text-[#1e1b19] font-medium disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
             >
-              Prev
+              {t('common:prev') || 'Prev'}
             </button>
             <span className="px-3 py-1 font-bold text-[#1e1b19]">
               {page} / {totalPages}
@@ -287,7 +288,7 @@ export const MemberTableView: React.FC<MemberTableViewProps> = ({
               onClick={() => onPageChange(page + 1)}
               className="px-2.5 py-1 rounded-md bg-white border border-[#e8e1dd] text-[#1e1b19] font-medium disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
             >
-              Next
+              {t('common:next') || 'Next'}
             </button>
           </div>
         )}

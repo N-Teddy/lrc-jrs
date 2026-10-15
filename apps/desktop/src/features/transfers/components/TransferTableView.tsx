@@ -1,3 +1,4 @@
+import { useTranslation } from '@jrs/client-core';
 import type { ITown } from '@jrs/shared';
 import {
   ArrowRight,
@@ -40,6 +41,7 @@ export const TransferTableView: React.FC<TransferTableViewProps> = ({
   activeTownId,
   townsMap,
 }) => {
+  const { t } = useTranslation(['transfers', 'common']);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const totalPages = Math.ceil(total / limit) || 1;
 
@@ -241,7 +243,8 @@ export const TransferTableView: React.FC<TransferTableViewProps> = ({
       {/* Pagination Footer */}
       <div className="p-4 bg-[#faf2ee] border-t border-[#e8e1dd] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#8a726a]">
         <div>
-          Showing {transfers.length} of {total} recorded relocations
+          {t('common:showingTransfers', { count: transfers.length, total }) ||
+            `Showing ${transfers.length} of ${total} recorded relocations`}
         </div>
         {totalPages > 1 && (
           <div className="flex items-center gap-1">
@@ -251,7 +254,7 @@ export const TransferTableView: React.FC<TransferTableViewProps> = ({
               onClick={() => onPageChange(page - 1)}
               className="px-2.5 py-1 rounded-md bg-white border border-[#e8e1dd] text-[#1e1b19] font-medium disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
             >
-              Prev
+              {t('common:prev') || 'Prev'}
             </button>
             <span className="px-3 py-1 font-bold text-[#1e1b19]">
               {page} / {totalPages}
@@ -262,7 +265,7 @@ export const TransferTableView: React.FC<TransferTableViewProps> = ({
               onClick={() => onPageChange(page + 1)}
               className="px-2.5 py-1 rounded-md bg-white border border-[#e8e1dd] text-[#1e1b19] font-medium disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
             >
-              Next
+              {t('common:next') || 'Next'}
             </button>
           </div>
         )}

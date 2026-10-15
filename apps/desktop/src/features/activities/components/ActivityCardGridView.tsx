@@ -2,8 +2,6 @@ import { useTownContext, useTranslation } from '@jrs/client-core';
 import type { IActivity } from '@jrs/shared';
 import {
   CalendarBlank,
-  CaretLeft,
-  CaretRight,
   ClockCounterClockwise,
   DotsThreeVertical,
   Eye,
@@ -307,34 +305,40 @@ export const ActivityCardGridView: React.FC<ActivityCardGridViewProps> = ({
       </div>
 
       {/* Pagination Footer */}
-      <div className="bg-white rounded-2xl border border-[#e8e1dd] py-3 px-4 flex items-center justify-between text-xs text-[#8a726a]">
-        <span>
-          Showing {(page - 1) * limit + 1} - {Math.min(page * limit, total)} of{' '}
-          {total} activities
-        </span>
-
-        <div className="flex items-center gap-1.5">
-          <button
-            type="button"
-            onClick={() => onPageChange(page - 1)}
-            disabled={page <= 1}
-            className="p-1 rounded bg-[#faf2ee] border border-[#e8e1dd] hover:bg-white disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
-          >
-            <CaretLeft size={16} weight="bold" />
-          </button>
-          <span className="font-bold text-[#1e1b19] px-2">
-            {page} / {totalPages}
+      {totalPages > 1 && (
+        <div className="bg-white rounded-2xl border border-[#e8e1dd] shadow-xs py-3 px-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#8a726a]">
+          <span>
+            {t('common:showingActivities', {
+              start: (page - 1) * limit + 1,
+              end: Math.min(page * limit, total),
+              total,
+            }) ||
+              `Showing ${(page - 1) * limit + 1} - ${Math.min(page * limit, total)} of ${total} activities`}
           </span>
-          <button
-            type="button"
-            onClick={() => onPageChange(page + 1)}
-            disabled={page >= totalPages}
-            className="p-1 rounded bg-[#faf2ee] border border-[#e8e1dd] hover:bg-white disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
-          >
-            <CaretRight size={16} weight="bold" />
-          </button>
+
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              disabled={page <= 1}
+              onClick={() => onPageChange(page - 1)}
+              className="px-2.5 py-1 rounded-md bg-[#faf2ee] hover:bg-[#f4ece9] border border-[#e8e1dd] text-[#1e1b19] font-medium disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+            >
+              {t('common:prev') || 'Prev'}
+            </button>
+            <span className="px-3 py-1 font-bold text-[#1e1b19]">
+              {page} / {totalPages}
+            </span>
+            <button
+              type="button"
+              disabled={page >= totalPages}
+              onClick={() => onPageChange(page + 1)}
+              className="px-2.5 py-1 rounded-md bg-[#faf2ee] hover:bg-[#f4ece9] border border-[#e8e1dd] text-[#1e1b19] font-medium disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+            >
+              {t('common:next') || 'Next'}
+            </button>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

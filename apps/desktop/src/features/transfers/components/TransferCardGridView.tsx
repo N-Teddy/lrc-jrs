@@ -1,3 +1,4 @@
+import { useTranslation } from '@jrs/client-core';
 import type { ITown } from '@jrs/shared';
 import {
   ArrowRight,
@@ -37,6 +38,7 @@ export const TransferCardGridView: React.FC<TransferCardGridViewProps> = ({
   activeTownId,
   townsMap,
 }) => {
+  const { t } = useTranslation(['transfers', 'common']);
   const totalPages = Math.ceil(total / limit) || 1;
 
   if (isLoading) {
@@ -190,7 +192,8 @@ export const TransferCardGridView: React.FC<TransferCardGridViewProps> = ({
       {/* Pagination Footer */}
       <div className="p-4 bg-white rounded-2xl border border-[#e8e1dd] shadow-xs flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#8a726a]">
         <div>
-          Showing {transfers.length} of {total} recorded relocations
+          {t('common:showingTransfers', { count: transfers.length, total }) ||
+            `Showing ${transfers.length} of ${total} recorded relocations`}
         </div>
         {totalPages > 1 && (
           <div className="flex items-center gap-1">
@@ -200,7 +203,7 @@ export const TransferCardGridView: React.FC<TransferCardGridViewProps> = ({
               onClick={() => onPageChange(page - 1)}
               className="px-2.5 py-1 rounded-md bg-[#faf2ee] hover:bg-[#f4ece9] border border-[#e8e1dd] text-[#1e1b19] font-medium disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
             >
-              Prev
+              {t('common:prev') || 'Prev'}
             </button>
             <span className="px-3 py-1 font-bold text-[#1e1b19]">
               {page} / {totalPages}
@@ -211,7 +214,7 @@ export const TransferCardGridView: React.FC<TransferCardGridViewProps> = ({
               onClick={() => onPageChange(page + 1)}
               className="px-2.5 py-1 rounded-md bg-[#faf2ee] hover:bg-[#f4ece9] border border-[#e8e1dd] text-[#1e1b19] font-medium disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
             >
-              Next
+              {t('common:next') || 'Next'}
             </button>
           </div>
         )}
