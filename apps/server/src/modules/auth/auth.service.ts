@@ -115,6 +115,12 @@ export class AuthService {
       throw new ForbiddenException('Your account access has been revoked');
     }
 
+    if (user.account?.hasAppAccess === false) {
+      throw new ForbiddenException(
+        'Your account is pending activation. Application access has not been granted.',
+      );
+    }
+
     // Check temporary password first if user has one
     if (user.isTemporaryPassword && user.tempPasswordHash) {
       const isTempMatch = await bcrypt.compare(

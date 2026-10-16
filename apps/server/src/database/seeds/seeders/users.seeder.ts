@@ -6,7 +6,7 @@ import { PasswordGeneratorUtil } from '../../../core/utils/password-generator.ut
 import { PhoneSanitizer } from '../../../core/utils/phone-sanitizer.util';
 import { UsersService } from '../../../modules/users/users.service';
 import { EmailService } from '../../../services/email.service';
-import { Town, type TownDocument } from '../../schemas';
+import { AccountStatus, Town, type TownDocument } from '../../schemas';
 import { SEED_MEMBERS_NO_APP_ACCESS } from '../data/members-no-access.data';
 import {
   SEED_ADMIN_USERS,
@@ -24,6 +24,7 @@ export interface SeededUserSummary {
   townCode: string;
   hasAppAccess: boolean;
   emailSent: boolean;
+  isTemporary?: boolean;
 }
 
 @Injectable()
@@ -90,16 +91,37 @@ export class UsersSeeder {
           userData.email,
       );
 
-      let tempPassword = '—';
+      const isTemporary =
+        userData.isTemporaryPassword ??
+        userData.account.status === AccountStatus.MUST_CHANGE_PASSWORD;
+
+      let plainPassword = userData.password || options.defaultPassword;
+      if (!plainPassword) {
+        plainPassword = hasAppAccess
+          ? PasswordGeneratorUtil.generateTemporaryPassword()
+          : 'NoAppAccessPass2026!';
+      }
+
       let passwordHash: string;
+      let tempPasswordHash: string | undefined;
+      let tempPasswordExpiresAt: Date | undefined;
 
       if (hasAppAccess) {
-        tempPassword =
-          options.defaultPassword ||
-          PasswordGeneratorUtil.generateTemporaryPassword();
-        passwordHash = await bcrypt.hash(tempPassword, 10);
+        if (isTemporary) {
+          tempPasswordHash = await bcrypt.hash(plainPassword, 10);
+          passwordHash = tempPasswordHash;
+          tempPasswordExpiresAt = new Date(Date.now() + 48 * 60 * 60 * 1000); // 48h validity
+        } else {
+          passwordHash = await bcrypt.hash(plainPassword, 10);
+          tempPasswordHash = undefined;
+          tempPasswordExpiresAt = undefined;
+        }
       } else {
         passwordHash = noAccessPasswordHash;
+        if (userData.password) {
+          tempPasswordHash = await bcrypt.hash(userData.password, 10);
+          tempPasswordExpiresAt = new Date(Date.now() + 48 * 60 * 60 * 1000);
+        }
       }
 
       // Map allowed read town codes to object IDs
@@ -107,16 +129,14 @@ export class UsersSeeder {
         .map((code) => townMap.get(code)?.toString())
         .filter((id): id is string => Boolean(id));
 
-      const payload = {
+      const payload: Record<string, unknown> = {
         fullName: userData.fullName,
         phoneNumber: sanitizedPhone,
         email: userData.email.toLowerCase().trim(),
         passwordHash,
-        tempPasswordHash: hasAppAccess ? passwordHash : undefined,
-        tempPasswordExpiresAt: hasAppAccess
-          ? new Date(Date.now() + 48 * 60 * 60 * 1000) // 48h validity
-          : undefined,
-        isTemporaryPassword: hasAppAccess,
+        tempPasswordHash,
+        tempPasswordExpiresAt,
+        isTemporaryPassword: isTemporary,
         dateOfBirth: userData.dateOfBirth,
         isJr: userData.isJr,
         role: userData.role,
@@ -132,20 +152,27 @@ export class UsersSeeder {
 
       const existing = await this.usersService.findByPhone(sanitizedPhone);
       if (existing) {
-        await this.usersService.update(existing._id, payload);
+        if (!isTemporary) {
+          await this.usersService.update(existing._id, {
+            ...payload,
+            $unset: { tempPasswordHash: 1, tempPasswordExpiresAt: 1 },
+          } as any);
+        } else {
+          await this.usersService.update(existing._id, payload as any);
+        }
       } else {
-        await this.usersService.create(payload);
+        await this.usersService.create(payload as any);
       }
 
       // Send email notification to users who have application access
       let emailSent = false;
-      if (hasAppAccess) {
+      if (hasAppAccess && isTemporary) {
         try {
           emailSent = await this.emailService.sendTemporaryPasswordEmail(
             userData.email,
             {
               fullName: userData.fullName,
-              tempPassword,
+              tempPassword: plainPassword,
               expiresInHours: 48,
               loginUrl: 'http://localhost:5173/login',
             },
@@ -160,16 +187,19 @@ export class UsersSeeder {
             `Could not dispatch email to ${userData.email}: ${emailErr}`,
           );
         }
+      }
 
+      if (hasAppAccess) {
         summaries.push({
           fullName: userData.fullName,
           role: userData.role,
           phoneNumber: sanitizedPhone,
           email: userData.email,
-          password: tempPassword,
+          password: plainPassword,
           townCode: userData.homeTownCode,
           hasAppAccess: true,
           emailSent,
+          isTemporary,
         });
       } else {
         noAccessCount++;

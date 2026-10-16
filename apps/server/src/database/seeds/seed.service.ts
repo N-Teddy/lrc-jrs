@@ -125,7 +125,10 @@ export class SeedService {
         Town: u.townCode,
         Phone: u.phoneNumber,
         Email: u.email,
-        'Temp Password': u.password,
+        Password: u.password,
+        'Password Type': u.isTemporary
+          ? 'Temporary (Must Change)'
+          : 'Permanent (Direct Login)',
         'App Access': u.hasAppAccess ? 'Yes' : 'No',
         'Email Status': !u.hasAppAccess
           ? '— (No App Access)'

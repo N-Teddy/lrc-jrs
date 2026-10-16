@@ -10,6 +10,8 @@ export interface SeedUserData {
   role: UserRole;
   isActivePC: boolean;
   homeTownCode: string;
+  password?: string;
+  isTemporaryPassword?: boolean;
   account: {
     status: AccountStatus;
     hasAppAccess: boolean;
@@ -33,8 +35,28 @@ export const SEED_ADMIN_USERS: SeedUserData[] = [
     role: UserRole.AP,
     isActivePC: false,
     homeTownCode: 'DLA',
+    password: 'AdminPassword123!',
+    isTemporaryPassword: false,
     account: {
       status: AccountStatus.ACTIVE,
+      hasAppAccess: true,
+      isAccessRevoked: false,
+      allowedReadTownCodes: [],
+    },
+  },
+  {
+    fullName: 'Assistant Animateur Principal',
+    phoneNumber: '+237670000002',
+    email: 'ap.assistant@lrcjrs.org',
+    dateOfBirth: '1990-05-20',
+    isJr: false,
+    role: UserRole.AP,
+    isActivePC: false,
+    homeTownCode: 'DLA',
+    password: 'TempPassword123!',
+    isTemporaryPassword: true,
+    account: {
+      status: AccountStatus.MUST_CHANGE_PASSWORD,
       hasAppAccess: true,
       isAccessRevoked: false,
       allowedReadTownCodes: [],
@@ -57,6 +79,8 @@ export const SEED_PC_USERS: SeedUserData[] = [
     role: UserRole.PC,
     isActivePC: true,
     homeTownCode: 'DLA',
+    password: 'PcPassword123!',
+    isTemporaryPassword: false,
     account: {
       status: AccountStatus.ACTIVE,
       hasAppAccess: true,
@@ -72,8 +96,10 @@ export const SEED_PC_USERS: SeedUserData[] = [
     role: UserRole.PC,
     isActivePC: true,
     homeTownCode: 'DLA',
+    password: 'TempPassword123!',
+    isTemporaryPassword: true,
     account: {
-      status: AccountStatus.ACTIVE,
+      status: AccountStatus.MUST_CHANGE_PASSWORD,
       hasAppAccess: true,
       isAccessRevoked: false,
     },
@@ -89,6 +115,8 @@ export const SEED_PC_USERS: SeedUserData[] = [
     role: UserRole.PC,
     isActivePC: true,
     homeTownCode: 'YDE',
+    password: 'PcPassword123!',
+    isTemporaryPassword: false,
     account: {
       status: AccountStatus.ACTIVE,
       hasAppAccess: true,
@@ -104,8 +132,10 @@ export const SEED_PC_USERS: SeedUserData[] = [
     role: UserRole.PC,
     isActivePC: true,
     homeTownCode: 'YDE',
+    password: 'TempPassword123!',
+    isTemporaryPassword: true,
     account: {
-      status: AccountStatus.ACTIVE,
+      status: AccountStatus.MUST_CHANGE_PASSWORD,
       hasAppAccess: true,
       isAccessRevoked: false,
     },
@@ -121,6 +151,8 @@ export const SEED_PC_USERS: SeedUserData[] = [
     role: UserRole.PC,
     isActivePC: true,
     homeTownCode: 'BAF',
+    password: 'PcPassword123!',
+    isTemporaryPassword: false,
     account: {
       status: AccountStatus.ACTIVE,
       hasAppAccess: true,
@@ -136,12 +168,15 @@ export const SEED_PC_USERS: SeedUserData[] = [
     role: UserRole.PC,
     isActivePC: true,
     homeTownCode: 'BAF',
+    password: 'TempPassword123!',
+    isTemporaryPassword: true,
     account: {
-      status: AccountStatus.ACTIVE,
+      status: AccountStatus.MUST_CHANGE_PASSWORD,
       hasAppAccess: true,
       isAccessRevoked: false,
     },
   },
+
   // Edéa PCs
   {
     fullName: 'PC Edéa 1 (Patrice Manga)',
@@ -152,6 +187,8 @@ export const SEED_PC_USERS: SeedUserData[] = [
     role: UserRole.PC,
     isActivePC: true,
     homeTownCode: 'EDA',
+    password: 'PcPassword123!',
+    isTemporaryPassword: false,
     account: {
       status: AccountStatus.ACTIVE,
       hasAppAccess: true,
@@ -167,8 +204,10 @@ export const SEED_PC_USERS: SeedUserData[] = [
     role: UserRole.PC,
     isActivePC: true,
     homeTownCode: 'EDA',
+    password: 'TempPassword123!',
+    isTemporaryPassword: true,
     account: {
-      status: AccountStatus.ACTIVE,
+      status: AccountStatus.MUST_CHANGE_PASSWORD,
       hasAppAccess: true,
       isAccessRevoked: false,
     },
@@ -191,6 +230,8 @@ export const SEED_MEMBER_USERS: SeedUserData[] = [
     role: UserRole.MEMBER,
     isActivePC: false,
     homeTownCode: 'DLA',
+    password: 'MemberPassword123!',
+    isTemporaryPassword: false,
     account: {
       status: AccountStatus.ACTIVE,
       hasAppAccess: true,
@@ -209,6 +250,8 @@ export const SEED_MEMBER_USERS: SeedUserData[] = [
     role: UserRole.MEMBER,
     isActivePC: false,
     homeTownCode: 'YDE',
+    password: 'TempPassword123!',
+    isTemporaryPassword: true,
     account: {
       status: AccountStatus.PENDING_ACTIVATION,
       hasAppAccess: false,
@@ -226,6 +269,8 @@ export const SEED_MEMBER_USERS: SeedUserData[] = [
     role: UserRole.MEMBER,
     isActivePC: false,
     homeTownCode: 'BAF',
+    password: 'TempPassword123!',
+    isTemporaryPassword: true,
     account: {
       status: AccountStatus.MUST_CHANGE_PASSWORD,
       hasAppAccess: true,
