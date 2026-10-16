@@ -18,13 +18,13 @@
     "react-dom": "^19.1.0",
     "@tauri-apps/plugin-opener": "^2",
     "@tauri-apps/plugin-store": "^2",
-    "react": "^19.1.0",
+    "react": "^19.3.0",
     "pdfjs-dist": "^6.4.299"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.3",
     "@tauri-apps/cli": "^2",
-    "@types/react": "^19.1.8",
+    "@types/react": "^19.3.0",
     "@types/react-dom": "^19.1.6",
     "@types/react-simple-maps": "^3.0.6",
     "@vitejs/plugin-react": "^6.0.2",
