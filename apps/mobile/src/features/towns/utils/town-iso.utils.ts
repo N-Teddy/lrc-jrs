@@ -1,32 +1,22 @@
 import type { ITown } from '@jrs/shared';
+import { mapTownCodeToIso, TOWN_TO_ISO_MAP } from '@jrs/shared';
 import {
   CAMEROON_REGIONS,
   CAMEROON_TOWNS_CONFIG,
 } from '../config/cameroon-map.config';
 
-/**
- * Mapping between fellowship town codes and Cameroon administrative region ISO codes.
- */
-export const TOWN_TO_ISO_MAP: Record<string, string> = {
-  DLA: 'CM-LT',
-  EDA: 'CM-LT',
-  EDE: 'CM-LT',
-  YDE: 'CM-CE',
-  BAF: 'CM-OU',
-};
-
-/**
- * Resolves the ISO region code for a given town code.
- */
-export function mapTownCodeToIso(townCode: string): string | null {
-  return TOWN_TO_ISO_MAP[townCode.toUpperCase()] || null;
-}
+export {
+  buildIsoToTownMap,
+  buildIsoToTownsMap,
+  mapTownCodeToIso,
+  TOWN_TO_ISO_MAP,
+} from '@jrs/shared';
 
 /**
  * Converts longitude and latitude coordinates into SVG canvas (1000x900) coordinates.
  * Using GeoMercator projection centered at [12.5, 7.35] with scale 4500 and translate [500, 450].
  */
-function projectMercator(lng: number, lat: number): [number, number] {
+function _projectMercator(lng: number, lat: number): [number, number] {
   const lambda = (lng - 12.5) * (Math.PI / 180);
   const phi = (lat * Math.PI) / 180;
   const phi0 = (7.35 * Math.PI) / 180;
@@ -51,35 +41,4 @@ export function getTownSvgCoordinates(town: ITown): [number, number] {
     return CAMEROON_REGIONS[iso].svgCoordinates;
   }
   return [500, 450];
-}
-
-/**
- * Constructs an ISO-to-Town lookup dictionary from available towns.
- */
-export function buildIsoToTownMap(towns: ITown[]): Record<string, ITown> {
-  const map: Record<string, ITown> = {};
-  for (const town of towns) {
-    const iso = mapTownCodeToIso(town.code);
-    if (iso && !map[iso]) {
-      map[iso] = town;
-    }
-  }
-  return map;
-}
-
-/**
- * Constructs an ISO-to-Towns array lookup dictionary from available towns.
- */
-export function buildIsoToTownsMap(towns: ITown[]): Record<string, ITown[]> {
-  const map: Record<string, ITown[]> = {};
-  for (const town of towns) {
-    const iso = mapTownCodeToIso(town.code);
-    if (iso) {
-      if (!map[iso]) {
-        map[iso] = [];
-      }
-      map[iso].push(town);
-    }
-  }
-  return map;
 }

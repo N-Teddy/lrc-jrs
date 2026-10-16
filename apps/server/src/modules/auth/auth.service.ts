@@ -46,7 +46,11 @@ export class AuthService {
     private readonly refreshTokenModel: Model<RefreshTokenDocument>,
     @InjectModel(PasswordResetToken.name)
     private readonly passwordResetModel: Model<PasswordResetTokenDocument>,
-  ) {}
+  ) {
+    void InjectModel;
+    void RefreshToken;
+    void PasswordResetToken;
+  }
 
   public formatUserResponse(user: UserDocument) {
     return {

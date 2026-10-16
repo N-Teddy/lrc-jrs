@@ -53,7 +53,13 @@ export class ActivitiesService {
     private readonly townModel: Model<TownDocument>,
     @InjectModel(User.name) readonly _userModel: Model<UserDocument>,
     private readonly driveService: DriveService,
-  ) {}
+  ) {
+    void InjectModel;
+    void Activity;
+    void Attendance;
+    void Town;
+    void User;
+  }
 
   /**
    * Helper to resolve town identifier (ObjectId string or town code like "DLA")

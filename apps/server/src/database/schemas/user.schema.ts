@@ -10,7 +10,7 @@ export type UserDocument = User & Document;
 
 export enum AccountStatus {
   PENDING_ACTIVATION = 'PENDING_ACTIVATION',
-  MUST_CHANGE_PASSWORD = 'MUST_CHANGE_PASSWORD',
+  MUST_CHANGE_PASSWORD = `MUST_CHANGE_PASSWORD`,
   ACTIVE = 'ACTIVE',
   REVOKED = 'REVOKED',
 }

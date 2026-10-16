@@ -1,39 +1,20 @@
-import { useAuth, useHttp, useTownContext } from '@jrs/client-core';
-import type { IAuthUser, ITown } from '@jrs/shared';
+import {
+  type AuthFlowScreenState,
+  useAuth,
+  useAuthFlowState,
+  useHttp,
+  useTownContext,
+} from '@jrs/client-core';
 import { useEffect, useMemo, useState } from 'react';
 
-type AuthScreenState =
-  | 'login'
-  | 'setup'
-  | 'forgot-password'
-  | 'verify-otp'
-  | 'reset-password';
+export type { AuthFlowScreenState as AuthScreenState };
 
 export function useDesktopAppFlow() {
   const { user, isAuthenticated, isLoading } = useAuth();
   const http = useHttp();
   const { isLoadingTowns } = useTownContext();
 
-  // Navigation State Machine for Auth
-  const [currentScreen, setCurrentScreen] = useState<AuthScreenState>('login');
-
-  // Multi-Region Hub Selection State
-  const [hasExplicitlySelectedTown, setHasExplicitlySelectedTown] =
-    useState(false);
-  const [isSwitchingRegion, setIsSwitchingRegion] = useState(false);
-
-  // First-Time Setup State
-  const [setupData, setSetupData] = useState<{
-    setupToken: string;
-    user: IAuthUser;
-  } | null>(null);
-
-  // Recovery Flow State
-  const [recoveryIdentifier, setRecoveryIdentifier] = useState('');
-  const [recoveryChannel, setRecoveryChannel] = useState<
-    'auto' | 'whatsapp' | 'email'
-  >('auto');
-  const [resetToken, setResetToken] = useState('');
+  const flow = useAuthFlowState(isAuthenticated);
 
   // Security Cutoff Modal State
   const [isSessionTerminated, setIsSessionTerminated] = useState(false);
@@ -42,18 +23,10 @@ export function useDesktopAppFlow() {
   useEffect(() => {
     const unsubscribe = http.onUnauthorizedEvent(() => {
       setIsSessionTerminated(true);
-      setCurrentScreen('login');
+      flow.setCurrentScreen('login');
     });
     return unsubscribe;
-  }, [http]);
-
-  // Reset town selection state on logout so next login always prompts map
-  useEffect(() => {
-    if (!isAuthenticated) {
-      setHasExplicitlySelectedTown(false);
-      setIsSwitchingRegion(false);
-    }
-  }, [isAuthenticated]);
+  }, [http, flow.setCurrentScreen]);
 
   // Determine if user has view or edit access to multiple towns
   const hasMultiTownAccess = useMemo(() => {
@@ -71,72 +44,31 @@ export function useDesktopAppFlow() {
     isAuthenticated &&
       user &&
       hasMultiTownAccess &&
-      (!hasExplicitlySelectedTown || isSwitchingRegion),
+      (!flow.hasExplicitlySelectedTown || flow.isSwitchingRegion),
   );
 
-  const handleTownSelected = (_town: ITown) => {
-    setHasExplicitlySelectedTown(true);
-    setIsSwitchingRegion(false);
-  };
-
-  const handleSwitchRegion = () => {
-    setIsSwitchingRegion(true);
-  };
-
-  const handleRequiresPasswordChange = (data: {
-    setupToken: string;
-    user: IAuthUser;
-  }) => {
-    setSetupData(data);
-    setCurrentScreen('setup');
+  const handleForgotPasswordClick = (id: string) => {
+    flow.setRecoveryIdentifier(id);
+    flow.setCurrentScreen('forgot-password');
   };
 
   const handleCancelSetup = () => {
-    setSetupData(null);
-    setCurrentScreen('login');
+    flow.setSetupData(null);
+    flow.setCurrentScreen('login');
   };
 
   const handleSetupComplete = () => {
-    setSetupData(null);
-    setCurrentScreen('login');
-  };
-
-  const handleForgotPasswordClick = (id: string) => {
-    setRecoveryIdentifier(id);
-    setCurrentScreen('forgot-password');
-  };
-
-  const handleBackToSignIn = () => {
-    setCurrentScreen('login');
-  };
-
-  const handleCodeSent = (
-    identifier: string,
-    channel: 'auto' | 'whatsapp' | 'email',
-  ) => {
-    setRecoveryIdentifier(identifier);
-    setRecoveryChannel(channel);
-    setCurrentScreen('verify-otp');
+    flow.setSetupData(null);
+    flow.setCurrentScreen('login');
   };
 
   const handleBackToChangeContact = () => {
-    setCurrentScreen('forgot-password');
-  };
-
-  const handleCodeVerified = (token: string) => {
-    setResetToken(token);
-    setCurrentScreen('reset-password');
-  };
-
-  const handlePasswordResetComplete = () => {
-    setResetToken('');
-    setRecoveryIdentifier('');
-    setCurrentScreen('login');
+    flow.setCurrentScreen('forgot-password');
   };
 
   const handleAcknowledgeSessionTerminated = () => {
     setIsSessionTerminated(false);
-    setCurrentScreen('login');
+    flow.setCurrentScreen('login');
   };
 
   return {
@@ -144,24 +76,24 @@ export function useDesktopAppFlow() {
     isAuthenticated,
     isLoading: isLoading || (isAuthenticated && isLoadingTowns),
     hasMultiTownAccess,
-    currentScreen,
-    setupData,
-    recoveryIdentifier,
-    recoveryChannel,
-    resetToken,
+    currentScreen: flow.currentScreen,
+    setupData: flow.setupData,
+    recoveryIdentifier: flow.recoveryIdentifier,
+    recoveryChannel: flow.recoveryChannel,
+    resetToken: flow.resetToken,
     isSessionTerminated,
     shouldShowRegionSelector,
-    handleTownSelected,
-    handleSwitchRegion,
-    handleRequiresPasswordChange,
+    handleTownSelected: flow.handleTownSelected,
+    handleSwitchRegion: flow.handleSwitchRegion,
+    handleRequiresPasswordChange: flow.handleRequiresPasswordChange,
     handleCancelSetup,
     handleSetupComplete,
     handleForgotPasswordClick,
-    handleBackToSignIn,
-    handleCodeSent,
+    handleBackToSignIn: flow.handleBackToLogin,
+    handleCodeSent: flow.handleCodeSent,
     handleBackToChangeContact,
-    handleCodeVerified,
-    handlePasswordResetComplete,
+    handleCodeVerified: flow.handleOtpVerified,
+    handlePasswordResetComplete: flow.handleRecoverySuccess,
     handleAcknowledgeSessionTerminated,
   };
 }

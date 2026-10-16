@@ -1,13 +1,6 @@
-import { useTownContext, useTranslation } from '@jrs/client-core';
+import { useTranslation } from '@jrs/client-core';
 import type { IActivity } from '@jrs/shared';
-import {
-  CalendarBlank,
-  ClockCounterClockwise,
-  DotsThreeVertical,
-  Eye,
-  PencilSimple,
-  Trash,
-} from '@phosphor-icons/react';
+import { CalendarBlank } from '@phosphor-icons/react';
 import type React from 'react';
 import { useState } from 'react';
 import { PaginationControl } from '../../../components';
@@ -16,6 +9,7 @@ import {
   getActivityStatusConfig,
   getActivityTypeConfig,
 } from '../utils/activity-ui.utils';
+import { ActivityActionMenu } from './ActivityActionMenu';
 
 interface ActivityTableViewProps {
   activities: IActivity[];
@@ -45,7 +39,6 @@ export const ActivityTableView: React.FC<ActivityTableViewProps> = ({
   isPrivileged,
 }) => {
   const { t } = useTranslation();
-  const { canWrite } = useTownContext();
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
 
   const totalPages = Math.ceil(total / limit) || 1;
@@ -111,7 +104,6 @@ export const ActivityTableView: React.FC<ActivityTableViewProps> = ({
                 activity.endDate,
               );
               const TypeIcon = typeConfig.icon;
-              const historyCount = activity.changeHistory?.length || 0;
 
               return (
                 <tr
@@ -188,87 +180,21 @@ export const ActivityTableView: React.FC<ActivityTableViewProps> = ({
 
                   {/* Actions */}
                   <td className="py-3.5 px-4 text-right">
-                    <div className="relative inline-flex items-center justify-end">
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setOpenMenuId(
-                            openMenuId === activity.id ? null : activity.id,
-                          )
-                        }
-                        className="p-1.5 rounded-lg hover:bg-[#faf2ee] text-[#8a726a] hover:text-[#1e1b19] transition-colors cursor-pointer"
-                      >
-                        <DotsThreeVertical size={16} weight="bold" />
-                      </button>
-
-                      {openMenuId === activity.id && (
-                        <div
-                          className="absolute right-0 top-full mt-1 w-44 bg-white rounded-xl border border-[#e8e1dd] shadow-lg py-1 z-30 flex flex-col"
-                          onMouseLeave={() => setOpenMenuId(null)}
-                        >
-                          {/* Activity Details Action */}
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setOpenMenuId(null);
-                              onViewDetails(activity);
-                            }}
-                            className="w-full px-3 py-2 text-left text-xs text-[#b85028] hover:bg-[#fff2ee] flex items-center gap-2 font-bold cursor-pointer"
-                          >
-                            <Eye size={15} weight="bold" />
-                            <span>
-                              {t('activities:card.details', 'Details')}
-                            </span>
-                          </button>
-
-                          {canWrite && (
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setOpenMenuId(null);
-                                onEditActivity(activity);
-                              }}
-                              className="w-full px-3 py-2 text-left text-xs text-[#1e1b19] hover:bg-[#faf2ee] flex items-center gap-2 font-medium cursor-pointer"
-                            >
-                              <PencilSimple size={15} weight="bold" />
-                              <span>
-                                {t('activities:card.edit')} / Reschedule
-                              </span>
-                            </button>
-                          )}
-
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setOpenMenuId(null);
-                              onViewHistory(activity);
-                            }}
-                            className="w-full px-3 py-2 text-left text-xs text-[#1e1b19] hover:bg-[#faf2ee] flex items-center gap-2 font-medium cursor-pointer"
-                          >
-                            <ClockCounterClockwise size={15} weight="bold" />
-                            <span>
-                              {t('activities:card.viewHistory', {
-                                count: historyCount,
-                              })}
-                            </span>
-                          </button>
-
-                          {canWrite && isPrivileged && onDeleteActivity && (
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setOpenMenuId(null);
-                                onDeleteActivity(activity);
-                              }}
-                              className="w-full px-3 py-2 text-left text-xs text-[#ba1a1a] hover:bg-[#ffdad6]/40 flex items-center gap-2 font-medium cursor-pointer border-t border-[#e8e1dd]"
-                            >
-                              <Trash size={15} weight="bold" />
-                              <span>{t('activities:card.delete')}</span>
-                            </button>
-                          )}
-                        </div>
-                      )}
-                    </div>
+                    <ActivityActionMenu
+                      activity={activity}
+                      isOpen={openMenuId === activity.id}
+                      onToggle={() =>
+                        setOpenMenuId(
+                          openMenuId === activity.id ? null : activity.id,
+                        )
+                      }
+                      onClose={() => setOpenMenuId(null)}
+                      onViewDetails={onViewDetails}
+                      onEditActivity={onEditActivity}
+                      onViewHistory={onViewHistory}
+                      onDeleteActivity={onDeleteActivity}
+                      isPrivileged={isPrivileged}
+                    />
                   </td>
                 </tr>
               );

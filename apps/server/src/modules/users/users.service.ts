@@ -47,7 +47,10 @@ export class UsersService {
     private readonly emailService: EmailService,
     private readonly whatsAppService: WhatsAppService,
     private readonly mediaService: MediaService,
-  ) {}
+  ) {
+    void InjectModel;
+    void Town;
+  }
 
   /**
    * Helper to resolve town identifier (either ObjectId string or town code like "DLA")

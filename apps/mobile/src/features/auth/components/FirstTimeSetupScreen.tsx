@@ -1,24 +1,18 @@
 import { useAuth, useTranslation } from '@jrs/client-core';
 import type { IAuthUser } from '@jrs/shared';
-import {
-  CheckCircle,
-  Eye,
-  EyeSlash,
-  Lock,
-  ShieldCheck,
-} from 'phosphor-react-native';
+import { CheckCircle, ShieldCheck } from 'phosphor-react-native';
 import React, { useState } from 'react';
 import {
   ActivityIndicator,
   StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
 import { colors } from '../../../theme/colors';
 import { AuthErrorBanner, AuthScreenContainer } from './AuthScreenContainer';
-import { isPasswordValid, PasswordRequirements } from './PasswordRequirements';
+import { PasswordFormFields, passwordFormStyles } from './PasswordFormFields';
+import { isPasswordValid } from './PasswordRequirements';
 
 interface FirstTimeSetupScreenProps {
   setupToken: string;
@@ -38,8 +32,6 @@ export const FirstTimeSetupScreen: React.FC<FirstTimeSetupScreenProps> = ({
 
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [showNewPassword, setShowNewPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -99,100 +91,28 @@ export const FirstTimeSetupScreen: React.FC<FirstTimeSetupScreenProps> = ({
 
       {/* Form Fields */}
       <View style={styles.form}>
-        {/* New Password */}
-        <View style={styles.fieldGroup}>
-          <Text style={styles.label}>
-            {t('auth:setup.newPasswordLabel') || 'New Permanent Password'}{' '}
-            <Text style={styles.required}>*</Text>
-          </Text>
-          <View style={styles.inputContainer}>
-            <View style={styles.inputIconContainer}>
-              <Lock size={20} weight="bold" color={colors.textMuted} />
-            </View>
-            <TextInput
-              style={styles.input}
-              placeholder={
-                t('auth:setup.newPasswordPlaceholder') ||
-                'Enter new secure password'
-              }
-              placeholderTextColor={colors.textMuted}
-              value={newPassword}
-              onChangeText={setNewPassword}
-              secureTextEntry={!showNewPassword}
-              autoCapitalize="none"
-              autoCorrect={false}
-              returnKeyType="next"
-              editable={!isLoading}
-            />
-            <TouchableOpacity
-              style={styles.eyeButton}
-              onPress={() => setShowNewPassword(!showNewPassword)}
-              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-            >
-              {showNewPassword ? (
-                <EyeSlash
-                  size={20}
-                  weight="bold"
-                  color={colors.textSecondary}
-                />
-              ) : (
-                <Eye size={20} weight="bold" color={colors.textSecondary} />
-              )}
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {/* Requirements Live Checklist */}
-        <PasswordRequirements password={newPassword} />
-
-        {/* Confirm Password */}
-        <View style={styles.fieldGroup}>
-          <Text style={styles.label}>
-            {t('auth:setup.confirmPasswordLabel') || 'Confirm Password'}{' '}
-            <Text style={styles.required}>*</Text>
-          </Text>
-          <View
-            style={[
-              styles.inputContainer,
-              passwordsMatch && styles.inputSuccessBorder,
-            ]}
-          >
-            <View style={styles.inputIconContainer}>
-              <Lock size={20} weight="bold" color={colors.textMuted} />
-            </View>
-            <TextInput
-              style={styles.input}
-              placeholder={
-                t('auth:setup.confirmPasswordPlaceholder') ||
-                'Re-enter your new password'
-              }
-              placeholderTextColor={colors.textMuted}
-              value={confirmPassword}
-              onChangeText={setConfirmPassword}
-              secureTextEntry={!showConfirmPassword}
-              autoCapitalize="none"
-              autoCorrect={false}
-              returnKeyType="done"
-              onSubmitEditing={handleSubmit}
-              editable={!isLoading}
-            />
-            <TouchableOpacity
-              style={styles.eyeButton}
-              onPress={() => setShowConfirmPassword(!showConfirmPassword)}
-              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-            >
-              {showConfirmPassword ? (
-                <EyeSlash
-                  size={20}
-                  weight="bold"
-                  color={colors.textSecondary}
-                />
-              ) : (
-                <Eye size={20} weight="bold" color={colors.textSecondary} />
-              )}
-            </TouchableOpacity>
-          </View>
-        </View>
+        <PasswordFormFields
+          newPassword={newPassword}
+          setNewPassword={setNewPassword}
+          confirmPassword={confirmPassword}
+          setConfirmPassword={setConfirmPassword}
+          isLoading={isLoading}
+          onSubmitEditing={handleSubmit}
+          newPasswordLabel={
+            t('auth:setup.newPasswordLabel') || 'New Permanent Password'
+          }
+          newPasswordPlaceholder={
+            t('auth:setup.newPasswordPlaceholder') ||
+            'Enter new secure password'
+          }
+          confirmPasswordLabel={
+            t('auth:setup.confirmPasswordLabel') || 'Confirm Password'
+          }
+          confirmPasswordPlaceholder={
+            t('auth:setup.confirmPasswordPlaceholder') ||
+            'Re-enter your new password'
+          }
+        />
 
         {/* Submit CTA */}
         <TouchableOpacity
@@ -223,115 +143,4 @@ export const FirstTimeSetupScreen: React.FC<FirstTimeSetupScreenProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  header: {
-    marginBottom: 20,
-  },
-  iconCircle: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: colors.primaryLight,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  title: {
-    fontSize: 26,
-    fontWeight: '800',
-    color: colors.text,
-    letterSpacing: -0.5,
-  },
-  subtitle: {
-    fontSize: 14,
-    color: colors.textSecondary,
-    marginTop: 6,
-    lineHeight: 20,
-  },
-  errorBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.errorLight,
-    borderColor: 'rgba(186, 26, 26, 0.25)',
-    borderWidth: 1,
-    borderRadius: 14,
-    padding: 14,
-    marginBottom: 18,
-  },
-  errorIcon: {
-    marginRight: 10,
-  },
-  errorText: {
-    flex: 1,
-    fontSize: 13,
-    fontWeight: '600',
-    color: colors.errorDark,
-    lineHeight: 18,
-  },
-  form: {
-    gap: 16,
-  },
-  fieldGroup: {
-    marginBottom: 2,
-  },
-  label: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: colors.text,
-    marginBottom: 8,
-  },
-  required: {
-    color: colors.primary,
-  },
-  inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    height: 54,
-    backgroundColor: colors.inputBg,
-    borderColor: colors.inputBorder,
-    borderWidth: 1.2,
-    borderRadius: 14,
-    paddingHorizontal: 14,
-  },
-  inputSuccessBorder: {
-    borderColor: colors.success,
-  },
-  inputIconContainer: {
-    marginRight: 10,
-  },
-  input: {
-    flex: 1,
-    fontSize: 15,
-    color: colors.text,
-    height: '100%',
-  },
-  eyeButton: {
-    padding: 6,
-  },
-  submitButton: {
-    height: 54,
-    backgroundColor: colors.primary,
-    borderRadius: 14,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 12,
-    shadowColor: colors.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  submitButtonDisabled: {
-    opacity: 0.5,
-  },
-  submitButtonContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  submitButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '700',
-  },
-});
+const styles = passwordFormStyles;

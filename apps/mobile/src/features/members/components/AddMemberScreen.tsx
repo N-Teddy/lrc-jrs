@@ -2,13 +2,8 @@ import { useCreateMemberMutation, useTownContext } from '@jrs/client-core';
 import type { Gender, UserRole } from '@jrs/shared';
 import {
   ArrowLeft,
-  CalendarBlank,
-  Check,
   CheckCircle,
-  EnvelopeSimple,
   Info,
-  Phone,
-  User,
   WarningCircle,
 } from 'phosphor-react-native';
 import React, { useState } from 'react';
@@ -20,12 +15,16 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
   TouchableWithoutFeedback,
   View,
 } from 'react-native';
 import { colors } from '../../../theme/colors';
+import {
+  type MemberFormData,
+  MemberFormFields,
+  memberFormStyles,
+} from './MemberFormFields';
 
 interface AddMemberScreenProps {
   onBack: () => void;
@@ -39,24 +38,33 @@ export const AddMemberScreen: React.FC<AddMemberScreenProps> = ({
   const { activeTown } = useTownContext();
   const createMemberMutation = useCreateMemberMutation();
 
-  const [fullName, setFullName] = useState('');
-  const [phoneNumber, setPhoneNumber] = useState('');
-  const [email, setEmail] = useState('');
-  const [gender, setGender] = useState<Gender>('MALE');
-  const [dateOfBirth, setDateOfBirth] = useState('');
-  const [role, setRole] = useState<UserRole>('MEMBER' as UserRole);
+  const [formData, setFormData] = useState<MemberFormData>({
+    fullName: '',
+    phoneNumber: '',
+    email: '',
+    gender: 'MALE' as Gender,
+    dateOfBirth: '',
+    role: 'MEMBER' as UserRole,
+  });
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  const handleFieldChange = <K extends keyof MemberFormData>(
+    field: K,
+    value: MemberFormData[K],
+  ) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
   const handleSubmit = async () => {
-    if (!fullName.trim()) {
+    if (!formData.fullName.trim()) {
       setErrorMessage('Full name is required.');
       return;
     }
-    if (!phoneNumber.trim()) {
+    if (!formData.phoneNumber.trim()) {
       setErrorMessage('Phone number is required.');
       return;
     }
-    if (!dateOfBirth.trim()) {
+    if (!formData.dateOfBirth.trim()) {
       setErrorMessage('Date of birth is required (YYYY-MM-DD).');
       return;
     }
@@ -69,13 +77,13 @@ export const AddMemberScreen: React.FC<AddMemberScreenProps> = ({
 
     try {
       await createMemberMutation.mutateAsync({
-        fullName: fullName.trim(),
-        phoneNumber: phoneNumber.trim(),
-        email: email.trim() || undefined,
-        gender,
-        dateOfBirth: dateOfBirth.trim(),
-        role,
-        homeTownId: activeTown.id, // Fellowship hub is default context!
+        fullName: formData.fullName.trim(),
+        phoneNumber: formData.phoneNumber.trim(),
+        email: formData.email.trim() || undefined,
+        gender: formData.gender,
+        dateOfBirth: formData.dateOfBirth.trim(),
+        role: formData.role,
+        homeTownId: activeTown.id,
         hasAppAccess: true,
       });
 
@@ -138,169 +146,11 @@ export const AddMemberScreen: React.FC<AddMemberScreenProps> = ({
           )}
 
           <View style={styles.form}>
-            {/* Full Name */}
-            <View style={styles.fieldGroup}>
-              <Text style={styles.label}>
-                Full Name <Text style={styles.required}>*</Text>
-              </Text>
-              <View style={styles.inputContainer}>
-                <User size={18} weight="bold" color={colors.textMuted} />
-                <TextInput
-                  style={styles.input}
-                  placeholder="e.g. Emmanuel Ndongo"
-                  placeholderTextColor={colors.textMuted}
-                  value={fullName}
-                  onChangeText={setFullName}
-                  returnKeyType="next"
-                />
-              </View>
-            </View>
-
-            {/* WhatsApp Phone Number */}
-            <View style={styles.fieldGroup}>
-              <Text style={styles.label}>
-                Phone Number <Text style={styles.required}>*</Text>
-              </Text>
-              <View style={styles.inputContainer}>
-                <Phone size={18} weight="bold" color={colors.textMuted} />
-                <TextInput
-                  style={styles.input}
-                  placeholder="e.g. 670 000 000"
-                  placeholderTextColor={colors.textMuted}
-                  value={phoneNumber}
-                  onChangeText={setPhoneNumber}
-                  keyboardType="phone-pad"
-                  returnKeyType="next"
-                />
-              </View>
-            </View>
-
-            {/* Email Address */}
-            <View style={styles.fieldGroup}>
-              <Text style={styles.label}>Email Address (Optional)</Text>
-              <View style={styles.inputContainer}>
-                <EnvelopeSimple
-                  size={18}
-                  weight="bold"
-                  color={colors.textMuted}
-                />
-                <TextInput
-                  style={styles.input}
-                  placeholder="e.g. emmanuel@example.org"
-                  placeholderTextColor={colors.textMuted}
-                  value={email}
-                  onChangeText={setEmail}
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                  returnKeyType="next"
-                />
-              </View>
-            </View>
-
-            {/* Gender Selector: Male and Female */}
-            <View style={styles.fieldGroup}>
-              <Text style={styles.label}>
-                Gender <Text style={styles.required}>*</Text>
-              </Text>
-              <View style={styles.genderRow}>
-                <TouchableOpacity
-                  style={[
-                    styles.genderButton,
-                    gender === 'MALE' && styles.genderButtonActive,
-                  ]}
-                  onPress={() => setGender('MALE')}
-                  activeOpacity={0.8}
-                >
-                  <Text
-                    style={[
-                      styles.genderButtonText,
-                      gender === 'MALE' && styles.genderButtonTextActive,
-                    ]}
-                  >
-                    Male
-                  </Text>
-                  {gender === 'MALE' && (
-                    <Check size={16} weight="bold" color="#FFFFFF" />
-                  )}
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={[
-                    styles.genderButton,
-                    gender === 'FEMALE' && styles.genderButtonActive,
-                  ]}
-                  onPress={() => setGender('FEMALE')}
-                  activeOpacity={0.8}
-                >
-                  <Text
-                    style={[
-                      styles.genderButtonText,
-                      gender === 'FEMALE' && styles.genderButtonTextActive,
-                    ]}
-                  >
-                    Female
-                  </Text>
-                  {gender === 'FEMALE' && (
-                    <Check size={16} weight="bold" color="#FFFFFF" />
-                  )}
-                </TouchableOpacity>
-              </View>
-            </View>
-
-            {/* Date of Birth */}
-            <View style={styles.fieldGroup}>
-              <Text style={styles.label}>
-                Date of Birth (YYYY-MM-DD){' '}
-                <Text style={styles.required}>*</Text>
-              </Text>
-              <View style={styles.inputContainer}>
-                <CalendarBlank
-                  size={18}
-                  weight="bold"
-                  color={colors.textMuted}
-                />
-                <TextInput
-                  style={styles.input}
-                  placeholder="e.g. 2002-08-15"
-                  placeholderTextColor={colors.textMuted}
-                  value={dateOfBirth}
-                  onChangeText={setDateOfBirth}
-                  keyboardType="numbers-and-punctuation"
-                  returnKeyType="done"
-                />
-              </View>
-            </View>
-
-            {/* Role in Fellowship */}
-            <View style={styles.fieldGroup}>
-              <Text style={styles.label}>Role in Fellowship</Text>
-              <View style={styles.roleRow}>
-                {[
-                  { label: 'Member', value: 'MEMBER' },
-                  { label: 'PC', value: 'PC' },
-                  { label: 'AP', value: 'AP' },
-                ].map((item) => (
-                  <TouchableOpacity
-                    key={item.value}
-                    style={[
-                      styles.roleButton,
-                      role === item.value && styles.roleButtonActive,
-                    ]}
-                    onPress={() => setRole(item.value as UserRole)}
-                  >
-                    <Text
-                      style={[
-                        styles.roleButtonText,
-                        role === item.value && styles.roleButtonTextActive,
-                      ]}
-                    >
-                      {item.label}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </View>
+            <MemberFormFields
+              data={formData}
+              onChange={handleFieldChange}
+              isCreate={true}
+            />
 
             {/* Submit Button */}
             <TouchableOpacity
@@ -329,181 +179,25 @@ export const AddMemberScreen: React.FC<AddMemberScreenProps> = ({
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  topBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingVertical: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.cardBorder,
-    backgroundColor: colors.card,
-  },
-  backButton: {
-    padding: 4,
-  },
-  topBarTitle: {
-    fontSize: 17,
-    fontWeight: '800',
-    color: colors.text,
-  },
-  scrollContent: {
-    padding: 20,
-    paddingBottom: 40,
-  },
+  ...memberFormStyles,
   hubBanner: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    backgroundColor: colors.primaryLight,
-    borderColor: colors.primaryBorder,
-    borderWidth: 1,
+    backgroundColor: 'rgba(217, 119, 6, 0.08)',
     borderRadius: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    marginBottom: 18,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    marginBottom: 20,
+    gap: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(217, 119, 6, 0.2)',
   },
   hubBannerText: {
     fontSize: 13,
     color: colors.textSecondary,
   },
   hubBold: {
-    fontWeight: '800',
+    fontWeight: '700',
     color: colors.primary,
-  },
-  errorBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.errorLight,
-    borderColor: 'rgba(186, 26, 26, 0.25)',
-    borderWidth: 1,
-    borderRadius: 14,
-    padding: 12,
-    marginBottom: 18,
-  },
-  errorIcon: {
-    marginRight: 10,
-  },
-  errorText: {
-    flex: 1,
-    fontSize: 13,
-    fontWeight: '600',
-    color: colors.errorDark,
-  },
-  form: {
-    gap: 16,
-  },
-  fieldGroup: {
-    marginBottom: 2,
-  },
-  label: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: colors.text,
-    marginBottom: 8,
-  },
-  required: {
-    color: colors.primary,
-  },
-  inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    height: 52,
-    backgroundColor: colors.inputBg,
-    borderColor: colors.inputBorder,
-    borderWidth: 1.2,
-    borderRadius: 14,
-    paddingHorizontal: 14,
-    gap: 10,
-  },
-  input: {
-    flex: 1,
-    fontSize: 15,
-    color: colors.text,
-    height: '100%',
-  },
-  genderRow: {
-    flexDirection: 'row',
-    gap: 10,
-  },
-  genderButton: {
-    flex: 1,
-    height: 50,
-    borderRadius: 14,
-    backgroundColor: colors.inputBg,
-    borderColor: colors.inputBorder,
-    borderWidth: 1.2,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-  },
-  genderButtonActive: {
-    backgroundColor: colors.primary,
-    borderColor: colors.primary,
-  },
-  genderButtonText: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: colors.textSecondary,
-  },
-  genderButtonTextActive: {
-    color: '#FFFFFF',
-  },
-  roleRow: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  roleButton: {
-    flex: 1,
-    height: 44,
-    borderRadius: 12,
-    backgroundColor: colors.inputBg,
-    borderColor: colors.inputBorder,
-    borderWidth: 1.2,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  roleButtonActive: {
-    backgroundColor: colors.text,
-    borderColor: colors.text,
-  },
-  roleButtonText: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: colors.textSecondary,
-  },
-  roleButtonTextActive: {
-    color: '#FFFFFF',
-  },
-  submitButton: {
-    height: 54,
-    backgroundColor: colors.primary,
-    borderRadius: 14,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 14,
-    shadowColor: colors.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  submitButtonDisabled: {
-    opacity: 0.6,
-  },
-  submitButtonContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  submitButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '700',
   },
 });

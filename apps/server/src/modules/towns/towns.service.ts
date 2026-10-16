@@ -7,7 +7,10 @@ import { Town, type TownDocument } from '../../database/schemas';
 export class TownsService {
   constructor(
     @InjectModel(Town.name) private readonly townModel: Model<TownDocument>,
-  ) {}
+  ) {
+    void InjectModel;
+    void Town;
+  }
 
   async findAll() {
     const towns = await this.townModel.find().sort({ name: 1 }).exec();

@@ -1,46 +1,18 @@
-import { useAuth, useTownContext } from '@jrs/client-core';
-import type { IAuthUser, ITown } from '@jrs/shared';
-import { useEffect, useMemo, useState } from 'react';
+import {
+  type AuthFlowScreenState,
+  useAuth,
+  useAuthFlowState,
+  useTownContext,
+} from '@jrs/client-core';
+import { useMemo } from 'react';
 
-type MobileAuthScreenState =
-  | 'login'
-  | 'setup'
-  | 'forgot-password'
-  | 'verify-otp'
-  | 'reset-password';
+export type { AuthFlowScreenState as MobileAuthScreenState };
 
 export function useMobileAuthFlow() {
   const { user, isAuthenticated, isLoading, signOut } = useAuth();
   const { availableTowns, isLoadingTowns } = useTownContext();
 
-  const [currentScreen, setCurrentScreen] =
-    useState<MobileAuthScreenState>('login');
-
-  // Multi-Town Hub Selection State
-  const [hasExplicitlySelectedTown, setHasExplicitlySelectedTown] =
-    useState(false);
-  const [isSwitchingRegion, setIsSwitchingRegion] = useState(false);
-
-  // First-Time Setup State
-  const [setupData, setSetupData] = useState<{
-    setupToken: string;
-    user: IAuthUser;
-  } | null>(null);
-
-  // Recovery Flow State
-  const [recoveryIdentifier, setRecoveryIdentifier] = useState('');
-  const [recoveryChannel, setRecoveryChannel] = useState<
-    'auto' | 'whatsapp' | 'email'
-  >('auto');
-  const [resetToken, setResetToken] = useState('');
-
-  // Reset town selection state on logout so next login always prompts map
-  useEffect(() => {
-    if (!isAuthenticated) {
-      setHasExplicitlySelectedTown(false);
-      setIsSwitchingRegion(false);
-    }
-  }, [isAuthenticated]);
+  const flow = useAuthFlowState(isAuthenticated);
 
   // Determine if user has access to multiple towns
   const hasMultiTownAccess = useMemo(() => {
@@ -60,67 +32,26 @@ export function useMobileAuthFlow() {
     isAuthenticated &&
       user &&
       hasMultiTownAccess &&
-      (!hasExplicitlySelectedTown || isSwitchingRegion),
+      (!flow.hasExplicitlySelectedTown || flow.isSwitchingRegion),
   );
 
-  const handleTownSelected = (_town: ITown) => {
-    setHasExplicitlySelectedTown(true);
-    setIsSwitchingRegion(false);
-  };
-
-  const handleSwitchRegion = () => {
-    setIsSwitchingRegion(true);
-  };
-
-  const handleRequiresPasswordChange = (data: {
-    setupToken: string;
-    user: IAuthUser;
-  }) => {
-    setSetupData(data);
-    setCurrentScreen('setup');
-  };
-
   const handleCancelSetup = () => {
-    setSetupData(null);
-    setCurrentScreen('login');
+    flow.setSetupData(null);
+    flow.setCurrentScreen('login');
   };
 
   const handleSetupComplete = () => {
-    setSetupData(null);
-    setCurrentScreen('login');
+    flow.setSetupData(null);
+    flow.setCurrentScreen('login');
   };
 
   const handleForgotPasswordClick = (identifier?: string) => {
-    setRecoveryIdentifier(identifier || '');
-    setCurrentScreen('forgot-password');
-  };
-
-  const handleBackToSignIn = () => {
-    setCurrentScreen('login');
-  };
-
-  const handleCodeSent = (
-    identifier: string,
-    channel: 'auto' | 'whatsapp' | 'email',
-  ) => {
-    setRecoveryIdentifier(identifier);
-    setRecoveryChannel(channel);
-    setCurrentScreen('verify-otp');
+    flow.setRecoveryIdentifier(identifier || '');
+    flow.setCurrentScreen('forgot-password');
   };
 
   const handleBackToChangeContact = () => {
-    setCurrentScreen('forgot-password');
-  };
-
-  const handleCodeVerified = (token: string) => {
-    setResetToken(token);
-    setCurrentScreen('reset-password');
-  };
-
-  const handlePasswordResetComplete = () => {
-    setResetToken('');
-    setRecoveryIdentifier('');
-    setCurrentScreen('login');
+    flow.setCurrentScreen('forgot-password');
   };
 
   return {
@@ -128,23 +59,23 @@ export function useMobileAuthFlow() {
     isAuthenticated,
     isLoading: isLoading || (isAuthenticated && isLoadingTowns),
     signOut,
-    currentScreen,
-    setupData,
-    recoveryIdentifier,
-    recoveryChannel,
-    resetToken,
+    currentScreen: flow.currentScreen,
+    setupData: flow.setupData,
+    recoveryIdentifier: flow.recoveryIdentifier,
+    recoveryChannel: flow.recoveryChannel,
+    resetToken: flow.resetToken,
     hasMultiTownAccess,
     shouldShowRegionSelector,
-    handleTownSelected,
-    handleSwitchRegion,
-    handleRequiresPasswordChange,
+    handleTownSelected: flow.handleTownSelected,
+    handleSwitchRegion: flow.handleSwitchRegion,
+    handleRequiresPasswordChange: flow.handleRequiresPasswordChange,
     handleCancelSetup,
     handleSetupComplete,
     handleForgotPasswordClick,
-    handleBackToSignIn,
-    handleCodeSent,
+    handleBackToSignIn: flow.handleBackToLogin,
+    handleCodeSent: flow.handleCodeSent,
     handleBackToChangeContact,
-    handleCodeVerified,
-    handlePasswordResetComplete,
+    handleCodeVerified: flow.handleOtpVerified,
+    handlePasswordResetComplete: flow.handleRecoverySuccess,
   };
 }
