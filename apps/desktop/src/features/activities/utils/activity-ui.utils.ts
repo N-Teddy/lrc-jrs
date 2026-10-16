@@ -251,6 +251,7 @@ export function isActivityStarted(startDateStr: string): boolean {
   }
 }
 
+// fallow-ignore-next-line unused-export
 export function getTimeUntilStart(startDateStr: string): string {
   try {
     const start = new Date(startDateStr);

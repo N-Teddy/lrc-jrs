@@ -5,6 +5,7 @@
 /**
  * Generates up to two uppercase initials from a user's full name.
  */
+// fallow-ignore-next-line unused-export
 export function getUserInitials(fullName?: string): string {
   if (!fullName?.trim()) {
     return 'JR';

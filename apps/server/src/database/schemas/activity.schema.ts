@@ -9,7 +9,7 @@ import {
 export type ActivityDocument = Activity & Document;
 
 @Schema({ _id: false })
-export class ActivityChangeLog {
+class ActivityChangeLog {
   @Prop({
     type: String,
     required: true,
@@ -36,11 +36,10 @@ export class ActivityChangeLog {
   reason?: string;
 }
 
-export const ActivityChangeLogSchema =
-  SchemaFactory.createForClass(ActivityChangeLog);
+const ActivityChangeLogSchema = SchemaFactory.createForClass(ActivityChangeLog);
 
 @Schema({ _id: false })
-export class ActivityReport {
+class ActivityReport {
   @Prop({ type: String, required: true })
   fileId: string;
 
@@ -69,8 +68,7 @@ export class ActivityReport {
   fileSize?: number;
 }
 
-export const ActivityReportSchema =
-  SchemaFactory.createForClass(ActivityReport);
+const ActivityReportSchema = SchemaFactory.createForClass(ActivityReport);
 
 @Schema(baseSchemaOptions)
 export class Activity extends BaseDocument {

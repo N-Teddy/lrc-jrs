@@ -1,0 +1,17 @@
+{
+  "$schema": "https://raw.githubusercontent.com/fallow-rs/fallow/main/schema.json",
+  "entry": ["src/index.{js,jsx,mjs}", "src/main.{js,jsx,mjs}"],
+  "workspaces": {
+    "patterns": ["apps/*", "packages/*"]
+  },
+  "duplicates": {
+    "minOccurrences": 3
+  },
+  "rules": {
+    "unused-dependencies": "warn",
+    "unused-class-members": "off",
+    "complexity-cyclomatic": "off",
+    "complexity-cognitive": "off",
+    "complexity-crap": "off"
+  }
+}

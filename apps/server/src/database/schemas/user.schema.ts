@@ -16,7 +16,7 @@ export enum AccountStatus {
 }
 
 @Schema({ _id: false })
-export class UserAccountInfo {
+class UserAccountInfo {
   @Prop({
     type: String,
     required: true,

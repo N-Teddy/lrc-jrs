@@ -3,9 +3,6 @@ import { CheckCircle, Circle } from '@phosphor-icons/react';
 import type React from 'react';
 import type { PasswordRule } from '../utils/password.utils';
 
-export { validatePasswordRules } from '../utils/password.utils';
-export type { PasswordRule };
-
 interface PasswordRequirementsProps {
   rules: PasswordRule[];
 }

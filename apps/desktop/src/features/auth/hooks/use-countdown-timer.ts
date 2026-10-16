@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 /**
  * Format total seconds into a mm:ss display string.
  */
-export function formatTimerMinutes(totalSec: number): string {
+function formatTimerMinutes(totalSec: number): string {
   const mins = Math.floor(totalSec / 60);
   const secs = totalSec % 60;
   return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;

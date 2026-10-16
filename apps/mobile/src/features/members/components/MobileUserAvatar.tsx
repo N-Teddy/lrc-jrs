@@ -11,7 +11,7 @@ import {
 import { colors } from '../../../theme/colors';
 import { resolveAvatarUrl } from '../utils/avatar-resolver.util';
 
-export type MobileAvatarSize = 'sm' | 'md' | 'lg' | 'xl' | '2xl';
+type MobileAvatarSize = 'sm' | 'md' | 'lg' | 'xl' | '2xl';
 
 interface MobileUserAvatarProps {
   avatarUrl?: string | null;

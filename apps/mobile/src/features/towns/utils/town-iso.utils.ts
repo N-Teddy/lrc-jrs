@@ -26,7 +26,7 @@ export function mapTownCodeToIso(townCode: string): string | null {
  * Converts longitude and latitude coordinates into SVG canvas (1000x900) coordinates.
  * Using GeoMercator projection centered at [12.5, 7.35] with scale 4500 and translate [500, 450].
  */
-export function projectMercator(lng: number, lat: number): [number, number] {
+function projectMercator(lng: number, lat: number): [number, number] {
   const lambda = (lng - 12.5) * (Math.PI / 180);
   const phi = (lat * Math.PI) / 180;
   const phi0 = (7.35 * Math.PI) / 180;

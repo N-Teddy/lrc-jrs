@@ -27,6 +27,7 @@ interface AuditEvent {
   badgeBg: string;
 }
 
+// fallow-ignore-next-line unused-export
 export const SecurityAuditFeedView: React.FC<SecurityAuditFeedViewProps> = ({
   members,
   onOpenManageAccess,

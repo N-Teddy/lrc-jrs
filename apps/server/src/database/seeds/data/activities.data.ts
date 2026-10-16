@@ -107,7 +107,7 @@ const TOWN_NAMES: Record<string, string> = {
 /**
  * Generates ~50 activities for a given year spread across all 12 months and 4 towns.
  */
-export function generateYearActivities(
+function generateYearActivities(
   year: number,
   targetCount = 50,
 ): SeedActivityData[] {
@@ -186,7 +186,7 @@ export function generateYearActivities(
   return activities;
 }
 
-export function generateAllActivities(): SeedActivityData[] {
+function generateAllActivities(): SeedActivityData[] {
   const activities2024 = generateYearActivities(2024, 50);
   const activities2025 = generateYearActivities(2025, 50);
   const activities2026 = generateYearActivities(2026, 50);

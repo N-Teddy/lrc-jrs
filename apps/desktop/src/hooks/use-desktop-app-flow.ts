@@ -2,7 +2,7 @@ import { useAuth, useHttp, useTownContext } from '@jrs/client-core';
 import type { IAuthUser, ITown } from '@jrs/shared';
 import { useEffect, useMemo, useState } from 'react';
 
-export type AuthScreenState =
+type AuthScreenState =
   | 'login'
   | 'setup'
   | 'forgot-password'

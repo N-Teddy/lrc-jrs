@@ -10,7 +10,7 @@ import {
   TOWN_TO_ISO_MAP,
 } from '../utils/town-iso.utils';
 
-export interface RegionHoverInfo {
+interface RegionHoverInfo {
   title: string;
   subtitle?: string;
   hasHub?: boolean;

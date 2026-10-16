@@ -104,10 +104,12 @@ export const MembersFeature: React.FC = () => {
     }
   };
 
-  // If viewing a single member detail page
-  if (selectedMemberId) {
-    return (
-      <div className="w-full flex flex-col gap-6">
+  const members = membersData?.items ?? [];
+  const total = membersData?.total ?? members.length;
+
+  return (
+    <div className="w-full flex flex-col gap-6">
+      {selectedMemberId ? (
         <MemberDetailPage
           memberId={selectedMemberId}
           onBack={() => setSelectedMemberId(null)}
@@ -116,127 +118,96 @@ export const MembersFeature: React.FC = () => {
           onDelete={isCurrentUserAp ? (m) => setDeletingMember(m) : undefined}
           isCurrentUserAp={isCurrentUserAp}
         />
-
-        {/* Modals available from detail page as well */}
-        <EditMemberModal
-          isOpen={Boolean(editingMember)}
-          member={editingMember}
-          onClose={() => setEditingMember(null)}
-          onSubmit={handleUpdateMember}
-          isSubmitting={updateMemberMutation.isPending}
-        />
-
-        <ManageAccessModal
-          isOpen={Boolean(accessMember)}
-          member={accessMember}
-          onClose={() => setAccessMember(null)}
-          onUpdateAccess={async (id, dto) => {
-            await updateAccessMutation.mutateAsync({ id, dto });
-          }}
-        />
-
-        <DeleteMemberDialog
-          isOpen={Boolean(deletingMember)}
-          member={deletingMember}
-          onClose={() => setDeletingMember(null)}
-          onConfirmDelete={handleConfirmDelete}
-          isDeleting={deleteMemberMutation.isPending}
-        />
-      </div>
-    );
-  }
-
-  const members = membersData?.items ?? [];
-  const total = membersData?.total ?? members.length;
-
-  return (
-    <div className="w-full flex flex-col gap-6">
-      {/* 1. Header & Title */}
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-extrabold text-[#1e1b19] tracking-tight">
-            {t('members:title')}
-          </h1>
-        </div>
-      </div>
-
-      {/* 2. Top Metric Cards */}
-      <MemberStatsOverview
-        stats={stats}
-        isLoading={isStatsLoading}
-        hubName={activeTown ? activeTown.name : 'Hub'}
-      />
-
-      {/* 3. Filter Toolbar */}
-      <MemberFilterToolbar
-        search={search}
-        onSearchChange={(val) => {
-          setSearch(val);
-          setPage(1);
-        }}
-        roleFilter={roleFilter}
-        onRoleFilterChange={(role) => {
-          setRoleFilter(role);
-          setPage(1);
-        }}
-        isJrOnly={isJrOnly}
-        onToggleJrOnly={() => {
-          setIsJrOnly(!isJrOnly);
-          setPage(1);
-        }}
-        viewMode={viewMode}
-        onViewModeChange={(mode) => {
-          setViewMode(mode);
-          setPage(1);
-        }}
-        onOpenRegisterModal={() => setIsRegisterModalOpen(true)}
-      />
-
-      {/* 4. Directory View (Table or Grid) */}
-      {viewMode === 'table' ? (
-        <MemberTableView
-          members={members}
-          isLoading={isMembersLoading}
-          total={total}
-          page={page}
-          limit={limit}
-          onPageChange={setPage}
-          onViewMember={(id) => setSelectedMemberId(id)}
-          onEditMember={(m) => setEditingMember(m)}
-          onManageAccess={(m) => setAccessMember(m)}
-          onDeleteMember={
-            isCurrentUserAp ? (m) => setDeletingMember(m) : undefined
-          }
-          isCurrentUserAp={isCurrentUserAp}
-        />
       ) : (
-        <MemberCardGridView
-          members={members}
-          isLoading={isMembersLoading}
-          total={total}
-          page={page}
-          limit={limit}
-          onPageChange={setPage}
-          onViewMember={(id) => setSelectedMemberId(id)}
-          onEditMember={(m) => setEditingMember(m)}
-          onManageAccess={(m) => setAccessMember(m)}
-          onDeleteMember={
-            isCurrentUserAp ? (m) => setDeletingMember(m) : undefined
-          }
-          isCurrentUserAp={isCurrentUserAp}
-        />
-      )}
+        <>
+          {/* 1. Header & Title */}
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
+            <div className="flex flex-col gap-1">
+              <h1 className="text-2xl font-extrabold text-[#1e1b19] tracking-tight">
+                {t('members:title')}
+              </h1>
+            </div>
+          </div>
 
-      {/* 5. Modals */}
-      <RegisterMemberModal
-        isOpen={isRegisterModalOpen}
-        onClose={() => setIsRegisterModalOpen(false)}
-        onSubmit={handleCreateMember}
-        activeTownName={activeTown ? activeTown.name : 'Hub'}
-        activeTownCode={activeTown ? activeTown.code : 'HUB'}
-        activePcCount={stats?.activePcCount ?? 0}
-        isSubmitting={createMemberMutation.isPending}
-      />
+          {/* 2. Top Metric Cards */}
+          <MemberStatsOverview
+            stats={stats}
+            isLoading={isStatsLoading}
+            hubName={activeTown ? activeTown.name : 'Hub'}
+          />
+
+          {/* 3. Filter Toolbar */}
+          <MemberFilterToolbar
+            search={search}
+            onSearchChange={(val) => {
+              setSearch(val);
+              setPage(1);
+            }}
+            roleFilter={roleFilter}
+            onRoleFilterChange={(role) => {
+              setRoleFilter(role);
+              setPage(1);
+            }}
+            isJrOnly={isJrOnly}
+            onToggleJrOnly={() => {
+              setIsJrOnly(!isJrOnly);
+              setPage(1);
+            }}
+            viewMode={viewMode}
+            onViewModeChange={(mode) => {
+              setViewMode(mode);
+              setPage(1);
+            }}
+            onOpenRegisterModal={() => setIsRegisterModalOpen(true)}
+          />
+
+          {/* 4. Directory View (Table or Grid) */}
+          {viewMode === 'table' ? (
+            <MemberTableView
+              members={members}
+              isLoading={isMembersLoading}
+              total={total}
+              page={page}
+              limit={limit}
+              onPageChange={setPage}
+              onViewMember={(id) => setSelectedMemberId(id)}
+              onEditMember={(m) => setEditingMember(m)}
+              onManageAccess={(m) => setAccessMember(m)}
+              onDeleteMember={
+                isCurrentUserAp ? (m) => setDeletingMember(m) : undefined
+              }
+              isCurrentUserAp={isCurrentUserAp}
+            />
+          ) : (
+            <MemberCardGridView
+              members={members}
+              isLoading={isMembersLoading}
+              total={total}
+              page={page}
+              limit={limit}
+              onPageChange={setPage}
+              onViewMember={(id) => setSelectedMemberId(id)}
+              onEditMember={(m) => setEditingMember(m)}
+              onManageAccess={(m) => setAccessMember(m)}
+              onDeleteMember={
+                isCurrentUserAp ? (m) => setDeletingMember(m) : undefined
+              }
+              isCurrentUserAp={isCurrentUserAp}
+            />
+          )}
+
+          {/* 5. Modals */}
+          <RegisterMemberModal
+            isOpen={isRegisterModalOpen}
+            onClose={() => setIsRegisterModalOpen(false)}
+            onSubmit={handleCreateMember}
+            activeTownName={activeTown ? activeTown.name : 'Hub'}
+            activeTownCode={activeTown ? activeTown.code : 'HUB'}
+            activePcCount={stats?.activePcCount ?? 0}
+            isSubmitting={createMemberMutation.isPending}
+          />
+        </>
+      )}
 
       <EditMemberModal
         isOpen={Boolean(editingMember)}

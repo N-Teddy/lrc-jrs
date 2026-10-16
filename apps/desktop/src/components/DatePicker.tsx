@@ -8,6 +8,7 @@ import {
 } from '@phosphor-icons/react';
 import type React from 'react';
 import { useEffect, useId, useRef, useState } from 'react';
+import { useClickOutside } from '../hooks/use-click-outside';
 import { CustomSelect, type SelectOption } from './CustomSelect';
 
 // ==========================================
@@ -112,6 +113,80 @@ function getFirstDayOfWeek(year: number, monthIndex: number): number {
   return (day + 6) % 7;
 }
 
+interface PickerTriggerProps {
+  inputId?: string;
+  disabled?: boolean;
+  isOpen: boolean;
+  onToggle: () => void;
+  ariaLabel?: string;
+  placeholder?: string;
+  displayText: string;
+  hasValue: boolean;
+  onClear: () => void;
+  icon?: React.ReactNode;
+}
+
+const PickerTrigger: React.FC<PickerTriggerProps> = ({
+  inputId,
+  disabled,
+  isOpen,
+  onToggle,
+  ariaLabel,
+  placeholder,
+  displayText,
+  hasValue,
+  onClear,
+  icon,
+}) => (
+  <div
+    id={inputId}
+    role="combobox"
+    tabIndex={disabled ? -1 : 0}
+    aria-label={ariaLabel || placeholder}
+    aria-expanded={isOpen}
+    onClick={() => !disabled && onToggle()}
+    onKeyDown={(e) => {
+      if ((e.key === 'Enter' || e.key === ' ') && !disabled) {
+        e.preventDefault();
+        onToggle();
+      }
+    }}
+    className={`w-full flex items-center justify-between h-10 px-3.5 rounded-lg border text-xs transition-all cursor-pointer select-none ${
+      disabled
+        ? 'opacity-60 bg-[#f4ece9] border-[#e8e1dd] cursor-not-allowed'
+        : isOpen
+          ? 'bg-white border-[#b85028] ring-2 ring-[#b85028]/20 shadow-xs'
+          : 'bg-[#faf2ee] hover:bg-[#f4ece9] border-[#e8e1dd] focus:bg-white focus:border-[#b85028]'
+    }`}
+  >
+    <span
+      className={`truncate font-medium ${
+        hasValue ? 'text-[#1e1b19]' : 'text-[#8a726a]'
+      }`}
+    >
+      {displayText}
+    </span>
+    <div className="flex items-center gap-1.5 text-[#8a726a] shrink-0">
+      {hasValue && !disabled && (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onClear();
+          }}
+          className="p-1 rounded hover:bg-[#e8e1dd] text-[#8a726a] hover:text-[#1e1b19] transition-colors"
+          title="Clear"
+        >
+          <X size={12} />
+        </button>
+      )}
+      {icon ?? (
+        <CalendarBlank size={16} weight="bold" className="text-[#b85028]" />
+      )}
+    </div>
+  </div>
+);
+
 // ==========================================
 // 1. DATE PICKER
 // ==========================================
@@ -172,20 +247,14 @@ export const DatePicker: React.FC<DatePickerProps> = ({
   }, [value]);
 
   // Click outside to close
-  useEffect(() => {
-    if (!isOpen) return;
-    function handleClickOutside(event: MouseEvent) {
-      if (
-        containerRef.current &&
-        !containerRef.current.contains(event.target as Node)
-      ) {
-        setIsOpen(false);
-        setViewMode('days');
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isOpen]);
+  useClickOutside(
+    containerRef,
+    () => {
+      setIsOpen(false);
+      setViewMode('days');
+    },
+    isOpen,
+  );
 
   const handlePrevMonth = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -237,51 +306,17 @@ export const DatePicker: React.FC<DatePickerProps> = ({
   return (
     <div ref={containerRef} className={`relative w-full ${className}`}>
       {/* Input Trigger */}
-      <div
-        id={inputId}
-        role="combobox"
-        tabIndex={disabled ? -1 : 0}
-        aria-label={ariaLabel || placeholder}
-        aria-expanded={isOpen}
-        onClick={() => !disabled && setIsOpen(!isOpen)}
-        onKeyDown={(e) => {
-          if ((e.key === 'Enter' || e.key === ' ') && !disabled) {
-            e.preventDefault();
-            setIsOpen(!isOpen);
-          }
-        }}
-        className={`w-full flex items-center justify-between h-10 px-3.5 rounded-lg border text-xs transition-all cursor-pointer select-none ${
-          disabled
-            ? 'opacity-60 bg-[#f4ece9] border-[#e8e1dd] cursor-not-allowed'
-            : isOpen
-              ? 'bg-white border-[#b85028] ring-2 ring-[#b85028]/20 shadow-xs'
-              : 'bg-[#faf2ee] hover:bg-[#f4ece9] border-[#e8e1dd] focus:bg-white focus:border-[#b85028]'
-        }`}
-      >
-        <span
-          className={`truncate font-medium ${
-            value ? 'text-[#1e1b19]' : 'text-[#8a726a]'
-          }`}
-        >
-          {value ? formatDisplayDate(value) : placeholder}
-        </span>
-        <div className="flex items-center gap-1.5 text-[#8a726a] shrink-0">
-          {value && !disabled && (
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                onChange('');
-              }}
-              className="p-1 rounded hover:bg-[#e8e1dd] text-[#8a726a] hover:text-[#1e1b19] transition-colors"
-              title="Clear"
-            >
-              <X size={12} />
-            </button>
-          )}
-          <CalendarBlank size={16} weight="bold" className="text-[#b85028]" />
-        </div>
-      </div>
+      <PickerTrigger
+        inputId={inputId}
+        disabled={disabled}
+        isOpen={isOpen}
+        onToggle={() => setIsOpen(!isOpen)}
+        ariaLabel={ariaLabel}
+        placeholder={placeholder}
+        displayText={value ? formatDisplayDate(value) : placeholder}
+        hasValue={Boolean(value)}
+        onClear={() => onChange('')}
+      />
 
       {/* Popover Calendar */}
       {isOpen && (
@@ -530,19 +565,7 @@ export const MonthYearPicker: React.FC<MonthYearPickerProps> = ({
     }
   }, [value]);
 
-  useEffect(() => {
-    if (!isOpen) return;
-    function handleClickOutside(event: MouseEvent) {
-      if (
-        containerRef.current &&
-        !containerRef.current.contains(event.target as Node)
-      ) {
-        setIsOpen(false);
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isOpen]);
+  useClickOutside(containerRef, () => setIsOpen(false), isOpen);
 
   const handleSelectMonth = (monthIndex: number) => {
     const formatted = `${viewYear}-${padZero(monthIndex + 1)}`;
@@ -558,51 +581,17 @@ export const MonthYearPicker: React.FC<MonthYearPickerProps> = ({
   return (
     <div ref={containerRef} className={`relative w-full ${className}`}>
       {/* Trigger */}
-      <div
-        id={inputId}
-        role="combobox"
-        tabIndex={disabled ? -1 : 0}
-        aria-label={ariaLabel || placeholder}
-        aria-expanded={isOpen}
-        onClick={() => !disabled && setIsOpen(!isOpen)}
-        onKeyDown={(e) => {
-          if ((e.key === 'Enter' || e.key === ' ') && !disabled) {
-            e.preventDefault();
-            setIsOpen(!isOpen);
-          }
-        }}
-        className={`w-full flex items-center justify-between h-10 px-3.5 rounded-lg border text-xs transition-all cursor-pointer select-none ${
-          disabled
-            ? 'opacity-60 bg-[#f4ece9] border-[#e8e1dd] cursor-not-allowed'
-            : isOpen
-              ? 'bg-white border-[#b85028] ring-2 ring-[#b85028]/20 shadow-xs'
-              : 'bg-[#faf2ee] hover:bg-[#f4ece9] border-[#e8e1dd] focus:bg-white focus:border-[#b85028]'
-        }`}
-      >
-        <span
-          className={`truncate font-medium ${
-            value ? 'text-[#1e1b19]' : 'text-[#8a726a]'
-          }`}
-        >
-          {value ? formatDisplayMonthYear(value) : placeholder}
-        </span>
-        <div className="flex items-center gap-1.5 text-[#8a726a] shrink-0">
-          {value && !disabled && (
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                onChange('');
-              }}
-              className="p-1 rounded hover:bg-[#e8e1dd] text-[#8a726a] hover:text-[#1e1b19] transition-colors"
-              title="Clear"
-            >
-              <X size={12} />
-            </button>
-          )}
-          <CalendarBlank size={16} weight="bold" className="text-[#b85028]" />
-        </div>
-      </div>
+      <PickerTrigger
+        inputId={inputId}
+        disabled={disabled}
+        isOpen={isOpen}
+        onToggle={() => setIsOpen(!isOpen)}
+        ariaLabel={ariaLabel}
+        placeholder={placeholder}
+        displayText={value ? formatDisplayMonthYear(value) : placeholder}
+        hasValue={Boolean(value)}
+        onClear={() => onChange('')}
+      />
 
       {/* Popover Card */}
       {isOpen && (
@@ -733,19 +722,7 @@ export const DateTimePicker: React.FC<DateTimePickerProps> = ({
     }
   }, [value]);
 
-  useEffect(() => {
-    if (!isOpen) return;
-    function handleClickOutside(event: MouseEvent) {
-      if (
-        containerRef.current &&
-        !containerRef.current.contains(event.target as Node)
-      ) {
-        setIsOpen(false);
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isOpen]);
+  useClickOutside(containerRef, () => setIsOpen(false), isOpen);
 
   const handleDateChange = (newDate: string) => {
     if (!newDate) {
@@ -778,51 +755,18 @@ export const DateTimePicker: React.FC<DateTimePickerProps> = ({
   return (
     <div ref={containerRef} className={`relative w-full ${className}`}>
       {/* Trigger */}
-      <div
-        id={inputId}
-        role="combobox"
-        tabIndex={disabled ? -1 : 0}
-        aria-label={ariaLabel || placeholder}
-        aria-expanded={isOpen}
-        onClick={() => !disabled && setIsOpen(!isOpen)}
-        onKeyDown={(e) => {
-          if ((e.key === 'Enter' || e.key === ' ') && !disabled) {
-            e.preventDefault();
-            setIsOpen(!isOpen);
-          }
-        }}
-        className={`w-full flex items-center justify-between h-10 px-3.5 rounded-lg border text-xs transition-all cursor-pointer select-none ${
-          disabled
-            ? 'opacity-60 bg-[#f4ece9] border-[#e8e1dd] cursor-not-allowed'
-            : isOpen
-              ? 'bg-white border-[#b85028] ring-2 ring-[#b85028]/20 shadow-xs'
-              : 'bg-[#faf2ee] hover:bg-[#f4ece9] border-[#e8e1dd] focus:bg-white focus:border-[#b85028]'
-        }`}
-      >
-        <span
-          className={`truncate font-medium ${
-            value ? 'text-[#1e1b19]' : 'text-[#8a726a]'
-          }`}
-        >
-          {value ? displayFormatted() : placeholder}
-        </span>
-        <div className="flex items-center gap-1.5 text-[#8a726a] shrink-0">
-          {value && !disabled && (
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                onChange('');
-              }}
-              className="p-1 rounded hover:bg-[#e8e1dd] text-[#8a726a] hover:text-[#1e1b19] transition-colors"
-              title="Clear"
-            >
-              <X size={12} />
-            </button>
-          )}
-          <Clock size={16} weight="bold" className="text-[#b85028]" />
-        </div>
-      </div>
+      <PickerTrigger
+        inputId={inputId}
+        disabled={disabled}
+        isOpen={isOpen}
+        onToggle={() => setIsOpen(!isOpen)}
+        ariaLabel={ariaLabel}
+        placeholder={placeholder}
+        displayText={value ? displayFormatted() : placeholder}
+        hasValue={Boolean(value)}
+        onClear={() => onChange('')}
+        icon={<Clock size={16} weight="bold" className="text-[#b85028]" />}
+      />
 
       {/* Popover */}
       {isOpen && (

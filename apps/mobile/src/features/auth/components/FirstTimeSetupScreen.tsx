@@ -1,31 +1,23 @@
 import { useAuth, useTranslation } from '@jrs/client-core';
 import type { IAuthUser } from '@jrs/shared';
 import {
-  ArrowLeft,
   CheckCircle,
   Eye,
   EyeSlash,
   Lock,
   ShieldCheck,
-  WarningCircle,
 } from 'phosphor-react-native';
 import React, { useState } from 'react';
 import {
   ActivityIndicator,
-  Keyboard,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  StatusBar,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  TouchableWithoutFeedback,
   View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { colors } from '../../../theme/colors';
+import { AuthErrorBanner, AuthScreenContainer } from './AuthScreenContainer';
 import { isPasswordValid, PasswordRequirements } from './PasswordRequirements';
 
 interface FirstTimeSetupScreenProps {
@@ -84,223 +76,154 @@ export const FirstTimeSetupScreen: React.FC<FirstTimeSetupScreenProps> = ({
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="dark-content" backgroundColor={colors.background} />
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <KeyboardAvoidingView
-          style={styles.container}
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        >
-          <ScrollView
-            contentContainerStyle={styles.scrollContent}
-            keyboardShouldPersistTaps="handled"
-            showsVerticalScrollIndicator={false}
-          >
-            {/* Top Back Navigation */}
+    <AuthScreenContainer
+      onBack={onCancel}
+      backLabel={t('auth:setup.backToSignIn') || 'Cancel & Sign Out'}
+    >
+      {/* Header */}
+      <View style={styles.header}>
+        <View style={styles.iconCircle}>
+          <ShieldCheck size={32} weight="fill" color={colors.primary} />
+        </View>
+        <Text style={styles.title}>
+          {t('auth:setup.title') || `Welcome, ${user.fullName}!`}
+        </Text>
+        <Text style={styles.subtitle}>
+          {t('auth:setup.welcome', { name: user.fullName }) ||
+            'Create your permanent password to complete your account setup.'}
+        </Text>
+      </View>
+
+      {/* Error Notification */}
+      <AuthErrorBanner message={errorMessage} />
+
+      {/* Form Fields */}
+      <View style={styles.form}>
+        {/* New Password */}
+        <View style={styles.fieldGroup}>
+          <Text style={styles.label}>
+            {t('auth:setup.newPasswordLabel') || 'New Permanent Password'}{' '}
+            <Text style={styles.required}>*</Text>
+          </Text>
+          <View style={styles.inputContainer}>
+            <View style={styles.inputIconContainer}>
+              <Lock size={20} weight="bold" color={colors.textMuted} />
+            </View>
+            <TextInput
+              style={styles.input}
+              placeholder={
+                t('auth:setup.newPasswordPlaceholder') ||
+                'Enter new secure password'
+              }
+              placeholderTextColor={colors.textMuted}
+              value={newPassword}
+              onChangeText={setNewPassword}
+              secureTextEntry={!showNewPassword}
+              autoCapitalize="none"
+              autoCorrect={false}
+              returnKeyType="next"
+              editable={!isLoading}
+            />
             <TouchableOpacity
-              style={styles.backButton}
-              onPress={onCancel}
+              style={styles.eyeButton}
+              onPress={() => setShowNewPassword(!showNewPassword)}
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             >
-              <ArrowLeft size={22} weight="bold" color={colors.text} />
-              <Text style={styles.backButtonText}>
-                {t('auth:setup.backToSignIn') || 'Cancel & Sign Out'}
-              </Text>
-            </TouchableOpacity>
-
-            {/* Header */}
-            <View style={styles.header}>
-              <View style={styles.iconCircle}>
-                <ShieldCheck size={32} weight="fill" color={colors.primary} />
-              </View>
-              <Text style={styles.title}>
-                {t('auth:setup.title') || `Welcome, ${user.fullName}!`}
-              </Text>
-              <Text style={styles.subtitle}>
-                {t('auth:setup.welcome', { name: user.fullName }) ||
-                  'Create your permanent password to complete your account setup.'}
-              </Text>
-            </View>
-
-            {/* Error Notification */}
-            {errorMessage && (
-              <View style={styles.errorBox}>
-                <WarningCircle
+              {showNewPassword ? (
+                <EyeSlash
                   size={20}
-                  weight="fill"
-                  color={colors.error}
-                  style={styles.errorIcon}
+                  weight="bold"
+                  color={colors.textSecondary}
                 />
-                <Text style={styles.errorText}>{errorMessage}</Text>
-              </View>
-            )}
+              ) : (
+                <Eye size={20} weight="bold" color={colors.textSecondary} />
+              )}
+            </TouchableOpacity>
+          </View>
+        </View>
 
-            {/* Form Fields */}
-            <View style={styles.form}>
-              {/* New Password */}
-              <View style={styles.fieldGroup}>
-                <Text style={styles.label}>
-                  {t('auth:setup.newPasswordLabel') || 'New Permanent Password'}{' '}
-                  <Text style={styles.required}>*</Text>
-                </Text>
-                <View style={styles.inputContainer}>
-                  <View style={styles.inputIconContainer}>
-                    <Lock size={20} weight="bold" color={colors.textMuted} />
-                  </View>
-                  <TextInput
-                    style={styles.input}
-                    placeholder={
-                      t('auth:setup.newPasswordPlaceholder') ||
-                      'Enter new secure password'
-                    }
-                    placeholderTextColor={colors.textMuted}
-                    value={newPassword}
-                    onChangeText={setNewPassword}
-                    secureTextEntry={!showNewPassword}
-                    autoCapitalize="none"
-                    autoCorrect={false}
-                    returnKeyType="next"
-                    editable={!isLoading}
-                  />
-                  <TouchableOpacity
-                    style={styles.eyeButton}
-                    onPress={() => setShowNewPassword(!showNewPassword)}
-                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                  >
-                    {showNewPassword ? (
-                      <EyeSlash
-                        size={20}
-                        weight="bold"
-                        color={colors.textSecondary}
-                      />
-                    ) : (
-                      <Eye
-                        size={20}
-                        weight="bold"
-                        color={colors.textSecondary}
-                      />
-                    )}
-                  </TouchableOpacity>
-                </View>
-              </View>
+        {/* Requirements Live Checklist */}
+        <PasswordRequirements password={newPassword} />
 
-              {/* Requirements Live Checklist */}
-              <PasswordRequirements password={newPassword} />
-
-              {/* Confirm Password */}
-              <View style={styles.fieldGroup}>
-                <Text style={styles.label}>
-                  {t('auth:setup.confirmPasswordLabel') || 'Confirm Password'}{' '}
-                  <Text style={styles.required}>*</Text>
-                </Text>
-                <View
-                  style={[
-                    styles.inputContainer,
-                    passwordsMatch && styles.inputSuccessBorder,
-                  ]}
-                >
-                  <View style={styles.inputIconContainer}>
-                    <Lock size={20} weight="bold" color={colors.textMuted} />
-                  </View>
-                  <TextInput
-                    style={styles.input}
-                    placeholder={
-                      t('auth:setup.confirmPasswordPlaceholder') ||
-                      'Re-enter your new password'
-                    }
-                    placeholderTextColor={colors.textMuted}
-                    value={confirmPassword}
-                    onChangeText={setConfirmPassword}
-                    secureTextEntry={!showConfirmPassword}
-                    autoCapitalize="none"
-                    autoCorrect={false}
-                    returnKeyType="done"
-                    onSubmitEditing={handleSubmit}
-                    editable={!isLoading}
-                  />
-                  <TouchableOpacity
-                    style={styles.eyeButton}
-                    onPress={() => setShowConfirmPassword(!showConfirmPassword)}
-                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                  >
-                    {showConfirmPassword ? (
-                      <EyeSlash
-                        size={20}
-                        weight="bold"
-                        color={colors.textSecondary}
-                      />
-                    ) : (
-                      <Eye
-                        size={20}
-                        weight="bold"
-                        color={colors.textSecondary}
-                      />
-                    )}
-                  </TouchableOpacity>
-                </View>
-              </View>
-
-              {/* Submit CTA */}
-              <TouchableOpacity
-                style={[
-                  styles.submitButton,
-                  (!isPasswordValid(newPassword) ||
-                    !passwordsMatch ||
-                    isLoading) &&
-                    styles.submitButtonDisabled,
-                ]}
-                onPress={handleSubmit}
-                disabled={
-                  !isPasswordValid(newPassword) || !passwordsMatch || isLoading
-                }
-                activeOpacity={0.85}
-              >
-                {isLoading ? (
-                  <ActivityIndicator color="#FFFFFF" size="small" />
-                ) : (
-                  <View style={styles.submitButtonContent}>
-                    <CheckCircle size={20} weight="bold" color="#FFFFFF" />
-                    <Text style={styles.submitButtonText}>
-                      {t('auth:setup.submitButton') ||
-                        'Save & Activate Account'}
-                    </Text>
-                  </View>
-                )}
-              </TouchableOpacity>
+        {/* Confirm Password */}
+        <View style={styles.fieldGroup}>
+          <Text style={styles.label}>
+            {t('auth:setup.confirmPasswordLabel') || 'Confirm Password'}{' '}
+            <Text style={styles.required}>*</Text>
+          </Text>
+          <View
+            style={[
+              styles.inputContainer,
+              passwordsMatch && styles.inputSuccessBorder,
+            ]}
+          >
+            <View style={styles.inputIconContainer}>
+              <Lock size={20} weight="bold" color={colors.textMuted} />
             </View>
-          </ScrollView>
-        </KeyboardAvoidingView>
-      </TouchableWithoutFeedback>
-    </SafeAreaView>
+            <TextInput
+              style={styles.input}
+              placeholder={
+                t('auth:setup.confirmPasswordPlaceholder') ||
+                'Re-enter your new password'
+              }
+              placeholderTextColor={colors.textMuted}
+              value={confirmPassword}
+              onChangeText={setConfirmPassword}
+              secureTextEntry={!showConfirmPassword}
+              autoCapitalize="none"
+              autoCorrect={false}
+              returnKeyType="done"
+              onSubmitEditing={handleSubmit}
+              editable={!isLoading}
+            />
+            <TouchableOpacity
+              style={styles.eyeButton}
+              onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            >
+              {showConfirmPassword ? (
+                <EyeSlash
+                  size={20}
+                  weight="bold"
+                  color={colors.textSecondary}
+                />
+              ) : (
+                <Eye size={20} weight="bold" color={colors.textSecondary} />
+              )}
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Submit CTA */}
+        <TouchableOpacity
+          style={[
+            styles.submitButton,
+            (!isPasswordValid(newPassword) || !passwordsMatch || isLoading) &&
+              styles.submitButtonDisabled,
+          ]}
+          onPress={handleSubmit}
+          disabled={
+            !isPasswordValid(newPassword) || !passwordsMatch || isLoading
+          }
+          activeOpacity={0.85}
+        >
+          {isLoading ? (
+            <ActivityIndicator color="#FFFFFF" size="small" />
+          ) : (
+            <View style={styles.submitButtonContent}>
+              <CheckCircle size={20} weight="bold" color="#FFFFFF" />
+              <Text style={styles.submitButtonText}>
+                {t('auth:setup.submitButton') || 'Save & Activate Account'}
+              </Text>
+            </View>
+          )}
+        </TouchableOpacity>
+      </View>
+    </AuthScreenContainer>
   );
 };
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  container: {
-    flex: 1,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    paddingHorizontal: 24,
-    paddingTop: 16,
-    paddingBottom: 40,
-  },
-  backButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 20,
-    alignSelf: 'flex-start',
-  },
-  backButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: colors.textSecondary,
-  },
   header: {
     marginBottom: 20,
   },

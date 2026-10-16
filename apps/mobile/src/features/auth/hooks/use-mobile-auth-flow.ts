@@ -2,7 +2,7 @@ import { useAuth, useTownContext } from '@jrs/client-core';
 import type { IAuthUser, ITown } from '@jrs/shared';
 import { useEffect, useMemo, useState } from 'react';
 
-export type MobileAuthScreenState =
+type MobileAuthScreenState =
   | 'login'
   | 'setup'
   | 'forgot-password'

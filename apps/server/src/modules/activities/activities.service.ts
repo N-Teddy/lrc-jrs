@@ -79,6 +79,27 @@ export class ActivitiesService {
   }
 
   /**
+   * Helper to validate activityId and fetch active activity or throw appropriate error
+   */
+  private async findValidActivityById(
+    activityId: string,
+  ): Promise<ActivityDocument> {
+    if (!Types.ObjectId.isValid(activityId)) {
+      throw new BadRequestException('Invalid activity ID');
+    }
+
+    const activity = await this.activityModel
+      .findOne({ _id: new Types.ObjectId(activityId), isDeleted: false })
+      .exec();
+
+    if (!activity) {
+      throw new NotFoundException(`Activity with ID ${activityId} not found`);
+    }
+
+    return activity;
+  }
+
+  /**
    * Maps an Activity document to IActivity interface
    */
   private mapActivity(
@@ -667,17 +688,7 @@ export class ActivitiesService {
     dto: RecordAttendanceDto,
     currentUser: IAuthUser,
   ): Promise<IAttendance> {
-    if (!Types.ObjectId.isValid(activityId)) {
-      throw new BadRequestException('Invalid activity ID');
-    }
-
-    const activity = await this.activityModel
-      .findOne({ _id: new Types.ObjectId(activityId), isDeleted: false })
-      .exec();
-
-    if (!activity) {
-      throw new NotFoundException(`Activity with ID ${activityId} not found`);
-    }
+    const activity = await this.findValidActivityById(activityId);
 
     // STRICT LOCK GUARD: Attendance cannot be modified if finalized and locked
     if (activity.isAttendanceLocked) {
@@ -1127,17 +1138,7 @@ export class ActivitiesService {
     currentUser: IAuthUser,
     reason?: string,
   ): Promise<IActivity> {
-    if (!Types.ObjectId.isValid(activityId)) {
-      throw new BadRequestException('Invalid activity ID');
-    }
-
-    const activity = await this.activityModel
-      .findOne({ _id: new Types.ObjectId(activityId), isDeleted: false })
-      .exec();
-
-    if (!activity) {
-      throw new NotFoundException(`Activity with ID ${activityId} not found`);
-    }
+    const activity = await this.findValidActivityById(activityId);
 
     if (currentUser.role !== UserRole.AP && currentUser.role !== UserRole.PC) {
       throw new ForbiddenException(
@@ -1175,17 +1176,7 @@ export class ActivitiesService {
     currentUser: IAuthUser,
     reason?: string,
   ): Promise<IActivity> {
-    if (!Types.ObjectId.isValid(activityId)) {
-      throw new BadRequestException('Invalid activity ID');
-    }
-
-    const activity = await this.activityModel
-      .findOne({ _id: new Types.ObjectId(activityId), isDeleted: false })
-      .exec();
-
-    if (!activity) {
-      throw new NotFoundException(`Activity with ID ${activityId} not found`);
-    }
+    const activity = await this.findValidActivityById(activityId);
 
     // Strict AP authority check
     if (currentUser.role !== UserRole.AP) {
@@ -1352,17 +1343,7 @@ export class ActivitiesService {
     currentUser: IAuthUser,
     folderId?: string,
   ): Promise<IActivity> {
-    if (!Types.ObjectId.isValid(activityId)) {
-      throw new BadRequestException('Invalid activity ID');
-    }
-
-    const activity = await this.activityModel
-      .findOne({ _id: new Types.ObjectId(activityId), isDeleted: false })
-      .exec();
-
-    if (!activity) {
-      throw new NotFoundException(`Activity with ID ${activityId} not found`);
-    }
+    const activity = await this.findValidActivityById(activityId);
 
     // Strict timing & status check: Must be past activity date and COMPLETED
     const now = new Date();
@@ -1435,17 +1416,7 @@ export class ActivitiesService {
     currentUser: IAuthUser,
     fileId?: string,
   ): Promise<IActivity> {
-    if (!Types.ObjectId.isValid(activityId)) {
-      throw new BadRequestException('Invalid activity ID');
-    }
-
-    const activity = await this.activityModel
-      .findOne({ _id: new Types.ObjectId(activityId), isDeleted: false })
-      .exec();
-
-    if (!activity) {
-      throw new NotFoundException(`Activity with ID ${activityId} not found`);
-    }
+    const activity = await this.findValidActivityById(activityId);
 
     if (currentUser.role !== UserRole.AP && currentUser.role !== UserRole.PC) {
       throw new ForbiddenException(

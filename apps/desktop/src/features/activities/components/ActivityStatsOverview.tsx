@@ -9,6 +9,7 @@ import {
   Users,
 } from '@phosphor-icons/react';
 import type React from 'react';
+import { StatsOverviewSkeleton } from '../../../components';
 
 interface ActivityStatsOverviewProps {
   stats: IActivityStats | undefined;
@@ -30,20 +31,7 @@ export const ActivityStatsOverview: React.FC<ActivityStatsOverviewProps> = ({
   const totalGuestsReached = stats?.totalGuestsReached ?? 0;
 
   if (isLoading) {
-    return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 animate-pulse">
-        {[1, 2, 3, 4].map((i) => (
-          <div
-            key={i}
-            className="h-32 rounded-2xl bg-white border border-[#e8e1dd] p-5 flex flex-col justify-between"
-          >
-            <div className="h-4 w-28 bg-[#f4ece9] rounded" />
-            <div className="h-8 w-16 bg-[#f4ece9] rounded" />
-            <div className="h-3 w-36 bg-[#f4ece9] rounded" />
-          </div>
-        ))}
-      </div>
-    );
+    return <StatsOverviewSkeleton />;
   }
 
   return (

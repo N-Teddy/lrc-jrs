@@ -1,7 +1,7 @@
 import type { IStorageAdapter } from '@jrs/client-core';
 import * as SecureStore from 'expo-secure-store';
 
-export class MobileSecureStoreAdapter implements IStorageAdapter {
+class MobileSecureStoreAdapter implements IStorageAdapter {
   private memoryFallback: Map<string, string> = new Map();
 
   async getItem(key: string): Promise<string | null> {

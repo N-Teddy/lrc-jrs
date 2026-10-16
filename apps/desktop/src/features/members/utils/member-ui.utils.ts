@@ -52,6 +52,7 @@ export function getCleanDigitsForWhatsApp(
   return digits;
 }
 
+// fallow-ignore-next-line unused-export
 export function getInitials(name: string | undefined | null): string {
   if (!name) return '??';
   const parts = name.trim().split(/\s+/).filter(Boolean);

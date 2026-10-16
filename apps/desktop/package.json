@@ -11,24 +11,19 @@
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
-    "@jrs/api-client": "workspace:*",
+    "react-simple-maps": "^5.0.5",
     "@jrs/client-core": "workspace:*",
     "@jrs/shared": "workspace:*",
     "@phosphor-icons/react": "^2.1.7",
-    "@tanstack/react-query": "^5.67.0",
-    "@tauri-apps/api": "^2",
+    "react-dom": "^19.1.0",
     "@tauri-apps/plugin-opener": "^2",
     "@tauri-apps/plugin-store": "^2",
-    "d3-geo": "^3.1.1",
-    "pdfjs-dist": "^6.4.299",
     "react": "^19.1.0",
-    "react-dom": "^19.1.0",
-    "react-simple-maps": "^5.0.5"
+    "pdfjs-dist": "^6.4.299"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.3",
     "@tauri-apps/cli": "^2",
-    "@types/d3-geo": "^3.1.1",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
     "@types/react-simple-maps": "^3.0.6",

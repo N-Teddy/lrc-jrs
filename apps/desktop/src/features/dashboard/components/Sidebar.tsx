@@ -15,8 +15,6 @@ import {
 import React, { useState } from 'react';
 import type { DashboardTabId } from '../hooks/use-dashboard-layout';
 
-export type { DashboardTabId };
-
 interface SidebarProps {
   isCollapsed: boolean;
   onToggleCollapse: () => void;

@@ -9,7 +9,7 @@ import {
 export type AttendanceDocument = Attendance & Document;
 
 @Schema({ _id: false })
-export class GuestInfo {
+class GuestInfo {
   @Prop({ type: String, required: true, trim: true })
   fullName: string;
 
@@ -20,10 +20,10 @@ export class GuestInfo {
   notes?: string;
 }
 
-export const GuestInfoSchema = SchemaFactory.createForClass(GuestInfo);
+const GuestInfoSchema = SchemaFactory.createForClass(GuestInfo);
 
 @Schema({ _id: true })
-export class AttendanceItem {
+class AttendanceItem {
   @Prop({
     type: String,
     required: true,
@@ -49,8 +49,7 @@ export class AttendanceItem {
   status: AttendanceStatus;
 }
 
-export const AttendanceItemSchema =
-  SchemaFactory.createForClass(AttendanceItem);
+const AttendanceItemSchema = SchemaFactory.createForClass(AttendanceItem);
 
 @Schema(baseSchemaOptions)
 export class Attendance extends BaseDocument {

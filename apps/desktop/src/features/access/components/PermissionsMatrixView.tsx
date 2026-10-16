@@ -20,6 +20,65 @@ interface PermissionsMatrixViewProps {
   isCurrentUserAp: boolean;
 }
 
+interface RoleSummaryConfig {
+  badge: string;
+  badgeClass: string;
+  icon: React.ElementType;
+  iconColor: string;
+  description: string;
+  footer: string;
+  permissions: { text: string; allowed: boolean }[];
+}
+
+const ROLE_SUMMARIES: RoleSummaryConfig[] = [
+  {
+    badge: 'AP',
+    badgeClass: 'bg-[#5c1d24] text-white',
+    icon: ShieldCheck,
+    iconColor: 'text-[#5c1d24]',
+    description:
+      'Full executive diocesan authority. Permitted to oversee, create, reschedule, delete, and delegate accounts across all Cameroon hubs.',
+    footer: 'Inter-Hub Clergy & Senior Directors',
+    permissions: [
+      { text: 'Inter-Hub Multi-Hub Write Access', allowed: true },
+      { text: 'Member Account Grant & Suspension', allowed: true },
+      { text: 'Cross-Town Scope Delegation', allowed: true },
+      { text: 'Permanent Registry Archival', allowed: true },
+    ],
+  },
+  {
+    badge: 'PC',
+    badgeClass: 'bg-[#2c4e37] text-white',
+    icon: UserCheck,
+    iconColor: 'text-[#2c4e37]',
+    description:
+      'Hub administrator. Full management authority inside their assigned home hub, with read-only auditing into delegated external hubs.',
+    footer: 'Hub Leaders & Youth Pastors',
+    permissions: [
+      { text: 'Home Hub Full Write Access', allowed: true },
+      { text: 'Attendance Roster Finalization', allowed: true },
+      { text: 'Delegated Read-Only External Hubs', allowed: true },
+      { text: 'Cannot Delete Registry Members', allowed: false },
+    ],
+  },
+  {
+    badge: 'Youth Member',
+    badgeClass: 'bg-[#faf2ee] text-[#57423b] border border-[#e8e1dd]',
+    icon: Users,
+    iconColor: 'text-[#8a726a]',
+    description:
+      'Fellowship participants. Access personal profile, view upcoming parish activities, and track chronological attendance record.',
+    footer: 'Active Fellowship Youth Cohort',
+    permissions: [
+      { text: 'Personal Attendance History', allowed: true },
+      { text: 'Home Hub Gatherings Calendar', allowed: true },
+      { text: 'No Administrative Roster Editing', allowed: false },
+      { text: 'No Access Management', allowed: false },
+    ],
+  },
+];
+
+// fallow-ignore-next-line unused-export
 export const PermissionsMatrixView: React.FC<PermissionsMatrixViewProps> = ({
   members,
   availableTowns,
@@ -49,126 +108,53 @@ export const PermissionsMatrixView: React.FC<PermissionsMatrixViewProps> = ({
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* AP Card */}
-          <div className="bg-white rounded-3xl border border-[#e8e1dd] p-6 shadow-xs flex flex-col justify-between">
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <span className="px-2.5 py-1 rounded-lg text-xs font-bold bg-[#5c1d24] text-white">
-                  AP
-                </span>
-                <ShieldCheck
-                  size={24}
-                  className="text-[#5c1d24]"
-                  weight="duotone"
-                />
-              </div>
-              <p className="text-xs text-[#57423b] leading-relaxed mb-4">
-                Full executive diocesan authority. Permitted to oversee, create,
-                reschedule, delete, and delegate accounts across all Cameroon
-                hubs.
-              </p>
-              <div className="space-y-2 text-xs">
-                <div className="flex items-center gap-2 text-[#2c4e37]">
-                  <CheckCircle size={15} weight="fill" />
-                  <span>Inter-Hub Multi-Hub Write Access</span>
+          {ROLE_SUMMARIES.map((role) => {
+            const Icon = role.icon;
+            return (
+              <div
+                key={role.badge}
+                className="bg-white rounded-3xl border border-[#e8e1dd] p-6 shadow-xs flex flex-col justify-between"
+              >
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <span
+                      className={`px-2.5 py-1 rounded-lg text-xs font-bold ${role.badgeClass}`}
+                    >
+                      {role.badge}
+                    </span>
+                    <Icon
+                      size={24}
+                      className={role.iconColor}
+                      weight="duotone"
+                    />
+                  </div>
+                  <p className="text-xs text-[#57423b] leading-relaxed mb-4">
+                    {role.description}
+                  </p>
+                  <div className="space-y-2 text-xs">
+                    {role.permissions.map((p) => (
+                      <div
+                        key={p.text}
+                        className={`flex items-center gap-2 ${
+                          p.allowed ? 'text-[#2c4e37]' : 'text-[#8a726a]'
+                        }`}
+                      >
+                        {p.allowed ? (
+                          <CheckCircle size={15} weight="fill" />
+                        ) : (
+                          <XCircle size={15} />
+                        )}
+                        <span>{p.text}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <div className="flex items-center gap-2 text-[#2c4e37]">
-                  <CheckCircle size={15} weight="fill" />
-                  <span>Member Account Grant & Suspension</span>
-                </div>
-                <div className="flex items-center gap-2 text-[#2c4e37]">
-                  <CheckCircle size={15} weight="fill" />
-                  <span>Cross-Town Scope Delegation</span>
-                </div>
-                <div className="flex items-center gap-2 text-[#2c4e37]">
-                  <CheckCircle size={15} weight="fill" />
-                  <span>Permanent Registry Archival</span>
-                </div>
-              </div>
-            </div>
-            <div className="mt-5 pt-4 border-t border-[#f4ece9] text-[11px] font-bold text-[#8a726a]">
-              Inter-Hub Clergy & Senior Directors
-            </div>
-          </div>
-
-          {/* PC Card */}
-          <div className="bg-white rounded-3xl border border-[#e8e1dd] p-6 shadow-xs flex flex-col justify-between">
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <span className="px-2.5 py-1 rounded-lg text-xs font-bold bg-[#2c4e37] text-white">
-                  PC
-                </span>
-                <UserCheck
-                  size={24}
-                  className="text-[#2c4e37]"
-                  weight="duotone"
-                />
-              </div>
-              <p className="text-xs text-[#57423b] leading-relaxed mb-4">
-                Hub administrator. Full management authority inside their
-                assigned home hub, with read-only auditing into delegated
-                external hubs.
-              </p>
-              <div className="space-y-2 text-xs">
-                <div className="flex items-center gap-2 text-[#2c4e37]">
-                  <CheckCircle size={15} weight="fill" />
-                  <span>Home Hub Full Write Access</span>
-                </div>
-                <div className="flex items-center gap-2 text-[#2c4e37]">
-                  <CheckCircle size={15} weight="fill" />
-                  <span>Attendance Roster Finalization</span>
-                </div>
-                <div className="flex items-center gap-2 text-[#2c4e37]">
-                  <CheckCircle size={15} weight="fill" />
-                  <span>Delegated Read-Only External Hubs</span>
-                </div>
-                <div className="flex items-center gap-2 text-[#8a726a]">
-                  <XCircle size={15} />
-                  <span>Cannot Delete Registry Members</span>
+                <div className="mt-5 pt-4 border-t border-[#f4ece9] text-[11px] font-bold text-[#8a726a]">
+                  {role.footer}
                 </div>
               </div>
-            </div>
-            <div className="mt-5 pt-4 border-t border-[#f4ece9] text-[11px] font-bold text-[#8a726a]">
-              Hub Leaders & Youth Pastors
-            </div>
-          </div>
-
-          {/* Youth Member Card */}
-          <div className="bg-white rounded-3xl border border-[#e8e1dd] p-6 shadow-xs flex flex-col justify-between">
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <span className="px-2.5 py-1 rounded-lg text-xs font-bold bg-[#faf2ee] text-[#57423b] border border-[#e8e1dd]">
-                  Youth Member
-                </span>
-                <Users size={24} className="text-[#8a726a]" weight="duotone" />
-              </div>
-              <p className="text-xs text-[#57423b] leading-relaxed mb-4">
-                Fellowship participants. Access personal profile, view upcoming
-                parish activities, and track chronological attendance record.
-              </p>
-              <div className="space-y-2 text-xs">
-                <div className="flex items-center gap-2 text-[#2c4e37]">
-                  <CheckCircle size={15} weight="fill" />
-                  <span>Personal Attendance History</span>
-                </div>
-                <div className="flex items-center gap-2 text-[#2c4e37]">
-                  <CheckCircle size={15} weight="fill" />
-                  <span>Home Hub Gatherings Calendar</span>
-                </div>
-                <div className="flex items-center gap-2 text-[#8a726a]">
-                  <XCircle size={15} />
-                  <span>No Administrative Roster Editing</span>
-                </div>
-                <div className="flex items-center gap-2 text-[#8a726a]">
-                  <XCircle size={15} />
-                  <span>No Access Management</span>
-                </div>
-              </div>
-            </div>
-            <div className="mt-5 pt-4 border-t border-[#f4ece9] text-[11px] font-bold text-[#8a726a]">
-              Active Fellowship Youth Cohort
-            </div>
-          </div>
+            );
+          })}
         </div>
       </div>
 

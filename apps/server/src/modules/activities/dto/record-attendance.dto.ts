@@ -10,7 +10,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 
-export class GuestInfoDto {
+class GuestInfoDto {
   @ApiProperty({ example: 'Jean-Pierre Foko' })
   @IsNotEmpty()
   @IsString()
@@ -27,7 +27,7 @@ export class GuestInfoDto {
   notes?: string;
 }
 
-export class RecordAttendanceItemDto {
+class RecordAttendanceItemDto {
   @ApiProperty({ enum: AttendeeType, example: AttendeeType.MEMBER })
   @IsNotEmpty()
   @IsEnum(AttendeeType)

@@ -1,6 +1,7 @@
 import { CaretDown, Check } from '@phosphor-icons/react';
 import type React from 'react';
 import { useEffect, useId, useRef, useState } from 'react';
+import { useClickOutside } from '../hooks/use-click-outside';
 
 export interface SelectOption<T = string> {
   value: T;
@@ -47,31 +48,17 @@ export function CustomSelect<T extends string = string>({
 
   const selectedOption = options.find((opt) => opt.value === value);
 
-  // Close when clicking outside
+  useClickOutside(containerRef, () => setIsOpen(false), isOpen);
+
   useEffect(() => {
     if (!isOpen) return;
-
-    function handleClickOutside(event: MouseEvent) {
-      if (
-        containerRef.current &&
-        !containerRef.current.contains(event.target as Node)
-      ) {
-        setIsOpen(false);
-      }
-    }
-
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === 'Escape') {
         setIsOpen(false);
       }
     }
-
-    document.addEventListener('mousedown', handleClickOutside);
     document.addEventListener('keydown', handleKeyDown);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('keydown', handleKeyDown);
-    };
+    return () => document.removeEventListener('keydown', handleKeyDown);
   }, [isOpen]);
 
   const handleSelect = (option: SelectOption<T>) => {

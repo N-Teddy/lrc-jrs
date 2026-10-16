@@ -13,20 +13,17 @@
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
-    "@jrs/api-client": "workspace:*",
+    "react-native-svg": "15.15.4",
     "@jrs/client-core": "workspace:*",
     "@jrs/shared": "workspace:*",
-    "@tanstack/react-query": "^5.67.0",
     "buffer": "^6.0.3",
     "expo": "~57.0.27",
-    "expo-dev-client": "~57.0.20",
+    "react-native-safe-area-context": "^5.10.1",
     "expo-secure-store": "~57.0.4",
     "expo-status-bar": "~57.0.1",
     "phosphor-react-native": "^2.1.0",
     "react": "19.2.3",
-    "react-native": "0.86.3",
-    "react-native-safe-area-context": "^5.10.1",
-    "react-native-svg": "15.15.4"
+    "react-native": "0.86.3"
   },
   "devDependencies": {
     "@types/react": "~19.2.2",

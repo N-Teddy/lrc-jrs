@@ -15,20 +15,14 @@ import {
 import React, { useState } from 'react';
 import {
   ActivityIndicator,
-  Keyboard,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  StatusBar,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  TouchableWithoutFeedback,
   View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { colors } from '../../../theme/colors';
+import { AuthScreenContainer } from './AuthScreenContainer';
 
 interface LoginScreenProps {
   onRequiresPasswordChange: (data: {
@@ -102,221 +96,197 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="dark-content" backgroundColor={colors.background} />
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <KeyboardAvoidingView
-          style={styles.container}
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        >
-          <ScrollView
-            contentContainerStyle={styles.scrollContent}
-            keyboardShouldPersistTaps="handled"
-            showsVerticalScrollIndicator={false}
-          >
-            {/* Header Title */}
-            <View style={styles.header}>
-              <Text style={styles.title}>
-                {t('auth:login.title') || 'Welcome Back'}
-              </Text>
-              <Text style={styles.subtitle}>
-                {t('auth:login.subtitle') ||
-                  'Sign in to your youth fellowship portal'}
-              </Text>
-            </View>
+    <AuthScreenContainer scrollContentStyle={styles.scrollContent}>
+      {/* Header Title */}
+      <View style={styles.header}>
+        <Text style={styles.title}>
+          {t('auth:login.title') || 'Welcome Back'}
+        </Text>
+        <Text style={styles.subtitle}>
+          {t('auth:login.subtitle') ||
+            'Sign in to your youth fellowship portal'}
+        </Text>
+      </View>
 
-            {/* First-time Member Guidance Banner */}
-            <View style={styles.noticeBox}>
-              <Info
-                size={20}
-                weight="bold"
-                color={colors.primary}
-                style={styles.noticeIcon}
-              />
-              <View style={styles.noticeTextContainer}>
-                <Text style={styles.noticeTitle}>
-                  {t('auth:login.firstTimeNoticeTitle') ||
-                    'First-time signing in?'}
-                </Text>
-                <Text style={styles.noticeText}>
-                  {t('auth:login.firstTimeNoticeDesc') ||
-                    'Enter the temporary password sent to your WhatsApp or Email to set up your permanent account.'}
-                </Text>
-              </View>
-            </View>
+      {/* First-time Member Guidance Banner */}
+      <View style={styles.noticeBox}>
+        <Info
+          size={20}
+          weight="bold"
+          color={colors.primary}
+          style={styles.noticeIcon}
+        />
+        <View style={styles.noticeTextContainer}>
+          <Text style={styles.noticeTitle}>
+            {t('auth:login.firstTimeNoticeTitle') || 'First-time signing in?'}
+          </Text>
+          <Text style={styles.noticeText}>
+            {t('auth:login.firstTimeNoticeDesc') ||
+              'Enter the temporary password sent to your WhatsApp or Email to set up your permanent account.'}
+          </Text>
+        </View>
+      </View>
 
-            {/* Error Notification */}
-            {errorMessage && (
-              <View style={styles.errorBox}>
-                <WarningCircle
-                  size={20}
-                  weight="fill"
-                  color={colors.error}
-                  style={styles.errorIcon}
-                />
-                <View style={styles.errorTextContainer}>
-                  <Text style={styles.errorText}>{errorMessage}</Text>
-                  {isTempExpired && (
-                    <TouchableOpacity
-                      onPress={() => onForgotPasswordClick?.(identifier)}
-                      style={styles.resetNowButton}
-                    >
-                      <Text style={styles.resetNowText}>
-                        {t('auth:login.resetNow') || 'Reset Password Now →'}
-                      </Text>
-                    </TouchableOpacity>
-                  )}
-                </View>
-              </View>
+      {/* Error Notification */}
+      {errorMessage && (
+        <View style={styles.errorBox}>
+          <WarningCircle
+            size={20}
+            weight="fill"
+            color={colors.error}
+            style={styles.errorIcon}
+          />
+          <View style={styles.errorTextContainer}>
+            <Text style={styles.errorText}>{errorMessage}</Text>
+            {isTempExpired && (
+              <TouchableOpacity
+                onPress={() => onForgotPasswordClick?.(identifier)}
+                style={styles.resetNowButton}
+              >
+                <Text style={styles.resetNowText}>
+                  {t('auth:login.resetNow') || 'Reset Password Now →'}
+                </Text>
+              </TouchableOpacity>
             )}
+          </View>
+        </View>
+      )}
 
-            {/* Form Fields */}
-            <View style={styles.form}>
-              {/* Identifier Field */}
-              <View style={styles.fieldGroup}>
-                <Text style={styles.label}>
-                  {t('auth:login.identifierLabel') || 'Phone Number or Email'}{' '}
-                  <Text style={styles.required}>*</Text>
-                </Text>
-                <View style={styles.inputContainer}>
-                  <View style={styles.inputIconContainer}>
-                    {isPhoneInput ? (
-                      <Phone size={20} weight="bold" color={colors.primary} />
-                    ) : isEmailInput ? (
-                      <EnvelopeSimple
-                        size={20}
-                        weight="bold"
-                        color={colors.primary}
-                      />
-                    ) : (
-                      <At size={20} weight="bold" color={colors.textMuted} />
-                    )}
-                  </View>
-                  <TextInput
-                    style={styles.input}
-                    placeholder={
-                      t('auth:login.identifierPlaceholder') ||
-                      'e.g. 670 000 000 or name@domain.org'
-                    }
-                    placeholderTextColor={colors.textMuted}
-                    value={identifier}
-                    onChangeText={setIdentifier}
-                    autoCapitalize="none"
-                    autoCorrect={false}
-                    keyboardType={isPhoneInput ? 'phone-pad' : 'email-address'}
-                    returnKeyType="next"
-                    editable={!isLoading}
-                  />
-                </View>
-              </View>
-
-              {/* Password Field */}
-              <View style={styles.fieldGroup}>
-                <View style={styles.passwordHeaderRow}>
-                  <Text style={styles.label}>
-                    {t('auth:login.passwordLabel') || 'Password'}{' '}
-                    <Text style={styles.required}>*</Text>
-                  </Text>
-                  <TouchableOpacity
-                    onPress={() => onForgotPasswordClick?.(identifier)}
-                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                  >
-                    <Text style={styles.forgotPasswordText}>
-                      {t('auth:login.forgotPassword') || 'Forgot Password?'}
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-                <View style={styles.inputContainer}>
-                  <View style={styles.inputIconContainer}>
-                    <Lock size={20} weight="bold" color={colors.textMuted} />
-                  </View>
-                  <TextInput
-                    style={styles.input}
-                    placeholder={
-                      t('auth:login.passwordPlaceholder') ||
-                      'Enter your password'
-                    }
-                    placeholderTextColor={colors.textMuted}
-                    value={password}
-                    onChangeText={setPassword}
-                    secureTextEntry={!showPassword}
-                    autoCapitalize="none"
-                    autoCorrect={false}
-                    returnKeyType="done"
-                    onSubmitEditing={handleLogin}
-                    editable={!isLoading}
-                  />
-                  <TouchableOpacity
-                    style={styles.eyeButton}
-                    onPress={() => setShowPassword(!showPassword)}
-                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                  >
-                    {showPassword ? (
-                      <EyeSlash
-                        size={20}
-                        weight="bold"
-                        color={colors.textSecondary}
-                      />
-                    ) : (
-                      <Eye
-                        size={20}
-                        weight="bold"
-                        color={colors.textSecondary}
-                      />
-                    )}
-                  </TouchableOpacity>
-                </View>
-              </View>
-
-              {/* Keep Signed In Checkbox */}
-              <TouchableOpacity
-                style={styles.checkboxRow}
-                onPress={() => setKeepSignedIn(!keepSignedIn)}
-                activeOpacity={0.8}
-              >
-                <View
-                  style={[
-                    styles.checkbox,
-                    keepSignedIn
-                      ? styles.checkboxChecked
-                      : styles.checkboxUnchecked,
-                  ]}
-                >
-                  {keepSignedIn && (
-                    <Check size={14} weight="bold" color="#fff" />
-                  )}
-                </View>
-                <Text style={styles.checkboxLabel}>
-                  {t('auth:login.keepSignedIn') || 'Keep me signed in'}
-                </Text>
-              </TouchableOpacity>
-
-              {/* Submit CTA */}
-              <TouchableOpacity
-                style={[
-                  styles.submitButton,
-                  isLoading && styles.submitButtonDisabled,
-                ]}
-                onPress={handleLogin}
-                disabled={isLoading}
-                activeOpacity={0.85}
-              >
-                {isLoading ? (
-                  <ActivityIndicator color="#FFFFFF" size="small" />
-                ) : (
-                  <View style={styles.submitButtonContent}>
-                    <Text style={styles.submitButtonText}>
-                      {t('auth:login.signInButton') || 'Sign In'}
-                    </Text>
-                    <ArrowRight size={18} weight="bold" color="#FFFFFF" />
-                  </View>
-                )}
-              </TouchableOpacity>
+      {/* Form Fields */}
+      <View style={styles.form}>
+        {/* Identifier Field */}
+        <View style={styles.fieldGroup}>
+          <Text style={styles.label}>
+            {t('auth:login.identifierLabel') || 'Phone Number or Email'}{' '}
+            <Text style={styles.required}>*</Text>
+          </Text>
+          <View style={styles.inputContainer}>
+            <View style={styles.inputIconContainer}>
+              {isPhoneInput ? (
+                <Phone size={20} weight="bold" color={colors.primary} />
+              ) : isEmailInput ? (
+                <EnvelopeSimple
+                  size={20}
+                  weight="bold"
+                  color={colors.primary}
+                />
+              ) : (
+                <At size={20} weight="bold" color={colors.textMuted} />
+              )}
             </View>
-          </ScrollView>
-        </KeyboardAvoidingView>
-      </TouchableWithoutFeedback>
-    </SafeAreaView>
+            <TextInput
+              style={styles.input}
+              placeholder={
+                t('auth:login.identifierPlaceholder') ||
+                'e.g. 670 000 000 or name@domain.org'
+              }
+              placeholderTextColor={colors.textMuted}
+              value={identifier}
+              onChangeText={setIdentifier}
+              autoCapitalize="none"
+              autoCorrect={false}
+              keyboardType={isPhoneInput ? 'phone-pad' : 'email-address'}
+              returnKeyType="next"
+              editable={!isLoading}
+            />
+          </View>
+        </View>
+
+        {/* Password Field */}
+        <View style={styles.fieldGroup}>
+          <View style={styles.passwordHeaderRow}>
+            <Text style={styles.label}>
+              {t('auth:login.passwordLabel') || 'Password'}{' '}
+              <Text style={styles.required}>*</Text>
+            </Text>
+            <TouchableOpacity
+              onPress={() => onForgotPasswordClick?.(identifier)}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            >
+              <Text style={styles.forgotPasswordText}>
+                {t('auth:login.forgotPassword') || 'Forgot Password?'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+          <View style={styles.inputContainer}>
+            <View style={styles.inputIconContainer}>
+              <Lock size={20} weight="bold" color={colors.textMuted} />
+            </View>
+            <TextInput
+              style={styles.input}
+              placeholder={
+                t('auth:login.passwordPlaceholder') || 'Enter your password'
+              }
+              placeholderTextColor={colors.textMuted}
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry={!showPassword}
+              autoCapitalize="none"
+              autoCorrect={false}
+              returnKeyType="done"
+              onSubmitEditing={handleLogin}
+              editable={!isLoading}
+            />
+            <TouchableOpacity
+              style={styles.eyeButton}
+              onPress={() => setShowPassword(!showPassword)}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            >
+              {showPassword ? (
+                <EyeSlash
+                  size={20}
+                  weight="bold"
+                  color={colors.textSecondary}
+                />
+              ) : (
+                <Eye size={20} weight="bold" color={colors.textSecondary} />
+              )}
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Keep Signed In Checkbox */}
+        <TouchableOpacity
+          style={styles.checkboxRow}
+          onPress={() => setKeepSignedIn(!keepSignedIn)}
+          activeOpacity={0.8}
+        >
+          <View
+            style={[
+              styles.checkbox,
+              keepSignedIn ? styles.checkboxChecked : styles.checkboxUnchecked,
+            ]}
+          >
+            {keepSignedIn && <Check size={14} weight="bold" color="#fff" />}
+          </View>
+          <Text style={styles.checkboxLabel}>
+            {t('auth:login.keepSignedIn') || 'Keep me signed in'}
+          </Text>
+        </TouchableOpacity>
+
+        {/* Submit CTA */}
+        <TouchableOpacity
+          style={[
+            styles.submitButton,
+            isLoading && styles.submitButtonDisabled,
+          ]}
+          onPress={handleLogin}
+          disabled={isLoading}
+          activeOpacity={0.85}
+        >
+          {isLoading ? (
+            <ActivityIndicator color="#FFFFFF" size="small" />
+          ) : (
+            <View style={styles.submitButtonContent}>
+              <Text style={styles.submitButtonText}>
+                {t('auth:login.signInButton') || 'Sign In'}
+              </Text>
+              <ArrowRight size={18} weight="bold" color="#FFFFFF" />
+            </View>
+          )}
+        </TouchableOpacity>
+      </View>
+    </AuthScreenContainer>
   );
 };
 

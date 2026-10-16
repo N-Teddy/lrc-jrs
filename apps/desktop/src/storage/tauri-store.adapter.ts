@@ -1,7 +1,7 @@
 import type { IStorageAdapter } from '@jrs/client-core';
 import { LazyStore } from '@tauri-apps/plugin-store';
 
-export class TauriStoreAdapter implements IStorageAdapter {
+class TauriStoreAdapter implements IStorageAdapter {
   private store: LazyStore | null = null;
   private memoryFallback: Map<string, string> = new Map();
 

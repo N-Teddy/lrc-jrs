@@ -80,8 +80,6 @@ function computeRosterSnapshot(
 export const ActivityAttendanceRoster: React.FC<
   ActivityAttendanceRosterProps
 > = ({ activity, onBack }) => {
-  // const { state, actions } = useActivityAttendanceWorkspace(activity);
-
   const { t, i18n } = useTranslation(['attendance', 'towns', 'common']);
   const isFrench = i18n.language?.startsWith('fr');
   const { canWrite } = useTownContext();

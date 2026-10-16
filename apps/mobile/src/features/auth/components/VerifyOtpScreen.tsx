@@ -4,33 +4,25 @@ import type {
   IVerifyResetCodeResponse,
 } from '@jrs/shared';
 import {
-  ArrowLeft,
   ArrowRight,
   CheckCircle,
   EnvelopeSimple,
   PencilSimple,
   ShieldCheck,
   Timer,
-  WarningCircle,
   WhatsappLogo,
 } from 'phosphor-react-native';
 import React, { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
-  Keyboard,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  StatusBar,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  TouchableWithoutFeedback,
   View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { colors } from '../../../theme/colors';
+import { AuthErrorBanner, AuthScreenContainer } from './AuthScreenContainer';
 
 interface VerifyOtpScreenProps {
   identifier: string;
@@ -171,183 +163,139 @@ export const VerifyOtpScreen: React.FC<VerifyOtpScreenProps> = ({
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="dark-content" backgroundColor={colors.background} />
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <KeyboardAvoidingView
-          style={styles.container}
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    <AuthScreenContainer
+      onBack={onBackToChangeContact}
+      backLabel={t('auth:verifyOtp.changeContact') || 'Change Identifier'}
+    >
+      {/* Header */}
+      <View style={styles.header}>
+        <View style={styles.iconCircle}>
+          <ShieldCheck size={32} weight="fill" color={colors.primary} />
+        </View>
+        <Text style={styles.title}>
+          {t('auth:verifyOtp.title') || 'Enter 6-Digit Code'}
+        </Text>
+        <Text style={styles.subtitle}>
+          {t('auth:verifyOtp.subtitle') ||
+            'We sent a secure verification code to:'}
+        </Text>
+
+        {/* Destination badge */}
+        <TouchableOpacity
+          style={styles.destinationBadge}
+          onPress={onBackToChangeContact}
         >
-          <ScrollView
-            contentContainerStyle={styles.scrollContent}
-            keyboardShouldPersistTaps="handled"
-            showsVerticalScrollIndicator={false}
-          >
-            {/* Top Back Navigation */}
-            <TouchableOpacity
-              style={styles.backButton}
-              onPress={onBackToChangeContact}
-              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-            >
-              <ArrowLeft size={22} weight="bold" color={colors.text} />
-              <Text style={styles.backButtonText}>
-                {t('auth:verifyOtp.changeContact') || 'Change Identifier'}
-              </Text>
-            </TouchableOpacity>
+          {channel === 'whatsapp' ? (
+            <WhatsappLogo size={18} weight="bold" color="#25D366" />
+          ) : (
+            <EnvelopeSimple size={18} weight="bold" color={colors.primary} />
+          )}
+          <Text style={styles.destinationText}>{maskedId}</Text>
+          <PencilSimple size={14} weight="bold" color={colors.textMuted} />
+        </TouchableOpacity>
+      </View>
 
-            {/* Header */}
-            <View style={styles.header}>
-              <View style={styles.iconCircle}>
-                <ShieldCheck size={32} weight="fill" color={colors.primary} />
-              </View>
-              <Text style={styles.title}>
-                {t('auth:verifyOtp.title') || 'Enter 6-Digit Code'}
-              </Text>
-              <Text style={styles.subtitle}>
-                {t('auth:verifyOtp.subtitle') ||
-                  'We sent a secure verification code to:'}
-              </Text>
+      {/* Notifications */}
+      <AuthErrorBanner message={errorMessage} />
 
-              {/* Destination badge */}
-              <TouchableOpacity
-                style={styles.destinationBadge}
-                onPress={onBackToChangeContact}
-              >
-                {channel === 'whatsapp' ? (
-                  <WhatsappLogo size={18} weight="bold" color="#25D366" />
-                ) : (
-                  <EnvelopeSimple
-                    size={18}
-                    weight="bold"
-                    color={colors.primary}
-                  />
-                )}
-                <Text style={styles.destinationText}>{maskedId}</Text>
-                <PencilSimple
-                  size={14}
-                  weight="bold"
-                  color={colors.textMuted}
-                />
-              </TouchableOpacity>
-            </View>
+      {resendNotice && (
+        <View style={styles.successBox}>
+          <CheckCircle
+            size={20}
+            weight="fill"
+            color={colors.success}
+            style={styles.errorIcon}
+          />
+          <Text style={styles.successText}>{resendNotice}</Text>
+        </View>
+      )}
 
-            {/* Notifications */}
-            {errorMessage && (
-              <View style={styles.errorBox}>
-                <WarningCircle
-                  size={20}
-                  weight="fill"
-                  color={colors.error}
-                  style={styles.errorIcon}
-                />
-                <Text style={styles.errorText}>{errorMessage}</Text>
-              </View>
-            )}
+      {/* 6-Digit Input Row */}
+      <View style={styles.otpRow}>
+        {digits.map((digit, index) => (
+          <TextInput
+            key={index}
+            ref={(ref) => {
+              inputRefs.current[index] = ref;
+            }}
+            style={[
+              styles.otpBox,
+              digit ? styles.otpBoxFilled : null,
+              errorMessage ? styles.otpBoxError : null,
+            ]}
+            value={digit}
+            onChangeText={(text) => handleCellChange(text, index)}
+            onKeyPress={(e) => handleKeyPress(e, index)}
+            keyboardType="number-pad"
+            maxLength={index === 0 ? 6 : 1}
+            selectTextOnFocus
+            textAlign="center"
+            editable={!isLoading}
+          />
+        ))}
+      </View>
 
-            {resendNotice && (
-              <View style={styles.successBox}>
-                <CheckCircle
-                  size={20}
-                  weight="fill"
-                  color={colors.success}
-                  style={styles.errorIcon}
-                />
-                <Text style={styles.successText}>{resendNotice}</Text>
-              </View>
-            )}
+      {/* Countdown & Attempts Info */}
+      <View style={styles.statusRow}>
+        <View style={styles.timerContainer}>
+          <Timer size={16} weight="bold" color={colors.textSecondary} />
+          <Text style={styles.timerText}>
+            {t('auth:verifyOtp.codeExpiresIn') || 'Expires in'} {formattedTimer}
+          </Text>
+        </View>
+        <Text style={styles.attemptsText}>
+          {t('auth:verifyOtp.attemptsRemaining', {
+            count: attemptsRemaining,
+          }) || `${attemptsRemaining} attempts left`}
+        </Text>
+      </View>
 
-            {/* 6-Digit Input Row */}
-            <View style={styles.otpRow}>
-              {digits.map((digit, index) => (
-                <TextInput
-                  key={index}
-                  ref={(ref) => {
-                    inputRefs.current[index] = ref;
-                  }}
-                  style={[
-                    styles.otpBox,
-                    digit ? styles.otpBoxFilled : null,
-                    errorMessage ? styles.otpBoxError : null,
-                  ]}
-                  value={digit}
-                  onChangeText={(text) => handleCellChange(text, index)}
-                  onKeyPress={(e) => handleKeyPress(e, index)}
-                  keyboardType="number-pad"
-                  maxLength={index === 0 ? 6 : 1}
-                  selectTextOnFocus
-                  textAlign="center"
-                  editable={!isLoading}
-                />
-              ))}
-            </View>
+      {/* Submit Action */}
+      <TouchableOpacity
+        style={[
+          styles.submitButton,
+          (!isFormComplete || isLoading) && styles.submitButtonDisabled,
+        ]}
+        onPress={handleVerify}
+        disabled={!isFormComplete || isLoading}
+        activeOpacity={0.85}
+      >
+        {isLoading ? (
+          <ActivityIndicator color="#FFFFFF" size="small" />
+        ) : (
+          <View style={styles.submitButtonContent}>
+            <Text style={styles.submitButtonText}>
+              {t('auth:verifyOtp.verifyAndProceed') || 'Verify & Continue'}
+            </Text>
+            <ArrowRight size={18} weight="bold" color="#FFFFFF" />
+          </View>
+        )}
+      </TouchableOpacity>
 
-            {/* Countdown & Attempts Info */}
-            <View style={styles.statusRow}>
-              <View style={styles.timerContainer}>
-                <Timer size={16} weight="bold" color={colors.textSecondary} />
-                <Text style={styles.timerText}>
-                  {t('auth:verifyOtp.codeExpiresIn') || 'Expires in'}{' '}
-                  {formattedTimer}
-                </Text>
-              </View>
-              <Text style={styles.attemptsText}>
-                {t('auth:verifyOtp.attemptsRemaining', {
-                  count: attemptsRemaining,
-                }) || `${attemptsRemaining} attempts left`}
-              </Text>
-            </View>
-
-            {/* Submit Action */}
-            <TouchableOpacity
+      {/* Resend Code Link */}
+      <View style={styles.resendContainer}>
+        <Text style={styles.resendLabel}>
+          {t('auth:verifyOtp.didNotReceive') || "Didn't receive the code? "}
+        </Text>
+        <TouchableOpacity
+          onPress={handleResend}
+          disabled={secondsRemaining > 0 || isResending}
+        >
+          {isResending ? (
+            <ActivityIndicator size="small" color={colors.primary} />
+          ) : (
+            <Text
               style={[
-                styles.submitButton,
-                (!isFormComplete || isLoading) && styles.submitButtonDisabled,
+                styles.resendAction,
+                secondsRemaining > 0 && styles.resendActionDisabled,
               ]}
-              onPress={handleVerify}
-              disabled={!isFormComplete || isLoading}
-              activeOpacity={0.85}
             >
-              {isLoading ? (
-                <ActivityIndicator color="#FFFFFF" size="small" />
-              ) : (
-                <View style={styles.submitButtonContent}>
-                  <Text style={styles.submitButtonText}>
-                    {t('auth:verifyOtp.verifyAndProceed') ||
-                      'Verify & Continue'}
-                  </Text>
-                  <ArrowRight size={18} weight="bold" color="#FFFFFF" />
-                </View>
-              )}
-            </TouchableOpacity>
-
-            {/* Resend Code Link */}
-            <View style={styles.resendContainer}>
-              <Text style={styles.resendLabel}>
-                {t('auth:verifyOtp.didNotReceive') ||
-                  "Didn't receive the code? "}
-              </Text>
-              <TouchableOpacity
-                onPress={handleResend}
-                disabled={secondsRemaining > 0 || isResending}
-              >
-                {isResending ? (
-                  <ActivityIndicator size="small" color={colors.primary} />
-                ) : (
-                  <Text
-                    style={[
-                      styles.resendAction,
-                      secondsRemaining > 0 && styles.resendActionDisabled,
-                    ]}
-                  >
-                    {t('auth:verifyOtp.resendCode') || 'Resend Code'}
-                  </Text>
-                )}
-              </TouchableOpacity>
-            </View>
-          </ScrollView>
-        </KeyboardAvoidingView>
-      </TouchableWithoutFeedback>
-    </SafeAreaView>
+              {t('auth:verifyOtp.resendCode') || 'Resend Code'}
+            </Text>
+          )}
+        </TouchableOpacity>
+      </View>
+    </AuthScreenContainer>
   );
 };
 

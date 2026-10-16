@@ -23,7 +23,7 @@ function resolveTemplatePath(relativePath: string): string {
   );
 }
 
-export function renderTemplate(
+function renderTemplate(
   relativePath: string,
   context: Record<string, unknown>,
 ): string {

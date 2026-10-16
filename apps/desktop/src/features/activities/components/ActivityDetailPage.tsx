@@ -42,7 +42,6 @@ import {
 import { openUrl } from '@tauri-apps/plugin-opener';
 import type React from 'react';
 import { useMemo, useState } from 'react';
-// import { useActivityDetailWorkspace } from '../hooks/useActivityDetailWorkspace';
 
 import { UserAvatar } from '../../../components';
 import { formatCameroonPhone } from '../../members/utils/member-ui.utils';
@@ -74,8 +73,6 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
   onDeleteActivity,
   isPrivileged,
 }) => {
-  // const { state, actions } = useActivityDetailWorkspace(activity);
-
   const { t } = useTranslation();
   const { user } = useAuth();
   const { canWrite } = useTownContext();
