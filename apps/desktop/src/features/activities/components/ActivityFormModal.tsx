@@ -326,7 +326,7 @@ export const ActivityFormModal: React.FC<ActivityFormModalProps> = ({
                   htmlFor="activity-category"
                   className="font-bold text-[#1e1b19]"
                 >
-                  Canonical Activity Category{' '}
+                  Official Activity Category{' '}
                   <span className="text-[#b85028]">*</span>
                 </label>
                 <CustomSelect<ActivityType>
@@ -433,12 +433,12 @@ export const ActivityFormModal: React.FC<ActivityFormModalProps> = ({
             </div>
           </div>
 
-          {/* SECTION: Pastoral Directives & Notes */}
+          {/* SECTION: Program Notes & Notes */}
           <div className="flex flex-col gap-3 pt-3 border-t border-[#f4ece9]">
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-[#b85028]" />
               <span className="text-[11px] font-bold text-[#8a726a] uppercase tracking-wider">
-                Pastoral Notes & Directives
+                Transfer Notes & Directives
               </span>
             </div>
 
@@ -472,7 +472,7 @@ export const ActivityFormModal: React.FC<ActivityFormModalProps> = ({
                 <span>Documented Change Reason (Audit Log) *</span>
               </label>
               <p className="text-[11px] text-[#8a726a]">
-                Required by Diocesan audit standards. State why the dates,
+                Required by Inter-Hub audit standards. State why the dates,
                 status, or scope were altered.
               </p>
               <input

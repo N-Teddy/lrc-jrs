@@ -220,13 +220,13 @@ export const InitiateTransferModal: React.FC<InitiateTransferModalProps> = ({
             />
           </div>
 
-          {/* Pastoral Reason / Relocation Note */}
+          {/* Relocation Reason / Transfer Notes */}
           <div className="flex flex-col gap-1.5">
             <label
               htmlFor="initiate-transfer-reason"
               className="text-xs font-bold text-[#1e1b19]"
             >
-              Pastoral Reason / Relocation Note{' '}
+              Relocation Reason / Transfer Notes{' '}
               <span className="text-[#8a726a] font-normal">(Optional)</span>
             </label>
             <textarea

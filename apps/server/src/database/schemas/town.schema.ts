@@ -9,12 +9,10 @@ export type TownDocument = Town & Document;
 
 @Schema(baseSchemaOptions)
 export class Town extends BaseDocument {
-  @Prop({ required: true, trim: true, unique: true })
+  @Prop({ type: String, required: true, trim: true, unique: true })
   name: string;
 
-  @Prop({
-    required: true,
-    trim: true,
+  @Prop({ type: String, required: true, trim: true,
     uppercase: true,
     unique: true,
     index: true,

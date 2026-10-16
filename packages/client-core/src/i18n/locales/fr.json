@@ -233,8 +233,8 @@
     }
   },
   "roles": {
-    "ap": "Animateur Principal (AP)",
-    "pc": "Personne Contact (PC)",
+    "ap": "AP",
+    "pc": "PC",
     "member": "Membre JR",
     "ageWarning": "Le groupe JR est destiné aux jeunes âgés de 18 à 30 ans."
   },
@@ -360,11 +360,11 @@
   },
   "members": {
     "title": "Annuaire Principal des Membres",
-    "subtitle": "Registre Canonique",
+    "subtitle": "Registre Officiel",
     "registerMember": "Enregistrer un Membre",
     "stats": {
       "totalRegistered": "Total Enregistré",
-      "canonicalJrAge": "Âge Canonique JR (18–30)",
+      "canonicalJrAge": "Tranche d'Âge Jeunesse (18–30)",
       "leadershipContacts": "Responsables de Contact",
       "activePcs": "PC Actifs",
       "fullQuota": "Quota Plein",
@@ -372,7 +372,7 @@
       "active": "Actif",
       "offline": "Hors-ligne",
       "joinedThisQuarter": "+{{count}} inscrits ce trimestre",
-      "ageBracket": "Tranche 18–30 ans (Directives Canoniques)"
+      "ageBracket": "Tranche 18–30 ans (Directives Communautaires)"
     },
     "filters": {
       "searchPlaceholder": "Rechercher par nom, téléphone (+237...), email...",
@@ -493,7 +493,7 @@
     },
     "filters": {
       "searchPlaceholder": "Rechercher par nom, téléphone (+237...), email...",
-      "allTowns": "Tous les Centres / Diocèse",
+      "allTowns": "Tous les Centres / Inter-Centres",
       "allStates": "Tous les États",
       "active": "Actifs Uniquement",
       "pending": "En Attente Première Connexion",
@@ -536,9 +536,9 @@
     "permissions": {
       "title": "Gouvernance des Rôles & Permissions",
       "subtitle": "Aperçu des droits et limites par niveau diocésain",
-      "apRole": "Animateur Principal (AP)",
+      "apRole": "AP",
       "apDesc": "Autorité diocésaine complète. Gestion de tous les centres, création et modification des activités, attribution des comptes et permissions.",
-      "pcRole": "Coordinateur Paroissial (PC)",
+      "pcRole": "PC",
       "pcDesc": "Gestion complète au sein de son centre paroissial d'attache. Consultation en lecture seule sur les centres autorisés.",
       "memberRole": "Membre de la Jeunesse",
       "memberDesc": "Accès individuel aux activités, suivi de présence et cercles de partage."

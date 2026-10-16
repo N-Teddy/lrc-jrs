@@ -167,7 +167,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
                   }`}
                 >
                   <span>{age} yrs</span>
-                  {isEligibleJr && <span>· Canonical JR</span>}
+                  {isEligibleJr && <span>· Eligible Youth</span>}
                 </span>
               )}
               <span>•</span>
@@ -311,7 +311,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
         <div
           className={`grid grid-cols-1 ${hasAppAccess ? 'lg:grid-cols-3' : ''} gap-6`}
         >
-          {/* Identity & Canonical Status */}
+          {/* Identity & Official Status */}
           <div
             className={`${hasAppAccess ? 'lg:col-span-2' : 'w-full'} flex flex-col gap-6`}
           >
@@ -408,13 +408,13 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
                 </div>
               </div>
 
-              {/* Pastoral & Fellowship Notes */}
+              {/* Transfer & Fellowship Notes */}
               <div className="p-4 rounded-2xl bg-[#faf2ee] border border-[#e8e1dd] flex flex-col gap-2">
                 <span className="text-xs font-bold text-[#1e1b19]">
-                  Canonical Community Standing
+                  Official Community Standing
                 </span>
                 <p className="text-xs text-[#57423b] leading-relaxed">
-                  Member registered in good standing under Diocesan Youth
+                  Member registered in good standing under Inter-Hub Youth
                   Fellowship statutes. Eligible for fellowship circles, regional
                   gatherings, and sacramental retreat cohorts.
                 </p>
@@ -499,7 +499,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
       {/* 5. Tab 2: Town Registry & Relocation Records */}
       {activeDetailTab === 'transfers' && (
         <div className="flex flex-col gap-6 animate-in fade-in duration-200">
-          {/* Canonical Hub Registry Passport Header Card */}
+          {/* Official Hub Registry Passport Header Card */}
           <div className="relative bg-gradient-to-br from-white via-[#fffaf7] to-white rounded-3xl border-2 border-[#ffdbcf]/70 p-6 sm:p-8 shadow-sm overflow-hidden flex flex-col gap-6">
             {/* Background Subtle Watermark */}
             <div className="absolute -right-8 -bottom-8 pointer-events-none opacity-[0.04] text-[#b85028]">
@@ -515,10 +515,10 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
                 <div className="flex flex-col">
                   <div className="flex items-center gap-2">
                     <h3 className="text-base font-black text-[#1e1b19] tracking-tight">
-                      Canonical Hub Registry & Passport
+                      Official Hub Registry & Passport
                     </h3>
                     <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#ffdbcf]/60 text-[#812901] border border-[#ffb59c]/50">
-                      Deanery Roll
+                      Registry Index
                     </span>
                   </div>
                   <p className="text-xs text-[#8a726a] mt-0.5">
@@ -540,7 +540,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
               )}
             </div>
 
-            {/* Canonical Dual Pillars: Current Resident Hub <-> Origin Hub */}
+            {/* Official Dual Pillars: Current Resident Hub <-> Origin Hub */}
             <div className="grid grid-cols-1 lg:grid-cols-7 gap-4 items-center relative z-10">
               {/* Pillar 1: Current Resident Hub (3 cols) */}
               <div className="lg:col-span-3 p-5 rounded-2xl bg-white border border-[#c2e9ca] shadow-2xs flex flex-col justify-between gap-3 relative overflow-hidden group">
@@ -563,7 +563,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
                   </h4>
                   <div className="flex items-center gap-1.5 text-xs text-[#8a726a] mt-1">
                     <Buildings size={14} className="text-[#486b52]" />
-                    <span>Canonical Resident Seat in Cameroon</span>
+                    <span>Official Current Hub in Cameroon</span>
                   </div>
                 </div>
 
@@ -587,7 +587,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
                 </span>
               </div>
 
-              {/* Pillar 2: Mother Sanctuary / Origin Hub (3 cols) */}
+              {/* Pillar 2: Origin Hub / Origin Hub (3 cols) */}
               <div className="lg:col-span-3 p-5 rounded-2xl bg-white border border-[#ffdbcf] shadow-2xs flex flex-col justify-between gap-3 relative overflow-hidden group">
                 <div className="absolute top-0 left-0 right-0 h-1 bg-[#b85028]" />
                 <div className="flex items-center justify-between gap-2">
@@ -597,7 +597,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
                       weight="fill"
                       className="text-[#b85028]"
                     />
-                    Mother Sanctuary
+                    Origin Hub
                   </span>
                   <span className="text-sm font-mono font-black text-[#b85028] bg-[#fff2ee] px-2.5 py-0.5 rounded-lg border border-[#ffdbcf]">
                     {member.transferHistory && member.transferHistory.length > 0
@@ -614,7 +614,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
                           ?.name || 'Origin Hub'
                       : (member.homeTown?.name ??
                         activeTown?.name ??
-                        'Mother Sanctuary')}
+                        'Origin Hub')}
                   </h4>
                   <div className="flex items-center gap-1.5 text-xs text-[#8a726a] mt-1">
                     <ShieldCheck size={14} className="text-[#b85028]" />
@@ -639,7 +639,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 border-b border-[#f4ece9]">
               <div>
                 <h3 className="text-base font-bold text-[#1e1b19]">
-                  Canonical Relocation Ledger & Pastoral Endorsements
+                  Transfer Ledger & Hub Endorsements
                 </h3>
                 <p className="text-xs text-[#8a726a] mt-0.5">
                   Complete chronological audit record of fellowship transfers,
@@ -718,7 +718,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
                         {record.reason && (
                           <div className="p-3 rounded-xl bg-[#faf2ee]/60 border border-[#f4ece9] text-xs text-[#57423b] leading-relaxed">
                             <span className="font-bold text-[#812901] block mb-0.5">
-                              Pastoral Note:
+                              Transfer Notes:
                             </span>
                             {record.reason}
                           </div>
@@ -754,7 +754,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
                 <div className="p-5 rounded-2xl bg-[#faf2ee]/70 border border-[#e8e1dd] flex-1 flex flex-col gap-2">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
                     <span className="text-xs font-bold text-[#1e1b19]">
-                      Canonical Inception & First Enrollment at{' '}
+                      Official Inception & First Enrollment at{' '}
                       {member.transferHistory &&
                       member.transferHistory.length > 0
                         ? townsMap.get(member.transferHistory[0].fromTownId)

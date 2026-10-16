@@ -4,7 +4,9 @@ packages:
 allowBuilds:
   '@parcel/watcher': true
   '@scarf/scarf': true
+  '@swc/core': true
   bcrypt: true
+  esbuild: true
   unrs-resolver: true
 overrides:
   tar: '>=7.5.18'

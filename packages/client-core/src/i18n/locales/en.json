@@ -233,8 +233,8 @@
     }
   },
   "roles": {
-    "ap": "Principal Coordinator (AP)",
-    "pc": "Contact Person (PC)",
+    "ap": "AP",
+    "pc": "PC",
     "member": "JR Member",
     "ageWarning": "The JR group is designated for youth aged 18 to 30."
   },
@@ -251,7 +251,7 @@
     "venue": "Venue / Room",
     "startDate": "Start Date & Time",
     "endDate": "End Date & Time",
-    "notes": "Notes & Pastoral Agenda",
+    "notes": "Notes & Activity Agenda",
     "status": "Status",
     "changeReason": "Reason for Modification",
     "changeReasonPlaceholder": "Describe why dates, venue, or status were changed...",
@@ -360,11 +360,11 @@
   },
   "members": {
     "title": "Primary Members Directory",
-    "subtitle": "Canonical Register",
+    "subtitle": "Registry Index",
     "registerMember": "Register Member",
     "stats": {
       "totalRegistered": "Total Registered",
-      "canonicalJrAge": "Canonical JR Age (18–30)",
+      "canonicalJrAge": "Youth Age Range (18–30)",
       "leadershipContacts": "Leadership Contacts",
       "activePcs": "Active PCs",
       "fullQuota": "Full Quota",
@@ -372,7 +372,7 @@
       "active": "Active",
       "offline": "Offline",
       "joinedThisQuarter": "+{{count}} joined this quarter",
-      "ageBracket": "Age bracket 18–30 (Canonical Guidelines)"
+      "ageBracket": "Age bracket 18–30 (Community Guidelines)"
     },
     "filters": {
       "searchPlaceholder": "Search by name, phone (+237...), or email...",
@@ -416,8 +416,8 @@
       "fullName": "Full Name",
       "fullNamePlaceholder": "e.g. Samuel Eto'o Junior",
       "dob": "Date of Birth",
-      "ageBadgeUnder": "Age {{age}} — Under Canonical Age (< 18)",
-      "ageBadgeEligible": "Age {{age}} — Canonical JR Eligible Youth (18–30)",
+      "ageBadgeUnder": "Age {{age}} — Under Youth Age (< 18)",
+      "ageBadgeEligible": "Age {{age}} — Eligible Youth (18–30)",
       "ageBadgeSenior": "Age {{age}} — Senior Cohort (> 30)",
       "sectionContact": "Contact & Credentials Dispatch",
       "phoneLabel": "Phone Number (WhatsApp Preferred)",
@@ -427,7 +427,7 @@
       "sectionRole": "Fellowship Role & Scope",
       "jrMemberDesc": "Regular youth cohort member attending study groups & missions.",
       "pcDesc": "Community leader coordinating hub activities and care.",
-      "apDesc": "Diocesan animator supervising pastoral programs.",
+      "apDesc": "Inter-Hub animator supervising community programs.",
       "quotaFull": "Quota Full (2/2 Active PCs)",
       "quotaAlert": "Quota Alert: 2 active PCs already designated for this hub.",
       "sectionAccess": "Grant Mobile & Desktop Portal Access",
@@ -493,7 +493,7 @@
     },
     "filters": {
       "searchPlaceholder": "Search by name, phone (+237...), email, or identifier...",
-      "allTowns": "All Hubs / Diocesan",
+      "allTowns": "All Hubs Scope",
       "allStates": "All Account States",
       "active": "Active Only",
       "pending": "Pending First Login",
@@ -536,10 +536,10 @@
     "permissions": {
       "title": "Role & Hierarchy Governance",
       "subtitle": "Overview of permission boundaries across diocesan ranks",
-      "apRole": "Apostolic Prefect (AP)",
+      "apRole": "AP",
       "apDesc": "Full executive authority across all towns. Can register and remove members, create and reschedule activities, grant portal accounts, and assign cross-hub scopes.",
-      "pcRole": "Parish Coordinator (PC)",
-      "pcDesc": "Parish-level administrator. Full read/write management within home town hub. Has read-only auditing into assigned external hubs.",
+      "pcRole": "PC",
+      "pcDesc": "Hub-level administrator. Full read/write management within home town hub. Has read-only auditing into assigned external hubs.",
       "memberRole": "Youth Member",
       "memberDesc": "Fellowship member. Can view assigned parish gatherings, track attendance history, and engage in mentorship circles."
     }

@@ -54,7 +54,7 @@ export const PermissionsMatrixView: React.FC<PermissionsMatrixViewProps> = ({
             <div>
               <div className="flex items-center justify-between mb-3">
                 <span className="px-2.5 py-1 rounded-lg text-xs font-bold bg-[#5c1d24] text-white">
-                  Apostolic Prefect (AP)
+                  AP
                 </span>
                 <ShieldCheck
                   size={24}
@@ -70,7 +70,7 @@ export const PermissionsMatrixView: React.FC<PermissionsMatrixViewProps> = ({
               <div className="space-y-2 text-xs">
                 <div className="flex items-center gap-2 text-[#2c4e37]">
                   <CheckCircle size={15} weight="fill" />
-                  <span>Diocesan Multi-Hub Write Access</span>
+                  <span>Inter-Hub Multi-Hub Write Access</span>
                 </div>
                 <div className="flex items-center gap-2 text-[#2c4e37]">
                   <CheckCircle size={15} weight="fill" />
@@ -87,7 +87,7 @@ export const PermissionsMatrixView: React.FC<PermissionsMatrixViewProps> = ({
               </div>
             </div>
             <div className="mt-5 pt-4 border-t border-[#f4ece9] text-[11px] font-bold text-[#8a726a]">
-              Diocesan Clergy & Senior Directors
+              Inter-Hub Clergy & Senior Directors
             </div>
           </div>
 
@@ -96,7 +96,7 @@ export const PermissionsMatrixView: React.FC<PermissionsMatrixViewProps> = ({
             <div>
               <div className="flex items-center justify-between mb-3">
                 <span className="px-2.5 py-1 rounded-lg text-xs font-bold bg-[#2c4e37] text-white">
-                  Parish Coordinator (PC)
+                  PC
                 </span>
                 <UserCheck
                   size={24}
@@ -105,7 +105,7 @@ export const PermissionsMatrixView: React.FC<PermissionsMatrixViewProps> = ({
                 />
               </div>
               <p className="text-xs text-[#57423b] leading-relaxed mb-4">
-                Parish hub administrator. Full management authority inside their
+                Hub administrator. Full management authority inside their
                 assigned home hub, with read-only auditing into delegated
                 external hubs.
               </p>
@@ -129,7 +129,7 @@ export const PermissionsMatrixView: React.FC<PermissionsMatrixViewProps> = ({
               </div>
             </div>
             <div className="mt-5 pt-4 border-t border-[#f4ece9] text-[11px] font-bold text-[#8a726a]">
-              Parish Leaders & Youth Pastors
+              Hub Leaders & Youth Pastors
             </div>
           </div>
 
@@ -153,7 +153,7 @@ export const PermissionsMatrixView: React.FC<PermissionsMatrixViewProps> = ({
                 </div>
                 <div className="flex items-center gap-2 text-[#2c4e37]">
                   <CheckCircle size={15} weight="fill" />
-                  <span>Home Parish Gatherings Calendar</span>
+                  <span>Home Hub Gatherings Calendar</span>
                 </div>
                 <div className="flex items-center gap-2 text-[#8a726a]">
                   <XCircle size={15} />
@@ -181,7 +181,7 @@ export const PermissionsMatrixView: React.FC<PermissionsMatrixViewProps> = ({
               <span>Cross-Hub Read Scopes & Jurisdictions</span>
             </h3>
             <p className="text-xs text-[#8a726a] mt-0.5">
-              Parish coordinators and officers granted read-only visibility into
+              Hub coordinators and officers granted read-only visibility into
               other parish gatherings
             </p>
           </div>

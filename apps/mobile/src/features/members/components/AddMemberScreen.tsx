@@ -278,8 +278,8 @@ export const AddMemberScreen: React.FC<AddMemberScreenProps> = ({
               <View style={styles.roleRow}>
                 {[
                   { label: 'Member', value: 'MEMBER' },
-                  { label: 'PC (Leader)', value: 'PC' },
-                  { label: 'AP (Director)', value: 'AP' },
+                  { label: 'PC', value: 'PC' },
+                  { label: 'AP', value: 'AP' },
                 ].map((item) => (
                   <TouchableOpacity
                     key={item.value}

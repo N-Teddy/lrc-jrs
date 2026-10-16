@@ -41,7 +41,7 @@ export const AccessFilterToolbar: React.FC<AccessFilterToolbarProps> = ({
     return [
       {
         value: 'ALL',
-        label: t('access:filters.allTowns') || 'All Hubs / Diocesan',
+        label: t('access:filters.allTowns') || 'All Hubs / Inter-Hub',
       },
       ...availableTowns.map((t) => ({
         value: t.id,
@@ -82,11 +82,11 @@ export const AccessFilterToolbar: React.FC<AccessFilterToolbarProps> = ({
       },
       {
         value: 'AP',
-        label: 'Apostolic Prefect (AP)',
+        label: 'AP',
       },
       {
         value: 'PC',
-        label: 'Parish Coordinator (PC)',
+        label: 'PC',
       },
       {
         value: 'MEMBER',

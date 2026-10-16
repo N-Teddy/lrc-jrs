@@ -18,25 +18,26 @@ export enum AccountStatus {
 @Schema({ _id: false })
 export class UserAccountInfo {
   @Prop({
+    type: String,
     required: true,
     enum: AccountStatus,
     default: AccountStatus.PENDING_ACTIVATION,
   })
   status: AccountStatus;
 
-  @Prop({ default: true })
+  @Prop({ type: Boolean, default: true })
   hasAppAccess: boolean;
 
-  @Prop({ default: false })
+  @Prop({ type: Boolean, default: false })
   isAccessRevoked: boolean;
 
   @Prop({ type: [String], default: [] })
   allowedReadTownIds: string[];
 
-  @Prop()
+  @Prop({ type: String })
   invitedBy?: string;
 
-  @Prop()
+  @Prop({ type: Date })
   invitedAt?: Date;
 }
 
@@ -54,13 +55,13 @@ export class TownTransferRecord {
   @Prop({ required: true })
   transferredBy: string;
 
-  @Prop()
+  @Prop({ type: String })
   reason?: string;
 }
 
 @Schema(baseSchemaOptions)
 export class User extends BaseDocument {
-  @Prop({ required: true, trim: true })
+  @Prop({ type: String, required: true, trim: true })
   fullName: string;
 
   @Prop({ required: true, unique: true, trim: true, index: true })
@@ -75,40 +76,41 @@ export class User extends BaseDocument {
   })
   email?: string;
 
-  @Prop({ trim: true })
+  @Prop({ type: String, trim: true })
   avatarUrl?: string;
 
   @Prop({ type: String, enum: ['MALE', 'FEMALE'], required: false })
   gender?: 'MALE' | 'FEMALE';
 
-  @Prop({ default: false })
+  @Prop({ type: Boolean, default: false })
   isWhatsappVerified?: boolean;
 
-  @Prop()
+  @Prop({ type: String })
   integrationDate?: string;
 
-  @Prop()
+  @Prop({ type: String })
   passwordHash?: string;
 
-  @Prop()
+  @Prop({ type: String })
   tempPasswordHash?: string;
 
-  @Prop()
+  @Prop({ type: Date })
   tempPasswordExpiresAt?: Date;
 
-  @Prop({ default: false })
+  @Prop({ type: Boolean, default: false })
   isTemporaryPassword: boolean;
 
   @Prop({ required: true })
   dateOfBirth: string;
 
-  @Prop({ default: true })
+  @Prop({ type: Boolean, default: true })
   isJr: boolean;
 
   @Prop({ type: Types.ObjectId, ref: 'Town', required: true, index: true })
   homeTownId: Types.ObjectId;
 
   @Prop({
+    type: String,
     required: true,
     enum: UserRole,
     default: UserRole.MEMBER,
@@ -116,7 +118,7 @@ export class User extends BaseDocument {
   })
   role: UserRole;
 
-  @Prop({ default: false, index: true })
+  @Prop({ type: Boolean, default: false, index: true })
   isActivePC: boolean;
 
   @Prop({ type: UserAccountInfo, default: () => ({}) })
@@ -131,3 +133,7 @@ export const UserSchema = SchemaFactory.createForClass(User);
 // Indexes
 UserSchema.index({ homeTownId: 1, role: 1 });
 UserSchema.index({ homeTownId: 1, isActivePC: 1 });
+UserSchema.index({ 'account.hasAppAccess': 1 });
+UserSchema.index({ 'transferHistory.fromTownId': 1 });
+UserSchema.index({ 'transferHistory.toTownId': 1 });
+UserSchema.index({ 'transferHistory.transferredAt': -1 });

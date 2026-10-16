@@ -2,10 +2,12 @@ import { Injectable, Logger, type OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
 import { TemplateLoaderUtil } from '../core/utils/template-loader.util';
+import type { NotificationStrategy } from './notification.strategy';
 
 @Injectable()
-export class EmailService implements OnModuleInit {
+export class EmailService implements OnModuleInit, NotificationStrategy {
   private readonly logger = new Logger(EmailService.name);
+  readonly channel = 'email';
   private transporter: nodemailer.Transporter | null = null;
   private readonly fromAddress: string;
 
@@ -64,6 +66,14 @@ export class EmailService implements OnModuleInit {
         );
       }
     }
+  }
+
+  async send(recipient: string, message: string, metadata?: Record<string, unknown>): Promise<boolean> {
+    return this.sendEmail({
+      to: recipient,
+      subject: (metadata?.subject as string) || 'Notification - LRC JRS',
+      html: message,
+    });
   }
 
   /**

@@ -127,8 +127,8 @@ export const MemberFilterSheet: React.FC<MemberFilterSheetProps> = ({
                   {[
                     { label: 'All Roles', value: 'ALL' },
                     { label: 'Member', value: 'MEMBER' },
-                    { label: 'PC (Coordinator)', value: 'PC' },
-                    { label: 'AP (Director)', value: 'AP' },
+                    { label: 'PC', value: 'PC' },
+                    { label: 'AP', value: 'AP' },
                   ].map((item) => (
                     <TouchableOpacity
                       key={item.value}

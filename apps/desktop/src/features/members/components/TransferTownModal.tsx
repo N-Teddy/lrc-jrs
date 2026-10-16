@@ -223,7 +223,7 @@ export const TransferTownModal: React.FC<TransferTownModalProps> = ({
               htmlFor="transfer-reason"
               className="text-xs font-bold text-[#1e1b19]"
             >
-              Pastoral Reason / Relocation Note{' '}
+              Relocation Reason / Transfer Notes{' '}
               <span className="text-[#8a726a] font-normal">(Optional)</span>
             </label>
             <textarea

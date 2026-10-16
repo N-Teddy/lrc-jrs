@@ -133,7 +133,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           ) : (
             /* Pristine Minimalist Workspace Card */
             <div className="relative w-full min-h-[560px] rounded-3xl bg-white border border-[#e8e1dd] shadow-xs flex flex-col justify-between p-8 sm:p-12 overflow-hidden">
-              {/* Background Subtle Sanctuary Grid Pattern */}
+              {/* Background Subtle Hub Grid Pattern */}
               <div className="absolute inset-0 pointer-events-none opacity-40">
                 <svg
                   className="w-full h-full text-[#e8e1dd]"

@@ -88,7 +88,7 @@ export const TransferTableView: React.FC<TransferTableViewProps> = ({
               <th className="py-3 px-4 font-bold">Relocation Route</th>
               <th className="py-3 px-4 font-bold">Authority & Sign-off</th>
               <th className="py-3 px-4 font-bold">Effective Date</th>
-              <th className="py-3 px-4 font-bold">Pastoral Reason</th>
+              <th className="py-3 px-4 font-bold">Relocation Reason</th>
               <th className="py-3 px-4 font-bold text-right">Actions</th>
             </tr>
           </thead>
@@ -188,12 +188,12 @@ export const TransferTableView: React.FC<TransferTableViewProps> = ({
                         {formattedDate}
                       </span>
                       <span className="text-[10px] text-[#8a726a]">
-                        Canonical Ledger
+                        Transfer Ledger
                       </span>
                     </div>
                   </td>
 
-                  {/* 5. Pastoral Reason */}
+                  {/* 5. Relocation Reason */}
                   <td className="py-3.5 px-4 max-w-xs">
                     {item.reason ? (
                       <p className="text-xs text-[#57423b] line-clamp-2 italic bg-[#faf2ee]/50 px-2 py-1 rounded border border-[#f4ece9]">

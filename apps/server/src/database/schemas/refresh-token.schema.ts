@@ -18,16 +18,16 @@ export class RefreshToken extends BaseDocument {
   @Prop({ required: true })
   expiresAt: Date;
 
-  @Prop({ default: false, index: true })
+  @Prop({ type: Boolean, default: false, index: true })
   isRevoked: boolean;
 
-  @Prop()
+  @Prop({ type: String })
   replacedByTokenHash?: string;
 
-  @Prop()
+  @Prop({ type: String })
   userAgent?: string;
 
-  @Prop()
+  @Prop({ type: String })
   ipAddress?: string;
 }
 

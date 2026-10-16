@@ -81,7 +81,7 @@ export const MemberStatsOverview: React.FC<MemberStatsOverviewProps> = ({
         </div>
       </div>
 
-      {/* 2. Canonical JR Age (18–30) */}
+      {/* 2. Youth Age Range (18–30) */}
       <div className="bg-white p-5 rounded-2xl border border-[#e8e1dd] shadow-xs flex flex-col justify-between gap-3 transition-shadow hover:shadow-sm">
         <div className="flex items-start justify-between">
           <div className="flex flex-col gap-1">
