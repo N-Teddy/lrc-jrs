@@ -67,7 +67,7 @@ export const ActivityCardGridView: React.FC<ActivityCardGridViewProps> = ({
               <div className="h-4 w-3/4 bg-[#f4ece9] rounded" />
               <div className="h-3 w-1/2 bg-[#f4ece9] rounded" />
             </div>
-            <div className="h-8 w-full bg-[#f4ece9] rounded-lg" />
+            <div className="h-8 w-full bg-[#f4ece9] rounded-md" />
           </div>
         ))}
       </div>
@@ -76,8 +76,8 @@ export const ActivityCardGridView: React.FC<ActivityCardGridViewProps> = ({
 
   if (activities.length === 0) {
     return (
-      <div className="bg-white rounded-2xl border border-[#e8e1dd] shadow-xs p-12 flex flex-col items-center justify-center text-center min-h-[320px]">
-        <div className="w-14 h-14 rounded-2xl bg-[#faf2ee] border border-[#e8e1dd] flex items-center justify-center text-[#8a726a] mb-4">
+      <div className="bg-white rounded-xl border border-[#e8e1dd] shadow-xs p-12 flex flex-col items-center justify-center text-center min-h-[320px]">
+        <div className="w-14 h-14 rounded-xl bg-[#faf2ee] border border-[#e8e1dd] flex items-center justify-center text-[#8a726a] mb-4">
           <CalendarBlank size={28} weight="duotone" />
         </div>
         <h3 className="text-base font-bold text-[#1e1b19] mb-1">
@@ -238,7 +238,7 @@ export const ActivityCardGridView: React.FC<ActivityCardGridViewProps> = ({
 
       {/* Pagination Footer */}
       {totalPages > 1 && (
-        <div className="bg-white rounded-2xl border border-[#e8e1dd] shadow-xs py-3 px-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#8a726a]">
+        <div className="bg-white rounded-xl border border-[#e8e1dd] shadow-xs py-3 px-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#8a726a]">
           <span>
             {t('common:showingActivities', {
               start: (page - 1) * limit + 1,

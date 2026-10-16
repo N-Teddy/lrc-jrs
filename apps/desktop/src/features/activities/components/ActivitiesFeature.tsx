@@ -114,6 +114,9 @@ export const ActivitiesFeature: React.FC = () => {
   };
 
   const handleEditActivity = (activity: IActivity) => {
+    if (activity.status === ActivityStatus.COMPLETED) {
+      return;
+    }
     setEditingActivity(activity);
     setIsFormModalOpen(true);
   };

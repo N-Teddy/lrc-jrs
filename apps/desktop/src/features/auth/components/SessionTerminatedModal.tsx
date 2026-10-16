@@ -22,9 +22,9 @@ export const SessionTerminatedModal: React.FC<SessionTerminatedModalProps> = ({
       aria-labelledby="session-title"
       className="fixed inset-0 z-50 flex items-center justify-center bg-[#1e1b19]/70 p-4 backdrop-blur-[3px] animate-fadeIn"
     >
-      <div className="w-full max-w-md rounded-2xl border border-[#e8e1dd] bg-white p-7 sm:p-8 shadow-2xl text-center flex flex-col items-center gap-5">
+      <div className="w-full max-w-md rounded-xl border border-[#e8e1dd] bg-white p-7 sm:p-8 shadow-2xl text-center flex flex-col items-center gap-5">
         {/* Badge Icon */}
-        <div className="w-16 h-16 rounded-2xl bg-[#ffdbcf] text-[#983912] flex items-center justify-center shadow-inner">
+        <div className="w-16 h-16 rounded-xl bg-[#ffdbcf] text-[#983912] flex items-center justify-center shadow-inner">
           <LockKey size={36} weight="fill" />
         </div>
 
@@ -43,7 +43,7 @@ export const SessionTerminatedModal: React.FC<SessionTerminatedModalProps> = ({
         </p>
 
         {/* Audit Tag */}
-        <div className="w-full bg-[#faf2ee] rounded-xl px-4 py-2.5 flex items-center justify-center gap-2 text-xs text-[#8a726a] border border-[#e8e1dd]">
+        <div className="w-full bg-[#faf2ee] rounded-lg px-4 py-2.5 flex items-center justify-center gap-2 text-xs text-[#8a726a] border border-[#e8e1dd]">
           <Fingerprint size={16} weight="bold" />
           <span>{t('auth:sessionTerminated.auditTag')}</span>
         </div>
@@ -52,7 +52,7 @@ export const SessionTerminatedModal: React.FC<SessionTerminatedModalProps> = ({
         <button
           type="button"
           onClick={onAcknowledge}
-          className="w-full py-3.5 px-6 rounded-xl bg-[#b85028] text-white text-sm font-semibold shadow-md hover:bg-[#983912] active:scale-[0.99] transition flex items-center justify-center gap-2 mt-1 cursor-pointer"
+          className="w-full py-3 px-6 rounded-md bg-[#b85028] text-white text-sm font-semibold shadow-md hover:bg-[#983912] active:scale-[0.99] transition flex items-center justify-center gap-2 mt-1 cursor-pointer"
         >
           <ArrowClockwise size={18} weight="bold" />
           <span>{t('auth:sessionTerminated.signInAgain')}</span>

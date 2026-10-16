@@ -162,7 +162,7 @@ export const ActivityCalendarView: React.FC<ActivityCalendarViewProps> = ({
 
   if (isLoading) {
     return (
-      <div className="bg-white rounded-2xl border border-[#e8e1dd] shadow-xs p-8 flex flex-col items-center justify-center min-h-[400px] animate-pulse">
+      <div className="bg-white rounded-xl border border-[#e8e1dd] shadow-xs p-8 flex flex-col items-center justify-center min-h-[400px] animate-pulse">
         <div className="w-10 h-10 rounded-full bg-[#f4ece9] mb-4" />
         <div className="h-4 w-48 bg-[#f4ece9] rounded mb-2" />
         <div className="h-3 w-32 bg-[#f4ece9] rounded" />
@@ -171,7 +171,7 @@ export const ActivityCalendarView: React.FC<ActivityCalendarViewProps> = ({
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-[#e8e1dd] shadow-xs overflow-hidden flex flex-col">
+    <div className="bg-white rounded-xl border border-[#e8e1dd] shadow-xs overflow-hidden flex flex-col">
       {/* Calendar Header Navigation */}
       <div className="p-4 bg-[#faf2ee] border-b border-[#e8e1dd] flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
@@ -187,7 +187,7 @@ export const ActivityCalendarView: React.FC<ActivityCalendarViewProps> = ({
           <button
             type="button"
             onClick={handleToday}
-            className="px-3 py-1.5 rounded-lg bg-white border border-[#e8e1dd] text-xs font-bold text-[#1e1b19] hover:bg-[#faf2ee] transition-colors cursor-pointer"
+            className="px-3 py-1.5 rounded-md bg-white border border-[#e8e1dd] text-xs font-bold text-[#1e1b19] hover:bg-[#faf2ee] transition-colors cursor-pointer"
           >
             Today
           </button>
@@ -195,7 +195,7 @@ export const ActivityCalendarView: React.FC<ActivityCalendarViewProps> = ({
             <button
               type="button"
               onClick={handlePrevMonth}
-              className="p-1.5 rounded-lg bg-white border border-[#e8e1dd] text-[#57423b] hover:text-[#1e1b19] hover:bg-[#faf2ee] transition-colors cursor-pointer"
+              className="p-1.5 rounded-md bg-white border border-[#e8e1dd] text-[#57423b] hover:text-[#1e1b19] hover:bg-[#faf2ee] transition-colors cursor-pointer"
               title="Previous Month"
             >
               <CaretLeft size={16} weight="bold" />
@@ -203,7 +203,7 @@ export const ActivityCalendarView: React.FC<ActivityCalendarViewProps> = ({
             <button
               type="button"
               onClick={handleNextMonth}
-              className="p-1.5 rounded-lg bg-white border border-[#e8e1dd] text-[#57423b] hover:text-[#1e1b19] hover:bg-[#faf2ee] transition-colors cursor-pointer"
+              className="p-1.5 rounded-md bg-white border border-[#e8e1dd] text-[#57423b] hover:text-[#1e1b19] hover:bg-[#faf2ee] transition-colors cursor-pointer"
               title="Next Month"
             >
               <CaretRight size={16} weight="bold" />
@@ -292,7 +292,7 @@ export const ActivityCalendarView: React.FC<ActivityCalendarViewProps> = ({
       {/* Activity Details Popover / Modal on Click */}
       {activeActivityModal && (
         <div className="fixed inset-0 z-50 bg-[#1e1b19]/40 backdrop-blur-[1px] flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl border border-[#e8e1dd] shadow-xl max-w-md w-full p-6 flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-150">
+          <div className="bg-white rounded-xl border border-[#e8e1dd] shadow-xl max-w-md w-full p-6 flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-150">
             <div className="flex items-start justify-between gap-3">
               <div className="flex flex-col gap-1">
                 <span className="text-[11px] font-bold uppercase tracking-wider text-[#b85028]">
@@ -305,14 +305,14 @@ export const ActivityCalendarView: React.FC<ActivityCalendarViewProps> = ({
               <button
                 type="button"
                 onClick={() => setActiveActivityModal(null)}
-                className="p-1 rounded-lg hover:bg-[#faf2ee] text-[#8a726a] hover:text-[#1e1b19] cursor-pointer"
+                className="p-1 rounded-md hover:bg-[#faf2ee] text-[#8a726a] hover:text-[#1e1b19] cursor-pointer"
               >
                 ✕
               </button>
             </div>
 
             {activeActivityModal.notes && (
-              <p className="text-xs text-[#57423b] bg-[#faf2ee] p-3 rounded-xl border border-[#e8e1dd]">
+              <p className="text-xs text-[#57423b] bg-[#faf2ee] p-3 rounded-md border border-[#e8e1dd]">
                 {activeActivityModal.notes}
               </p>
             )}
@@ -338,7 +338,7 @@ export const ActivityCalendarView: React.FC<ActivityCalendarViewProps> = ({
                   setActiveActivityModal(null);
                   onViewDetails(act);
                 }}
-                className="flex-1 py-2 px-3 rounded-xl bg-[#b85028] text-white hover:bg-[#a44520] font-bold text-xs shadow-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                className="flex-1 py-2 px-3 rounded-md bg-[#b85028] text-white hover:bg-[#a44520] font-bold text-xs shadow-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
               >
                 <Eye size={16} weight="bold" />
                 <span>Details</span>
@@ -352,7 +352,7 @@ export const ActivityCalendarView: React.FC<ActivityCalendarViewProps> = ({
                     setActiveActivityModal(null);
                     onEditActivity(act);
                   }}
-                  className="py-2 px-3 rounded-xl bg-[#faf2ee] border border-[#e8e1dd] text-[#57423b] hover:text-[#1e1b19] font-bold text-xs transition-colors cursor-pointer flex items-center gap-1"
+                  className="py-2 px-3 rounded-md bg-[#faf2ee] border border-[#e8e1dd] text-[#57423b] hover:text-[#1e1b19] font-bold text-xs transition-colors cursor-pointer flex items-center gap-1"
                 >
                   <PencilSimple size={15} weight="bold" />
                   <span>Edit</span>

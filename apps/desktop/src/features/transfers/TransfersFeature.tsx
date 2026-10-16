@@ -4,6 +4,7 @@ import {
   useMembersQuery,
   useTownContext,
   useTownsQuery,
+  useTranslation,
   useUpdateMemberAccessMutation,
   useUpdateMemberMutation,
 } from '@jrs/client-core';
@@ -31,6 +32,7 @@ import { TransferTableView } from './components/TransferTableView';
 import type { IFlattenedTransferRecord } from './utils/transfer-ui.utils';
 
 export const TransfersFeature: React.FC = () => {
+  const { t } = useTranslation(['transfers', 'common']);
   const { user } = useAuth();
   const { activeTown, canWrite } = useTownContext();
   const { data: towns = [] } = useTownsQuery();
@@ -193,13 +195,16 @@ export const TransfersFeature: React.FC = () => {
 
   const townSelectOptions = useMemo(() => {
     return [
-      { value: 'ALL', label: 'All Town Hubs' },
-      ...towns.map((t) => ({
-        value: t.id,
-        label: `${t.name} (${t.code})`,
+      {
+        value: 'ALL',
+        label: t('transfers:filters.allHubs', 'All Town Hubs'),
+      },
+      ...towns.map((tw) => ({
+        value: tw.id,
+        label: `${tw.name} (${tw.code})`,
       })),
     ];
-  }, [towns]);
+  }, [towns, t]);
 
   // If a single member detail page is selected
   if (selectedMemberId) {
@@ -255,11 +260,13 @@ export const TransfersFeature: React.FC = () => {
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
         <div className="flex flex-col gap-1">
           <h1 className="text-2xl font-extrabold text-[#1e1b19] tracking-tight">
-            Town Transfers
+            {t('transfers:title', 'Town Transfers')}
           </h1>
           <p className="text-xs text-[#8a726a]">
-            Official registry of member relocations, pastoral jurisdictions,
-            and inter-city transitions across Cameroon.
+            {t(
+              'transfers:description',
+              'Official registry of member relocations, pastoral jurisdictions, and inter-city transitions across Cameroon.',
+            )}
           </p>
         </div>
       </div>

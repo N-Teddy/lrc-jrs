@@ -80,10 +80,10 @@ export const AccountsDirectoryTable: React.FC<AccountsDirectoryTableProps> = ({
 
   if (isLoading) {
     return (
-      <div className="bg-white rounded-3xl border border-[#e8e1dd] shadow-xs p-6 flex flex-col gap-4 animate-pulse">
-        <div className="h-10 bg-[#faf2ee] rounded-xl w-full" />
+      <div className="bg-white rounded-xl border border-[#e8e1dd] shadow-xs p-6 flex flex-col gap-4 animate-pulse">
+        <div className="h-10 bg-[#faf2ee] rounded-md w-full" />
         {[1, 2, 3, 4, 5, 6].map((i) => (
-          <div key={i} className="h-12 bg-[#faf2ee] rounded-xl w-full" />
+          <div key={i} className="h-12 bg-[#faf2ee] rounded-md w-full" />
         ))}
       </div>
     );
@@ -91,8 +91,8 @@ export const AccountsDirectoryTable: React.FC<AccountsDirectoryTableProps> = ({
 
   if (members.length === 0) {
     return (
-      <div className="bg-white rounded-3xl border border-[#e8e1dd] shadow-xs p-12 flex flex-col items-center justify-center text-center min-h-[360px]">
-        <div className="w-14 h-14 rounded-2xl bg-[#faf2ee] border border-[#e8e1dd] flex items-center justify-center text-[#8a726a] mb-4">
+      <div className="bg-white rounded-xl border border-[#e8e1dd] shadow-xs p-12 flex flex-col items-center justify-center text-center min-h-[360px]">
+        <div className="w-14 h-14 rounded-lg bg-[#faf2ee] border border-[#e8e1dd] flex items-center justify-center text-[#8a726a] mb-4">
           <ShieldCheck size={28} weight="duotone" />
         </div>
         <h3 className="text-base font-bold text-[#1e1b19] mb-1">
@@ -108,7 +108,7 @@ export const AccountsDirectoryTable: React.FC<AccountsDirectoryTableProps> = ({
   }
 
   return (
-    <div className="bg-white rounded-3xl border border-[#e8e1dd] shadow-xs flex flex-col overflow-hidden">
+    <div className="bg-white rounded-xl border border-[#e8e1dd] shadow-xs flex flex-col overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse">
           <thead>
@@ -274,7 +274,7 @@ export const AccountsDirectoryTable: React.FC<AccountsDirectoryTableProps> = ({
                           onClick={() =>
                             setOpenMenuId(openMenuId === m.id ? null : m.id)
                           }
-                          className="w-7 h-7 rounded-lg text-[#8a726a] hover:text-[#1e1b19] hover:bg-[#faf2ee] flex items-center justify-center transition-colors cursor-pointer"
+                          className="w-7 h-7 rounded-md text-[#8a726a] hover:text-[#1e1b19] hover:bg-[#faf2ee] flex items-center justify-center transition-colors cursor-pointer"
                         >
                           <DotsThreeVertical size={16} weight="bold" />
                         </button>
@@ -323,7 +323,9 @@ export const AccountsDirectoryTable: React.FC<AccountsDirectoryTableProps> = ({
                               className="w-full px-3 py-2 text-left text-xs text-[#1e1b19] hover:bg-[#faf2ee] flex items-center gap-2 font-medium cursor-pointer"
                             >
                               <User size={14} className="text-[#8a726a]" />
-                              <span>View Profile</span>
+                              <span>
+                                {t('members:table.viewProfile', 'View Profile')}
+                              </span>
                             </button>
 
                             {isCurrentUserAp && (

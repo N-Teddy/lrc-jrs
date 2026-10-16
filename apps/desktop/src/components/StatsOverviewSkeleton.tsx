@@ -14,7 +14,7 @@ export const StatsOverviewSkeleton: React.FC<StatsOverviewSkeletonProps> = ({
       {Array.from({ length: count }, (_, i) => i + 1).map((i) => (
         <div
           key={i}
-          className="h-32 rounded-2xl bg-white border border-[#e8e1dd] p-5 flex flex-col justify-between"
+          className="h-32 rounded-xl bg-white border border-[#e8e1dd] p-5 flex flex-col justify-between"
         >
           <div className="h-4 w-28 bg-[#f4ece9] rounded" />
           <div className="h-8 w-16 bg-[#f4ece9] rounded" />

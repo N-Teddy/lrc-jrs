@@ -15,12 +15,12 @@ const SIZE_CLASSES: Record<
   UserAvatarSize,
   { container: string; text: string }
 > = {
-  xs: { container: 'w-7 h-7 rounded-lg', text: 'text-[10px]' },
-  sm: { container: 'w-8 h-8 rounded-lg', text: 'text-xs' },
-  md: { container: 'w-9 h-9 rounded-xl', text: 'text-xs' },
-  lg: { container: 'w-12 h-12 rounded-2xl', text: 'text-sm' },
-  xl: { container: 'w-16 h-16 rounded-2xl', text: 'text-lg' },
-  '2xl': { container: 'w-20 h-20 rounded-2xl', text: 'text-2xl' },
+  xs: { container: 'w-7 h-7 rounded-md', text: 'text-[10px]' },
+  sm: { container: 'w-8 h-8 rounded-md', text: 'text-xs' },
+  md: { container: 'w-9 h-9 rounded-lg', text: 'text-xs' },
+  lg: { container: 'w-12 h-12 rounded-xl', text: 'text-sm' },
+  xl: { container: 'w-16 h-16 rounded-xl', text: 'text-lg' },
+  '2xl': { container: 'w-20 h-20 rounded-xl', text: 'text-2xl' },
 };
 
 export const UserAvatar: React.FC<UserAvatarProps> = ({

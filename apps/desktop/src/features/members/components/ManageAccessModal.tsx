@@ -116,11 +116,11 @@ export const ManageAccessModal: React.FC<ManageAccessModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 bg-[#23201e]/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-200">
-      <div className="relative w-full max-w-[560px] my-auto bg-white rounded-3xl border border-[#e8e1dd] shadow-2xl flex flex-col overflow-hidden">
+      <div className="relative w-full max-w-[560px] my-auto bg-white rounded-xl border border-[#e8e1dd] shadow-2xl flex flex-col overflow-hidden">
         {/* Header */}
         <div className="p-6 pb-4 flex items-start justify-between border-b border-[#f4ece9]">
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-2xl bg-[#fff2ee] border border-[#ffdbcf] flex items-center justify-center text-[#b85028] shrink-0">
+            <div className="w-11 h-11 rounded-lg bg-[#fff2ee] border border-[#ffdbcf] flex items-center justify-center text-[#b85028] shrink-0">
               <Key size={24} weight="duotone" />
             </div>
             <div className="flex flex-col">
@@ -135,7 +135,7 @@ export const ManageAccessModal: React.FC<ManageAccessModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="w-8 h-8 rounded-lg bg-[#faf2ee] hover:bg-[#f4ece9] border border-[#e8e1dd] flex items-center justify-center text-[#8a726a] hover:text-[#1e1b19] transition-colors cursor-pointer"
+            className="w-8 h-8 rounded-md bg-[#faf2ee] hover:bg-[#f4ece9] border border-[#e8e1dd] flex items-center justify-center text-[#8a726a] hover:text-[#1e1b19] transition-colors cursor-pointer"
           >
             <X size={18} />
           </button>
@@ -227,7 +227,7 @@ export const ManageAccessModal: React.FC<ManageAccessModalProps> = ({
                     member.isWhatsappVerified && setInviteChannel('whatsapp')
                   }
                   disabled={!member.isWhatsappVerified}
-                  className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-bold transition-all border ${
+                  className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-md text-xs font-bold transition-all border ${
                     inviteChannel === 'whatsapp'
                       ? 'bg-[#c2e9ca] text-[#2c4e37] border-[#a9d0b2]'
                       : 'bg-[#faf2ee] text-[#8a726a] border-[#e8e1dd] opacity-60'
@@ -240,7 +240,7 @@ export const ManageAccessModal: React.FC<ManageAccessModalProps> = ({
                   type="button"
                   onClick={() => member.email && setInviteChannel('email')}
                   disabled={!member.email}
-                  className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-bold transition-all border ${
+                  className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-md text-xs font-bold transition-all border ${
                     inviteChannel === 'email'
                       ? 'bg-[#fff2ee] text-[#b85028] border-[#ffdbcf]'
                       : 'bg-[#faf2ee] text-[#8a726a] border-[#e8e1dd] opacity-60'
@@ -257,7 +257,7 @@ export const ManageAccessModal: React.FC<ManageAccessModalProps> = ({
                   isSubmitting || (!member.isWhatsappVerified && !member.email)
                 }
                 onClick={handleInviteToApp}
-                className="w-full mt-2 py-2 px-4 rounded-lg bg-[#b85028] hover:bg-[#a44520] text-white text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                className="w-full mt-2 py-2 px-4 rounded-md bg-[#b85028] hover:bg-[#a44520] text-white text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
               >
                 <PaperPlaneTilt size={16} weight="bold" />
                 <span>{isSubmitting ? 'Sending...' : 'Send Invitation'}</span>
@@ -285,7 +285,7 @@ export const ManageAccessModal: React.FC<ManageAccessModalProps> = ({
                     type="button"
                     disabled={isSubmitting}
                     onClick={handleResendCredentials}
-                    className="w-full py-2 px-4 rounded-lg bg-[#b85028] hover:bg-[#a44520] text-white text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                    className="w-full py-2 px-4 rounded-md bg-[#b85028] hover:bg-[#a44520] text-white text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
                   >
                     <PaperPlaneTilt size={16} weight="bold" />
                     <span>
@@ -322,7 +322,7 @@ export const ManageAccessModal: React.FC<ManageAccessModalProps> = ({
                   type="button"
                   disabled={isSubmitting}
                   onClick={handleToggleActive}
-                  className={`w-full py-2 px-4 rounded-lg text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 border ${
+                  className={`w-full py-2 px-4 rounded-md text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 border ${
                     !isRevoked
                       ? 'bg-white hover:bg-[#ffdad6] text-[#ba1a1a] border-[#ffb4a8]'
                       : 'bg-[#486b52] hover:bg-[#3d5b45] text-white border-[#486b52]'
@@ -344,7 +344,7 @@ export const ManageAccessModal: React.FC<ManageAccessModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 rounded-lg bg-white border border-[#e8e1dd] text-xs font-bold text-[#57423b] hover:bg-[#f4ece9] transition-colors cursor-pointer"
+            className="px-4 py-2 rounded-md bg-white border border-[#e8e1dd] text-xs font-bold text-[#57423b] hover:bg-[#f4ece9] transition-colors cursor-pointer"
           >
             {t('common:close')}
           </button>

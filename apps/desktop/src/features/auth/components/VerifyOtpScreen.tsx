@@ -82,7 +82,7 @@ export const VerifyOtpScreen: React.FC<VerifyOtpScreenProps> = ({
 
           {/* Icon Badge Illustration & Header */}
           <div className="flex flex-col items-center text-center gap-2 pt-1">
-            <div className="relative w-16 h-16 rounded-2xl bg-[#faf2ee] flex items-center justify-center text-[#983912] shadow-xs">
+            <div className="relative w-16 h-16 rounded-xl bg-[#faf2ee] flex items-center justify-center text-[#983912] shadow-xs">
               <ChatCircleText size={32} weight="fill" />
               <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-[#b85028] flex items-center justify-center text-white">
                 <Lock size={12} weight="bold" />

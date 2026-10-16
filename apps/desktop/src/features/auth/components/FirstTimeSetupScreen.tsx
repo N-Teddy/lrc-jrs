@@ -56,7 +56,7 @@ export const FirstTimeSetupScreen: React.FC<FirstTimeSetupScreenProps> = ({
 
   return (
     <div className="flex min-h-screen w-full items-center justify-center bg-[#fdfbf9] p-4 sm:p-6 lg:p-10">
-      <div className="w-full max-w-[580px] rounded-[28px] border border-[#ece5dd] bg-white p-8 sm:12 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+      <div className="w-full max-w-[580px] rounded-2xl border border-[#ece5dd] bg-white p-8 sm:12 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
         {/* Top Bar: Back Action, Language Switcher & Session Timer Widget */}
         <div className="mb-7 flex items-center justify-between">
           <button
@@ -91,7 +91,7 @@ export const FirstTimeSetupScreen: React.FC<FirstTimeSetupScreenProps> = ({
 
         {/* Icon Header */}
         <div className="mb-6 text-center">
-          <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#edf3ee] text-[#486b52]">
+          <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-xl bg-[#edf3ee] text-[#486b52]">
             <ShieldCheck size={32} weight="fill" />
           </div>
           <h1 className="text-2xl font-bold tracking-tight text-[#23201e]">

@@ -16,6 +16,8 @@ export const resources = {
     navigation: fr.navigation,
     dashboard: fr.dashboard,
     access: fr.access,
+    transfers: fr.transfers,
+    drive: fr.drive,
   },
   en: {
     common: en.common,
@@ -28,6 +30,8 @@ export const resources = {
     navigation: en.navigation,
     dashboard: en.dashboard,
     access: en.access,
+    transfers: en.transfers,
+    drive: en.drive,
   },
 } as const;
 
@@ -49,6 +53,8 @@ export function initI18n(initialLanguage = 'fr'): typeof i18n {
         'navigation',
         'dashboard',
         'access',
+        'transfers',
+        'drive',
       ],
       interpolation: {
         escapeValue: false,

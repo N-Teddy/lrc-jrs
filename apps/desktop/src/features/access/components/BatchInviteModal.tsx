@@ -66,11 +66,11 @@ export const BatchInviteModal: React.FC<BatchInviteModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 bg-[#1e1b19]/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-200">
-      <div className="w-full max-w-[560px] bg-white rounded-3xl border border-[#e8e1dd] shadow-2xl overflow-hidden flex flex-col">
+      <div className="w-full max-w-[560px] bg-white rounded-xl border border-[#e8e1dd] shadow-2xl overflow-hidden flex flex-col">
         {/* Header */}
         <div className="p-6 border-b border-[#f4ece9] flex items-start justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-2xl bg-[#fff2ee] border border-[#ffdbcf] text-[#b85028] flex items-center justify-center shrink-0">
+            <div className="w-11 h-11 rounded-lg bg-[#fff2ee] border border-[#ffdbcf] text-[#b85028] flex items-center justify-center shrink-0">
               <PaperPlaneTilt size={24} weight="duotone" />
             </div>
             <div>
@@ -87,7 +87,7 @@ export const BatchInviteModal: React.FC<BatchInviteModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="w-8 h-8 rounded-lg bg-[#faf2ee] hover:bg-[#f4ece9] border border-[#e8e1dd] flex items-center justify-center text-[#8a726a] hover:text-[#1e1b19] cursor-pointer"
+            className="w-8 h-8 rounded-md bg-[#faf2ee] hover:bg-[#f4ece9] border border-[#e8e1dd] flex items-center justify-center text-[#8a726a] hover:text-[#1e1b19] cursor-pointer"
           >
             <X size={16} />
           </button>
@@ -102,7 +102,7 @@ export const BatchInviteModal: React.FC<BatchInviteModalProps> = ({
             <button
               type="button"
               onClick={() => setChannel('whatsapp')}
-              className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
+              className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-md border text-xs font-bold transition-all cursor-pointer ${
                 channel === 'whatsapp'
                   ? 'bg-[#c2e9ca] text-[#2c4e37] border-[#a9d0b2] shadow-xs'
                   : 'bg-white text-[#8a726a] border-[#e8e1dd] hover:bg-[#f4ece9]'
@@ -114,7 +114,7 @@ export const BatchInviteModal: React.FC<BatchInviteModalProps> = ({
             <button
               type="button"
               onClick={() => setChannel('email')}
-              className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
+              className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-md border text-xs font-bold transition-all cursor-pointer ${
                 channel === 'email'
                   ? 'bg-[#fff2ee] text-[#b85028] border-[#ffdbcf] shadow-xs'
                   : 'bg-white text-[#8a726a] border-[#e8e1dd] hover:bg-[#f4ece9]'
@@ -156,7 +156,7 @@ export const BatchInviteModal: React.FC<BatchInviteModalProps> = ({
                   <div
                     key={m.id}
                     onClick={() => toggleMember(m.id)}
-                    className={`p-3 rounded-xl border flex items-center justify-between transition-all cursor-pointer ${
+                    className={`p-3 rounded-lg border flex items-center justify-between transition-all cursor-pointer ${
                       isSelected
                         ? 'bg-[#fff8f5] border-[#b85028]'
                         : 'bg-white border-[#e8e1dd] hover:bg-[#faf2ee]'
@@ -205,7 +205,7 @@ export const BatchInviteModal: React.FC<BatchInviteModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-xl bg-white border border-[#e8e1dd] text-xs font-bold text-[#57423b] hover:bg-[#f4ece9] cursor-pointer"
+              className="px-4 py-2 rounded-md bg-white border border-[#e8e1dd] text-xs font-bold text-[#57423b] hover:bg-[#f4ece9] cursor-pointer"
             >
               {t('common:cancel')}
             </button>
@@ -213,7 +213,7 @@ export const BatchInviteModal: React.FC<BatchInviteModalProps> = ({
               type="button"
               disabled={isSending || selectedIds.length === 0}
               onClick={handleSend}
-              className="px-5 py-2 rounded-xl bg-[#b85028] hover:bg-[#a44520] text-white text-xs font-bold transition-all shadow-xs disabled:opacity-50 flex items-center gap-2 cursor-pointer"
+              className="px-5 py-2 rounded-md bg-[#b85028] hover:bg-[#a44520] text-white text-xs font-bold transition-all shadow-xs disabled:opacity-50 flex items-center gap-2 cursor-pointer"
             >
               <PaperPlaneTilt size={15} weight="bold" />
               <span>

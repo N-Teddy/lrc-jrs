@@ -54,7 +54,7 @@ export const TransferTableView: React.FC<TransferTableViewProps> = ({
 
   if (isLoading) {
     return (
-      <div className="bg-white rounded-2xl border border-[#e8e1dd] shadow-xs p-8 flex flex-col items-center justify-center min-h-[360px] animate-pulse">
+      <div className="bg-white rounded-xl border border-[#e8e1dd] shadow-xs p-8 flex flex-col items-center justify-center min-h-[360px] animate-pulse">
         <div className="w-10 h-10 rounded-full bg-[#f4ece9] mb-4" />
         <div className="h-4 w-48 bg-[#f4ece9] rounded mb-2" />
         <div className="h-3 w-32 bg-[#f4ece9] rounded" />
@@ -64,32 +64,47 @@ export const TransferTableView: React.FC<TransferTableViewProps> = ({
 
   if (transfers.length === 0) {
     return (
-      <div className="bg-white rounded-2xl border border-[#e8e1dd] shadow-xs p-12 flex flex-col items-center justify-center text-center min-h-[320px]">
-        <div className="w-14 h-14 rounded-2xl bg-[#faf2ee] border border-[#e8e1dd] flex items-center justify-center text-[#8a726a] mb-4">
+      <div className="bg-white rounded-xl border border-[#e8e1dd] shadow-xs p-12 flex flex-col items-center justify-center text-center min-h-[320px]">
+        <div className="w-14 h-14 rounded-lg bg-[#faf2ee] border border-[#e8e1dd] flex items-center justify-center text-[#8a726a] mb-4">
           <ArrowsLeftRight size={28} weight="duotone" />
         </div>
         <h3 className="text-base font-bold text-[#1e1b19] mb-1">
-          No Relocation Records Found
+          {t('transfers:table.noRecords', 'No Relocation Records Found')}
         </h3>
         <p className="text-xs text-[#8a726a] max-w-sm">
-          No member town transfers match the active search or filters.
+          {t(
+            'transfers:table.noRecordsDesc',
+            'No member town transfers match the active search or filters.',
+          )}
         </p>
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-[#e8e1dd] shadow-xs overflow-hidden flex flex-col">
+    <div className="bg-white rounded-xl border border-[#e8e1dd] shadow-xs overflow-hidden flex flex-col">
       <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-[#faf2ee] border-b border-[#e8e1dd] text-[#8a726a] text-[11px] font-bold uppercase tracking-wider">
-              <th className="py-3 px-4 font-bold">Fellowship Member</th>
-              <th className="py-3 px-4 font-bold">Relocation Route</th>
-              <th className="py-3 px-4 font-bold">Authority & Sign-off</th>
-              <th className="py-3 px-4 font-bold">Effective Date</th>
-              <th className="py-3 px-4 font-bold">Relocation Reason</th>
-              <th className="py-3 px-4 font-bold text-right">Actions</th>
+              <th className="py-3 px-4 font-bold">
+                {t('transfers:table.member', 'Fellowship Member')}
+              </th>
+              <th className="py-3 px-4 font-bold">
+                {t('transfers:table.route', 'Relocation Route')}
+              </th>
+              <th className="py-3 px-4 font-bold">
+                {t('transfers:table.authority', 'Authority & Sign-off')}
+              </th>
+              <th className="py-3 px-4 font-bold">
+                {t('transfers:table.date', 'Effective Date')}
+              </th>
+              <th className="py-3 px-4 font-bold">
+                {t('transfers:table.reason', 'Relocation Reason')}
+              </th>
+              <th className="py-3 px-4 font-bold text-right">
+                {t('transfers:table.actions', 'Actions')}
+              </th>
             </tr>
           </thead>
           <tbody className="text-xs text-[#1e1b19] divide-y divide-[#f4ece9]">
@@ -101,7 +116,7 @@ export const TransferTableView: React.FC<TransferTableViewProps> = ({
                 item.toTownId,
                 activeTownId,
               );
-              const badge = getDirectionDisplayInfo(direction);
+              const badge = getDirectionDisplayInfo(direction, t);
               const formattedDate = formatTransferDate(item.transferredAt);
 
               return (
@@ -175,7 +190,10 @@ export const TransferTableView: React.FC<TransferTableViewProps> = ({
                           {item.transferredBy}
                         </span>
                         <span className="text-[10px] text-[#8a726a]">
-                          Authorized Sign-off
+                          {t(
+                            'transfers:table.authorizedSignOff',
+                            'Authorized Sign-off',
+                          )}
                         </span>
                       </div>
                     </div>
@@ -188,7 +206,7 @@ export const TransferTableView: React.FC<TransferTableViewProps> = ({
                         {formattedDate}
                       </span>
                       <span className="text-[10px] text-[#8a726a]">
-                        Transfer Ledger
+                        {t('transfers:table.transferLedger', 'Transfer Ledger')}
                       </span>
                     </div>
                   </td>
@@ -201,7 +219,10 @@ export const TransferTableView: React.FC<TransferTableViewProps> = ({
                       </p>
                     ) : (
                       <span className="text-xs text-[#8a726a] italic">
-                        Standard fellowship transfer
+                        {t(
+                          'transfers:table.standardTransfer',
+                          'Standard fellowship transfer',
+                        )}
                       </span>
                     )}
                   </td>
@@ -214,8 +235,11 @@ export const TransferTableView: React.FC<TransferTableViewProps> = ({
                         onClick={(e) =>
                           handleCopyPhone(item.id, item.memberPhone, e)
                         }
-                        title="Copy Member Phone"
-                        className="w-7 h-7 rounded-lg hover:bg-[#faf2ee] flex items-center justify-center text-[#8a726a] hover:text-[#b85028] transition-colors cursor-pointer"
+                        title={t(
+                          'transfers:table.copyPhone',
+                          'Copy Member Phone',
+                        )}
+                        className="w-7 h-7 rounded-md hover:bg-[#faf2ee] flex items-center justify-center text-[#8a726a] hover:text-[#b85028] transition-colors cursor-pointer"
                       >
                         {copiedId === item.id ? (
                           <Check size={16} className="text-[#486b52]" />
@@ -226,8 +250,11 @@ export const TransferTableView: React.FC<TransferTableViewProps> = ({
                       <button
                         type="button"
                         onClick={() => onViewMember(item.memberId)}
-                        title="View Member Profile & Relocation Ledger"
-                        className="w-7 h-7 rounded-lg hover:bg-[#faf2ee] flex items-center justify-center text-[#8a726a] hover:text-[#b85028] transition-colors cursor-pointer"
+                        title={t(
+                          'transfers:table.viewProfile',
+                          'View Member Profile & Relocation Ledger',
+                        )}
+                        className="w-7 h-7 rounded-md hover:bg-[#faf2ee] flex items-center justify-center text-[#8a726a] hover:text-[#b85028] transition-colors cursor-pointer"
                       >
                         <Eye size={16} />
                       </button>

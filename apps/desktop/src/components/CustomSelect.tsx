@@ -74,9 +74,9 @@ export function CustomSelect<T extends string = string>({
       : 'bg-[#faf2ee] hover:bg-[#f4ece9] border-[#e8e1dd] hover:border-[#ddc0b7]';
 
   const sizeStyles = {
-    sm: 'h-8 px-2.5 text-xs rounded-lg',
-    md: 'h-10 px-3.5 text-xs rounded-lg',
-    lg: 'h-11 px-4 text-sm rounded-lg',
+    sm: 'h-8 px-2.5 text-xs rounded-md',
+    md: 'h-10 px-3.5 text-xs rounded-md',
+    lg: 'h-11 px-4 text-sm rounded-md',
   }[size];
 
   return (
@@ -143,7 +143,7 @@ export function CustomSelect<T extends string = string>({
                 aria-selected={isSelected}
                 disabled={option.disabled}
                 onClick={() => handleSelect(option)}
-                className={`w-full text-left flex items-center justify-between gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold cursor-pointer transition-all ${
+                className={`w-full text-left flex items-center justify-between gap-2.5 px-3 py-2 rounded-md text-xs font-semibold cursor-pointer transition-all ${
                   option.disabled
                     ? 'opacity-40 cursor-not-allowed text-[#8a726a]'
                     : isSelected

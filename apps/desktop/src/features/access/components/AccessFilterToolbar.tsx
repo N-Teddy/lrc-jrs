@@ -97,12 +97,13 @@ export const AccessFilterToolbar: React.FC<AccessFilterToolbarProps> = ({
   );
 
   return (
-    <div className="bg-white rounded-2xl border border-[#e8e1dd] p-3.5 shadow-xs flex flex-wrap items-center justify-between gap-3">
+    <div className="bg-white rounded-xl border border-[#e8e1dd] p-4 shadow-xs flex flex-col xl:flex-row items-stretch xl:items-center justify-between gap-3">
       {/* Search Input */}
-      <div className="relative flex-1 min-w-[240px]">
+      <div className="relative flex items-center gap-2.5 px-3.5 h-10 rounded-md bg-[#faf2ee] border border-[#e8e1dd] focus-within:ring-2 focus-within:ring-[#b85028]/20 focus-within:border-[#b85028] focus-within:bg-white transition-all w-full sm:w-80 md:w-96 flex-initial">
         <MagnifyingGlass
           size={16}
-          className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8a726a]"
+          weight="bold"
+          className="text-[#8a726a] shrink-0"
         />
         <input
           type="text"
@@ -112,20 +113,21 @@ export const AccessFilterToolbar: React.FC<AccessFilterToolbarProps> = ({
             t('access:filters.searchPlaceholder') ||
             'Search by name, phone (+237...), email, or identifier...'
           }
-          className="w-full h-10 pl-9 pr-8 rounded-lg bg-[#faf2ee] border border-transparent focus:border-[#b85028] focus:bg-white text-xs text-[#1e1b19] placeholder-[#8a726a] outline-none transition-all"
+          className="bg-transparent text-xs text-[#1e1b19] placeholder:text-[#8a726a] outline-none w-full pr-6"
         />
         {search && (
           <button
             type="button"
             onClick={() => onSearchChange('')}
-            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#8a726a] hover:text-[#1e1b19] p-1 cursor-pointer"
+            className="absolute right-2.5 text-[#8a726a] hover:text-[#1e1b19] p-0.5 cursor-pointer"
+            title="Clear search"
           >
             <X size={14} weight="bold" />
           </button>
         )}
       </div>
 
-      <div className="flex flex-wrap items-center gap-2.5">
+      <div className="flex flex-wrap items-center gap-2.5 flex-1 justify-start xl:justify-end">
         {/* Hub Select */}
         <CustomSelect<string>
           value={selectedTownId || 'ALL'}
@@ -158,7 +160,7 @@ export const AccessFilterToolbar: React.FC<AccessFilterToolbarProps> = ({
           <button
             type="button"
             onClick={onOpenBatchInvite}
-            className="h-10 px-4 rounded-xl bg-[#b85028] hover:bg-[#a44520] text-white text-xs font-bold transition-all shadow-xs flex items-center gap-2 cursor-pointer"
+            className="h-10 px-4 rounded-md bg-[#b85028] hover:bg-[#a44520] text-white text-xs font-bold transition-all shadow-xs flex items-center gap-2 cursor-pointer"
           >
             <PaperPlaneTilt size={16} weight="bold" />
             <span>{t('access:filters.batchInvite') || 'Batch Invite'}</span>

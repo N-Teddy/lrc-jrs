@@ -65,6 +65,7 @@ export const ActivityFormModal: React.FC<ActivityFormModalProps> = ({
 }) => {
   const { t } = useTranslation();
   const isEditing = Boolean(initialActivity);
+  const isCompleted = initialActivity?.status === ActivityStatus.COMPLETED;
 
   const [title, setTitle] = useState('');
   const [activityType, setActivityType] = useState<ActivityType>(
@@ -74,11 +75,19 @@ export const ActivityFormModal: React.FC<ActivityFormModalProps> = ({
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [notes, setNotes] = useState('');
-  const [status, setStatus] = useState<ActivityStatus>(
-    ActivityStatus.SCHEDULED,
-  );
   const [changeReason, setChangeReason] = useState('');
   const [error, setError] = useState<string | null>(null);
+
+  // Auto-determine activity status based on date/time schedule
+  const computedStatus = useMemo<ActivityStatus>(() => {
+    if (!startDate) return ActivityStatus.SCHEDULED;
+    const now = new Date();
+    const s = new Date(startDate);
+    const e = endDate ? new Date(endDate) : s;
+    if (now < s) return ActivityStatus.SCHEDULED;
+    if (now >= s && now <= e) return ActivityStatus.IN_PROGRESS;
+    return ActivityStatus.COMPLETED;
+  }, [startDate, endDate]);
 
   // Populate or reset form fields
   useEffect(() => {
@@ -91,7 +100,6 @@ export const ActivityFormModal: React.FC<ActivityFormModalProps> = ({
       setStartDate(toDateTimeLocalString(initialActivity.startDate));
       setEndDate(toDateTimeLocalString(initialActivity.endDate));
       setNotes(initialActivity.notes || '');
-      setStatus(initialActivity.status || ActivityStatus.SCHEDULED);
       setChangeReason('');
     } else {
       setTitle('');
@@ -105,7 +113,6 @@ export const ActivityFormModal: React.FC<ActivityFormModalProps> = ({
       later.setHours(12, 0, 0, 0);
       setEndDate(toDateTimeLocalString(later.toISOString()));
       setNotes('');
-      setStatus(ActivityStatus.SCHEDULED);
       setChangeReason('');
     }
     setError(null);
@@ -120,8 +127,6 @@ export const ActivityFormModal: React.FC<ActivityFormModalProps> = ({
       return true;
     if (endDate !== toDateTimeLocalString(initialActivity.endDate)) return true;
     if (notes.trim() !== (initialActivity.notes || '')) return true;
-    if (status !== (initialActivity.status || ActivityStatus.SCHEDULED))
-      return true;
     if (changeReason.trim() !== '') return true;
     return false;
   }, [
@@ -133,7 +138,6 @@ export const ActivityFormModal: React.FC<ActivityFormModalProps> = ({
     startDate,
     endDate,
     notes,
-    status,
     changeReason,
   ]);
 
@@ -164,25 +168,6 @@ export const ActivityFormModal: React.FC<ActivityFormModalProps> = ({
     },
   ];
 
-  const statusOptions: SelectOption<ActivityStatus>[] = [
-    {
-      value: ActivityStatus.SCHEDULED,
-      label: t('activities:statuses.SCHEDULED'),
-    },
-    {
-      value: ActivityStatus.IN_PROGRESS,
-      label: t('activities:statuses.IN_PROGRESS'),
-    },
-    {
-      value: ActivityStatus.COMPLETED,
-      label: t('activities:statuses.COMPLETED'),
-    },
-    {
-      value: ActivityStatus.CANCELLED,
-      label: t('activities:statuses.CANCELLED'),
-    },
-  ];
-
   const townOptions: SelectOption<string>[] = towns.map((t) => ({
     value: t.id,
     label: `${t.name} (${t.code})`,
@@ -193,6 +178,11 @@ export const ActivityFormModal: React.FC<ActivityFormModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+
+    if (isCompleted) {
+      setError('Completed activities cannot be modified.');
+      return;
+    }
 
     if (!title.trim()) {
       setError('Activity title is required.');
@@ -232,7 +222,7 @@ export const ActivityFormModal: React.FC<ActivityFormModalProps> = ({
         startDate: startIso,
         endDate: endIso,
         notes: notes.trim() || undefined,
-        status: isEditing ? status : undefined,
+        status: computedStatus,
         changeReason: isEditing ? changeReason.trim() : undefined,
       });
       onClose();
@@ -243,11 +233,11 @@ export const ActivityFormModal: React.FC<ActivityFormModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 bg-[#23201e]/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-200">
-      <div className="relative w-full max-w-2xl bg-white rounded-2xl border border-[#e8e1dd] shadow-2xl overflow-hidden flex flex-col my-auto max-h-[92vh]">
+      <div className="relative w-full max-w-2xl bg-white rounded-xl border border-[#e8e1dd] shadow-2xl overflow-hidden flex flex-col my-auto max-h-[92vh]">
         {/* Header */}
         <div className="px-6 py-5 flex items-start justify-between border-b border-[#f4ece9] bg-[#faf8f6]/50">
           <div className="flex items-center gap-3.5">
-            <div className="w-10 h-10 rounded-xl bg-[#fff2ee] border border-[#ffdbcf] flex items-center justify-center text-[#b85028] shrink-0 shadow-xs">
+            <div className="w-10 h-10 rounded-lg bg-[#fff2ee] border border-[#ffdbcf] flex items-center justify-center text-[#b85028] shrink-0 shadow-xs">
               <CalendarPlus size={22} weight="duotone" />
             </div>
             <div className="flex flex-col">
@@ -274,7 +264,7 @@ export const ActivityFormModal: React.FC<ActivityFormModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="w-8 h-8 rounded-lg bg-[#faf2ee] text-[#8a726a] hover:text-[#1e1b19] hover:bg-[#f4ece9] flex items-center justify-center transition-colors cursor-pointer"
+            className="w-8 h-8 rounded-md bg-[#faf2ee] text-[#8a726a] hover:text-[#1e1b19] hover:bg-[#f4ece9] flex items-center justify-center transition-colors cursor-pointer"
           >
             <X size={16} />
           </button>
@@ -285,6 +275,16 @@ export const ActivityFormModal: React.FC<ActivityFormModalProps> = ({
           onSubmit={handleSubmit}
           className="overflow-y-auto p-7 flex flex-col gap-6 text-xs text-[#1e1b19]"
         >
+          {isCompleted && (
+            <div className="p-3.5 bg-[#ffdad6] border border-[#ffb4a8] rounded-xl text-[#ba1a1a] flex items-center gap-2.5 font-semibold">
+              <WarningCircle size={20} weight="fill" className="shrink-0" />
+              <span>
+                This activity has already taken place and is marked as
+                Completed. Completed activities cannot be modified.
+              </span>
+            </div>
+          )}
+
           {error && (
             <div className="p-3.5 bg-[#ffdad6] border border-[#ffb4a8] rounded-lg text-[#ba1a1a] flex items-center gap-2 font-semibold">
               <WarningCircle size={18} weight="fill" className="shrink-0" />
@@ -315,7 +315,7 @@ export const ActivityFormModal: React.FC<ActivityFormModalProps> = ({
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="e.g. Monthly Fellowship & Youth Choir Rehearsal"
-                className="w-full h-10 px-3.5 bg-[#faf2ee] focus:bg-white text-xs text-[#1e1b19] rounded-lg border border-[#e8e1dd] focus:border-[#b85028] outline-none transition-all font-medium"
+                className="w-full h-10 px-3.5 bg-[#faf2ee] focus:bg-white text-xs text-[#1e1b19] rounded-md border border-[#e8e1dd] focus:border-[#b85028] outline-none transition-all font-medium"
               />
             </div>
 
@@ -360,27 +360,6 @@ export const ActivityFormModal: React.FC<ActivityFormModalProps> = ({
                 />
               </div>
             </div>
-
-            {/* Status Lifecycle (If Editing) */}
-            {isEditing && (
-              <div className="flex flex-col gap-1.5 pt-1">
-                <label
-                  htmlFor="activity-status"
-                  className="font-bold text-[#1e1b19]"
-                >
-                  Status Lifecycle
-                </label>
-                <CustomSelect<ActivityStatus>
-                  id="activity-status"
-                  value={status}
-                  onChange={setStatus}
-                  options={statusOptions}
-                  variant="form"
-                  size="md"
-                  className="w-full sm:w-1/2"
-                />
-              </div>
-            )}
           </div>
 
           {/* SECTION: Schedule & Timing */}
@@ -431,6 +410,36 @@ export const ActivityFormModal: React.FC<ActivityFormModalProps> = ({
                 />
               </div>
             </div>
+
+            {/* Auto-Determined Status Badge */}
+            <div className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-[#faf2ee] border border-[#e8e1dd] text-xs">
+              <div className="flex items-center gap-2">
+                <Clock size={16} weight="bold" className="text-[#b85028]" />
+                <span className="text-[#57423b] font-medium">
+                  Status (Auto-calculated by schedule):
+                </span>
+              </div>
+              <span
+                className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${
+                  computedStatus === ActivityStatus.SCHEDULED
+                    ? 'bg-[#e2f0d9] text-[#276a3c] border-[#b6deb2]'
+                    : computedStatus === ActivityStatus.IN_PROGRESS
+                      ? 'bg-[#ffeed9] text-[#934c00] border-[#ffd099]'
+                      : 'bg-[#faf2ee] text-[#57423b] border-[#e8e1dd]'
+                }`}
+              >
+                <span
+                  className={`w-1.5 h-1.5 rounded-full ${
+                    computedStatus === ActivityStatus.SCHEDULED
+                      ? 'bg-[#276a3c]'
+                      : computedStatus === ActivityStatus.IN_PROGRESS
+                        ? 'bg-[#934c00] animate-pulse'
+                        : 'bg-[#57423b]'
+                  }`}
+                />
+                <span>{t(`activities:statuses.${computedStatus}`)}</span>
+              </span>
+            </div>
           </div>
 
           {/* SECTION: Program Notes & Notes */}
@@ -456,7 +465,7 @@ export const ActivityFormModal: React.FC<ActivityFormModalProps> = ({
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 placeholder="Meeting reflections, choir rehearsal agenda, items to bring..."
-                className="w-full p-3.5 rounded-lg bg-[#faf2ee] focus:bg-white text-xs border border-[#e8e1dd] focus:border-[#b85028] outline-none transition-all font-medium resize-none"
+                className="w-full p-3.5 rounded-md bg-[#faf2ee] focus:bg-white text-xs border border-[#e8e1dd] focus:border-[#b85028] outline-none transition-all font-medium resize-none"
               />
             </div>
           </div>
@@ -481,7 +490,7 @@ export const ActivityFormModal: React.FC<ActivityFormModalProps> = ({
                 value={changeReason}
                 onChange={(e) => setChangeReason(e.target.value)}
                 placeholder="e.g. Rescheduled due to diocesan retreat."
-                className="w-full h-10 px-3.5 rounded-lg bg-white border border-[#e8e1dd] focus:border-[#b85028] text-xs outline-none transition-all font-medium mt-1"
+                className="w-full h-10 px-3.5 rounded-md bg-white border border-[#e8e1dd] focus:border-[#b85028] text-xs outline-none transition-all font-medium mt-1"
               />
             </div>
           )}
@@ -492,16 +501,22 @@ export const ActivityFormModal: React.FC<ActivityFormModalProps> = ({
               type="button"
               onClick={onClose}
               disabled={isSubmitting}
-              className="px-4 py-2 rounded-lg border border-[#e8e1dd] text-xs font-bold text-[#57423b] hover:bg-[#faf2ee] transition-colors cursor-pointer"
+              className="px-4 py-2 rounded-md border border-[#e8e1dd] text-xs font-bold text-[#57423b] hover:bg-[#faf2ee] transition-colors cursor-pointer"
             >
               {t('common:cancel')}
             </button>
 
             <button
               type="submit"
-              disabled={isSubmitting || (isEditing && !isDirty)}
-              title={isEditing && !isDirty ? 'No changes detected' : undefined}
-              className="px-5 py-2 rounded-lg bg-[#b85028] hover:bg-[#a44520] text-white font-bold text-xs shadow-xs active:scale-[0.98] transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={isSubmitting || isCompleted || (isEditing && !isDirty)}
+              title={
+                isCompleted
+                  ? 'Completed activities cannot be modified'
+                  : isEditing && !isDirty
+                    ? 'No changes detected'
+                    : undefined
+              }
+              className="px-5 py-2 rounded-md bg-[#b85028] hover:bg-[#a44520] text-white font-bold text-xs shadow-xs active:scale-[0.98] transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSubmitting ? (
                 <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />

@@ -88,7 +88,7 @@ export const ResetPasswordScreen: React.FC<ResetPasswordScreenProps> = ({
 
           {/* Header */}
           <div className="flex flex-col items-center text-center gap-2">
-            <div className="w-16 h-16 rounded-2xl bg-[#faf2ee] text-[#b85028] flex items-center justify-center shadow-xs">
+            <div className="w-16 h-16 rounded-xl bg-[#faf2ee] text-[#b85028] flex items-center justify-center shadow-xs">
               <Key size={32} weight="fill" />
             </div>
             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#1e1b19]">
@@ -136,8 +136,8 @@ export const ResetPasswordScreen: React.FC<ResetPasswordScreenProps> = ({
 
           {/* Success State */}
           {isSuccess ? (
-            <div className="rounded-2xl border border-[#486b52]/20 bg-[#edf3ee] p-8 text-center flex flex-col items-center gap-4 animate-fadeIn">
-              <div className="w-16 h-16 rounded-2xl bg-[#c2e9ca] text-[#43664d] flex items-center justify-center shadow-xs">
+            <div className="rounded-xl border border-[#486b52]/20 bg-[#edf3ee] p-8 text-center flex flex-col items-center gap-4 animate-fadeIn">
+              <div className="w-16 h-16 rounded-xl bg-[#c2e9ca] text-[#43664d] flex items-center justify-center shadow-xs">
                 <CheckCircle size={36} weight="fill" />
               </div>
               <div className="flex flex-col gap-1">

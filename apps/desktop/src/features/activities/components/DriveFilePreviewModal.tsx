@@ -151,7 +151,7 @@ export const DriveFilePreviewModal: React.FC<DriveFilePreviewModalProps> = ({
       className="fixed inset-0 z-50 flex items-center justify-center bg-[#1e1b19]/75 p-3 sm:p-6 backdrop-blur-xs animate-in fade-in duration-150"
     >
       <div
-        className={`bg-white rounded-3xl border border-[#e8e1dd] shadow-2xl flex flex-col overflow-hidden transition-all duration-200 ${
+        className={`bg-white rounded-xl border border-[#e8e1dd] shadow-2xl flex flex-col overflow-hidden transition-all duration-200 ${
           isFullscreen
             ? 'w-full h-full rounded-none'
             : 'w-full max-w-5xl h-[88vh] max-h-[920px]'
@@ -293,8 +293,8 @@ export const DriveFilePreviewModal: React.FC<DriveFilePreviewModalProps> = ({
             </div>
           ) : (
             /* 3. Document Card with Quick Launch Actions */
-            <div className="p-8 max-w-md w-full flex flex-col items-center text-center gap-5 bg-white rounded-3xl border border-[#e8e1dd] shadow-md animate-in zoom-in-95 duration-150">
-              <div className="w-16 h-16 rounded-2xl bg-[#fff2ee] border border-[#ffdbcf] text-[#b85028] flex items-center justify-center">
+            <div className="p-8 max-w-md w-full flex flex-col items-center text-center gap-5 bg-white rounded-xl border border-[#e8e1dd] shadow-md animate-in zoom-in-95 duration-150">
+              <div className="w-16 h-16 rounded-xl bg-[#fff2ee] border border-[#ffdbcf] text-[#b85028] flex items-center justify-center">
                 {getFileIcon(file.filename, file.mimeType)}
               </div>
 

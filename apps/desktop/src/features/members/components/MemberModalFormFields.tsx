@@ -55,9 +55,9 @@ export const MemberModalFormFields: React.FC<MemberModalFormFieldsProps> = ({
   return (
     <>
       {/* Avatar Upload Banner */}
-      <div className="flex items-center gap-4 p-3.5 rounded-2xl bg-[#faf2ee]/80 border border-[#e8e1dd]">
+      <div className="flex items-center gap-4 p-3.5 rounded-xl bg-[#faf2ee]/80 border border-[#e8e1dd]">
         <div className="relative group shrink-0">
-          <div className="w-16 h-16 rounded-2xl border border-[#d1c4bf] bg-white flex items-center justify-center overflow-hidden shadow-2xs">
+          <div className="w-16 h-16 rounded-xl border border-[#d1c4bf] bg-white flex items-center justify-center overflow-hidden shadow-2xs">
             {formData.avatarPreview ? (
               <img
                 src={formData.avatarPreview}
@@ -77,18 +77,24 @@ export const MemberModalFormFields: React.FC<MemberModalFormFieldsProps> = ({
         <div className="flex flex-col gap-1 min-w-0 flex-1">
           <div className="flex items-center gap-2">
             <span className="text-xs font-bold text-[#1e1b19]">
-              Member Profile Picture
+              {t('members:modal.avatarTitle', 'Member Profile Picture')}
             </span>
             {formData.avatarFile && (
               <span className="text-[10px] font-bold text-[#2c4e37] bg-[#c2e9ca] px-2 py-0.2 rounded-full">
-                New Photo Selected
+                {t('members:modal.avatarNewSelected', 'New Photo Selected')}
               </span>
             )}
           </div>
           <p className="text-[11px] text-[#8a726a] leading-tight">
             {formData.avatarFile
-              ? 'New photo will be uploaded and applied when saved.'
-              : `Change photo or leave as is. If gender is updated, avatar will adapt to ${formData.gender === 'FEMALE' ? 'female' : 'male'}.`}
+              ? t(
+                  'members:modal.avatarNewDesc',
+                  'New photo will be uploaded and applied when saved.',
+                )
+              : t(
+                  'members:modal.avatarDesc',
+                  'Change photo or leave as is. If gender is updated, avatar will adapt.',
+                )}
           </p>
           <div className="flex items-center gap-2 mt-1">
             <input
@@ -107,10 +113,10 @@ export const MemberModalFormFields: React.FC<MemberModalFormFieldsProps> = ({
               <UploadSimple size={13} weight="bold" />
               <span>
                 {formData.avatarFile
-                  ? 'Change Photo'
+                  ? t('members:modal.avatarChange', 'Change Photo')
                   : isCreate
-                    ? 'Upload Photo'
-                    : 'Upload New Photo'}
+                    ? t('members:modal.avatarUpload', 'Upload Photo')
+                    : t('members:modal.avatarUploadNew', 'Upload New Photo')}
               </span>
             </button>
             {formData.avatarFile && (
@@ -120,7 +126,7 @@ export const MemberModalFormFields: React.FC<MemberModalFormFieldsProps> = ({
                 className="px-2.5 py-1 rounded-md bg-[#ffdad6] hover:bg-[#ffb4a8] text-[#ba1a1a] text-[11px] font-bold transition-all flex items-center gap-1 cursor-pointer"
               >
                 <Trash size={13} weight="bold" />
-                <span>Reset</span>
+                <span>{t('members:modal.avatarReset', 'Reset')}</span>
               </button>
             )}
           </div>
@@ -143,37 +149,38 @@ export const MemberModalFormFields: React.FC<MemberModalFormFieldsProps> = ({
             required
             value={formData.fullName}
             onChange={(e) => onChange('fullName', e.target.value)}
-            className="h-10 w-full bg-[#faf2ee] focus:bg-white text-xs text-[#1e1b19] px-3.5 rounded-lg border border-[#e8e1dd] focus:border-[#b85028] outline-none transition-all"
+            className="h-10 w-full bg-[#faf2ee] focus:bg-white text-xs text-[#1e1b19] px-3.5 rounded-md border border-[#e8e1dd] focus:border-[#b85028] outline-none transition-all"
             placeholder="e.g. John Doe"
           />
         </div>
 
         <div className="flex flex-col gap-1.5">
           <span className="text-xs font-bold text-[#1e1b19]">
-            Gender <span className="text-[#b85028]">*</span>
+            {t('members:modal.gender', 'Gender')}{' '}
+            <span className="text-[#b85028]">*</span>
           </span>
           <div className="grid grid-cols-2 gap-2 h-10">
             <button
               type="button"
               onClick={() => onChange('gender', 'MALE')}
-              className={`flex items-center justify-center gap-2 rounded-lg text-xs font-bold border transition-all cursor-pointer ${
+              className={`flex items-center justify-center gap-2 rounded-md text-xs font-bold border transition-all cursor-pointer ${
                 formData.gender === 'MALE'
                   ? 'bg-[#fff2ee] text-[#b85028] border-[#b85028] shadow-2xs'
                   : 'bg-[#faf2ee] text-[#8a726a] border-[#e8e1dd] hover:bg-[#f4ece9]'
               }`}
             >
-              Male
+              {t('members:modal.male', 'Male')}
             </button>
             <button
               type="button"
               onClick={() => onChange('gender', 'FEMALE')}
-              className={`flex items-center justify-center gap-2 rounded-lg text-xs font-bold border transition-all cursor-pointer ${
+              className={`flex items-center justify-center gap-2 rounded-md text-xs font-bold border transition-all cursor-pointer ${
                 formData.gender === 'FEMALE'
                   ? 'bg-[#fff2ee] text-[#b85028] border-[#b85028] shadow-2xs'
                   : 'bg-[#faf2ee] text-[#8a726a] border-[#e8e1dd] hover:bg-[#f4ece9]'
               }`}
             >
-              Female
+              {t('members:modal.female', 'Female')}
             </button>
           </div>
         </div>
@@ -187,7 +194,8 @@ export const MemberModalFormFields: React.FC<MemberModalFormFieldsProps> = ({
               htmlFor="member-dob"
               className="text-xs font-bold text-[#1e1b19]"
             >
-              Date of Birth <span className="text-[#b85028]">*</span>
+              {t('members:modal.dob', 'Date of Birth')}{' '}
+              <span className="text-[#b85028]">*</span>
             </label>
             {age !== null && (
               <span className="text-[10px] font-bold text-[#b85028] bg-[#fff2ee] px-2 py-0.5 rounded-full border border-[#ffdbcf]">
@@ -200,7 +208,7 @@ export const MemberModalFormFields: React.FC<MemberModalFormFieldsProps> = ({
             value={formData.dateOfBirth}
             onChange={(val) => onChange('dateOfBirth', val)}
             maxDate={new Date().toISOString().split('T')[0]}
-            placeholder="Select date of birth"
+            placeholder={t('members:modal.selectDob', 'Select date of birth')}
           />
         </div>
 
@@ -209,13 +217,19 @@ export const MemberModalFormFields: React.FC<MemberModalFormFieldsProps> = ({
             htmlFor="member-integrationDate"
             className="text-xs font-bold text-[#1e1b19]"
           >
-            Integration Date (Optional)
+            {t(
+              'members:modal.integrationDateOptional',
+              'Integration Date (Optional)',
+            )}
           </label>
           <DatePicker
             id="member-integrationDate"
             value={formData.integrationDate}
             onChange={(val) => onChange('integrationDate', val)}
-            placeholder="Select integration date"
+            placeholder={t(
+              'members:modal.selectIntegrationDate',
+              'Select integration date',
+            )}
           />
         </div>
       </div>
@@ -227,10 +241,13 @@ export const MemberModalFormFields: React.FC<MemberModalFormFieldsProps> = ({
             htmlFor="member-phone"
             className="text-xs font-bold text-[#1e1b19]"
           >
-            {t('members:modal.phoneNumber')}{' '}
+            {t(
+              'members:modal.phoneNumber',
+              'Phone Number (WhatsApp Preferred)',
+            )}{' '}
             <span className="text-[#b85028]">*</span>
           </label>
-          <div className="flex items-center h-10 w-full bg-[#faf2ee] rounded-lg border border-[#e8e1dd] focus-within:border-[#b85028] focus-within:bg-white transition-all overflow-hidden">
+          <div className="flex items-center h-10 w-full bg-[#faf2ee] rounded-md border border-[#e8e1dd] focus-within:border-[#b85028] focus-within:bg-white transition-all overflow-hidden">
             <div className="px-3 border-r border-[#e8e1dd] bg-[#f4ece9] h-full flex items-center gap-1.5 shrink-0 select-none">
               <span className="text-xs font-bold text-[#57423b]">🇨🇲 +237</span>
             </div>
@@ -254,7 +271,10 @@ export const MemberModalFormFields: React.FC<MemberModalFormFieldsProps> = ({
             htmlFor="member-email"
             className="text-xs font-bold text-[#1e1b19]"
           >
-            Email Address (Optional)
+            {t(
+              'members:modal.emailAddressOptional',
+              'Email Address (Optional)',
+            )}
           </label>
           <input
             id="member-email"
@@ -262,7 +282,7 @@ export const MemberModalFormFields: React.FC<MemberModalFormFieldsProps> = ({
             value={formData.email}
             onChange={(e) => onChange('email', e.target.value)}
             placeholder="member@example.com"
-            className="h-10 w-full bg-[#faf2ee] focus:bg-white text-xs text-[#1e1b19] px-3.5 rounded-lg border border-[#e8e1dd] focus:border-[#b85028] outline-none transition-all"
+            className="h-10 w-full bg-[#faf2ee] focus:bg-white text-xs text-[#1e1b19] px-3.5 rounded-md border border-[#e8e1dd] focus:border-[#b85028] outline-none transition-all"
           />
         </div>
       </div>

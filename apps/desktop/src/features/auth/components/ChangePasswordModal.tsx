@@ -72,11 +72,11 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
       aria-labelledby="change-pw-title"
       className="fixed inset-0 z-50 flex items-center justify-center bg-[#1e1b19]/60 p-4 backdrop-blur-[2px] animate-fadeIn"
     >
-      <div className="relative w-full max-w-xl rounded-2xl border border-[#e8e1dd] bg-white p-6 sm:p-8 shadow-2xl max-h-[92vh] overflow-y-auto">
+      <div className="relative w-full max-w-xl rounded-xl border border-[#e8e1dd] bg-white p-6 sm:p-8 shadow-2xl max-h-[92vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-start justify-between pb-4 border-b border-[#faf2ee]">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[#faf2ee] text-[#b85028] flex items-center justify-center">
+            <div className="w-10 h-10 rounded-lg bg-[#faf2ee] text-[#b85028] flex items-center justify-center">
               <Key size={22} weight="fill" />
             </div>
             <div>
@@ -94,7 +94,7 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
           <button
             type="button"
             onClick={handleClose}
-            className="p-1 rounded-lg text-[#8a726a] hover:text-[#1e1b19] hover:bg-[#faf2ee] transition cursor-pointer"
+            className="p-1 rounded-md text-[#8a726a] hover:text-[#1e1b19] hover:bg-[#faf2ee] transition cursor-pointer"
           >
             <X size={20} weight="bold" />
           </button>
@@ -102,7 +102,7 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
 
         {/* Success Toast */}
         {showSuccessToast && (
-          <div className="my-4 rounded-xl border border-[#43664d]/20 bg-[#c2e9ca] p-4 text-[#00210e] flex items-start gap-3">
+          <div className="my-4 rounded-lg border border-[#43664d]/20 bg-[#c2e9ca] p-4 text-[#00210e] flex items-start gap-3">
             <CheckCircle
               size={22}
               weight="fill"
@@ -121,7 +121,7 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
 
         {/* Error message */}
         {errorMessage && (
-          <div className="my-4 rounded-xl border border-[#ba1a1a]/20 bg-[#ffdad6] p-3.5 text-xs text-[#93000a] flex items-start gap-2.5">
+          <div className="my-4 rounded-lg border border-[#ba1a1a]/20 bg-[#ffdad6] p-3.5 text-xs text-[#93000a] flex items-start gap-2.5">
             <WarningCircle
               size={18}
               weight="fill"
@@ -154,7 +154,7 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
                 placeholder={t(
                   'auth:changePassword.currentPasswordPlaceholder',
                 )}
-                className="w-full rounded-xl border border-[#e8e1dd] bg-[#faf2ee] py-3 pl-11 pr-11 text-sm text-[#1e1b19] placeholder-[#8a726a] outline-none focus:bg-white focus:border-[#b85028] focus:ring-2 focus:ring-[#b85028]/20 transition"
+                className="w-full rounded-md border border-[#e8e1dd] bg-[#faf2ee] py-3 pl-11 pr-11 text-sm text-[#1e1b19] placeholder-[#8a726a] outline-none focus:bg-white focus:border-[#b85028] focus:ring-2 focus:ring-[#b85028]/20 transition"
               />
               <button
                 type="button"
@@ -190,7 +190,7 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 placeholder={t('auth:changePassword.newPasswordPlaceholder')}
-                className="w-full rounded-xl border border-[#e8e1dd] bg-[#faf2ee] py-3 pl-11 pr-11 text-sm text-[#1e1b19] placeholder-[#8a726a] outline-none focus:bg-white focus:border-[#b85028] focus:ring-2 focus:ring-[#b85028]/20 transition"
+                className="w-full rounded-md border border-[#e8e1dd] bg-[#faf2ee] py-3 pl-11 pr-11 text-sm text-[#1e1b19] placeholder-[#8a726a] outline-none focus:bg-white focus:border-[#b85028] focus:ring-2 focus:ring-[#b85028]/20 transition"
               />
               <button
                 type="button"
@@ -214,7 +214,7 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
             )}
 
             {/* Strength Meter & Requirements */}
-            <div className="mt-3 rounded-xl border border-[#e8e1dd] bg-[#faf2ee] p-3.5">
+            <div className="mt-3 rounded-lg border border-[#e8e1dd] bg-[#faf2ee] p-3.5">
               <div className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-wider text-[#57423b] mb-1.5">
                 <span>{t('auth:rules.passwordRequirements')}</span>
                 <span className="font-bold text-[#1e1b19]">
@@ -252,7 +252,7 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
                 placeholder={t(
                   'auth:changePassword.confirmPasswordPlaceholder',
                 )}
-                className="w-full rounded-xl border border-[#e8e1dd] bg-[#faf2ee] py-3 pl-11 pr-11 text-sm text-[#1e1b19] placeholder-[#8a726a] outline-none focus:bg-white focus:border-[#b85028] focus:ring-2 focus:ring-[#b85028]/20 transition"
+                className="w-full rounded-md border border-[#e8e1dd] bg-[#faf2ee] py-3 pl-11 pr-11 text-sm text-[#1e1b19] placeholder-[#8a726a] outline-none focus:bg-white focus:border-[#b85028] focus:ring-2 focus:ring-[#b85028]/20 transition"
               />
               <div className="absolute inset-y-0 right-0 flex items-center pr-3.5">
                 {confirmPassword.length > 0 &&
@@ -295,14 +295,14 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
             <button
               type="button"
               onClick={handleClose}
-              className="w-full sm:w-auto px-5 py-2.5 rounded-xl border border-[#e8e1dd] bg-[#faf2ee] text-xs font-semibold text-[#57423b] hover:bg-[#f4ece9] transition cursor-pointer"
+              className="w-full sm:w-auto px-5 py-2.5 rounded-md border border-[#e8e1dd] bg-[#faf2ee] text-xs font-semibold text-[#57423b] hover:bg-[#f4ece9] transition cursor-pointer"
             >
               {t('common:cancel')}
             </button>
             <button
               type="submit"
               disabled={isSubmitDisabled}
-              className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-[#b85028] text-white text-xs font-bold shadow-sm hover:bg-[#983912] active:scale-[0.99] transition flex items-center justify-center gap-2 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
+              className="w-full sm:w-auto px-6 py-2.5 rounded-md bg-[#b85028] text-white text-xs font-bold shadow-sm hover:bg-[#983912] active:scale-[0.99] transition flex items-center justify-center gap-2 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
             >
               {isPending ? (
                 <>

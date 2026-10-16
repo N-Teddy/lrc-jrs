@@ -44,7 +44,7 @@ export const MemberStatsOverview: React.FC<MemberStatsOverviewProps> = ({
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
       {/* 1. Total Registered */}
-      <div className="bg-white p-5 rounded-2xl border border-[#e8e1dd] shadow-xs flex flex-col justify-between gap-3 transition-shadow hover:shadow-sm">
+      <div className="bg-white p-5 rounded-xl border border-[#e8e1dd] shadow-xs flex flex-col justify-between gap-3 transition-shadow hover:shadow-sm">
         <div className="flex items-start justify-between">
           <div className="flex flex-col gap-1">
             <span className="text-[12px] font-bold text-[#8a726a] uppercase tracking-wider">
@@ -59,7 +59,7 @@ export const MemberStatsOverview: React.FC<MemberStatsOverviewProps> = ({
               </span>
             </div>
           </div>
-          <div className="w-10 h-10 rounded-xl bg-[#fff2ee] border border-[#ffdbcf] flex items-center justify-center text-[#b85028]">
+          <div className="w-10 h-10 rounded-lg bg-[#fff2ee] border border-[#ffdbcf] flex items-center justify-center text-[#b85028]">
             <Users size={22} weight="duotone" />
           </div>
         </div>
@@ -72,7 +72,7 @@ export const MemberStatsOverview: React.FC<MemberStatsOverviewProps> = ({
       </div>
 
       {/* 2. Youth Age Range (18–30) */}
-      <div className="bg-white p-5 rounded-2xl border border-[#e8e1dd] shadow-xs flex flex-col justify-between gap-3 transition-shadow hover:shadow-sm">
+      <div className="bg-white p-5 rounded-xl border border-[#e8e1dd] shadow-xs flex flex-col justify-between gap-3 transition-shadow hover:shadow-sm">
         <div className="flex items-start justify-between">
           <div className="flex flex-col gap-1">
             <span className="text-[12px] font-bold text-[#8a726a] uppercase tracking-wider">
@@ -87,7 +87,7 @@ export const MemberStatsOverview: React.FC<MemberStatsOverviewProps> = ({
               </span>
             </div>
           </div>
-          <div className="w-10 h-10 rounded-xl bg-[#c2e9ca]/40 border border-[#a9d0b2] flex items-center justify-center text-[#486b52]">
+          <div className="w-10 h-10 rounded-lg bg-[#c2e9ca]/40 border border-[#a9d0b2] flex items-center justify-center text-[#486b52]">
             <UserCheck size={22} weight="duotone" />
           </div>
         </div>
@@ -98,7 +98,7 @@ export const MemberStatsOverview: React.FC<MemberStatsOverviewProps> = ({
       </div>
 
       {/* 3. Leadership Contacts */}
-      <div className="bg-white p-5 rounded-2xl border border-[#e8e1dd] shadow-xs flex flex-col justify-between gap-3 transition-shadow hover:shadow-sm">
+      <div className="bg-white p-5 rounded-xl border border-[#e8e1dd] shadow-xs flex flex-col justify-between gap-3 transition-shadow hover:shadow-sm">
         <div className="flex items-start justify-between">
           <div className="flex flex-col gap-1">
             <span className="text-[12px] font-bold text-[#8a726a] uppercase tracking-wider">
@@ -118,7 +118,7 @@ export const MemberStatsOverview: React.FC<MemberStatsOverviewProps> = ({
               {t('members:stats.fullQuota')}
             </span>
           ) : (
-            <div className="w-10 h-10 rounded-xl bg-[#faf2ee] border border-[#e8e1dd] flex items-center justify-center text-[#b85028]">
+            <div className="w-10 h-10 rounded-lg bg-[#faf2ee] border border-[#e8e1dd] flex items-center justify-center text-[#b85028]">
               <TreeStructure size={22} weight="duotone" />
             </div>
           )}
@@ -138,7 +138,7 @@ export const MemberStatsOverview: React.FC<MemberStatsOverviewProps> = ({
       </div>
 
       {/* 4. Portal Accounts */}
-      <div className="bg-white p-5 rounded-2xl border border-[#e8e1dd] shadow-xs flex flex-col justify-between gap-3 transition-shadow hover:shadow-sm">
+      <div className="bg-white p-5 rounded-xl border border-[#e8e1dd] shadow-xs flex flex-col justify-between gap-3 transition-shadow hover:shadow-sm">
         <div className="flex items-start justify-between">
           <div className="flex flex-col gap-1">
             <span className="text-[12px] font-bold text-[#8a726a] uppercase tracking-wider">

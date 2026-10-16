@@ -45,7 +45,7 @@ export const ActivityTableView: React.FC<ActivityTableViewProps> = ({
 
   if (isLoading) {
     return (
-      <div className="bg-white rounded-2xl border border-[#e8e1dd] shadow-xs p-8 flex flex-col items-center justify-center min-h-[360px] animate-pulse">
+      <div className="bg-white rounded-xl border border-[#e8e1dd] shadow-xs p-8 flex flex-col items-center justify-center min-h-[360px] animate-pulse">
         <div className="w-10 h-10 rounded-full bg-[#f4ece9] mb-4" />
         <div className="h-4 w-48 bg-[#f4ece9] rounded mb-2" />
         <div className="h-3 w-32 bg-[#f4ece9] rounded" />
@@ -55,8 +55,8 @@ export const ActivityTableView: React.FC<ActivityTableViewProps> = ({
 
   if (activities.length === 0) {
     return (
-      <div className="bg-white rounded-2xl border border-[#e8e1dd] shadow-xs p-12 flex flex-col items-center justify-center text-center min-h-[320px]">
-        <div className="w-14 h-14 rounded-2xl bg-[#faf2ee] border border-[#e8e1dd] flex items-center justify-center text-[#8a726a] mb-4">
+      <div className="bg-white rounded-xl border border-[#e8e1dd] shadow-xs p-12 flex flex-col items-center justify-center text-center min-h-[320px]">
+        <div className="w-14 h-14 rounded-xl bg-[#faf2ee] border border-[#e8e1dd] flex items-center justify-center text-[#8a726a] mb-4">
           <CalendarBlank size={28} weight="duotone" />
         </div>
         <h3 className="text-base font-bold text-[#1e1b19] mb-1">
@@ -70,7 +70,7 @@ export const ActivityTableView: React.FC<ActivityTableViewProps> = ({
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-[#e8e1dd] shadow-xs overflow-hidden flex flex-col">
+    <div className="bg-white rounded-xl border border-[#e8e1dd] shadow-xs overflow-hidden flex flex-col">
       <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse">
           <thead>
@@ -93,7 +93,7 @@ export const ActivityTableView: React.FC<ActivityTableViewProps> = ({
             </tr>
           </thead>
           <tbody className="divide-y divide-[#e8e1dd] text-xs text-[#1e1b19]">
-            {activities.map((activity) => {
+            {activities.map((activity, index) => {
               const typeConfig = getActivityTypeConfig(
                 activity.activityType,
                 t,
@@ -194,6 +194,10 @@ export const ActivityTableView: React.FC<ActivityTableViewProps> = ({
                       onViewHistory={onViewHistory}
                       onDeleteActivity={onDeleteActivity}
                       isPrivileged={isPrivileged}
+                      openUpwards={
+                        index >= Math.max(1, activities.length - 2) &&
+                        activities.length > 2
+                      }
                     />
                   </td>
                 </tr>

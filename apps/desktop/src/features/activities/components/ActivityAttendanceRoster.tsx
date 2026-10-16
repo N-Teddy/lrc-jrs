@@ -593,21 +593,21 @@ export const ActivityAttendanceRoster: React.FC<
 
       {/* Notifications / Alerts */}
       {saveSuccessMsg && (
-        <div className="p-3.5 bg-[#edf3ee] border border-[#c2e9ca] rounded-2xl text-[#486b52] flex items-center gap-2 text-xs font-bold">
+        <div className="p-3.5 bg-[#edf3ee] border border-[#c2e9ca] rounded-xl text-[#486b52] flex items-center gap-2 text-xs font-bold">
           <CheckCircle size={18} weight="fill" />
           <span>{saveSuccessMsg}</span>
         </div>
       )}
 
       {saveErrorMsg && (
-        <div className="p-3.5 bg-[#ffdad6]/50 border border-[#ffb4a8] rounded-2xl text-[#ba1a1a] flex items-center gap-2 text-xs font-bold">
+        <div className="p-3.5 bg-[#ffdad6]/50 border border-[#ffb4a8] rounded-xl text-[#ba1a1a] flex items-center gap-2 text-xs font-bold">
           <WarningCircle size={18} weight="fill" />
           <span>{saveErrorMsg}</span>
         </div>
       )}
 
       {/* 2. Activity Summary Banner Card */}
-      <div className="bg-white rounded-2xl border border-[#e8e1dd] shadow-xs p-6 flex flex-col gap-5">
+      <div className="bg-white rounded-xl border border-[#e8e1dd] shadow-xs p-6 flex flex-col gap-5">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-[#e8e1dd]">
           <div className="flex flex-col gap-2">
             <div className="flex flex-wrap items-center gap-2">
@@ -754,8 +754,8 @@ export const ActivityAttendanceRoster: React.FC<
 
       {/* 4. Timing Guard Lock Notice */}
       {!isUnlocked && (
-        <div className="bg-[#faf2ee] border border-[#ffdbcf] rounded-2xl p-4 flex items-start gap-3.5">
-          <div className="w-9 h-9 rounded-xl bg-[#ffdbcf]/60 border border-[#ffb59c] flex items-center justify-center text-[#812901] shrink-0">
+        <div className="bg-[#faf2ee] border border-[#ffdbcf] rounded-xl p-4 flex items-start gap-3.5">
+          <div className="w-9 h-9 rounded-lg bg-[#ffdbcf]/60 border border-[#ffb59c] flex items-center justify-center text-[#812901] shrink-0">
             <Lock size={20} weight="bold" />
           </div>
           <div className="flex flex-col gap-1">
@@ -773,9 +773,9 @@ export const ActivityAttendanceRoster: React.FC<
 
       {/* Attendance Finalized & Locked Notice */}
       {isAttendanceLocked && (
-        <div className="max-w-2xl bg-[#fffbf2] border border-[#fde8bb] rounded-2xl p-4 flex items-center justify-between gap-4 flex-wrap shadow-2xs">
+        <div className="max-w-2xl bg-[#fffbf2] border border-[#fde8bb] rounded-xl p-4 flex items-center justify-between gap-4 flex-wrap shadow-2xs">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[#ffe082] text-[#812901] flex items-center justify-center shrink-0">
+            <div className="w-10 h-10 rounded-lg bg-[#ffe082] text-[#812901] flex items-center justify-center shrink-0">
               <Lock size={20} weight="bold" />
             </div>
             <div className="flex flex-col gap-0.5">
@@ -794,7 +794,7 @@ export const ActivityAttendanceRoster: React.FC<
               type="button"
               onClick={() => setIsUnlockModalOpen(true)}
               disabled={unlockMutation.isPending}
-              className="px-3.5 py-1.5 rounded-xl bg-white border border-[#ffe082] text-xs font-bold text-[#812901] hover:bg-[#fffbf0] transition-colors cursor-pointer flex items-center gap-1.5 shadow-2xs"
+              className="px-3.5 py-1.5 rounded-md bg-white border border-[#ffe082] text-xs font-bold text-[#812901] hover:bg-[#fffbf0] transition-colors cursor-pointer flex items-center gap-1.5 shadow-2xs"
             >
               <LockOpen size={14} weight="bold" />
               <span>Unlock (AP Override)</span>
@@ -807,11 +807,11 @@ export const ActivityAttendanceRoster: React.FC<
       <div className="flex flex-col gap-4">
         {/* Centralized Cohesive Tab Bar */}
         <div className="flex justify-center">
-          <div className="inline-flex items-center p-1.5 bg-[#faf2ee] rounded-2xl border border-[#e8e1dd] shadow-xs gap-1.5">
+          <div className="inline-flex items-center p-1.5 bg-[#faf2ee] rounded-xl border border-[#e8e1dd] shadow-xs gap-1.5">
             <button
               type="button"
               onClick={() => setActiveTab('members')}
-              className={`flex items-center gap-2 px-5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              className={`flex items-center gap-2 px-5 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                 activeTab === 'members'
                   ? 'bg-white text-[#b85028] shadow-xs border border-[#e8e1dd]'
                   : 'text-[#57423b] hover:text-[#1e1b19] hover:bg-white/50 border border-transparent'
@@ -836,7 +836,7 @@ export const ActivityAttendanceRoster: React.FC<
             <button
               type="button"
               onClick={() => setActiveTab('guests')}
-              className={`flex items-center gap-2 px-5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              className={`flex items-center gap-2 px-5 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                 activeTab === 'guests'
                   ? 'bg-white text-[#b85028] shadow-xs border border-[#e8e1dd]'
                   : 'text-[#57423b] hover:text-[#1e1b19] hover:bg-white/50 border border-transparent'
@@ -861,7 +861,7 @@ export const ActivityAttendanceRoster: React.FC<
         </div>
 
         {/* Tab Actions Toolbar & Content Container */}
-        <div className="bg-white rounded-2xl border border-[#e8e1dd] shadow-xs overflow-hidden flex flex-col">
+        <div className="bg-white rounded-xl border border-[#e8e1dd] shadow-xs overflow-hidden flex flex-col">
           <div className="p-4 bg-[#faf2ee] flex flex-wrap items-center justify-between gap-3">
             {activeTab === 'members' ? (
               <div className="flex flex-wrap items-center gap-2.5 w-full justify-between">
@@ -1245,7 +1245,7 @@ export const ActivityAttendanceRoster: React.FC<
       {/* Add Guest Modal */}
       {isAddGuestModalOpen && (
         <div className="fixed inset-0 z-50 bg-[#23201e]/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl border border-[#e8e1dd] shadow-2xl max-w-md w-full overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-150">
+          <div className="bg-white rounded-xl border border-[#e8e1dd] shadow-2xl max-w-md w-full overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-150">
             <div className="px-6 py-5 flex items-center justify-between border-b border-[#f4ece9] bg-[#faf8f6]/50">
               <h3 className="font-bold text-base text-[#1e1b19]">
                 {t('attendance:guest.addGuest')}
@@ -1339,10 +1339,10 @@ export const ActivityAttendanceRoster: React.FC<
       {/* Custom Lock Attendance Modal */}
       {isLockModalOpen && (
         <div className="fixed inset-0 z-50 bg-[#1e1b19]/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="w-full max-w-md bg-white rounded-3xl border border-[#e8e1dd] shadow-2xl overflow-hidden flex flex-col">
+          <div className="w-full max-w-md bg-white rounded-xl border border-[#e8e1dd] shadow-2xl overflow-hidden flex flex-col">
             <div className="p-6 border-b border-[#f4ece9] flex items-start justify-between bg-[#fffbf9]">
               <div className="flex items-center gap-3">
-                <div className="w-11 h-11 rounded-2xl bg-[#fff8e1] border border-[#ffe082] text-[#812901] flex items-center justify-center shrink-0">
+                <div className="w-11 h-11 rounded-xl bg-[#fff8e1] border border-[#ffe082] text-[#812901] flex items-center justify-center shrink-0">
                   <Lock size={22} weight="bold" />
                 </div>
                 <div>
@@ -1416,10 +1416,10 @@ export const ActivityAttendanceRoster: React.FC<
       {/* Custom Unlock Attendance Modal */}
       {isUnlockModalOpen && (
         <div className="fixed inset-0 z-50 bg-[#1e1b19]/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="w-full max-w-md bg-white rounded-3xl border border-[#e8e1dd] shadow-2xl overflow-hidden flex flex-col">
+          <div className="w-full max-w-md bg-white rounded-xl border border-[#e8e1dd] shadow-2xl overflow-hidden flex flex-col">
             <div className="p-6 border-b border-[#f4ece9] flex items-start justify-between bg-[#fffbf9]">
               <div className="flex items-center gap-3">
-                <div className="w-11 h-11 rounded-2xl bg-[#fff2ee] border border-[#ffdbcf] text-[#b85028] flex items-center justify-center shrink-0">
+                <div className="w-11 h-11 rounded-xl bg-[#fff2ee] border border-[#ffdbcf] text-[#b85028] flex items-center justify-center shrink-0">
                   <LockOpen size={22} weight="bold" />
                 </div>
                 <div>

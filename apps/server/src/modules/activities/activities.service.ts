@@ -62,6 +62,20 @@ export class ActivitiesService {
   }
 
   /**
+   * Auto-determine activity status based on date/time schedule
+   */
+  public determineStatus(startDate: Date, endDate: Date): ActivityStatus {
+    const now = new Date();
+    if (now < startDate) {
+      return ActivityStatus.SCHEDULED;
+    }
+    if (now >= startDate && now <= endDate) {
+      return ActivityStatus.IN_PROGRESS;
+    }
+    return ActivityStatus.COMPLETED;
+  }
+
+  /**
    * Helper to resolve town identifier (ObjectId string or town code like "DLA")
    */
   async resolveTownObjectId(
@@ -216,7 +230,10 @@ export class ActivitiesService {
             activePcCount: 0,
           }
         : undefined,
-      status: doc.status,
+      status:
+        doc.status === ActivityStatus.CANCELLED
+          ? ActivityStatus.CANCELLED
+          : this.determineStatus(doc.startDate, doc.endDate),
       changeHistory,
       attendanceCount: attendanceCounts || { members: 0, guests: 0, total: 0 },
       isAttendanceLocked: Boolean(doc.isAttendanceLocked),
@@ -551,6 +568,8 @@ export class ActivitiesService {
       hostTownId = townId;
     }
 
+    const status = this.determineStatus(startDate, endDate);
+
     const newActivity = new this.activityModel({
       title: dto.title.trim(),
       activityType: dto.activityType,
@@ -560,7 +579,7 @@ export class ActivitiesService {
       locationVenue: dto.locationVenue.trim(),
       notes: dto.notes?.trim(),
       hostTownId,
-      status: ActivityStatus.SCHEDULED,
+      status,
       changeHistory: [],
       createdBy: new Types.ObjectId(currentUser.id),
       isDeleted: false,
@@ -588,6 +607,12 @@ export class ActivitiesService {
 
     if (!activity) {
       throw new NotFoundException(`Activity with ID ${id} not found`);
+    }
+
+    if (activity.status === ActivityStatus.COMPLETED) {
+      throw new BadRequestException(
+        'Cannot edit an activity that has already been completed.',
+      );
     }
 
     // Detect critical changes for audit history
@@ -652,7 +677,19 @@ export class ActivitiesService {
       activity.locationVenue = dto.locationVenue.trim();
     }
 
-    if (dto.status && dto.status !== activity.status) {
+    // Auto-determine status based on schedule unless activity is cancelled
+    if (activity.status !== ActivityStatus.CANCELLED) {
+      const computedStatus = this.determineStatus(
+        activity.startDate,
+        activity.endDate,
+      );
+      if (computedStatus !== activity.status) {
+        statusChanged = true;
+        previousValues.status = activity.status;
+        newValues.status = computedStatus;
+        activity.status = computedStatus;
+      }
+    } else if (dto.status && dto.status !== activity.status) {
       statusChanged = true;
       previousValues.status = activity.status;
       newValues.status = dto.status;

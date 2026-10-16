@@ -224,11 +224,11 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
         </button>
 
         <div className="flex items-center gap-2 self-end sm:self-auto">
-          {canWrite && (
+          {canWrite && !isCompleted && (
             <button
               type="button"
               onClick={() => onEditActivity(activity)}
-              className="px-3.5 py-1.5 rounded-lg bg-white border border-[#e8e1dd] hover:bg-[#faf2ee] text-xs font-bold text-[#1e1b19] transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs"
+              className="px-3.5 py-1.5 rounded-md bg-white border border-[#e8e1dd] hover:bg-[#faf2ee] text-xs font-bold text-[#1e1b19] transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs"
             >
               <PencilSimple size={14} weight="bold" />
               <span>Edit Activity</span>
@@ -239,7 +239,7 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
             <button
               type="button"
               onClick={() => onDeleteActivity(activity)}
-              className="px-3.5 py-1.5 rounded-lg bg-white border border-[#ffdad6] hover:bg-[#ffdad6]/40 text-xs font-bold text-[#ba1a1a] transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs"
+              className="px-3.5 py-1.5 rounded-md bg-white border border-[#ffdad6] hover:bg-[#ffdad6]/40 text-xs font-bold text-[#ba1a1a] transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs"
             >
               <Trash size={14} weight="bold" />
               <span>Delete</span>
@@ -249,7 +249,7 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
       </div>
 
       {/* 2. Activity Hero Banner */}
-      <section className="bg-white rounded-3xl border border-[#e8e1dd] shadow-xs p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <section className="bg-white rounded-xl border border-[#e8e1dd] shadow-xs p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="flex flex-col gap-3 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <span
@@ -318,7 +318,7 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
             type="button"
             onClick={() => onTrackAttendance(activity)}
             disabled={isLocked && !isCurrentUserAp}
-            className={`h-11 px-5 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs ${
+            className={`h-11 px-5 rounded-md font-bold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs ${
               isLocked && !isCurrentUserAp
                 ? 'bg-[#8a726a]/30 text-[#8a726a] cursor-not-allowed'
                 : 'bg-[#b85028] hover:bg-[#a44520] text-white'
@@ -343,7 +343,7 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
             <button
               type="button"
               onClick={() => setIsReportModalOpen(true)}
-              className="h-11 px-4 rounded-xl bg-[#faf2ee] hover:bg-[#f4ece9] border border-[#e8e1dd] text-[#1e1b19] font-bold text-xs transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-2xs"
+              className="h-11 px-4 rounded-md bg-[#faf2ee] hover:bg-[#f4ece9] border border-[#e8e1dd] text-[#1e1b19] font-bold text-xs transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-2xs"
             >
               <CloudArrowUp
                 size={18}
@@ -362,11 +362,11 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
 
       {/* 3. Centralized Segmented Pill Tab Bar */}
       <div className="flex justify-center w-full">
-        <div className="inline-flex p-1 rounded-xl bg-[#faf2ee] border border-[#e8e1dd] shadow-2xs gap-1">
+        <div className="inline-flex p-1 rounded-lg bg-[#faf2ee] border border-[#e8e1dd] shadow-2xs gap-1">
           <button
             type="button"
             onClick={() => setActiveTab('overview')}
-            className={`px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+            className={`px-4 py-2 rounded-md text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
               activeTab === 'overview'
                 ? 'bg-white text-[#1e1b19] shadow-2xs border border-[#e8e1dd]/60'
                 : 'text-[#8a726a] hover:text-[#1e1b19]'
@@ -379,7 +379,7 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
           <button
             type="button"
             onClick={() => setActiveTab('attendance')}
-            className={`px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+            className={`px-4 py-2 rounded-md text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
               activeTab === 'attendance'
                 ? 'bg-white text-[#1e1b19] shadow-2xs border border-[#e8e1dd]/60'
                 : 'text-[#8a726a] hover:text-[#1e1b19]'
@@ -394,7 +394,7 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
             <button
               type="button"
               onClick={() => setActiveTab('report')}
-              className={`px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+              className={`px-4 py-2 rounded-md text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
                 activeTab === 'report'
                   ? 'bg-white text-[#1e1b19] shadow-2xs border border-[#e8e1dd]/60'
                   : 'text-[#8a726a] hover:text-[#1e1b19]'
@@ -411,7 +411,7 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
           <button
             type="button"
             onClick={() => setActiveTab('history')}
-            className={`px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+            className={`px-4 py-2 rounded-md text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
               activeTab === 'history'
                 ? 'bg-white text-[#1e1b19] shadow-2xs border border-[#e8e1dd]/60'
                 : 'text-[#8a726a] hover:text-[#1e1b19]'
@@ -430,7 +430,7 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
         <div className="flex flex-col gap-6 animate-in fade-in duration-150">
           {/* Turnout KPI Summary Strip */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <div className="bg-white rounded-2xl p-5 border border-[#e8e1dd] shadow-2xs flex flex-col justify-between">
+            <div className="bg-white rounded-xl p-5 border border-[#e8e1dd] shadow-2xs flex flex-col justify-between">
               <span className="text-[11px] font-bold text-[#8a726a] uppercase tracking-wider">
                 Turnout Rate
               </span>
@@ -442,7 +442,7 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
               </span>
             </div>
 
-            <div className="bg-white rounded-2xl p-5 border border-[#e8e1dd] shadow-2xs flex flex-col justify-between">
+            <div className="bg-white rounded-xl p-5 border border-[#e8e1dd] shadow-2xs flex flex-col justify-between">
               <span className="text-[11px] font-bold text-[#8a726a] uppercase tracking-wider">
                 Total Present
               </span>
@@ -455,7 +455,7 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
               </span>
             </div>
 
-            <div className="bg-white rounded-2xl p-5 border border-[#e8e1dd] shadow-2xs flex flex-col justify-between">
+            <div className="bg-white rounded-xl p-5 border border-[#e8e1dd] shadow-2xs flex flex-col justify-between">
               <span className="text-[11px] font-bold text-[#8a726a] uppercase tracking-wider">
                 Members Absent
               </span>
@@ -467,7 +467,7 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
               </span>
             </div>
 
-            <div className="bg-white rounded-2xl p-5 border border-[#e8e1dd] shadow-2xs flex flex-col justify-between">
+            <div className="bg-white rounded-xl p-5 border border-[#e8e1dd] shadow-2xs flex flex-col justify-between">
               <span className="text-[11px] font-bold text-[#8a726a] uppercase tracking-wider">
                 External Guests
               </span>
@@ -482,7 +482,7 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
 
           {/* Lock Status & Roll Call Banner */}
           <div
-            className={`p-4 sm:p-5 rounded-2xl border flex items-center justify-between gap-4 flex-wrap shadow-2xs max-w-2xl ${
+            className={`p-4 sm:p-5 rounded-xl border flex items-center justify-between gap-4 flex-wrap shadow-2xs max-w-2xl ${
               isLocked
                 ? 'bg-[#fffbf2] border-[#fde8bb] text-[#812901]'
                 : 'bg-[#eef7f0] border-[#c2e9ca] text-[#2c4e37]'
@@ -490,7 +490,7 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
           >
             <div className="flex items-center gap-3.5">
               <div
-                className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${
+                className={`w-11 h-11 rounded-lg flex items-center justify-center shrink-0 ${
                   isLocked
                     ? 'bg-[#ffe082] text-[#812901]'
                     : 'bg-[#c2e9ca] text-[#2c4e37]'
@@ -522,7 +522,7 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
                     <button
                       type="button"
                       onClick={() => setLockPromptOpen(true)}
-                      className="px-3.5 py-1.5 rounded-xl bg-white border border-[#ffe082] text-xs font-bold text-[#812901] hover:bg-[#fffbf0] transition-colors cursor-pointer flex items-center gap-1.5 shadow-2xs"
+                      className="px-3.5 py-1.5 rounded-md bg-white border border-[#ffe082] text-xs font-bold text-[#812901] hover:bg-[#fffbf0] transition-colors cursor-pointer flex items-center gap-1.5 shadow-2xs"
                     >
                       <LockOpen size={14} weight="bold" />
                       <span>Unlock (AP Override)</span>
@@ -532,7 +532,7 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
                     <button
                       type="button"
                       onClick={() => setLockPromptOpen(true)}
-                      className="px-4 py-2 rounded-xl bg-[#2c4e37] hover:bg-[#233f2c] text-xs font-bold text-white transition-colors cursor-pointer flex items-center gap-1.5 shadow-2xs"
+                      className="px-4 py-2 rounded-md bg-[#2c4e37] hover:bg-[#233f2c] text-xs font-bold text-white transition-colors cursor-pointer flex items-center gap-1.5 shadow-2xs"
                     >
                       <Lock size={15} weight="bold" />
                       <span>Finalize & Lock Attendance</span>
@@ -543,7 +543,7 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
 
           {/* Lock / Unlock Confirmation Prompt */}
           {lockPromptOpen && (
-            <div className="p-5 rounded-2xl bg-white border-2 border-[#b85028] shadow-md flex flex-col gap-3 animate-in fade-in duration-150">
+            <div className="p-5 rounded-xl bg-white border-2 border-[#b85028] shadow-md flex flex-col gap-3 animate-in fade-in duration-150">
               <div className="flex items-center justify-between">
                 <h4 className="text-xs font-bold text-[#1e1b19] flex items-center gap-2">
                   <WarningCircle
@@ -580,13 +580,13 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
                       ? 'Reason for AP override (e.g. Late check-in correction)...'
                       : 'Notes (Optional)...'
                   }
-                  className="flex-1 px-3.5 py-2 text-xs rounded-xl bg-[#faf2ee] border border-[#e8e1dd] focus:outline-none focus:border-[#b85028]"
+                  className="flex-1 px-3.5 py-2 text-xs rounded-md bg-[#faf2ee] border border-[#e8e1dd] focus:outline-none focus:border-[#b85028]"
                 />
                 <button
                   type="button"
                   onClick={handleToggleLock}
                   disabled={lockMutation.isPending || unlockMutation.isPending}
-                  className={`px-4 py-2 rounded-xl text-xs font-bold text-white transition-colors cursor-pointer shrink-0 ${
+                  className={`px-4 py-2 rounded-md text-xs font-bold text-white transition-colors cursor-pointer shrink-0 ${
                     isLocked
                       ? 'bg-[#b85028] hover:bg-[#a44520]'
                       : 'bg-[#2c4e37] hover:bg-[#233f2c]'
@@ -599,13 +599,13 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
           )}
 
           {/* Agenda & Notes Card */}
-          <div className="bg-white rounded-3xl border border-[#e8e1dd] p-6 shadow-xs flex flex-col gap-3">
+          <div className="bg-white rounded-xl border border-[#e8e1dd] p-6 shadow-xs flex flex-col gap-3">
             <h3 className="text-sm font-bold text-[#1e1b19] flex items-center gap-2">
               <Info size={16} weight="bold" className="text-[#b85028]" />
               <span>Activity Agenda & Notes</span>
             </h3>
             {activity.notes ? (
-              <p className="text-xs text-[#57423b] leading-relaxed whitespace-pre-wrap bg-[#faf2ee]/40 p-4 rounded-2xl border border-[#f4ece9]">
+              <p className="text-xs text-[#57423b] leading-relaxed whitespace-pre-wrap bg-[#faf2ee]/40 p-4 rounded-lg border border-[#f4ece9]">
                 {activity.notes}
               </p>
             ) : (
@@ -620,7 +620,7 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
 
       {/* TAB 2: ATTENDANCE */}
       {activeTab === 'attendance' && (
-        <div className="bg-white rounded-3xl border border-[#e8e1dd] shadow-xs p-6 flex flex-col gap-6 animate-in fade-in duration-150">
+        <div className="bg-white rounded-xl border border-[#e8e1dd] shadow-xs p-6 flex flex-col gap-6 animate-in fade-in duration-150">
           {/* Attendees Toolbar */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
             <div className="relative w-full sm:w-80">
@@ -633,13 +633,13 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search attendees by name or phone..."
-                className="w-full pl-10 pr-3.5 py-2 rounded-xl bg-[#faf2ee]/60 border border-[#e8e1dd] text-xs text-[#1e1b19] focus:outline-none focus:border-[#b85028]"
+                className="w-full pl-10 pr-3.5 py-2 rounded-md bg-[#faf2ee]/60 border border-[#e8e1dd] text-xs text-[#1e1b19] focus:outline-none focus:border-[#b85028]"
               />
             </div>
 
             <div className="flex items-center gap-2 flex-wrap">
               {/* Only ALL and GUESTS filters */}
-              <div className="inline-flex p-1 rounded-xl bg-[#faf2ee] border border-[#e8e1dd] gap-1">
+              <div className="inline-flex p-1 rounded-lg bg-[#faf2ee] border border-[#e8e1dd] gap-1">
                 {(
                   [
                     { id: 'ALL', label: `All (${attendedAttendees.length})` },
@@ -653,7 +653,7 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
                     key={tab.id}
                     type="button"
                     onClick={() => setAttendanceFilter(tab.id)}
-                    className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    className={`px-3 py-1 rounded-md text-xs font-bold transition-all cursor-pointer ${
                       attendanceFilter === tab.id
                         ? 'bg-white text-[#1e1b19] shadow-2xs'
                         : 'text-[#8a726a] hover:text-[#1e1b19]'
@@ -668,7 +668,7 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
                 type="button"
                 onClick={() => onTrackAttendance(activity)}
                 disabled={isLocked && !isCurrentUserAp}
-                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold text-white transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs ${
+                className={`px-3.5 py-1.5 rounded-md text-xs font-bold text-white transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs ${
                   isLocked && !isCurrentUserAp
                     ? 'bg-[#8a726a]/30 text-[#8a726a] cursor-not-allowed'
                     : 'bg-[#b85028] hover:bg-[#a44520]'
@@ -689,7 +689,7 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
                 Loading attendance records...
               </div>
             ) : filteredAttendees.length === 0 ? (
-              <div className="p-12 text-center flex flex-col items-center justify-center text-xs text-[#8a726a] border border-[#e8e1dd] rounded-2xl bg-[#faf2ee]/30">
+              <div className="p-12 text-center flex flex-col items-center justify-center text-xs text-[#8a726a] border border-[#e8e1dd] rounded-xl bg-[#faf2ee]/30">
                 <Users size={32} className="text-[#b85028]/60 mb-2" />
                 <span className="font-bold text-[#1e1b19]">
                   No Attendees Recorded
@@ -724,14 +724,14 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
                   return (
                     <div
                       key={att.id || att.memberId || name}
-                      className="bg-white rounded-2xl border border-[#e8e1dd] hover:border-[#b85028]/40 p-4 flex flex-col gap-3 shadow-2xs hover:shadow-xs transition-all group"
+                      className="bg-white rounded-lg border border-[#e8e1dd] hover:border-[#b85028]/40 p-4 flex flex-col gap-3 shadow-2xs hover:shadow-xs transition-all group"
                     >
                       <div className="flex items-center gap-3">
                         <UserAvatar
                           name={name}
                           avatarUrl={avatarUrl}
                           size="lg"
-                          className="rounded-xl shadow-2xs shrink-0"
+                          className="rounded-lg shadow-2xs shrink-0"
                         />
                         <div className="flex flex-col min-w-0 flex-1">
                           <span className="font-bold text-xs text-[#1e1b19] truncate group-hover:text-[#b85028] transition-colors">
@@ -780,10 +780,10 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
 
       {/* TAB 3: ACTIVITY REPORTS (STRICTLY IF COMPLETED & PAST) */}
       {canShowReportUi && activeTab === 'report' && (
-        <div className="bg-white rounded-3xl border border-[#e8e1dd] shadow-xs p-6 sm:p-8 flex flex-col gap-6 animate-in fade-in duration-150">
+        <div className="bg-white rounded-xl border border-[#e8e1dd] shadow-xs p-6 sm:p-8 flex flex-col gap-6 animate-in fade-in duration-150">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#f4ece9] pb-5">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-2xl bg-[#fff2ee] border border-[#ffdbcf] text-[#b85028] flex items-center justify-center shrink-0">
+              <div className="w-12 h-12 rounded-lg bg-[#fff2ee] border border-[#ffdbcf] text-[#b85028] flex items-center justify-center shrink-0">
                 <HardDrives size={24} weight="duotone" />
               </div>
               <div className="flex flex-col">
@@ -801,7 +801,7 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
               <button
                 type="button"
                 onClick={() => setIsReportModalOpen(true)}
-                className="px-4 py-2.5 rounded-xl bg-[#b85028] hover:bg-[#a44520] text-xs font-bold text-white transition-all flex items-center gap-2 shadow-2xs cursor-pointer self-start sm:self-auto"
+                className="px-4 py-2.5 rounded-md bg-[#b85028] hover:bg-[#a44520] text-xs font-bold text-white transition-all flex items-center gap-2 shadow-2xs cursor-pointer self-start sm:self-auto"
               >
                 <Plus size={15} weight="bold" />
                 <span>
@@ -815,8 +815,8 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
 
           {reports.length > 0 && (
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div className="p-3.5 rounded-2xl bg-[#faf2ee]/60 border border-[#e8e1dd] flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-white border border-[#e8e1dd] text-[#b85028] flex items-center justify-center font-bold text-xs">
+              <div className="p-3.5 rounded-lg bg-[#faf2ee]/60 border border-[#e8e1dd] flex items-center gap-3">
+                <div className="w-9 h-9 rounded-md bg-white border border-[#e8e1dd] text-[#b85028] flex items-center justify-center font-bold text-xs">
                   {reports.length}
                 </div>
                 <div className="flex flex-col">
@@ -829,8 +829,8 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
                   </span>
                 </div>
               </div>
-              <div className="p-3.5 rounded-2xl bg-[#faf2ee]/60 border border-[#e8e1dd] flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-white border border-[#e8e1dd] text-[#b85028] flex items-center justify-center font-bold text-xs">
+              <div className="p-3.5 rounded-lg bg-[#faf2ee]/60 border border-[#e8e1dd] flex items-center gap-3">
+                <div className="w-9 h-9 rounded-md bg-white border border-[#e8e1dd] text-[#b85028] flex items-center justify-center font-bold text-xs">
                   MB
                 </div>
                 <div className="flex flex-col">
@@ -846,8 +846,8 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
                   </span>
                 </div>
               </div>
-              <div className="p-3.5 rounded-2xl bg-[#faf2ee]/60 border border-[#e8e1dd] flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-white border border-[#e8e1dd] text-[#b85028] flex items-center justify-center">
+              <div className="p-3.5 rounded-lg bg-[#faf2ee]/60 border border-[#e8e1dd] flex items-center gap-3">
+                <div className="w-9 h-9 rounded-md bg-white border border-[#e8e1dd] text-[#b85028] flex items-center justify-center">
                   <Clock size={16} weight="bold" />
                 </div>
                 <div className="flex flex-col">
@@ -871,11 +871,11 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
               {reports.map((rep) => (
                 <div
                   key={rep.fileId}
-                  className="p-5 rounded-2xl bg-white border border-[#e8e1dd] hover:border-[#b85028]/40 shadow-2xs hover:shadow-xs transition-all flex flex-col justify-between gap-3 group"
+                  className="p-5 rounded-lg bg-white border border-[#e8e1dd] hover:border-[#b85028]/40 shadow-2xs hover:shadow-xs transition-all flex flex-col justify-between gap-3 group"
                 >
                   <div className="flex flex-col gap-3">
                     <div className="flex items-start justify-between gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-[#faf2ee] flex items-center justify-center shrink-0 border border-[#e8e1dd] text-[#b85028]">
+                      <div className="w-10 h-10 rounded-lg bg-[#faf2ee] flex items-center justify-center shrink-0 border border-[#e8e1dd] text-[#b85028]">
                         {getFileIcon(rep.filename)}
                       </div>
                       <div className="flex items-center gap-1.5 shrink-0">
@@ -883,7 +883,7 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
                           <button
                             type="button"
                             onClick={() => setReportToDelete(rep)}
-                            className="p-1.5 rounded-lg text-[#ba1a1a]/70 hover:text-[#ba1a1a] hover:bg-[#ffdad6]/40 transition-colors cursor-pointer"
+                            className="p-1.5 rounded-md text-[#ba1a1a]/70 hover:text-[#ba1a1a] hover:bg-[#ffdad6]/40 transition-colors cursor-pointer"
                             title="Delete this report from Google Drive"
                           >
                             <Trash size={15} />
@@ -919,7 +919,7 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
                     </div>
 
                     {rep.summary && (
-                      <div className="p-3 rounded-xl bg-[#faf2ee]/40 border border-[#f4ece9] text-xs text-[#57423b] leading-relaxed line-clamp-2">
+                      <div className="p-3 rounded-md bg-[#faf2ee]/40 border border-[#f4ece9] text-xs text-[#57423b] leading-relaxed line-clamp-2">
                         {rep.summary}
                       </div>
                     )}
@@ -929,7 +929,7 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
                     <button
                       type="button"
                       onClick={() => setPreviewFile(rep)}
-                      className="flex-1 py-2 px-3.5 rounded-xl bg-[#b85028] hover:bg-[#9c421f] text-white text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer"
+                      className="flex-1 py-2 px-3.5 rounded-md bg-[#b85028] hover:bg-[#9c421f] text-white text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer"
                     >
                       <Eye size={15} weight="bold" />
                       <span>Preview File</span>
@@ -948,7 +948,7 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
                             );
                           });
                         }}
-                        className="p-2 rounded-xl bg-[#faf2ee] hover:bg-[#f4ece9] border border-[#e8e1dd] text-[#1e1b19] transition-all flex items-center justify-center shadow-2xs cursor-pointer"
+                        className="p-2 rounded-md bg-[#faf2ee] hover:bg-[#f4ece9] border border-[#e8e1dd] text-[#1e1b19] transition-all flex items-center justify-center shadow-2xs cursor-pointer"
                         title="Open in Google Drive (External Browser)"
                       >
                         <ArrowSquareOut size={16} />
@@ -959,8 +959,8 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
               ))}
             </div>
           ) : (
-            <div className="p-12 rounded-2xl border-2 border-dashed border-[#e8e1dd] flex flex-col items-center justify-center text-center gap-3 bg-[#faf2ee]/20">
-              <div className="w-12 h-12 rounded-2xl bg-[#faf2ee] text-[#b85028] flex items-center justify-center">
+            <div className="p-12 rounded-xl border-2 border-dashed border-[#e8e1dd] flex flex-col items-center justify-center text-center gap-3 bg-[#faf2ee]/20">
+              <div className="w-12 h-12 rounded-lg bg-[#faf2ee] text-[#b85028] flex items-center justify-center">
                 <CloudArrowUp size={24} weight="duotone" />
               </div>
               <h4 className="text-sm font-bold text-[#1e1b19]">
@@ -975,7 +975,7 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
                 <button
                   type="button"
                   onClick={() => setIsReportModalOpen(true)}
-                  className="mt-2 px-5 py-2.5 rounded-xl bg-[#b85028] hover:bg-[#a44520] text-xs font-bold text-white transition-all shadow-xs cursor-pointer flex items-center gap-2"
+                  className="mt-2 px-5 py-2.5 rounded-md bg-[#b85028] hover:bg-[#a44520] text-xs font-bold text-white transition-all shadow-xs cursor-pointer flex items-center gap-2"
                 >
                   <Plus size={16} weight="bold" />
                   <span>Upload Activity Reports</span>
@@ -988,7 +988,7 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
 
       {/* TAB 4: AUDIT HISTORY */}
       {activeTab === 'history' && (
-        <div className="bg-white rounded-3xl border border-[#e8e1dd] shadow-xs p-6 flex flex-col gap-4 animate-in fade-in duration-150">
+        <div className="bg-white rounded-xl border border-[#e8e1dd] shadow-xs p-6 flex flex-col gap-4 animate-in fade-in duration-150">
           <h3 className="text-sm font-bold text-[#1e1b19] flex items-center gap-2">
             <ClockCounterClockwise
               size={16}
@@ -1004,7 +1004,7 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
               initial configuration.
             </p>
           ) : (
-            <div className="divide-y divide-[#f4ece9] border border-[#e8e1dd] rounded-2xl overflow-hidden">
+            <div className="divide-y divide-[#f4ece9] border border-[#e8e1dd] rounded-lg overflow-hidden">
               {history.map((log) => (
                 <div
                   key={log.id}
@@ -1047,10 +1047,10 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
       {/* Direct Report Delete Confirmation Modal */}
       {reportToDelete && (
         <div className="fixed inset-0 z-50 bg-[#1e1b19]/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="w-full max-w-md bg-white rounded-3xl border border-[#e8e1dd] shadow-2xl overflow-hidden flex flex-col">
+          <div className="w-full max-w-md bg-white rounded-xl border border-[#e8e1dd] shadow-2xl overflow-hidden flex flex-col">
             <div className="p-6 border-b border-[#f4ece9] flex items-start justify-between bg-[#fffbf9]">
               <div className="flex items-center gap-3">
-                <div className="w-11 h-11 rounded-2xl bg-[#ffdad6] border border-[#ffb4ab] text-[#ba1a1a] flex items-center justify-center shrink-0">
+                <div className="w-11 h-11 rounded-lg bg-[#ffdad6] border border-[#ffb4ab] text-[#ba1a1a] flex items-center justify-center shrink-0">
                   <Trash size={22} weight="bold" />
                 </div>
                 <div>
@@ -1065,7 +1065,7 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
               <button
                 type="button"
                 onClick={() => setReportToDelete(null)}
-                className="w-8 h-8 rounded-lg bg-[#faf2ee] hover:bg-[#f4ece9] border border-[#e8e1dd] flex items-center justify-center text-[#8a726a] hover:text-[#1e1b19] cursor-pointer"
+                className="w-8 h-8 rounded-md bg-[#faf2ee] hover:bg-[#f4ece9] border border-[#e8e1dd] flex items-center justify-center text-[#8a726a] hover:text-[#1e1b19] cursor-pointer"
               >
                 <X size={16} />
               </button>
@@ -1081,7 +1081,7 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
                 <button
                   type="button"
                   onClick={() => setReportToDelete(null)}
-                  className="px-4 py-2 rounded-xl bg-white border border-[#e8e1dd] text-[#57423b] font-bold text-xs hover:bg-[#faf2ee] cursor-pointer"
+                  className="px-4 py-2 rounded-md bg-white border border-[#e8e1dd] text-[#57423b] font-bold text-xs hover:bg-[#faf2ee] cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -1099,7 +1099,7 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
                     }
                   }}
                   disabled={deleteReportMutation.isPending}
-                  className="px-5 py-2 rounded-xl bg-[#ba1a1a] hover:bg-[#93000a] text-white font-bold text-xs shadow-xs cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
+                  className="px-5 py-2 rounded-md bg-[#ba1a1a] hover:bg-[#93000a] text-white font-bold text-xs shadow-xs cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
                 >
                   <Trash size={14} weight="bold" />
                   <span>

@@ -5,6 +5,7 @@ import {
   useDriveFilesQuery,
   useDriveFoldersQuery,
   useTownContext,
+  useTranslation,
 } from '@jrs/client-core';
 import type { IActivity } from '@jrs/shared';
 import {
@@ -42,6 +43,7 @@ interface IFolderTreeNode extends IDriveFolderOption {
 }
 
 export const DriveExplorerFeature: React.FC = () => {
+  const { t } = useTranslation(['drive', 'common']);
   const { activeTown } = useTownContext();
   const [selectedFolderId, setSelectedFolderId] = useState<string>('ALL');
   const [searchTerm, setSearchTerm] = useState('');
@@ -405,60 +407,62 @@ export const DriveExplorerFeature: React.FC = () => {
   return (
     <div className="flex flex-col gap-6 animate-in fade-in duration-200">
       {/* 1. Header & KPI Metrics */}
-      <div className="bg-white rounded-3xl border border-[#e8e1dd] shadow-xs p-6 sm:p-8 flex flex-col gap-6">
+      <div className="bg-white rounded-xl border border-[#e8e1dd] shadow-xs p-6 flex flex-col gap-6">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pb-6 border-b border-[#f4ece9]">
           <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-2xl bg-[#fff2ee] border border-[#ffdbcf] text-[#b85028] flex items-center justify-center shrink-0 shadow-2xs">
-              <HardDrives size={28} weight="duotone" />
+            <div className="w-12 h-12 rounded-xl bg-[#fff2ee] border border-[#ffdbcf] text-[#b85028] flex items-center justify-center shrink-0 shadow-2xs">
+              <HardDrives size={26} weight="duotone" />
             </div>
             <div className="flex flex-col">
               <div className="flex items-center gap-2 flex-wrap">
                 <h1 className="text-xl sm:text-2xl font-black text-[#1e1b19] tracking-tight">
-                  Google Drive File Explorer
+                  {t('drive:title', 'Google Drive File Explorer')}
                 </h1>
                 <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#ffdbcf]/60 text-[#812901] border border-[#ffb59c]/50">
-                  Document Vault
+                  {t('drive:documentVault', 'Document Vault')}
                 </span>
               </div>
               <p className="text-xs sm:text-sm text-[#8a726a] mt-1">
-                Browse Google Drive folder hierarchies, inspect activity
-                reports, and preview fellowship documents across all hubs.
+                {t(
+                  'drive:subtitle',
+                  'Browse Google Drive folder hierarchies, inspect activity reports, and preview fellowship documents across all hubs.',
+                )}
               </p>
             </div>
           </div>
 
           {/* Quick Metrics Bar */}
-          <div className="flex items-center gap-3 flex-wrap">
-            <div className="px-4 py-2.5 rounded-2xl bg-[#faf2ee]/70 border border-[#e8e1dd] flex items-center gap-3">
+          <div className="flex items-center gap-2.5 flex-wrap">
+            <div className="px-3.5 py-2 rounded-md bg-[#faf2ee]/70 border border-[#e8e1dd] flex items-center gap-2.5">
               <span className="w-2.5 h-2.5 rounded-full bg-[#486b52] animate-pulse" />
               <div className="flex flex-col">
                 <span className="text-[10px] font-bold text-[#8a726a] uppercase tracking-wider">
-                  Documents Indexed
+                  {t('drive:metrics.documentsIndexed', 'Documents Indexed')}
                 </span>
-                <span className="text-sm font-black text-[#1e1b19]">
-                  {allReports.length} files
+                <span className="text-xs font-black text-[#1e1b19]">
+                  {allReports.length} {t('drive:metrics.files', 'files')}
                 </span>
               </div>
             </div>
 
-            <div className="px-4 py-2.5 rounded-2xl bg-[#faf2ee]/70 border border-[#e8e1dd] flex items-center gap-3">
+            <div className="px-3.5 py-2 rounded-md bg-[#faf2ee]/70 border border-[#e8e1dd] flex items-center gap-2.5">
               <div className="flex flex-col">
                 <span className="text-[10px] font-bold text-[#8a726a] uppercase tracking-wider">
-                  Total Drive Space
+                  {t('drive:metrics.totalSpace', 'Total Drive Space')}
                 </span>
-                <span className="text-sm font-black text-[#b85028]">
+                <span className="text-xs font-black text-[#b85028]">
                   {(totalSizeBytes / (1024 * 1024)).toFixed(2)} MB
                 </span>
               </div>
             </div>
 
-            <div className="px-4 py-2.5 rounded-2xl bg-[#faf2ee]/70 border border-[#e8e1dd] flex items-center gap-3">
+            <div className="px-3.5 py-2 rounded-md bg-[#faf2ee]/70 border border-[#e8e1dd] flex items-center gap-2.5">
               <div className="flex flex-col">
                 <span className="text-[10px] font-bold text-[#8a726a] uppercase tracking-wider">
-                  Folders Mapped
+                  {t('drive:metrics.foldersMapped', 'Folders Mapped')}
                 </span>
-                <span className="text-sm font-black text-[#1e1b19]">
-                  {folders.length} paths
+                <span className="text-xs font-black text-[#1e1b19]">
+                  {folders.length} {t('drive:metrics.paths', 'paths')}
                 </span>
               </div>
             </div>
@@ -466,26 +470,30 @@ export const DriveExplorerFeature: React.FC = () => {
         </div>
 
         {/* 2. Search & File Format Filter Bar */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex flex-col xl:flex-row items-stretch xl:items-center justify-between gap-3">
           {/* Search Box */}
-          <div className="relative flex-1 max-w-md">
+          <div className="relative flex items-center gap-2.5 px-3.5 h-10 rounded-md bg-[#faf2ee] border border-[#e8e1dd] focus-within:ring-2 focus-within:ring-[#b85028]/20 focus-within:border-[#b85028] focus-within:bg-white transition-all w-full sm:w-80 md:w-96 flex-initial">
             <MagnifyingGlass
-              size={18}
+              size={16}
               weight="bold"
-              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8a726a]"
+              className="text-[#8a726a] shrink-0"
             />
             <input
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search by file name, summary, activity, or author..."
-              className="w-full pl-10 pr-9 py-2.5 rounded-xl bg-[#faf2ee]/50 border border-[#e8e1dd] text-xs text-[#1e1b19] placeholder:text-[#8a726a] focus:outline-none focus:border-[#b85028] focus:bg-white transition-all shadow-2xs"
+              placeholder={t(
+                'drive:filters.searchPlaceholder',
+                'Search by file name, summary, activity, or author...',
+              )}
+              className="bg-transparent text-xs text-[#1e1b19] placeholder:text-[#8a726a] outline-none w-full pr-6"
             />
             {searchTerm && (
               <button
                 type="button"
                 onClick={() => setSearchTerm('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8a726a] hover:text-[#1e1b19] p-0.5"
+                className="absolute right-2.5 text-[#8a726a] hover:text-[#1e1b19] p-0.5 cursor-pointer"
+                title="Clear search"
               >
                 <X size={14} weight="bold" />
               </button>
@@ -493,14 +501,17 @@ export const DriveExplorerFeature: React.FC = () => {
           </div>
 
           {/* Type Filter Chips */}
-          <div className="flex items-center gap-1.5 flex-wrap">
+          <div className="flex items-center gap-2 flex-wrap">
             {(
               [
-                { id: 'ALL', label: 'All Files' },
-                { id: 'PDF', label: 'PDFs' },
-                { id: 'DOC', label: 'Word Docs' },
-                { id: 'SHEET', label: 'Spreadsheets' },
-                { id: 'IMAGE', label: 'Images' },
+                { id: 'ALL', label: t('drive:formats.all', 'All Files') },
+                { id: 'PDF', label: t('drive:formats.pdf', 'PDFs') },
+                { id: 'DOC', label: t('drive:formats.doc', 'Word Docs') },
+                {
+                  id: 'SHEET',
+                  label: t('drive:formats.sheet', 'Spreadsheets'),
+                },
+                { id: 'IMAGE', label: t('drive:formats.image', 'Images') },
               ] as const
             ).map((filter) => {
               const active = fileTypeFilter === filter.id;
@@ -509,7 +520,7 @@ export const DriveExplorerFeature: React.FC = () => {
                   key={filter.id}
                   type="button"
                   onClick={() => setFileTypeFilter(filter.id)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  className={`h-10 px-3.5 rounded-md text-xs font-bold transition-all cursor-pointer ${
                     active
                       ? 'bg-[#b85028] text-white shadow-2xs'
                       : 'bg-[#faf2ee] hover:bg-[#f4ece9] text-[#57423b] border border-[#e8e1dd]'
@@ -615,7 +626,7 @@ export const DriveExplorerFeature: React.FC = () => {
 
           {/* Grid of Files */}
           {isLoading ? (
-            <div className="p-16 rounded-3xl bg-white border border-[#e8e1dd] flex flex-col items-center justify-center text-center gap-3">
+            <div className="p-16 rounded-xl bg-white border border-[#e8e1dd] flex flex-col items-center justify-center text-center gap-3">
               <div className="w-10 h-10 border-3 border-[#b85028] border-t-transparent rounded-full animate-spin" />
               <span className="text-xs font-semibold text-[#8a726a]">
                 Indexing Google Drive vault...
@@ -626,7 +637,7 @@ export const DriveExplorerFeature: React.FC = () => {
               {filteredReports.map((rep) => (
                 <div
                   key={`${rep.activityId || 'drive'}-${rep.fileId}`}
-                  className="p-5 rounded-2xl bg-white border border-[#e8e1dd] hover:border-[#b85028]/40 shadow-2xs hover:shadow-xs transition-all flex flex-col justify-between gap-3 group"
+                  className="p-5 rounded-xl bg-white border border-[#e8e1dd] hover:border-[#b85028]/40 shadow-2xs hover:shadow-xs transition-all flex flex-col justify-between gap-3 group"
                 >
                   <div className="flex flex-col gap-3">
                     <div className="flex items-start justify-between gap-3">
@@ -744,8 +755,8 @@ export const DriveExplorerFeature: React.FC = () => {
               ))}
             </div>
           ) : (
-            <div className="p-16 rounded-3xl bg-white border border-[#e8e1dd] shadow-xs flex flex-col items-center justify-center text-center gap-3">
-              <div className="w-14 h-14 rounded-2xl bg-[#faf2ee] text-[#b85028] flex items-center justify-center">
+            <div className="p-16 rounded-xl bg-white border border-[#e8e1dd] shadow-xs flex flex-col items-center justify-center text-center gap-3">
+              <div className="w-12 h-12 rounded-xl bg-[#faf2ee] text-[#b85028] flex items-center justify-center">
                 <CloudArrowUp size={28} weight="duotone" />
               </div>
               <h4 className="text-base font-bold text-[#1e1b19]">

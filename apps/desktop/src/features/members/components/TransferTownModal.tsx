@@ -103,11 +103,11 @@ export const TransferTownModal: React.FC<TransferTownModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
-      <div className="relative w-full max-w-lg rounded-3xl bg-white border border-[#e8e1dd] shadow-2xl p-6 sm:p-8 flex flex-col gap-6 animate-in zoom-in-95 duration-200">
+      <div className="relative w-full max-w-lg rounded-xl bg-white border border-[#e8e1dd] shadow-2xl p-6 sm:p-8 flex flex-col gap-6 animate-in zoom-in-95 duration-200">
         {/* Header */}
         <div className="flex items-start justify-between gap-4 pb-4 border-b border-[#f4ece9]">
           <div className="flex items-center gap-3.5">
-            <div className="w-11 h-11 rounded-2xl bg-[#fff2ee] border border-[#ffdbcf] text-[#b85028] flex items-center justify-center shrink-0 shadow-2xs">
+            <div className="w-11 h-11 rounded-lg bg-[#fff2ee] border border-[#ffdbcf] text-[#b85028] flex items-center justify-center shrink-0 shadow-2xs">
               <ArrowsLeftRight size={22} weight="duotone" />
             </div>
             <div className="flex flex-col">
@@ -122,7 +122,7 @@ export const TransferTownModal: React.FC<TransferTownModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-xl hover:bg-[#faf2ee] text-[#8a726a] hover:text-[#1e1b19] transition-colors cursor-pointer"
+            className="p-1.5 rounded-md hover:bg-[#faf2ee] text-[#8a726a] hover:text-[#1e1b19] transition-colors cursor-pointer"
           >
             <X size={18} weight="bold" />
           </button>
@@ -130,7 +130,7 @@ export const TransferTownModal: React.FC<TransferTownModalProps> = ({
 
         {/* Error Alert */}
         {errorMessage && (
-          <div className="p-3.5 rounded-2xl bg-[#ffdad6]/60 border border-[#ffb4ab] text-xs font-semibold text-[#ba1a1a] flex items-center gap-2.5">
+          <div className="p-3.5 rounded-lg bg-[#ffdad6]/60 border border-[#ffb4ab] text-xs font-semibold text-[#ba1a1a] flex items-center gap-2.5">
             <WarningCircle size={18} weight="fill" className="shrink-0" />
             <span>{errorMessage}</span>
           </div>
@@ -138,7 +138,7 @@ export const TransferTownModal: React.FC<TransferTownModalProps> = ({
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-5">
           {/* Member Profile Badge */}
-          <div className="p-4 rounded-2xl bg-[#faf2ee]/70 border border-[#e8e1dd] flex items-center gap-3.5">
+          <div className="p-4 rounded-lg bg-[#faf2ee]/70 border border-[#e8e1dd] flex items-center gap-3.5">
             <UserAvatar
               name={member.fullName}
               avatarUrl={member.avatarUrl}
@@ -162,7 +162,7 @@ export const TransferTownModal: React.FC<TransferTownModalProps> = ({
 
             <div className="grid grid-cols-1 sm:grid-cols-5 gap-3 items-center">
               {/* Origin Card */}
-              <div className="sm:col-span-2 p-3.5 rounded-2xl bg-[#fff8e1] border border-[#ffe082] flex flex-col gap-1">
+              <div className="sm:col-span-2 p-3.5 rounded-lg bg-[#fff8e1] border border-[#ffe082] flex flex-col gap-1">
                 <span className="text-[10px] font-bold text-[#812901] uppercase tracking-wider">
                   Origin Hub
                 </span>
@@ -182,7 +182,7 @@ export const TransferTownModal: React.FC<TransferTownModalProps> = ({
               </div>
 
               {/* Destination Card Preview */}
-              <div className="sm:col-span-2 p-3.5 rounded-2xl bg-[#eef7f0] border border-[#c2e9ca] flex flex-col gap-1">
+              <div className="sm:col-span-2 p-3.5 rounded-lg bg-[#eef7f0] border border-[#c2e9ca] flex flex-col gap-1">
                 <span className="text-[10px] font-bold text-[#2c4e37] uppercase tracking-wider">
                   Destination Hub
                 </span>
@@ -202,9 +202,9 @@ export const TransferTownModal: React.FC<TransferTownModalProps> = ({
               Destination Town Hub <span className="text-[#ba1a1a]">*</span>
             </span>
             {isTownsLoading ? (
-              <div className="h-10 bg-[#faf2ee] rounded-xl animate-pulse" />
+              <div className="h-10 bg-[#faf2ee] rounded-md animate-pulse" />
             ) : availableTowns.length === 0 ? (
-              <div className="p-3 text-xs text-[#8a726a] bg-[#faf2ee] rounded-xl border border-[#e8e1dd]">
+              <div className="p-3 text-xs text-[#8a726a] bg-[#faf2ee] rounded-md border border-[#e8e1dd]">
                 No other town hubs available for transfer.
               </div>
             ) : (
@@ -232,12 +232,12 @@ export const TransferTownModal: React.FC<TransferTownModalProps> = ({
               onChange={(e) => setReason(e.target.value)}
               placeholder="e.g. Relocated to Douala for university studies, professional employment, or family relocation..."
               rows={3}
-              className="w-full p-3 rounded-xl bg-[#faf2ee]/40 border border-[#e8e1dd] text-xs text-[#1e1b19] placeholder:text-[#8a726a] focus:outline-none focus:border-[#b85028] focus:bg-white transition-all shadow-2xs resize-none"
+              className="w-full p-3 rounded-md bg-[#faf2ee]/40 border border-[#e8e1dd] text-xs text-[#1e1b19] placeholder:text-[#8a726a] focus:outline-none focus:border-[#b85028] focus:bg-white transition-all shadow-2xs resize-none"
             />
           </div>
 
           {/* Administrative Notice */}
-          <div className="p-3.5 rounded-2xl bg-[#faf2ee]/60 border border-[#e8e1dd] flex items-start gap-2.5">
+          <div className="p-3.5 rounded-lg bg-[#faf2ee]/60 border border-[#e8e1dd] flex items-start gap-2.5">
             <Info
               size={16}
               weight="bold"
@@ -256,14 +256,14 @@ export const TransferTownModal: React.FC<TransferTownModalProps> = ({
               type="button"
               onClick={onClose}
               disabled={transferMutation.isPending}
-              className="px-4 py-2.5 rounded-xl bg-white border border-[#e8e1dd] text-xs font-bold text-[#57423b] hover:bg-[#faf2ee] transition-all cursor-pointer disabled:opacity-50"
+              className="px-4 py-2.5 rounded-md bg-white border border-[#e8e1dd] text-xs font-bold text-[#57423b] hover:bg-[#faf2ee] transition-all cursor-pointer disabled:opacity-50"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={!toTownId || transferMutation.isPending}
-              className="px-5 py-2.5 rounded-xl bg-[#b85028] hover:bg-[#9c421f] text-xs font-bold text-white transition-all flex items-center gap-2 shadow-2xs cursor-pointer disabled:opacity-50"
+              className="px-5 py-2.5 rounded-md bg-[#b85028] hover:bg-[#9c421f] text-xs font-bold text-white transition-all flex items-center gap-2 shadow-2xs cursor-pointer disabled:opacity-50"
             >
               {transferMutation.isPending ? (
                 <>

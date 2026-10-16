@@ -65,14 +65,14 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
       </div>
 
       {/* Full 50% Right Side: Form Container */}
-      <div className="relative flex h-full w-full flex-col justify-center overflow-y-auto px-8 sm:px-14 lg:w-1/2 lg:px-16 xl:px-24">
+      <div className="relative flex h-full w-full flex-col justify-center overflow-y-auto px-6 sm:px-12 lg:w-1/2 lg:px-10 xl:px-16">
         {/* Floating Language Switcher */}
         <div className="absolute top-6 right-8 z-10">
           <LanguageToggle showIcon />
         </div>
 
-        <div className="mx-auto w-full max-w-[500px] py-8">
-          <div className="bg-white rounded-3xl border border-[#e8e1dd] p-7 sm:p-10 shadow-sm">
+        <div className="mx-auto w-full max-w-xl py-8">
+          <div className="bg-white rounded-2xl border border-[#e8e1dd] p-6 sm:p-10 shadow-sm flex flex-col">
             {/* Header */}
             <div className="mb-7">
               <h1 className="text-2xl font-bold tracking-tight text-[#1e1b19] sm:text-3xl">
@@ -154,7 +154,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
                     value={identifier}
                     onChange={(e) => setIdentifier(e.target.value)}
                     placeholder={t('auth:login.identifierPlaceholder')}
-                    className="w-full h-11 rounded-lg border border-[#e8e1dd] bg-[#faf2ee] pl-10 pr-3.5 text-xs text-[#1e1b19] placeholder-[#8a726a] transition focus:bg-white focus:border-[#b85028] focus:outline-none focus:ring-2 focus:ring-[#b85028]/15"
+                    className="w-full h-11 rounded-md border border-[#e8e1dd] bg-[#faf2ee] pl-10 pr-3.5 text-xs text-[#1e1b19] placeholder-[#8a726a] transition focus:bg-white focus:border-[#b85028] focus:outline-none focus:ring-2 focus:ring-[#b85028]/15"
                   />
                 </div>
                 <p className="mt-1 text-[11px] text-[#8a726a]">
@@ -192,7 +192,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder={t('auth:login.passwordPlaceholder')}
-                    className="w-full h-11 rounded-lg border border-[#e8e1dd] bg-[#faf2ee] pl-10 pr-11 text-xs text-[#1e1b19] placeholder-[#8a726a] transition focus:bg-white focus:border-[#b85028] focus:outline-none focus:ring-2 focus:ring-[#b85028]/15"
+                    className="w-full h-11 rounded-md border border-[#e8e1dd] bg-[#faf2ee] pl-10 pr-11 text-xs text-[#1e1b19] placeholder-[#8a726a] transition focus:bg-white focus:border-[#b85028] focus:outline-none focus:ring-2 focus:ring-[#b85028]/15"
                   />
                   <button
                     type="button"
@@ -242,7 +242,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
                 <button
                   type="submit"
                   disabled={isLoading || !identifier.trim() || !password}
-                  className="flex w-full h-11 items-center justify-center gap-2 rounded-lg bg-[#b85028] px-5 text-xs font-bold text-white shadow-xs transition hover:bg-[#983912] active:bg-[#812901] disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
+                  className="flex w-full h-11 items-center justify-center gap-2 rounded-md bg-[#b85028] px-5 text-xs font-bold text-white shadow-xs transition hover:bg-[#983912] active:bg-[#812901] disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
                 >
                   {isLoading ? (
                     <>

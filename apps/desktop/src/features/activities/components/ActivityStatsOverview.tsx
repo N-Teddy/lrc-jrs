@@ -37,7 +37,7 @@ export const ActivityStatsOverview: React.FC<ActivityStatsOverviewProps> = ({
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       {/* 1. Total Gatherings */}
-      <div className="bg-white p-5 rounded-2xl border border-[#e8e1dd] shadow-xs flex flex-col justify-between gap-3 transition-shadow hover:shadow-sm">
+      <div className="bg-white p-5 rounded-xl border border-[#e8e1dd] shadow-xs flex flex-col justify-between gap-3 transition-shadow hover:shadow-sm">
         <div className="flex items-start justify-between">
           <div className="flex flex-col gap-1">
             <span className="text-[12px] font-bold text-[#8a726a] uppercase tracking-wider">
@@ -52,7 +52,7 @@ export const ActivityStatsOverview: React.FC<ActivityStatsOverviewProps> = ({
               </span>
             </div>
           </div>
-          <div className="w-10 h-10 rounded-xl bg-[#fff2ee] border border-[#ffdbcf] flex items-center justify-center text-[#b85028]">
+          <div className="w-10 h-10 rounded-lg bg-[#fff2ee] border border-[#ffdbcf] flex items-center justify-center text-[#b85028]">
             <CalendarBlank size={22} weight="duotone" />
           </div>
         </div>
@@ -63,7 +63,7 @@ export const ActivityStatsOverview: React.FC<ActivityStatsOverviewProps> = ({
       </div>
 
       {/* 2. Upcoming Gatherings */}
-      <div className="bg-white p-5 rounded-2xl border border-[#e8e1dd] shadow-xs flex flex-col justify-between gap-3 transition-shadow hover:shadow-sm">
+      <div className="bg-white p-5 rounded-xl border border-[#e8e1dd] shadow-xs flex flex-col justify-between gap-3 transition-shadow hover:shadow-sm">
         <div className="flex items-start justify-between">
           <div className="flex flex-col gap-1">
             <span className="text-[12px] font-bold text-[#8a726a] uppercase tracking-wider">
@@ -78,7 +78,7 @@ export const ActivityStatsOverview: React.FC<ActivityStatsOverviewProps> = ({
               </span>
             </div>
           </div>
-          <div className="w-10 h-10 rounded-xl bg-[#edf3ee] border border-[#c2e9ca] flex items-center justify-center text-[#486b52]">
+          <div className="w-10 h-10 rounded-lg bg-[#edf3ee] border border-[#c2e9ca] flex items-center justify-center text-[#486b52]">
             <FlagBanner size={22} weight="duotone" />
           </div>
         </div>
@@ -89,7 +89,7 @@ export const ActivityStatsOverview: React.FC<ActivityStatsOverviewProps> = ({
       </div>
 
       {/* 3. Completed Sessions */}
-      <div className="bg-white p-5 rounded-2xl border border-[#e8e1dd] shadow-xs flex flex-col justify-between gap-3 transition-shadow hover:shadow-sm">
+      <div className="bg-white p-5 rounded-xl border border-[#e8e1dd] shadow-xs flex flex-col justify-between gap-3 transition-shadow hover:shadow-sm">
         <div className="flex items-start justify-between">
           <div className="flex flex-col gap-1">
             <span className="text-[12px] font-bold text-[#8a726a] uppercase tracking-wider">
@@ -104,7 +104,7 @@ export const ActivityStatsOverview: React.FC<ActivityStatsOverviewProps> = ({
               </span>
             </div>
           </div>
-          <div className="w-10 h-10 rounded-xl bg-[#faf2ee] border border-[#e8e1dd] flex items-center justify-center text-[#1e1b19]">
+          <div className="w-10 h-10 rounded-lg bg-[#faf2ee] border border-[#e8e1dd] flex items-center justify-center text-[#1e1b19]">
             <CalendarCheck size={22} weight="duotone" />
           </div>
         </div>
@@ -115,7 +115,7 @@ export const ActivityStatsOverview: React.FC<ActivityStatsOverviewProps> = ({
       </div>
 
       {/* 4. Average Attendance Turnout / Guests */}
-      <div className="bg-white p-5 rounded-2xl border border-[#e8e1dd] shadow-xs flex flex-col justify-between gap-3 transition-shadow hover:shadow-sm">
+      <div className="bg-white p-5 rounded-xl border border-[#e8e1dd] shadow-xs flex flex-col justify-between gap-3 transition-shadow hover:shadow-sm">
         <div className="flex items-start justify-between">
           <div className="flex flex-col gap-1">
             <span className="text-[12px] font-bold text-[#8a726a] uppercase tracking-wider">
@@ -132,7 +132,7 @@ export const ActivityStatsOverview: React.FC<ActivityStatsOverviewProps> = ({
               </span>
             </div>
           </div>
-          <div className="w-10 h-10 rounded-xl bg-[#fff2ee] border border-[#ffdbcf] flex items-center justify-center text-[#b85028]">
+          <div className="w-10 h-10 rounded-lg bg-[#fff2ee] border border-[#ffdbcf] flex items-center justify-center text-[#b85028]">
             <Users size={22} weight="duotone" />
           </div>
         </div>

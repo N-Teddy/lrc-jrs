@@ -131,9 +131,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 <button
                   type="button"
                   onClick={onOpenHubSwitcher}
-                  className="w-10 h-10 rounded-lg bg-[#faf2ee] border border-[#e8e1dd] flex items-center justify-center text-[#b85028] hover:bg-[#ffdbcf] transition cursor-pointer"
+                  className="w-11 h-11 rounded-md bg-[#faf2ee] border border-[#e8e1dd] flex items-center justify-center text-[#b85028] hover:bg-[#ffdbcf] transition cursor-pointer"
                 >
-                  <MapPin size={18} weight="fill" />
+                  <MapPin size={20} weight="fill" />
                 </button>
                 <div className="absolute left-[78px] top-1/2 -translate-y-1/2 hidden group-hover:flex items-center z-50 pointer-events-none">
                   <div className="bg-[#1e1b19] text-white text-xs px-3 py-1.5 rounded-md shadow-lg whitespace-nowrap">
@@ -195,13 +195,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     <button
                       type="button"
                       onClick={() => onSelectTab(item.id)}
-                      className={`w-10 h-10 rounded-lg flex items-center justify-center transition cursor-pointer ${
+                      className={`w-11 h-11 rounded-md flex items-center justify-center transition cursor-pointer ${
                         isActive
                           ? 'bg-[#b85028] text-white shadow-xs'
                           : 'text-[#57423b] hover:bg-[#faf2ee] hover:text-[#1e1b19]'
                       }`}
                     >
-                      <Icon size={19} weight={isActive ? 'fill' : 'bold'} />
+                      <Icon size={21} weight={isActive ? 'fill' : 'bold'} />
                     </button>
 
                     <div className="absolute left-[78px] top-1/2 -translate-y-1/2 hidden group-hover:flex items-center z-50 pointer-events-none">
@@ -223,14 +223,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   key={item.id}
                   type="button"
                   onClick={() => onSelectTab(item.id)}
-                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs transition cursor-pointer ${
+                  className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-md text-[13px] transition cursor-pointer ${
                     isActive
                       ? 'bg-[#ffdbcf]/35 text-[#b85028] font-bold'
                       : 'font-medium text-[#57423b] hover:bg-[#faf2ee] hover:text-[#1e1b19]'
                   }`}
                 >
                   <Icon
-                    size={18}
+                    size={20}
                     weight={isActive ? 'fill' : 'bold'}
                     className={isActive ? 'text-[#b85028]' : 'text-[#8a726a]'}
                   />
@@ -248,10 +248,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <button
                 type="button"
                 onClick={onToggleCollapse}
-                className="w-10 h-8 rounded-md bg-[#faf2ee] text-[#57423b] hover:bg-white hover:text-[#1e1b19] transition flex items-center justify-center cursor-pointer"
+                className="w-11 h-9 rounded-md bg-[#faf2ee] text-[#57423b] hover:bg-white hover:text-[#1e1b19] transition flex items-center justify-center cursor-pointer"
                 title={t('navigation:expandSidebar')}
               >
-                <SidebarSimple size={16} weight="bold" />
+                <SidebarSimple size={17} weight="bold" />
               </button>
 
               {/* Red Log Out Button for Collapsed Mode */}
@@ -259,10 +259,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 <button
                   type="button"
                   onClick={() => setIsLogoutModalOpen(true)}
-                  className="w-10 h-10 rounded-lg bg-[#ffdad6] text-[#ba1a1a] hover:bg-[#ffb4a8] transition flex items-center justify-center cursor-pointer shadow-xs"
+                  className="w-11 h-11 rounded-md bg-[#ffdad6] text-[#ba1a1a] hover:bg-[#ffb4a8] transition flex items-center justify-center cursor-pointer shadow-xs"
                   title={t('common:logOut')}
                 >
-                  <SignOut size={18} weight="bold" />
+                  <SignOut size={20} weight="bold" />
                 </button>
                 <div className="absolute left-[78px] bottom-0 hidden group-hover:flex items-center z-50 pointer-events-none">
                   <div className="bg-[#1e1b19] text-white text-xs px-3 py-1.5 rounded-md shadow-lg whitespace-nowrap">
@@ -276,9 +276,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <button
               type="button"
               onClick={() => setIsLogoutModalOpen(true)}
-              className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-lg bg-[#ffdad6] text-[#ba1a1a] hover:bg-[#ffb4a8] font-bold text-xs transition cursor-pointer shadow-xs"
+              className="w-full flex items-center justify-center gap-2.5 py-2.5 px-3.5 rounded-md bg-[#ffdad6] text-[#ba1a1a] hover:bg-[#ffb4a8] font-bold text-xs transition cursor-pointer shadow-xs"
             >
-              <SignOut size={16} weight="bold" />
+              <SignOut size={17} weight="bold" />
               <span>{t('common:logOut')}</span>
             </button>
           )}
@@ -288,11 +288,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* Logout Confirmation Warning Modal */}
       {isLogoutModalOpen && (
         <div className="fixed inset-0 z-50 bg-[#23201e]/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-200">
-          <div className="relative w-full max-w-md my-auto bg-white rounded-2xl border border-[#e8e1dd] shadow-2xl flex flex-col overflow-hidden">
+          <div className="relative w-full max-w-md my-auto bg-white rounded-xl border border-[#e8e1dd] shadow-2xl flex flex-col overflow-hidden">
             {/* Header */}
-            <div className="px-6 py-5 flex items-start justify-between border-b border-[#f4ece9] bg-[#faf8f6]/50 rounded-t-2xl">
+            <div className="px-6 py-5 flex items-start justify-between border-b border-[#f4ece9] bg-[#faf8f6]/50 rounded-t-xl">
               <div className="flex items-center gap-3.5">
-                <div className="w-10 h-10 rounded-xl bg-[#ffdad6] border border-[#ffb4a8] text-[#ba1a1a] flex items-center justify-center shrink-0 shadow-xs">
+                <div className="w-10 h-10 rounded-lg bg-[#ffdad6] border border-[#ffb4a8] text-[#ba1a1a] flex items-center justify-center shrink-0 shadow-xs">
                   <Warning size={22} weight="fill" />
                 </div>
                 <div className="flex flex-col">
@@ -307,7 +307,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <button
                 type="button"
                 onClick={() => setIsLogoutModalOpen(false)}
-                className="w-8 h-8 rounded-lg bg-[#faf2ee] hover:bg-[#f4ece9] flex items-center justify-center text-[#8a726a] hover:text-[#1e1b19] transition-colors cursor-pointer"
+                className="w-8 h-8 rounded-md bg-[#faf2ee] hover:bg-[#f4ece9] flex items-center justify-center text-[#8a726a] hover:text-[#1e1b19] transition-colors cursor-pointer"
               >
                 <X size={16} />
               </button>
@@ -322,11 +322,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </div>
 
             {/* Footer Actions */}
-            <div className="px-6 py-4 bg-[#faf2ee] border-t border-[#e8e1dd] flex items-center justify-end gap-2.5 rounded-b-2xl">
+            <div className="px-6 py-4 bg-[#faf2ee] border-t border-[#e8e1dd] flex items-center justify-end gap-2.5 rounded-b-xl">
               <button
                 type="button"
                 onClick={() => setIsLogoutModalOpen(false)}
-                className="px-4 py-2 rounded-lg bg-white border border-[#e8e1dd] text-xs font-bold text-[#57423b] hover:bg-[#f4ece9] transition-colors cursor-pointer"
+                className="px-4 py-2 rounded-md bg-white border border-[#e8e1dd] text-xs font-bold text-[#57423b] hover:bg-[#f4ece9] transition-colors cursor-pointer"
               >
                 {t('common:cancel')}
               </button>
@@ -336,7 +336,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   setIsLogoutModalOpen(false);
                   signOut();
                 }}
-                className="px-4 py-2 rounded-lg bg-[#ba1a1a] hover:bg-[#93000a] text-white text-xs font-bold shadow-xs active:scale-[0.98] transition-all cursor-pointer flex items-center gap-2"
+                className="px-4 py-2 rounded-md bg-[#ba1a1a] hover:bg-[#93000a] text-white text-xs font-bold shadow-xs active:scale-[0.98] transition-all cursor-pointer flex items-center gap-2"
               >
                 <SignOut size={15} weight="bold" />
                 <span>{t('common:logOut')}</span>

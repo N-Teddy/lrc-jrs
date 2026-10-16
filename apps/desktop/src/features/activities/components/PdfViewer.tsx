@@ -115,8 +115,8 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({
 
   if (loadError) {
     return (
-      <div className="flex flex-col items-center justify-center p-8 text-center gap-3 bg-white rounded-2xl border border-[#e8e1dd] max-w-md mx-auto my-12">
-        <div className="w-12 h-12 rounded-xl bg-[#ffdad6] text-[#ba1a1a] flex items-center justify-center">
+      <div className="flex flex-col items-center justify-center p-8 text-center gap-3 bg-white rounded-xl border border-[#e8e1dd] max-w-md mx-auto my-12">
+        <div className="w-12 h-12 rounded-lg bg-[#ffdad6] text-[#ba1a1a] flex items-center justify-center">
           <WarningCircle size={24} weight="fill" />
         </div>
         <h4 className="text-sm font-bold text-[#1e1b19]">

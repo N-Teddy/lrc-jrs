@@ -1,5 +1,5 @@
 import { useTownContext, useTranslation } from '@jrs/client-core';
-import type { IActivity } from '@jrs/shared';
+import { ActivityStatus, type IActivity } from '@jrs/shared';
 import {
   ClockCounterClockwise,
   DotsThreeVertical,
@@ -20,6 +20,7 @@ export interface ActivityActionMenuProps {
   onDeleteActivity?: (activity: IActivity) => void;
   isPrivileged: boolean;
   align?: 'right' | 'left';
+  openUpwards?: boolean;
 }
 
 export const ActivityActionMenu: React.FC<ActivityActionMenuProps> = ({
@@ -33,10 +34,12 @@ export const ActivityActionMenu: React.FC<ActivityActionMenuProps> = ({
   onDeleteActivity,
   isPrivileged,
   align = 'right',
+  openUpwards = false,
 }) => {
   const { t } = useTranslation();
   const { canWrite } = useTownContext();
   const historyCount = activity.changeHistory?.length || 0;
+  const isCompleted = activity.status === ActivityStatus.COMPLETED;
 
   return (
     <div className="relative inline-flex items-center justify-end shrink-0">
@@ -51,7 +54,9 @@ export const ActivityActionMenu: React.FC<ActivityActionMenuProps> = ({
 
       {isOpen && (
         <div
-          className={`absolute ${align === 'right' ? 'right-0' : 'left-0'} top-full mt-1 w-44 bg-white rounded-xl border border-[#e8e1dd] shadow-lg py-1 z-30 flex flex-col animate-in fade-in zoom-in-95 duration-100`}
+          className={`absolute ${align === 'right' ? 'right-0' : 'left-0'} ${
+            openUpwards ? 'bottom-full mb-1.5' : 'top-full mt-1'
+          } w-44 bg-white rounded-xl border border-[#e8e1dd] shadow-xl py-1 z-40 flex flex-col animate-in fade-in zoom-in-95 duration-100`}
           onMouseLeave={onClose}
         >
           {/* Activity Details Action */}
@@ -67,7 +72,7 @@ export const ActivityActionMenu: React.FC<ActivityActionMenuProps> = ({
             <span>{t('activities:card.details', 'Details')}</span>
           </button>
 
-          {canWrite && (
+          {canWrite && !isCompleted && (
             <button
               type="button"
               onClick={() => {

@@ -71,16 +71,16 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
     return (
       <div className="flex flex-col gap-6 animate-pulse p-4">
         <div className="h-6 w-48 bg-[#f4ece9] rounded" />
-        <div className="h-48 rounded-3xl bg-white border border-[#e8e1dd]" />
-        <div className="h-64 rounded-3xl bg-white border border-[#e8e1dd]" />
+        <div className="h-48 rounded-xl bg-white border border-[#e8e1dd]" />
+        <div className="h-64 rounded-xl bg-white border border-[#e8e1dd]" />
       </div>
     );
   }
 
   if (error || !member) {
     return (
-      <div className="bg-white rounded-3xl border border-[#e8e1dd] p-12 text-center flex flex-col items-center">
-        <div className="w-14 h-14 rounded-2xl bg-[#ffdad6] text-[#ba1a1a] flex items-center justify-center mb-4">
+      <div className="bg-white rounded-xl border border-[#e8e1dd] p-12 text-center flex flex-col items-center">
+        <div className="w-14 h-14 rounded-lg bg-[#ffdad6] text-[#ba1a1a] flex items-center justify-center mb-4">
           <User size={28} />
         </div>
         <h3 className="text-lg font-bold text-[#1e1b19] mb-2">
@@ -92,7 +92,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
         <button
           type="button"
           onClick={onBack}
-          className="px-4 py-2 rounded-lg bg-[#faf2ee] hover:bg-[#f4ece9] text-xs font-bold text-[#1e1b19] transition-colors cursor-pointer"
+          className="px-4 py-2 rounded-md bg-[#faf2ee] hover:bg-[#f4ece9] text-xs font-bold text-[#1e1b19] transition-colors cursor-pointer"
         >
           {t('members:detail.backToMembers')}
         </button>
@@ -135,7 +135,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
       </div>
 
       {/* 2. Hero Profile Card */}
-      <section className="bg-white rounded-3xl border border-[#e8e1dd] p-6 sm:p-8 shadow-xs flex flex-col xl:flex-row xl:items-center justify-between gap-6">
+      <section className="bg-white rounded-xl border border-[#e8e1dd] p-6 sm:p-8 shadow-xs flex flex-col xl:flex-row xl:items-center justify-between gap-6">
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
           <UserAvatar
             avatarUrl={member.avatarUrl}
@@ -152,7 +152,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
               >
                 {roleInfo.label}
               </span>
-              <span className="inline-flex items-center px-2 py-0.5 rounded bg-[#f4ece9] text-[#57423b] text-xs font-mono font-bold">
+              <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-[#f4ece9] text-[#57423b] text-xs font-mono font-bold">
                 {member.homeTown?.code ?? activeTown?.code ?? 'HUB'}
               </span>
             </div>
@@ -194,7 +194,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
               href={`https://wa.me/${cleanDigits}`}
               target="_blank"
               rel="noreferrer"
-              className="flex items-center gap-2 px-3.5 py-2 rounded-lg bg-[#c2e9ca] hover:bg-[#a9d0b2] text-[#2c4e37] text-xs font-bold transition-colors cursor-pointer shadow-2xs"
+              className="flex items-center gap-2 px-3.5 py-2 rounded-md bg-[#c2e9ca] hover:bg-[#a9d0b2] text-[#2c4e37] text-xs font-bold transition-colors cursor-pointer shadow-2xs"
             >
               <ChatCircleText size={18} weight="fill" />
               <span>WhatsApp</span>
@@ -206,7 +206,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
             <button
               type="button"
               onClick={() => onEdit(member)}
-              className="flex items-center gap-2 px-3.5 py-2 rounded-lg bg-white hover:bg-[#faf2ee] border border-[#e8e1dd] text-[#1e1b19] text-xs font-bold transition-colors cursor-pointer"
+              className="flex items-center gap-2 px-3.5 py-2 rounded-md bg-white hover:bg-[#faf2ee] border border-[#e8e1dd] text-[#1e1b19] text-xs font-bold transition-colors cursor-pointer"
             >
               <PencilSimple size={16} />
               <span>{t('common:edit')}</span>
@@ -218,7 +218,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
             <button
               type="button"
               onClick={() => setIsTransferModalOpen(true)}
-              className="flex items-center gap-2 px-3.5 py-2 rounded-lg bg-white hover:bg-[#faf2ee] border border-[#e8e1dd] text-[#1e1b19] text-xs font-bold transition-colors cursor-pointer"
+              className="flex items-center gap-2 px-3.5 py-2 rounded-md bg-white hover:bg-[#faf2ee] border border-[#e8e1dd] text-[#1e1b19] text-xs font-bold transition-colors cursor-pointer"
             >
               <ArrowsLeftRight
                 size={16}
@@ -234,7 +234,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
             <button
               type="button"
               onClick={() => onManageAccess(member)}
-              className="flex items-center gap-2 px-3.5 py-2 rounded-lg bg-[#fff2ee] hover:bg-[#ffdbcf] border border-[#ffb59c] text-[#b85028] text-xs font-bold transition-colors cursor-pointer shadow-2xs"
+              className="flex items-center gap-2 px-3.5 py-2 rounded-md bg-[#fff2ee] hover:bg-[#ffdbcf] border border-[#ffb59c] text-[#b85028] text-xs font-bold transition-colors cursor-pointer shadow-2xs"
             >
               <Key size={16} weight="bold" />
               <span>{t('members:table.manageAccess')}</span>
@@ -247,7 +247,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
               type="button"
               onClick={() => onDelete(member)}
               title={t('members:table.deactivateMember')}
-              className="w-9 h-9 rounded-lg hover:bg-[#ffdad6] text-[#8a726a] hover:text-[#ba1a1a] flex items-center justify-center transition-colors cursor-pointer"
+              className="w-9 h-9 rounded-md hover:bg-[#ffdad6] text-[#8a726a] hover:text-[#ba1a1a] flex items-center justify-center transition-colors cursor-pointer"
             >
               <Trash size={18} />
             </button>
@@ -256,11 +256,11 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
       </section>
 
       {/* 3. Detail Tabs Strip */}
-      <div className="flex items-center justify-center gap-1.5 p-1 rounded-xl bg-[#faf2ee] w-fit mx-auto border border-[#e8e1dd]">
+      <div className="flex items-center justify-center gap-1.5 p-1 rounded-lg bg-[#faf2ee] w-fit mx-auto border border-[#e8e1dd]">
         <button
           type="button"
           onClick={() => setActiveDetailTab('identity')}
-          className={`flex items-center justify-center min-w-[140px] gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+          className={`flex items-center justify-center min-w-[140px] gap-2 px-4 py-2 rounded-md text-xs font-bold transition-all cursor-pointer ${
             activeDetailTab === 'identity'
               ? 'bg-white text-[#b85028] shadow-xs border border-[#e8e1dd]'
               : 'text-[#8a726a] hover:text-[#57423b] hover:bg-[#f4ece9] border border-transparent'
@@ -276,7 +276,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
         <button
           type="button"
           onClick={() => setActiveDetailTab('transfers')}
-          className={`flex items-center justify-center min-w-[140px] gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+          className={`flex items-center justify-center min-w-[140px] gap-2 px-4 py-2 rounded-md text-xs font-bold transition-all cursor-pointer ${
             activeDetailTab === 'transfers'
               ? 'bg-white text-[#b85028] shadow-xs border border-[#e8e1dd]'
               : 'text-[#8a726a] hover:text-[#57423b] hover:bg-[#f4ece9] border border-transparent'
@@ -292,7 +292,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
         <button
           type="button"
           onClick={() => setActiveDetailTab('attendance')}
-          className={`flex items-center justify-center min-w-[140px] gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+          className={`flex items-center justify-center min-w-[140px] gap-2 px-4 py-2 rounded-md text-xs font-bold transition-all cursor-pointer ${
             activeDetailTab === 'attendance'
               ? 'bg-white text-[#b85028] shadow-xs border border-[#e8e1dd]'
               : 'text-[#8a726a] hover:text-[#57423b] hover:bg-[#f4ece9] border border-transparent'
@@ -315,20 +315,20 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
           <div
             className={`${hasAppAccess ? 'lg:col-span-2' : 'w-full'} flex flex-col gap-6`}
           >
-            <div className="bg-white rounded-3xl border border-[#e8e1dd] p-6 shadow-xs flex flex-col gap-5">
+            <div className="bg-white rounded-xl border border-[#e8e1dd] p-6 shadow-xs flex flex-col gap-5">
               <h3 className="text-sm font-bold text-[#1e1b19] uppercase tracking-wider text-[#8a726a]">
                 Identity & Demographic Credentials
               </h3>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                <div className="p-3.5 rounded-2xl bg-[#faf2ee] border border-[#e8e1dd] flex flex-col gap-1">
+                <div className="p-3.5 rounded-lg bg-[#faf2ee] border border-[#e8e1dd] flex flex-col gap-1">
                   <span className="text-[#8a726a] font-medium">Full Name</span>
                   <span className="font-bold text-[#1e1b19] text-sm">
                     {member.fullName}
                   </span>
                 </div>
 
-                <div className="p-3.5 rounded-2xl bg-[#faf2ee] border border-[#e8e1dd] flex flex-col gap-1">
+                <div className="p-3.5 rounded-lg bg-[#faf2ee] border border-[#e8e1dd] flex flex-col gap-1">
                   <span className="text-[#8a726a] font-medium">Gender</span>
                   <span className="font-bold text-[#1e1b19] text-sm">
                     {member.gender
@@ -338,7 +338,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
                   </span>
                 </div>
 
-                <div className="p-3.5 rounded-2xl bg-[#faf2ee] border border-[#e8e1dd] flex flex-col gap-1">
+                <div className="p-3.5 rounded-lg bg-[#faf2ee] border border-[#e8e1dd] flex flex-col gap-1">
                   <span className="text-[#8a726a] font-medium">
                     Date of Birth
                   </span>
@@ -356,7 +356,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
                   </span>
                 </div>
 
-                <div className="p-3.5 rounded-2xl bg-[#faf2ee] border border-[#e8e1dd] flex flex-col gap-1">
+                <div className="p-3.5 rounded-lg bg-[#faf2ee] border border-[#e8e1dd] flex flex-col gap-1">
                   <span className="text-[#8a726a] font-medium">
                     Integration Date
                   </span>
@@ -373,7 +373,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
                   </span>
                 </div>
 
-                <div className="p-3.5 rounded-2xl bg-[#faf2ee] border border-[#e8e1dd] flex flex-col gap-1">
+                <div className="p-3.5 rounded-lg bg-[#faf2ee] border border-[#e8e1dd] flex flex-col gap-1">
                   <span className="text-[#8a726a] font-medium">
                     Phone (WhatsApp Line)
                   </span>
@@ -382,7 +382,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
                   </span>
                 </div>
 
-                <div className="p-3.5 rounded-2xl bg-[#faf2ee] border border-[#e8e1dd] flex flex-col gap-1">
+                <div className="p-3.5 rounded-lg bg-[#faf2ee] border border-[#e8e1dd] flex flex-col gap-1">
                   <span className="text-[#8a726a] font-medium">
                     Email Address
                   </span>
@@ -409,7 +409,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
               </div>
 
               {/* Transfer & Fellowship Notes */}
-              <div className="p-4 rounded-2xl bg-[#faf2ee] border border-[#e8e1dd] flex flex-col gap-2">
+              <div className="p-4 rounded-lg bg-[#faf2ee] border border-[#e8e1dd] flex flex-col gap-2">
                 <span className="text-xs font-bold text-[#1e1b19]">
                   Official Community Standing
                 </span>
@@ -425,7 +425,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
           {/* Account Portal Credentials Side Card (Only for members with app access) */}
           {hasAppAccess && (
             <div className="flex flex-col gap-6">
-              <div className="bg-white rounded-3xl border border-[#e8e1dd] p-6 shadow-xs flex flex-col gap-4">
+              <div className="bg-white rounded-xl border border-[#e8e1dd] p-6 shadow-xs flex flex-col gap-4">
                 <div className="flex items-center gap-2">
                   <ShieldCheck size={20} className="text-[#b85028]" />
                   <h3 className="text-sm font-bold text-[#1e1b19]">
@@ -484,7 +484,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
                   <button
                     type="button"
                     onClick={() => onManageAccess(member)}
-                    className="w-full mt-2 py-2.5 px-4 rounded-lg bg-[#faf2ee] hover:bg-[#f4ece9] border border-[#e8e1dd] text-[#b85028] text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer"
+                    className="w-full mt-2 py-2.5 px-4 rounded-md bg-[#faf2ee] hover:bg-[#f4ece9] border border-[#e8e1dd] text-[#b85028] text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer"
                   >
                     <Key size={16} />
                     <span>{t('members:table.manageAccess')}</span>
@@ -500,7 +500,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
       {activeDetailTab === 'transfers' && (
         <div className="flex flex-col gap-6 animate-in fade-in duration-200">
           {/* Official Hub Registry Passport Header Card */}
-          <div className="relative bg-gradient-to-br from-white via-[#fffaf7] to-white rounded-3xl border-2 border-[#ffdbcf]/70 p-6 sm:p-8 shadow-sm overflow-hidden flex flex-col gap-6">
+          <div className="relative bg-gradient-to-br from-white via-[#fffaf7] to-white rounded-xl border-2 border-[#ffdbcf]/70 p-6 sm:p-8 shadow-sm overflow-hidden flex flex-col gap-6">
             {/* Background Subtle Watermark */}
             <div className="absolute -right-8 -bottom-8 pointer-events-none opacity-[0.04] text-[#b85028]">
               <Certificate size={220} weight="fill" />
@@ -509,7 +509,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
             {/* Passport Top Banner */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-[#f4ece9] relative z-10">
               <div className="flex items-center gap-3.5">
-                <div className="w-12 h-12 rounded-2xl bg-[#fff2ee] border border-[#ffdbcf] text-[#b85028] flex items-center justify-center shrink-0 shadow-2xs">
+                <div className="w-12 h-12 rounded-lg bg-[#fff2ee] border border-[#ffdbcf] text-[#b85028] flex items-center justify-center shrink-0 shadow-2xs">
                   <Certificate size={24} weight="duotone" />
                 </div>
                 <div className="flex flex-col">
@@ -532,7 +532,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
                 <button
                   type="button"
                   onClick={() => setIsTransferModalOpen(true)}
-                  className="px-4 py-2.5 rounded-xl bg-[#b85028] hover:bg-[#9c421f] text-white text-xs font-bold transition-all flex items-center gap-2 shadow-2xs cursor-pointer self-start sm:self-auto shrink-0"
+                  className="px-4 py-2.5 rounded-md bg-[#b85028] hover:bg-[#9c421f] text-white text-xs font-bold transition-all flex items-center gap-2 shadow-2xs cursor-pointer self-start sm:self-auto shrink-0"
                 >
                   <ArrowsLeftRight size={16} weight="bold" />
                   <span>Transfer Member Hub</span>
@@ -543,14 +543,14 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
             {/* Official Dual Pillars: Current Resident Hub <-> Origin Hub */}
             <div className="grid grid-cols-1 lg:grid-cols-7 gap-4 items-center relative z-10">
               {/* Pillar 1: Current Resident Hub (3 cols) */}
-              <div className="lg:col-span-3 p-5 rounded-2xl bg-white border border-[#c2e9ca] shadow-2xs flex flex-col justify-between gap-3 relative overflow-hidden group">
+              <div className="lg:col-span-3 p-5 rounded-lg bg-white border border-[#c2e9ca] shadow-2xs flex flex-col justify-between gap-3 relative overflow-hidden group">
                 <div className="absolute top-0 left-0 right-0 h-1 bg-[#486b52]" />
                 <div className="flex items-center justify-between gap-2">
                   <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#eef7f0] text-[#2c4e37] border border-[#c2e9ca]">
                     <span className="w-2 h-2 rounded-full bg-[#486b52] animate-pulse" />
                     Active Jurisdiction
                   </span>
-                  <span className="text-sm font-mono font-black text-[#486b52] bg-[#eef7f0] px-2.5 py-0.5 rounded-lg border border-[#c2e9ca]">
+                  <span className="text-sm font-mono font-black text-[#486b52] bg-[#eef7f0] px-2.5 py-0.5 rounded-md border border-[#c2e9ca]">
                     {member.homeTown?.code ?? activeTown?.code ?? 'HUB'}
                   </span>
                 </div>
@@ -577,7 +577,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
 
               {/* Central Journey Indicator (1 col) */}
               <div className="lg:col-span-1 flex flex-col items-center justify-center gap-1.5 py-2">
-                <div className="w-10 h-10 rounded-2xl bg-[#faf2ee] border border-[#e8e1dd] text-[#b85028] flex items-center justify-center shadow-2xs">
+                <div className="w-10 h-10 rounded-lg bg-[#faf2ee] border border-[#e8e1dd] text-[#b85028] flex items-center justify-center shadow-2xs">
                   <ArrowsLeftRight size={18} weight="bold" />
                 </div>
                 <span className="text-[10px] font-black uppercase tracking-wider text-[#8a726a] text-center">
@@ -588,7 +588,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
               </div>
 
               {/* Pillar 2: Origin Hub / Origin Hub (3 cols) */}
-              <div className="lg:col-span-3 p-5 rounded-2xl bg-white border border-[#ffdbcf] shadow-2xs flex flex-col justify-between gap-3 relative overflow-hidden group">
+              <div className="lg:col-span-3 p-5 rounded-lg bg-white border border-[#ffdbcf] shadow-2xs flex flex-col justify-between gap-3 relative overflow-hidden group">
                 <div className="absolute top-0 left-0 right-0 h-1 bg-[#b85028]" />
                 <div className="flex items-center justify-between gap-2">
                   <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#fff2ee] text-[#812901] border border-[#ffdbcf]">
@@ -599,7 +599,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
                     />
                     Origin Hub
                   </span>
-                  <span className="text-sm font-mono font-black text-[#b85028] bg-[#fff2ee] px-2.5 py-0.5 rounded-lg border border-[#ffdbcf]">
+                  <span className="text-sm font-mono font-black text-[#b85028] bg-[#fff2ee] px-2.5 py-0.5 rounded-md border border-[#ffdbcf]">
                     {member.transferHistory && member.transferHistory.length > 0
                       ? townsMap.get(member.transferHistory[0].fromTownId)
                           ?.code || 'HUB'
@@ -635,7 +635,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
           </div>
 
           {/* Chronological Relocation Ledger */}
-          <div className="bg-white rounded-3xl border border-[#e8e1dd] p-6 sm:p-8 shadow-xs flex flex-col gap-6">
+          <div className="bg-white rounded-xl border border-[#e8e1dd] p-6 sm:p-8 shadow-xs flex flex-col gap-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 border-b border-[#f4ece9]">
               <div>
                 <h3 className="text-base font-bold text-[#1e1b19]">
@@ -669,7 +669,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
                       <div className="absolute -left-6 top-1 w-5 h-5 rounded-full bg-[#b85028] text-white flex items-center justify-center ring-4 ring-white shadow-xs">
                         <ArrowsLeftRight size={11} weight="bold" />
                       </div>
-                      <div className="p-5 rounded-2xl bg-white border border-[#e8e1dd] hover:border-[#b85028]/40 shadow-2xs hover:shadow-xs transition-all flex-1 flex flex-col gap-3 group">
+                      <div className="p-5 rounded-lg bg-white border border-[#e8e1dd] hover:border-[#b85028]/40 shadow-2xs hover:shadow-xs transition-all flex-1 flex flex-col gap-3 group">
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                           <div className="flex items-center gap-2 flex-wrap">
                             <span className="px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-[#fff2ee] text-[#b85028] border border-[#ffdbcf]">
@@ -716,7 +716,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
                         </div>
 
                         {record.reason && (
-                          <div className="p-3 rounded-xl bg-[#faf2ee]/60 border border-[#f4ece9] text-xs text-[#57423b] leading-relaxed">
+                          <div className="p-3 rounded-md bg-[#faf2ee]/60 border border-[#f4ece9] text-xs text-[#57423b] leading-relaxed">
                             <span className="font-bold text-[#812901] block mb-0.5">
                               Transfer Notes:
                             </span>
@@ -733,7 +733,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
                   <div className="absolute -left-6 top-1 w-5 h-5 rounded-full bg-[#486b52] text-white flex items-center justify-center ring-4 ring-white shadow-xs">
                     <ShieldCheck size={13} weight="bold" />
                   </div>
-                  <div className="p-4 rounded-2xl bg-[#eef7f0]/60 border border-[#c2e9ca] flex-1 flex flex-col gap-1">
+                  <div className="p-4 rounded-lg bg-[#eef7f0]/60 border border-[#c2e9ca] flex-1 flex flex-col gap-1">
                     <span className="text-xs font-bold text-[#2c4e37]">
                       Unbroken Native Hub Residency
                     </span>
@@ -751,7 +751,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
                 <div className="absolute -left-6 top-1 w-5 h-5 rounded-full bg-[#486b52] text-white flex items-center justify-center ring-4 ring-white shadow-xs">
                   <CheckCircle size={14} weight="fill" />
                 </div>
-                <div className="p-5 rounded-2xl bg-[#faf2ee]/70 border border-[#e8e1dd] flex-1 flex flex-col gap-2">
+                <div className="p-5 rounded-lg bg-[#faf2ee]/70 border border-[#e8e1dd] flex-1 flex flex-col gap-2">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
                     <span className="text-xs font-bold text-[#1e1b19]">
                       Official Inception & First Enrollment at{' '}

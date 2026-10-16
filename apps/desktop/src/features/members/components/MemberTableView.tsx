@@ -60,7 +60,7 @@ export const MemberTableView: React.FC<MemberTableViewProps> = ({
 
   if (isLoading) {
     return (
-      <div className="bg-white rounded-2xl border border-[#e8e1dd] shadow-xs p-8 flex flex-col items-center justify-center min-h-[360px] animate-pulse">
+      <div className="bg-white rounded-xl border border-[#e8e1dd] shadow-xs p-8 flex flex-col items-center justify-center min-h-[360px] animate-pulse">
         <div className="w-10 h-10 rounded-full bg-[#f4ece9] mb-4" />
         <div className="h-4 w-48 bg-[#f4ece9] rounded mb-2" />
         <div className="h-3 w-32 bg-[#f4ece9] rounded" />
@@ -70,8 +70,8 @@ export const MemberTableView: React.FC<MemberTableViewProps> = ({
 
   if (members.length === 0) {
     return (
-      <div className="bg-white rounded-2xl border border-[#e8e1dd] shadow-xs p-12 flex flex-col items-center justify-center text-center min-h-[320px]">
-        <div className="w-14 h-14 rounded-2xl bg-[#faf2ee] border border-[#e8e1dd] flex items-center justify-center text-[#8a726a] mb-4">
+      <div className="bg-white rounded-xl border border-[#e8e1dd] shadow-xs p-12 flex flex-col items-center justify-center text-center min-h-[320px]">
+        <div className="w-14 h-14 rounded-xl bg-[#faf2ee] border border-[#e8e1dd] flex items-center justify-center text-[#8a726a] mb-4">
           <User size={28} weight="duotone" />
         </div>
         <h3 className="text-base font-bold text-[#1e1b19] mb-1">
@@ -85,7 +85,7 @@ export const MemberTableView: React.FC<MemberTableViewProps> = ({
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-[#e8e1dd] shadow-xs overflow-hidden flex flex-col">
+    <div className="bg-white rounded-xl border border-[#e8e1dd] shadow-xs overflow-hidden flex flex-col">
       <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse">
           <thead>
@@ -219,7 +219,7 @@ export const MemberTableView: React.FC<MemberTableViewProps> = ({
                         type="button"
                         onClick={() => onViewMember(m.id)}
                         title={t('members:table.viewProfile')}
-                        className="w-7 h-7 rounded-lg hover:bg-[#faf2ee] flex items-center justify-center text-[#8a726a] hover:text-[#b85028] transition-colors cursor-pointer"
+                        className="w-7 h-7 rounded-md hover:bg-[#faf2ee] flex items-center justify-center text-[#8a726a] hover:text-[#b85028] transition-colors cursor-pointer"
                       >
                         <Eye size={16} />
                       </button>
@@ -229,7 +229,7 @@ export const MemberTableView: React.FC<MemberTableViewProps> = ({
                             type="button"
                             onClick={() => onEditMember(m)}
                             title={t('members:table.editRecord')}
-                            className="w-7 h-7 rounded-lg hover:bg-[#faf2ee] flex items-center justify-center text-[#8a726a] hover:text-[#b85028] transition-colors cursor-pointer"
+                            className="w-7 h-7 rounded-md hover:bg-[#faf2ee] flex items-center justify-center text-[#8a726a] hover:text-[#b85028] transition-colors cursor-pointer"
                           >
                             <PencilSimple size={16} />
                           </button>
@@ -237,7 +237,7 @@ export const MemberTableView: React.FC<MemberTableViewProps> = ({
                             type="button"
                             onClick={() => onManageAccess(m)}
                             title={t('members:table.manageAccess')}
-                            className="w-7 h-7 rounded-lg hover:bg-[#faf2ee] flex items-center justify-center text-[#8a726a] hover:text-[#b85028] transition-colors cursor-pointer"
+                            className="w-7 h-7 rounded-md hover:bg-[#faf2ee] flex items-center justify-center text-[#8a726a] hover:text-[#b85028] transition-colors cursor-pointer"
                           >
                             <Key size={16} />
                           </button>
@@ -246,7 +246,7 @@ export const MemberTableView: React.FC<MemberTableViewProps> = ({
                               type="button"
                               onClick={() => onDeleteMember(m)}
                               title={t('members:table.deactivateMember')}
-                              className="w-7 h-7 rounded-lg hover:bg-[#ffdad6] flex items-center justify-center text-[#8a726a] hover:text-[#ba1a1a] transition-colors cursor-pointer"
+                              className="w-7 h-7 rounded-md hover:bg-[#ffdad6] flex items-center justify-center text-[#8a726a] hover:text-[#ba1a1a] transition-colors cursor-pointer"
                             >
                               <Trash size={16} />
                             </button>

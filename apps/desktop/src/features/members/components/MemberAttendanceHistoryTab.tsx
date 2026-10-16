@@ -10,6 +10,7 @@ import {
   type MemberEngagementLevel,
 } from '@jrs/shared';
 import {
+  ArrowCounterClockwise,
   CalendarBlank,
   CalendarCheck,
   ChatCircleText,
@@ -21,11 +22,16 @@ import {
   MapPin,
   Warning,
   WarningCircle,
+  X,
   XCircle,
 } from '@phosphor-icons/react';
 import type React from 'react';
 import { useMemo, useState } from 'react';
-import { CustomSelect, type SelectOption } from '../../../components';
+import {
+  CustomSelect,
+  DatePeriodFilter,
+  type SelectOption,
+} from '../../../components';
 import { getActivityTypeConfig } from '../../activities/utils/activity-ui.utils';
 import { getCleanDigitsForWhatsApp } from '../utils/member-ui.utils';
 
@@ -141,7 +147,7 @@ export const MemberAttendanceHistoryTab: React.FC<
     refetch,
   } = useMemberAttendanceHistoryQuery(member.id);
 
-  const { t, i18n } = useTranslation([
+  const { t } = useTranslation([
     'members',
     'activities',
     'attendance',
@@ -159,11 +165,11 @@ export const MemberAttendanceHistoryTab: React.FC<
   const [selectedHubFilter, setSelectedHubFilter] = useState<string | null>(
     null,
   );
-  const [selectedYear, setSelectedYear] = useState<string>('ALL');
-  const [selectedMonth, setSelectedMonth] = useState<string>('ALL');
+  const [filterYear, setFilterYear] = useState<number | undefined>(undefined);
+  const [filterMonth, setFilterMonth] = useState<number | undefined>(undefined);
 
-  // Year options dynamically derived from history items
-  const yearOptions: SelectOption<string>[] = useMemo(() => {
+  // Available years dynamically derived from history items
+  const availableYears = useMemo(() => {
     const yearsSet = new Set<number>([2026, 2025, 2024]);
     if (history?.items) {
       for (const item of history.items) {
@@ -173,43 +179,8 @@ export const MemberAttendanceHistoryTab: React.FC<
         }
       }
     }
-    const sortedYears = Array.from(yearsSet).sort((a, b) => b - a);
-    return [
-      {
-        value: 'ALL',
-        label: getFilterLabel(t, 'members:filters.allYears', 'All Years'),
-      },
-      ...sortedYears.map((yr) => ({
-        value: String(yr),
-        label: `${yr}`,
-      })),
-    ];
-  }, [history?.items, t]);
-
-  // Month options localized with full month names
-  const monthOptions: SelectOption<string>[] = useMemo(() => {
-    const lang = i18n.language || 'en';
-    const months = Array.from({ length: 12 }, (_, i) => {
-      const monthNum = i + 1;
-      const monthName = new Date(2026, i, 1).toLocaleString(lang, {
-        month: 'long',
-      });
-      const capitalized =
-        monthName.charAt(0).toUpperCase() + monthName.slice(1);
-      return {
-        value: String(monthNum),
-        label: capitalized,
-      };
-    });
-
-    return [
-      {
-        value: 'ALL',
-        label: getFilterLabel(t, 'members:filters.allMonths', 'All Months'),
-      },
-      ...months,
-    ];
-  }, [t, i18n.language]);
+    return Array.from(yearsSet).sort((a, b) => b - a);
+  }, [history?.items]);
 
   // Status options localized
   const statusOptions: SelectOption<string>[] = useMemo(
@@ -290,17 +261,17 @@ export const MemberAttendanceHistoryTab: React.FC<
       }
 
       // 5. Year filter
-      if (selectedYear !== 'ALL' && item.startDate) {
-        const itemYear = new Date(item.startDate).getFullYear().toString();
-        if (itemYear !== selectedYear) {
+      if (filterYear !== undefined && item.startDate) {
+        const itemYear = new Date(item.startDate).getFullYear();
+        if (itemYear !== filterYear) {
           return false;
         }
       }
 
       // 6. Month filter
-      if (selectedMonth !== 'ALL' && item.startDate) {
-        const itemMonth = (new Date(item.startDate).getMonth() + 1).toString();
-        if (itemMonth !== selectedMonth) {
+      if (filterMonth !== undefined && item.startDate) {
+        const itemMonth = new Date(item.startDate).getMonth() + 1;
+        if (itemMonth !== filterMonth) {
           return false;
         }
       }
@@ -313,8 +284,8 @@ export const MemberAttendanceHistoryTab: React.FC<
     statusFilter,
     scopeFilter,
     selectedHubFilter,
-    selectedYear,
-    selectedMonth,
+    filterYear,
+    filterMonth,
   ]);
 
   const hasActiveFilters =
@@ -322,16 +293,16 @@ export const MemberAttendanceHistoryTab: React.FC<
     statusFilter !== 'ALL' ||
     scopeFilter !== 'ALL' ||
     Boolean(selectedHubFilter) ||
-    selectedYear !== 'ALL' ||
-    selectedMonth !== 'ALL';
+    filterYear !== undefined ||
+    filterMonth !== undefined;
 
   const handleClearFilters = () => {
     setSearchQuery('');
     setStatusFilter('ALL');
     setScopeFilter('ALL');
     setSelectedHubFilter(null);
-    setSelectedYear('ALL');
-    setSelectedMonth('ALL');
+    setFilterYear(undefined);
+    setFilterMonth(undefined);
   };
 
   const cleanDigits = getCleanDigitsForWhatsApp(member.phoneNumber);
@@ -352,7 +323,7 @@ export const MemberAttendanceHistoryTab: React.FC<
           {[1, 2, 3, 4].map((i) => (
             <div
               key={i}
-              className="h-28 rounded-3xl bg-white border border-[#e8e1dd] p-5 flex flex-col justify-between"
+              className="h-28 rounded-xl bg-white border border-[#e8e1dd] p-5 flex flex-col justify-between"
             >
               <div className="h-4 w-24 bg-[#f4ece9] rounded" />
               <div className="h-8 w-16 bg-[#f4ece9] rounded" />
@@ -360,15 +331,15 @@ export const MemberAttendanceHistoryTab: React.FC<
           ))}
         </div>
         {/* Table Skeleton */}
-        <div className="h-72 rounded-3xl bg-white border border-[#e8e1dd]" />
+        <div className="h-72 rounded-xl bg-white border border-[#e8e1dd]" />
       </div>
     );
   }
 
   if (error || !history) {
     return (
-      <div className="bg-white rounded-3xl border border-[#e8e1dd] p-10 text-center flex flex-col items-center">
-        <div className="w-12 h-12 rounded-2xl bg-[#ffdad6] text-[#ba1a1a] flex items-center justify-center mb-3">
+      <div className="bg-white rounded-xl border border-[#e8e1dd] p-10 text-center flex flex-col items-center">
+        <div className="w-12 h-12 rounded-xl bg-[#ffdad6] text-[#ba1a1a] flex items-center justify-center mb-3">
           <WarningCircle size={24} weight="bold" />
         </div>
         <h4 className="text-sm font-bold text-[#1e1b19] mb-1">
@@ -381,7 +352,7 @@ export const MemberAttendanceHistoryTab: React.FC<
         <button
           type="button"
           onClick={() => refetch()}
-          className="px-4 py-2 rounded-lg bg-[#faf2ee] hover:bg-[#f4ece9] text-xs font-bold text-[#1e1b19] border border-[#e8e1dd] transition-colors cursor-pointer"
+          className="px-4 py-2 rounded-md bg-[#faf2ee] hover:bg-[#f4ece9] text-xs font-bold text-[#1e1b19] border border-[#e8e1dd] transition-colors cursor-pointer"
         >
           Try Again
         </button>
@@ -398,12 +369,12 @@ export const MemberAttendanceHistoryTab: React.FC<
       {/* 1. Top KPI Summary Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Card 1: Hub Attendance Rate & Engagement */}
-        <div className="bg-white rounded-3xl border border-[#e8e1dd] p-5 shadow-xs flex flex-col justify-between gap-3 relative overflow-hidden">
+        <div className="bg-white rounded-xl border border-[#e8e1dd] p-5 shadow-xs flex flex-col justify-between gap-3 relative overflow-hidden">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold text-[#8a726a] uppercase tracking-wider">
               Hub Attendance Rate
             </span>
-            <span className="p-1.5 rounded-lg bg-[#faf2ee] text-[#b85028]">
+            <span className="p-1.5 rounded-md bg-[#faf2ee] text-[#b85028]">
               <CalendarCheck size={16} weight="bold" />
             </span>
           </div>
@@ -421,7 +392,7 @@ export const MemberAttendanceHistoryTab: React.FC<
           {engagement && (
             <div className="flex items-center gap-1.5">
               <span
-                className={`inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-bold border ${engagement.badgeBg} ${engagement.badgeText} ${engagement.borderColor}`}
+                className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold border ${engagement.badgeBg} ${engagement.badgeText} ${engagement.borderColor}`}
               >
                 {engagement.label}
               </span>
@@ -430,12 +401,12 @@ export const MemberAttendanceHistoryTab: React.FC<
         </div>
 
         {/* Card 2: Attendance Breakdown */}
-        <div className="bg-white rounded-3xl border border-[#e8e1dd] p-5 shadow-xs flex flex-col justify-between gap-3">
+        <div className="bg-white rounded-xl border border-[#e8e1dd] p-5 shadow-xs flex flex-col justify-between gap-3">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold text-[#8a726a] uppercase tracking-wider">
               Gatherings Turnout
             </span>
-            <span className="p-1.5 rounded-lg bg-[#faf2ee] text-[#486b52]">
+            <span className="p-1.5 rounded-md bg-[#faf2ee] text-[#486b52]">
               <CheckCircle size={16} weight="bold" />
             </span>
           </div>
@@ -448,7 +419,7 @@ export const MemberAttendanceHistoryTab: React.FC<
           </div>
 
           <div className="flex items-center gap-2 text-[11px] font-medium">
-            <span className="inline-flex items-center gap-1 text-[#ba1a1a] bg-[#ffdad6]/60 px-1.5 py-0.5 rounded">
+            <span className="inline-flex items-center gap-1 text-[#ba1a1a] bg-[#ffdad6]/60 px-1.5 py-0.5 rounded-full">
               <XCircle size={12} weight="bold" />
               <span>{history.totalAbsent} Absent</span>
             </span>
@@ -456,12 +427,12 @@ export const MemberAttendanceHistoryTab: React.FC<
         </div>
 
         {/* Card 3: Momentum & Consecutive Streak */}
-        <div className="bg-white rounded-3xl border border-[#e8e1dd] p-5 shadow-xs flex flex-col justify-between gap-3">
+        <div className="bg-white rounded-xl border border-[#e8e1dd] p-5 shadow-xs flex flex-col justify-between gap-3">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold text-[#8a726a] uppercase tracking-wider">
               Current Streak
             </span>
-            <span className="p-1.5 rounded-lg bg-[#faf2ee] text-[#b85028]">
+            <span className="p-1.5 rounded-md bg-[#faf2ee] text-[#b85028]">
               <Fire size={16} weight="fill" />
             </span>
           </div>
@@ -501,12 +472,12 @@ export const MemberAttendanceHistoryTab: React.FC<
         </div>
 
         {/* Card 4: Cross-Hub Mobility */}
-        <div className="bg-white rounded-3xl border border-[#e8e1dd] p-5 shadow-xs flex flex-col justify-between gap-3">
+        <div className="bg-white rounded-xl border border-[#e8e1dd] p-5 shadow-xs flex flex-col justify-between gap-3">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold text-[#8a726a] uppercase tracking-wider">
               Cross-Hub Mobility
             </span>
-            <span className="p-1.5 rounded-lg bg-[#faf2ee] text-[#b85028]">
+            <span className="p-1.5 rounded-md bg-[#faf2ee] text-[#b85028]">
               <GlobeHemisphereWest size={16} weight="bold" />
             </span>
           </div>
@@ -552,9 +523,9 @@ export const MemberAttendanceHistoryTab: React.FC<
 
       {/* 2. Follow-Up Alert Banner (When member needs follow-up) */}
       {isNeedsFollowUp && (
-        <div className="bg-[#fff2ee] border border-[#ffb59c] rounded-3xl p-5 shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="bg-[#fff2ee] border border-[#ffb59c] rounded-xl p-5 shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex items-start gap-3.5">
-            <div className="w-10 h-10 rounded-2xl bg-[#ffdad6] text-[#ba1a1a] flex items-center justify-center shrink-0 mt-0.5">
+            <div className="w-10 h-10 rounded-lg bg-[#ffdad6] text-[#ba1a1a] flex items-center justify-center shrink-0 mt-0.5">
               <Warning size={22} weight="bold" />
             </div>
             <div className="flex flex-col gap-1">
@@ -578,7 +549,7 @@ export const MemberAttendanceHistoryTab: React.FC<
               href={`https://wa.me/${cleanDigits}?text=${pastoralMessage}`}
               target="_blank"
               rel="noreferrer"
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#c2e9ca] hover:bg-[#a9d0b2] text-[#2c4e37] text-xs font-bold transition-all shadow-2xs shrink-0 cursor-pointer"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-md bg-[#c2e9ca] hover:bg-[#a9d0b2] text-[#2c4e37] text-xs font-bold transition-all shadow-2xs shrink-0 cursor-pointer"
             >
               <ChatCircleText size={18} weight="fill" />
               <span>Send Follow-Up Check-in</span>
@@ -588,30 +559,41 @@ export const MemberAttendanceHistoryTab: React.FC<
       )}
 
       {/* 3. Search and Filters Toolbar */}
-      <div className="bg-white rounded-3xl border border-[#e8e1dd] p-4 shadow-xs flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+      <div className="bg-white rounded-xl border border-[#e8e1dd] p-4 shadow-xs flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
         {/* Search input */}
-        <div className="relative flex-1">
+        <div className="relative flex items-center gap-2.5 px-3.5 h-10 rounded-md bg-[#faf2ee] border border-[#e8e1dd] focus-within:ring-2 focus-within:ring-[#b85028]/20 focus-within:border-[#b85028] focus-within:bg-white transition-all w-full sm:w-80 md:w-96 flex-initial">
           <MagnifyingGlass
             size={16}
-            className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8a726a]"
+            weight="bold"
+            className="text-[#8a726a] shrink-0"
           />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search gathering by title, venue, or parish..."
-            className="w-full pl-9 pr-4 py-2 rounded-xl bg-[#faf2ee] border border-transparent focus:border-[#b85028] focus:bg-white text-xs text-[#1e1b19] placeholder-[#8a726a] outline-none transition-all"
+            placeholder="Search gathering by title, venue..."
+            className="bg-transparent text-xs text-[#1e1b19] placeholder:text-[#8a726a] outline-none w-full pr-6"
           />
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={() => setSearchQuery('')}
+              className="absolute right-2.5 text-[#8a726a] hover:text-[#1e1b19] p-0.5 cursor-pointer"
+              title="Clear search"
+            >
+              <X size={14} weight="bold" />
+            </button>
+          )}
         </div>
 
         {/* Filter controls */}
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2.5 justify-start lg:justify-end">
           {/* Status CustomSelect Filter */}
           <CustomSelect<string>
             value={statusFilter}
             onChange={(val) => setStatusFilter(val as 'ALL' | AttendanceStatus)}
             options={statusOptions}
-            size="sm"
+            size="md"
             className="w-36"
           />
 
@@ -622,25 +604,21 @@ export const MemberAttendanceHistoryTab: React.FC<
               setScopeFilter(val as 'ALL' | 'HOME' | 'EXTERNAL')
             }
             options={scopeOptions}
-            size="sm"
+            size="md"
             className="w-36"
           />
 
-          {/* Year and Month CustomSelect Filters */}
-          <CustomSelect<string>
-            value={selectedYear}
-            onChange={setSelectedYear}
-            options={yearOptions}
-            size="sm"
-            className="w-32"
-          />
-
-          <CustomSelect<string>
-            value={selectedMonth}
-            onChange={setSelectedMonth}
-            options={monthOptions}
-            size="sm"
-            className="w-40"
+          {/* Unified DatePeriodFilter */}
+          <DatePeriodFilter
+            year={filterYear}
+            month={filterMonth}
+            onPeriodChange={(y, m) => {
+              setFilterYear(y);
+              setFilterMonth(m);
+            }}
+            availableYears={availableYears}
+            size="md"
+            align="right"
           />
 
           {/* Reset button if active */}
@@ -648,16 +626,17 @@ export const MemberAttendanceHistoryTab: React.FC<
             <button
               type="button"
               onClick={handleClearFilters}
-              className="px-3 py-1.5 rounded-lg text-xs font-bold text-[#ba1a1a] hover:bg-[#ffdad6]/50 transition-colors cursor-pointer"
+              className="h-10 px-3.5 bg-[#faf2ee] hover:bg-[#f4ece9] rounded-md border border-[#e8e1dd] text-[#8a726a] hover:text-[#ba1a1a] text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
             >
-              Clear Filters
+              <ArrowCounterClockwise size={14} weight="bold" />
+              <span>Clear Filters</span>
             </button>
           )}
         </div>
       </div>
 
       {/* 4. Gatherings Chronological History Table */}
-      <div className="bg-white rounded-3xl border border-[#e8e1dd] shadow-xs overflow-hidden flex flex-col">
+      <div className="bg-white rounded-xl border border-[#e8e1dd] shadow-xs overflow-hidden flex flex-col">
         <div className="px-6 py-4 border-b border-[#e8e1dd] flex items-center justify-between">
           <div className="flex items-center gap-2">
             <h3 className="text-sm font-bold text-[#1e1b19]">
@@ -687,7 +666,7 @@ export const MemberAttendanceHistoryTab: React.FC<
 
         {filteredItems.length === 0 ? (
           <div className="p-12 text-center flex flex-col items-center">
-            <div className="w-12 h-12 rounded-2xl bg-[#faf2ee] text-[#8a726a] flex items-center justify-center mb-3">
+            <div className="w-12 h-12 rounded-xl bg-[#faf2ee] text-[#8a726a] flex items-center justify-center mb-3">
               <CalendarBlank size={24} />
             </div>
             <h4 className="text-sm font-bold text-[#1e1b19] mb-1">
@@ -723,7 +702,7 @@ export const MemberAttendanceHistoryTab: React.FC<
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#f4ece9]">
-                {filteredItems.map((item) => {
+                {filteredItems.map((item: IMemberAttendanceHistoryItem) => {
                   const typeConfig = getActivityTypeConfig(
                     item.activityType as ActivityType,
                   );

@@ -7,10 +7,15 @@ import {
   GridFour,
   MagnifyingGlass,
   Table,
+  X,
 } from '@phosphor-icons/react';
 import type React from 'react';
 import { useMemo } from 'react';
-import { CustomSelect, type SelectOption } from '../../../components';
+import {
+  CustomSelect,
+  DatePeriodFilter,
+  type SelectOption,
+} from '../../../components';
 
 export type ActivityViewMode = 'table' | 'grid' | 'calendar';
 
@@ -47,41 +52,8 @@ export const ActivityFilterToolbar: React.FC<ActivityFilterToolbarProps> = ({
   onOpenCreateModal,
   onClearFilters,
 }) => {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const { canWrite } = useTownContext();
-
-  const periodOptions: SelectOption[] = useMemo(() => {
-    const lang = i18n.language || 'en';
-    const months = Array.from({ length: 12 }, (_, i) => {
-      const monthNum = i + 1;
-      const monthName = new Date(2026, i, 1).toLocaleString(lang, {
-        month: 'long',
-      });
-      const capitalized =
-        monthName.charAt(0).toUpperCase() + monthName.slice(1);
-      return {
-        value: `2026-${monthNum}`,
-        label: `${capitalized} 2026`,
-      };
-    });
-
-    return [
-      { value: 'all', label: t('activities:filters.allDates') },
-      {
-        value: '2026-all',
-        label: t('activities:filters.fullYear', { year: 2026 }),
-      },
-      ...months,
-      {
-        value: '2025-all',
-        label: t('activities:filters.archiveYear', { year: 2025 }),
-      },
-      {
-        value: '2024-all',
-        label: t('activities:filters.archiveYear', { year: 2024 }),
-      },
-    ];
-  }, [t, i18n.language]);
 
   const typeOptions: SelectOption[] = useMemo(
     () => [
@@ -128,62 +100,52 @@ export const ActivityFilterToolbar: React.FC<ActivityFilterToolbarProps> = ({
     [t],
   );
 
-  // Combined period value
-  const currentPeriodValue =
-    year === undefined && month === undefined
-      ? 'all'
-      : month !== undefined && year !== undefined
-        ? `${year}-${month}`
-        : year !== undefined
-          ? `${year}-all`
-          : 'all';
-
-  const handlePeriodChange = (val: string) => {
-    if (val === 'all') {
-      onYearChange(undefined);
-      onMonthChange(undefined);
-    } else if (val.endsWith('-all')) {
-      const y = Number(val.split('-')[0]);
-      onYearChange(y);
-      onMonthChange(undefined);
-    } else {
-      const parts = val.split('-');
-      onYearChange(Number(parts[0]));
-      onMonthChange(Number(parts[1]));
-    }
-  };
-
   const hasActiveFilters =
     Boolean(search) ||
-    currentPeriodValue !== 'all' ||
+    year !== undefined ||
+    month !== undefined ||
     activityType !== 'all' ||
     status !== 'all';
 
   return (
-    <div className="bg-white rounded-2xl border border-[#e8e1dd] shadow-xs p-4 flex flex-col xl:flex-row items-stretch xl:items-center justify-between gap-3">
+    <div className="bg-white rounded-xl border border-[#e8e1dd] shadow-xs p-4 flex flex-col xl:flex-row items-stretch xl:items-center justify-between gap-3">
       {/* Left Filter Controls */}
       <div className="flex flex-wrap items-center gap-2.5 flex-1">
         {/* Search Input */}
-        <div className="relative w-full sm:w-96 md:w-[420px] lg:w-[460px] flex-initial">
+        <div className="relative flex items-center gap-2.5 px-3.5 h-10 rounded-md bg-[#faf2ee] border border-[#e8e1dd] focus-within:ring-2 focus-within:ring-[#b85028]/20 focus-within:border-[#b85028] focus-within:bg-white transition-all w-full sm:w-80 md:w-96 flex-initial">
           <MagnifyingGlass
             size={16}
             weight="bold"
-            className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8a726a]"
+            className="text-[#8a726a] shrink-0"
           />
           <input
             type="text"
             value={search}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder={t('activities:filters.searchPlaceholder')}
-            className="h-10 w-full pl-9 pr-3.5 bg-[#faf2ee] rounded-lg text-xs text-[#1e1b19] placeholder:text-[#8a726a] outline-none focus:bg-white focus:ring-2 focus:ring-[#b85028]/20 border border-[#e8e1dd] focus:border-[#b85028] transition-all"
+            className="bg-transparent text-xs text-[#1e1b19] placeholder:text-[#8a726a] outline-none w-full pr-6"
           />
+          {search && (
+            <button
+              type="button"
+              onClick={() => onSearchChange('')}
+              className="absolute right-2.5 text-[#8a726a] hover:text-[#1e1b19] p-0.5 cursor-pointer"
+              title="Clear search"
+            >
+              <X size={14} weight="bold" />
+            </button>
+          )}
         </div>
 
-        {/* Combined Period Custom Select */}
-        <CustomSelect
-          value={currentPeriodValue}
-          onChange={handlePeriodChange}
-          options={periodOptions}
+        {/* Unified DatePeriodFilter */}
+        <DatePeriodFilter
+          year={year}
+          month={month}
+          onPeriodChange={(y, m) => {
+            onYearChange(y);
+            onMonthChange(m);
+          }}
+          availableYears={[2026, 2025, 2024]}
           size="md"
         />
 
@@ -208,7 +170,7 @@ export const ActivityFilterToolbar: React.FC<ActivityFilterToolbarProps> = ({
           <button
             type="button"
             onClick={onClearFilters}
-            className="h-10 px-3.5 bg-[#faf2ee] hover:bg-[#f4ece9] rounded-lg border border-[#e8e1dd] text-[#8a726a] hover:text-[#b85028] text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
+            className="h-10 px-3.5 bg-[#faf2ee] hover:bg-[#f4ece9] rounded-md border border-[#e8e1dd] text-[#8a726a] hover:text-[#b85028] text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
           >
             <ArrowCounterClockwise size={14} weight="bold" />
             <span>{t('activities:filters.clear')}</span>
@@ -217,9 +179,9 @@ export const ActivityFilterToolbar: React.FC<ActivityFilterToolbarProps> = ({
       </div>
 
       {/* Right Controls: View Switcher (Icon Only) & Primary Action Button */}
-      <div className="flex items-center gap-3 self-end xl:self-auto shrink-0">
+      <div className="flex items-center gap-2.5 self-end xl:self-auto shrink-0">
         {/* View Mode Segmented Controls - Icon Only */}
-        <div className="h-10 flex items-center gap-1 p-1 bg-[#faf2ee] rounded-lg border border-[#e8e1dd]">
+        <div className="h-10 flex items-center gap-1 p-1 bg-[#faf2ee] rounded-md border border-[#e8e1dd]">
           <button
             type="button"
             onClick={() => onViewModeChange('table')}
@@ -271,7 +233,7 @@ export const ActivityFilterToolbar: React.FC<ActivityFilterToolbarProps> = ({
           <button
             type="button"
             onClick={onOpenCreateModal}
-            className="h-10 flex items-center gap-2 px-4 bg-[#b85028] hover:bg-[#a44520] text-white rounded-lg text-xs font-bold shadow-xs active:scale-[0.98] transition-all cursor-pointer"
+            className="h-10 flex items-center gap-2 px-4 bg-[#b85028] hover:bg-[#a44520] text-white rounded-md text-xs font-bold shadow-xs active:scale-[0.98] transition-all cursor-pointer"
           >
             <CalendarPlus size={18} weight="bold" />
             <span>+ {t('activities:createActivity')}</span>

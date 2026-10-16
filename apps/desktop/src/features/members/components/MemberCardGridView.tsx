@@ -85,7 +85,7 @@ export const MemberCardGridView: React.FC<MemberCardGridViewProps> = ({
         {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
           <div
             key={i}
-            className="h-56 rounded-2xl bg-white border border-[#e8e1dd] p-5 flex flex-col justify-between"
+            className="h-56 rounded-xl bg-white border border-[#e8e1dd] p-5 flex flex-col justify-between"
           >
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-full bg-[#f4ece9]" />
@@ -95,7 +95,7 @@ export const MemberCardGridView: React.FC<MemberCardGridViewProps> = ({
               </div>
             </div>
             <div className="h-4 w-36 bg-[#f4ece9] rounded" />
-            <div className="h-8 w-full bg-[#f4ece9] rounded" />
+            <div className="h-8 w-full bg-[#f4ece9] rounded-md" />
           </div>
         ))}
       </div>
@@ -104,8 +104,8 @@ export const MemberCardGridView: React.FC<MemberCardGridViewProps> = ({
 
   if (members.length === 0) {
     return (
-      <div className="bg-white rounded-2xl border border-[#e8e1dd] shadow-xs p-12 flex flex-col items-center justify-center text-center min-h-[320px]">
-        <div className="w-14 h-14 rounded-2xl bg-[#faf2ee] border border-[#e8e1dd] flex items-center justify-center text-[#8a726a] mb-4">
+      <div className="bg-white rounded-xl border border-[#e8e1dd] shadow-xs p-12 flex flex-col items-center justify-center text-center min-h-[320px]">
+        <div className="w-14 h-14 rounded-xl bg-[#faf2ee] border border-[#e8e1dd] flex items-center justify-center text-[#8a726a] mb-4">
           <User size={28} weight="duotone" />
         </div>
         <h3 className="text-base font-bold text-[#1e1b19] mb-1">
@@ -132,7 +132,7 @@ export const MemberCardGridView: React.FC<MemberCardGridViewProps> = ({
             <article
               key={m.id}
               onClick={() => onViewMember(m.id)}
-              className="bg-white rounded-2xl border border-[#e8e1dd] p-5 shadow-xs hover:shadow-md transition-all flex flex-col justify-between group cursor-pointer"
+              className="bg-white rounded-xl border border-[#e8e1dd] p-5 shadow-xs hover:shadow-md transition-all flex flex-col justify-between group cursor-pointer"
             >
               <div>
                 {/* Header Row */}
@@ -303,7 +303,7 @@ export const MemberCardGridView: React.FC<MemberCardGridViewProps> = ({
 
       {/* Pagination Footer */}
       {totalPages > 1 && (
-        <div className="p-4 bg-white rounded-2xl border border-[#e8e1dd] shadow-xs flex items-center justify-between text-xs text-[#8a726a]">
+        <div className="p-4 bg-white rounded-xl border border-[#e8e1dd] shadow-xs flex items-center justify-between text-xs text-[#8a726a]">
           <div>
             {t('common:showingMembers', { count: members.length, total }) ||
               `Showing ${members.length} of ${total} registered members`}

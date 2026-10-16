@@ -79,9 +79,9 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         <div className="p-6 sm:p-8 max-w-[1536px] mx-auto w-full">
           {/* External Town Ambient Notification */}
           {!isViewingHomeTown && activeTown && (
-            <div className="mb-6 px-5 py-4 rounded-2xl bg-[#fff8e1] border-2 border-[#ffe082] shadow-xs flex flex-wrap items-center justify-between gap-4 animate-in fade-in slide-in-from-top-2 duration-200">
+            <div className="mb-6 px-5 py-4 rounded-xl bg-[#fff8e1] border-2 border-[#ffe082] shadow-xs flex flex-wrap items-center justify-between gap-4 animate-in fade-in slide-in-from-top-2 duration-200">
               <div className="flex items-center gap-3.5">
-                <div className="w-11 h-11 rounded-xl bg-[#ffecb3] border border-[#ffd54f] flex items-center justify-center text-[#b78103] shrink-0">
+                <div className="w-11 h-11 rounded-lg bg-[#ffecb3] border border-[#ffd54f] flex items-center justify-center text-[#b78103] shrink-0">
                   <Buildings size={24} weight="duotone" />
                 </div>
                 <div className="flex flex-col">
@@ -111,7 +111,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                 <button
                   type="button"
                   onClick={() => setActiveTownId(user.homeTownId)}
-                  className="px-4 py-2 rounded-xl bg-white hover:bg-[#fff9c4] text-[#7a5500] border border-[#ffd54f] text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
+                  className="px-4 py-2 rounded-md bg-white hover:bg-[#fff9c4] text-[#7a5500] border border-[#ffd54f] text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
                 >
                   <ArrowUUpLeft size={16} weight="bold" />
                   <span>Return to My Hub</span>
@@ -132,7 +132,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             <TransfersFeature />
           ) : (
             /* Pristine Minimalist Workspace Card */
-            <div className="relative w-full min-h-[560px] rounded-3xl bg-white border border-[#e8e1dd] shadow-xs flex flex-col justify-between p-8 sm:p-12 overflow-hidden">
+            <div className="relative w-full min-h-[560px] rounded-xl bg-white border border-[#e8e1dd] shadow-xs flex flex-col justify-between p-8 sm:p-12 overflow-hidden">
               {/* Background Subtle Hub Grid Pattern */}
               <div className="absolute inset-0 pointer-events-none opacity-40">
                 <svg
@@ -182,7 +182,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 
               {/* Central Pristine Workspace Focus */}
               <div className="relative z-10 my-auto py-12 flex flex-col items-center text-center max-w-md mx-auto">
-                <div className="w-16 h-16 rounded-2xl bg-[#faf2ee] border border-[#e8e1dd] flex items-center justify-center text-[#b85028] mb-5 shadow-xs">
+                <div className="w-16 h-16 rounded-xl bg-[#faf2ee] border border-[#e8e1dd] flex items-center justify-center text-[#b85028] mb-5 shadow-xs">
                   <SquaresFour size={32} weight="fill" />
                 </div>
 

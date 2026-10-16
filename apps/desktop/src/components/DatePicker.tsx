@@ -151,7 +151,7 @@ const PickerTrigger: React.FC<PickerTriggerProps> = ({
         onToggle();
       }
     }}
-    className={`w-full flex items-center justify-between h-10 px-3.5 rounded-lg border text-xs transition-all cursor-pointer select-none ${
+    className={`w-full flex items-center justify-between h-10 px-3.5 rounded-md border text-xs transition-all cursor-pointer select-none ${
       disabled
         ? 'opacity-60 bg-[#f4ece9] border-[#e8e1dd] cursor-not-allowed'
         : isOpen
@@ -379,7 +379,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
                       setViewMonth(idx);
                       setViewMode('days');
                     }}
-                    className={`h-9 rounded-lg text-xs font-bold transition-all ${
+                    className={`h-9 rounded-md text-xs font-bold transition-all ${
                       isSelected
                         ? 'bg-[#b85028] text-white shadow-xs'
                         : 'text-[#57423b] hover:bg-[#faf2ee] hover:text-[#1e1b19]'
@@ -405,7 +405,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
                       setViewYear(y);
                       setViewMode('days');
                     }}
-                    className={`h-8 rounded-lg text-xs font-semibold transition-all ${
+                    className={`h-8 rounded-md text-xs font-semibold transition-all ${
                       isSelected
                         ? 'bg-[#b85028] text-white font-bold shadow-xs'
                         : 'text-[#57423b] hover:bg-[#faf2ee] hover:text-[#1e1b19]'
@@ -465,7 +465,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
                       type="button"
                       disabled={isDisabled}
                       onClick={() => handleSelectDay(day)}
-                      className={`h-8 rounded-lg text-xs font-medium transition-all flex items-center justify-center relative ${
+                      className={`h-8 rounded-md text-xs font-medium transition-all flex items-center justify-center relative ${
                         isSelected
                           ? 'bg-[#b85028] text-white font-bold shadow-xs'
                           : isToday
@@ -631,7 +631,7 @@ export const MonthYearPicker: React.FC<MonthYearPickerProps> = ({
                   key={mShort}
                   type="button"
                   onClick={() => handleSelectMonth(idx)}
-                  className={`h-9 rounded-lg text-xs font-bold transition-all relative ${
+                  className={`h-9 rounded-md text-xs font-bold transition-all relative ${
                     isSelected
                       ? 'bg-[#b85028] text-white shadow-xs'
                       : isCurrent
@@ -779,7 +779,7 @@ export const DateTimePicker: React.FC<DateTimePickerProps> = ({
           />
 
           {/* Time Picker Bar */}
-          <div className="p-3 bg-[#faf2ee] rounded-lg border border-[#e8e1dd] flex items-center justify-between">
+          <div className="p-3 bg-[#faf2ee] rounded-md border border-[#e8e1dd] flex items-center justify-between">
             <div className="flex items-center gap-1.5 text-xs font-bold text-[#57423b]">
               <Clock size={16} weight="duotone" className="text-[#b85028]" />
               <span>Time:</span>
@@ -811,7 +811,7 @@ export const DateTimePicker: React.FC<DateTimePickerProps> = ({
             <button
               type="button"
               onClick={() => setIsOpen(false)}
-              className="px-3.5 py-1.5 bg-[#b85028] hover:bg-[#a44520] text-white text-xs font-bold rounded-lg shadow-xs"
+              className="px-3.5 py-1.5 bg-[#b85028] hover:bg-[#a44520] text-white text-xs font-bold rounded-md shadow-xs"
             >
               Done
             </button>

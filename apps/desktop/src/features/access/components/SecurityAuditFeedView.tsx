@@ -1,3 +1,4 @@
+import { useTranslation } from '@jrs/client-core';
 import type { IUser } from '@jrs/shared';
 import {
   CheckCircle,
@@ -32,6 +33,8 @@ export const SecurityAuditFeedView: React.FC<SecurityAuditFeedViewProps> = ({
   members,
   onOpenManageAccess,
 }) => {
+  const { t } = useTranslation(['access', 'common']);
+
   // Derive audit timeline from member account records
   const events: AuditEvent[] = useMemo(() => {
     const list: AuditEvent[] = [];
@@ -44,8 +47,14 @@ export const SecurityAuditFeedView: React.FC<SecurityAuditFeedViewProps> = ({
             member: m,
             type: 'SUSPENDED',
             timestamp: m.updatedAt || 'Recent',
-            title: 'Portal Access Suspended',
-            description: `Security access temporarily revoked for ${m.fullName}. Account cannot authenticate on mobile or desktop clients.`,
+            title: t(
+              'access:auditFeed.revokedTitle',
+              'Portal Access Suspended',
+            ),
+            description: t('access:auditFeed.revokedDesc', {
+              name: m.fullName,
+              defaultValue: `Security access temporarily revoked for ${m.fullName}. Account cannot authenticate on mobile or desktop clients.`,
+            }),
             icon: Prohibit,
             iconColor: 'text-[#ba1a1a]',
             badgeBg: 'bg-[#ffdad6] border-[#ffb4a8]',
@@ -56,8 +65,14 @@ export const SecurityAuditFeedView: React.FC<SecurityAuditFeedViewProps> = ({
             member: m,
             type: 'TEMP_PASSWORD',
             timestamp: m.account.invitedAt || m.updatedAt || 'Recent',
-            title: 'Temporary Password Issued',
-            description: `Single-use temporary credentials dispatched for ${m.fullName}. Setup countdown active (valid for 48 hours).`,
+            title: t(
+              'access:auditFeed.tempPasswordTitle',
+              'Temporary Password Issued',
+            ),
+            description: t('access:auditFeed.tempPasswordDesc', {
+              name: m.fullName,
+              defaultValue: `Single-use temporary credentials dispatched for ${m.fullName}. Setup countdown active (valid for 48 hours).`,
+            }),
             icon: LockKey,
             iconColor: 'text-[#b78103]',
             badgeBg: 'bg-[#fff8e1] border-[#ffe082]',
@@ -68,8 +83,14 @@ export const SecurityAuditFeedView: React.FC<SecurityAuditFeedViewProps> = ({
             member: m,
             type: 'PASSWORD_SET',
             timestamp: m.updatedAt || 'Recent',
-            title: 'Permanent Password Configured',
-            description: `${m.fullName} completed the first-time setup phase and initialized a permanent password. Account is active in good standing.`,
+            title: t(
+              'access:auditFeed.passwordSetTitle',
+              'Permanent Password Configured',
+            ),
+            description: t('access:auditFeed.passwordSetDesc', {
+              name: m.fullName,
+              defaultValue: `${m.fullName} completed the first-time setup phase and initialized a permanent password. Account is active in good standing.`,
+            }),
             icon: CheckCircle,
             iconColor: 'text-[#2c4e37]',
             badgeBg: 'bg-[#c2e9ca] border-[#a9d0b2]',
@@ -85,8 +106,15 @@ export const SecurityAuditFeedView: React.FC<SecurityAuditFeedViewProps> = ({
             member: m,
             type: 'INVITE_SENT',
             timestamp: m.updatedAt || 'Recent',
-            title: 'Cross-Town Read Scope Assigned',
-            description: `${m.account.allowedReadTownIds.length} external parish hubs granted to ${m.fullName} for read-only roster auditing.`,
+            title: t(
+              'access:auditFeed.scopeTitle',
+              'Cross-Town Read Scope Assigned',
+            ),
+            description: t('access:auditFeed.scopeDesc', {
+              count: m.account.allowedReadTownIds.length,
+              name: m.fullName,
+              defaultValue: `${m.account.allowedReadTownIds.length} external parish hubs granted to ${m.fullName} for read-only roster auditing.`,
+            }),
             icon: Globe,
             iconColor: 'text-[#b85028]',
             badgeBg: 'bg-[#fff2ee] border-[#ffdbcf]',
@@ -96,30 +124,39 @@ export const SecurityAuditFeedView: React.FC<SecurityAuditFeedViewProps> = ({
     }
 
     return list;
-  }, [members]);
+  }, [members, t]);
 
   return (
-    <div className="bg-white rounded-3xl border border-[#e8e1dd] p-6 shadow-xs flex flex-col gap-6">
+    <div className="bg-white rounded-xl border border-[#e8e1dd] p-6 shadow-xs flex flex-col gap-6">
       <div className="flex items-center justify-between pb-4 border-b border-[#e8e1dd]">
         <div>
           <h3 className="text-sm font-bold text-[#1e1b19] flex items-center gap-2">
             <ClockCounterClockwise size={18} className="text-[#b85028]" />
-            <span>Security & Credential Activity Stream</span>
+            <span>
+              {t(
+                'access:auditFeed.title',
+                'Security & Credential Activity Stream',
+              )}
+            </span>
           </h3>
           <p className="text-xs text-[#8a726a] mt-0.5">
-            Audit feed of portal onboarding, password lifecycle, and access
-            status events
+            {t(
+              'access:auditFeed.subtitle',
+              'Audit feed of portal onboarding, password lifecycle, and access status events',
+            )}
           </p>
         </div>
         <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-[#faf2ee] text-[#57423b] border border-[#e8e1dd]">
-          {events.length} security entries
+          {t('access:auditFeed.entriesCount', { count: events.length })}
         </span>
       </div>
 
       {events.length === 0 ? (
         <div className="p-12 text-center text-xs text-[#8a726a]">
-          No security or credential logs recorded for members in the active
-          scope.
+          {t(
+            'access:auditFeed.noEntries',
+            'No security or credential logs recorded for members in the active scope.',
+          )}
         </div>
       ) : (
         <div className="relative pl-6 space-y-6 before:absolute before:left-3 before:top-2 before:bottom-2 before:w-0.5 before:bg-[#f4ece9]">
@@ -128,12 +165,12 @@ export const SecurityAuditFeedView: React.FC<SecurityAuditFeedViewProps> = ({
             return (
               <div key={ev.id} className="relative flex items-start gap-4">
                 <div
-                  className={`w-7 h-7 rounded-xl border flex items-center justify-center shrink-0 z-10 ${ev.badgeBg} ${ev.iconColor}`}
+                  className={`w-7 h-7 rounded-md border flex items-center justify-center shrink-0 z-10 ${ev.badgeBg} ${ev.iconColor}`}
                 >
                   <Icon size={14} weight="bold" />
                 </div>
 
-                <div className="flex-1 bg-[#faf2ee] rounded-2xl p-4 border border-[#e8e1dd] shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex-1 bg-[#faf2ee] rounded-md p-4 border border-[#e8e1dd] shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div className="flex items-start gap-3">
                     <UserAvatar
                       avatarUrl={ev.member.avatarUrl}
@@ -165,9 +202,9 @@ export const SecurityAuditFeedView: React.FC<SecurityAuditFeedViewProps> = ({
                     <button
                       type="button"
                       onClick={() => onOpenManageAccess(ev.member)}
-                      className="px-2.5 py-1 rounded-lg bg-white border border-[#e8e1dd] text-[11px] font-bold text-[#57423b] hover:bg-[#f4ece9] cursor-pointer"
+                      className="px-2.5 py-1 rounded-md bg-white border border-[#e8e1dd] text-[11px] font-bold text-[#57423b] hover:bg-[#f4ece9] cursor-pointer"
                     >
-                      Manage
+                      {t('access:auditFeed.manage', 'Manage')}
                     </button>
                   </div>
                 </div>

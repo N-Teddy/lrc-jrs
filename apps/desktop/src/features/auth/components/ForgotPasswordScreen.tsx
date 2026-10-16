@@ -63,7 +63,7 @@ export const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({
 
           {/* Icon Motif & Title */}
           <div className="flex flex-col items-center text-center gap-3 pt-1">
-            <div className="w-16 h-16 rounded-2xl bg-[#ffdbcf] text-[#983912] flex items-center justify-center relative shadow-sm">
+            <div className="w-16 h-16 rounded-xl bg-[#ffdbcf] text-[#983912] flex items-center justify-center relative shadow-sm">
               <LockKey size={32} weight="fill" />
               <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-[#c2e9ca] text-[#43664d] flex items-center justify-center shadow-xs">
                 <PaperPlaneTilt size={14} weight="fill" />

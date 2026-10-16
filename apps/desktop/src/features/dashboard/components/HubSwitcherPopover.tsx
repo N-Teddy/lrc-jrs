@@ -67,11 +67,11 @@ export const HubSwitcherPopover: React.FC<HubSwitcherPopoverProps> = ({
       <div className="fixed inset-0" onClick={onClose} />
 
       {/* Centered Modal Card */}
-      <div className="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl border border-[#e8e1dd] overflow-hidden flex flex-col max-h-[85vh] animate-in zoom-in-95 duration-150 z-10">
+      <div className="relative w-full max-w-lg bg-white rounded-xl shadow-2xl border border-[#e8e1dd] overflow-hidden flex flex-col max-h-[85vh] animate-in zoom-in-95 duration-150 z-10">
         {/* Header */}
         <div className="px-5 py-4 bg-gradient-to-r from-[#faf6f4] to-[#faf2ee] border-b border-[#e8e1dd] flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-white border border-[#ffdbcf] text-[#b85028] flex items-center justify-center shadow-xs">
+            <div className="w-10 h-10 rounded-lg bg-white border border-[#ffdbcf] text-[#b85028] flex items-center justify-center shadow-xs">
               <Compass size={22} weight="duotone" />
             </div>
             <div>
@@ -93,7 +93,7 @@ export const HubSwitcherPopover: React.FC<HubSwitcherPopoverProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="w-8 h-8 rounded-lg bg-white border border-[#e8e1dd] text-[#8a726a] hover:text-[#1e1b19] hover:border-[#b85028] flex items-center justify-center transition cursor-pointer shadow-2xs"
+              className="w-8 h-8 rounded-md bg-white border border-[#e8e1dd] text-[#8a726a] hover:text-[#1e1b19] hover:border-[#b85028] flex items-center justify-center transition cursor-pointer shadow-2xs"
             >
               <X size={15} weight="bold" />
             </button>
@@ -114,7 +114,7 @@ export const HubSwitcherPopover: React.FC<HubSwitcherPopoverProps> = ({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={t('dashboard:hubSwitcher.searchPlaceholder')}
-              className="w-full pl-9 pr-8 py-2 bg-[#faf2ee] border border-[#e8e1dd] rounded-xl text-xs text-[#1e1b19] placeholder:text-[#8a726a] outline-none transition focus:bg-white focus:border-[#b85028] focus:ring-2 focus:ring-[#b85028]/15"
+              className="w-full pl-9 pr-8 py-2 bg-[#faf2ee] border border-[#e8e1dd] rounded-md text-xs text-[#1e1b19] placeholder:text-[#8a726a] outline-none transition focus:bg-white focus:border-[#b85028] focus:ring-2 focus:ring-[#b85028]/15"
             />
             {searchQuery && (
               <button
@@ -130,7 +130,7 @@ export const HubSwitcherPopover: React.FC<HubSwitcherPopoverProps> = ({
 
         {/* Current Active Hub Banner */}
         {currentTown && !searchQuery && (
-          <div className="mx-5 mt-3 px-3 py-2 rounded-xl bg-[#edf3ee] border border-[#c2e9ca] flex items-center justify-between text-xs">
+          <div className="mx-5 mt-3 px-3 py-2 rounded-lg bg-[#edf3ee] border border-[#c2e9ca] flex items-center justify-between text-xs">
             <div className="flex items-center gap-2 min-w-0">
               <span className="w-2 h-2 rounded-full bg-[#486b52] animate-pulse shrink-0" />
               <span className="text-[#2c4e37] font-semibold truncate">
@@ -160,7 +160,7 @@ export const HubSwitcherPopover: React.FC<HubSwitcherPopoverProps> = ({
                   await selectTown(town.id);
                   onClose();
                 }}
-                className={`group flex items-center justify-between p-3 rounded-xl cursor-pointer transition-all ${
+                className={`group flex items-center justify-between p-3 rounded-lg cursor-pointer transition-all ${
                   isCurrent
                     ? 'bg-[#fff2ee] border border-[#ffb59c] shadow-xs'
                     : 'bg-white border border-[#e8e1dd] hover:border-[#b85028]/50 hover:bg-[#faf6f4] hover:shadow-xs'
@@ -168,7 +168,7 @@ export const HubSwitcherPopover: React.FC<HubSwitcherPopoverProps> = ({
               >
                 <div className="flex items-center gap-3 min-w-0">
                   <div
-                    className={`w-9 h-9 rounded-xl flex items-center justify-center text-xs font-mono font-bold shrink-0 shadow-2xs ${
+                    className={`w-9 h-9 rounded-lg flex items-center justify-center text-xs font-mono font-bold shrink-0 shadow-2xs ${
                       isCurrent
                         ? 'bg-[#b85028] text-white shadow-xs'
                         : 'bg-[#faf2ee] text-[#57423b] border border-[#e8e1dd] group-hover:bg-white group-hover:text-[#b85028]'
@@ -200,11 +200,11 @@ export const HubSwitcherPopover: React.FC<HubSwitcherPopoverProps> = ({
 
                 <div className="shrink-0 ml-3">
                   {isCurrent ? (
-                    <div className="w-6 h-6 rounded-lg bg-[#b85028] text-white flex items-center justify-center shadow-2xs">
+                    <div className="w-6 h-6 rounded-md bg-[#b85028] text-white flex items-center justify-center shadow-2xs">
                       <Check size={14} weight="bold" />
                     </div>
                   ) : (
-                    <div className="w-6 h-6 rounded-lg flex items-center justify-center text-[#8a726a] group-hover:text-[#b85028] group-hover:bg-white transition-colors">
+                    <div className="w-6 h-6 rounded-md flex items-center justify-center text-[#8a726a] group-hover:text-[#b85028] group-hover:bg-white transition-colors">
                       <CaretRight size={14} weight="bold" />
                     </div>
                   )}
@@ -236,7 +236,7 @@ export const HubSwitcherPopover: React.FC<HubSwitcherPopoverProps> = ({
               onClose();
               onOpenMapView();
             }}
-            className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-white text-[#1e1b19] text-xs font-bold border border-[#e8e1dd] shadow-xs hover:border-[#b85028] hover:text-[#b85028] hover:bg-[#fff9f7] transition cursor-pointer"
+            className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-md bg-white text-[#1e1b19] text-xs font-bold border border-[#e8e1dd] shadow-xs hover:border-[#b85028] hover:text-[#b85028] hover:bg-[#fff9f7] transition cursor-pointer"
           >
             <MapTrifold size={17} weight="duotone" className="text-[#b85028]" />
             <span>{t('dashboard:hubSwitcher.openMapView')}</span>

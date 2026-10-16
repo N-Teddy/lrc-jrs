@@ -33,25 +33,28 @@ export function getTransferDirection(
 
 export function getDirectionDisplayInfo(
   direction: TransferDirection,
+  t?: any,
 ): DirectionBadgeInfo {
   switch (direction) {
     case 'INBOUND':
       return {
-        label: 'Inbound',
+        label: t ? t('transfers:directions.inbound', 'Inbound') : 'Inbound',
         bgClass: 'bg-[#eef7f0]',
         textClass: 'text-[#2c4e37]',
         borderClass: 'border-[#c2e9ca]',
       };
     case 'OUTBOUND':
       return {
-        label: 'Outbound',
+        label: t ? t('transfers:directions.outbound', 'Outbound') : 'Outbound',
         bgClass: 'bg-[#fff8e1]',
         textClass: 'text-[#812901]',
         borderClass: 'border-[#ffe082]',
       };
     default:
       return {
-        label: 'Inter-Hub',
+        label: t
+          ? t('transfers:directions.interHub', 'Inter-Hub')
+          : 'Inter-Hub',
         bgClass: 'bg-[#faf2ee]',
         textClass: 'text-[#57423b]',
         borderClass: 'border-[#e8e1dd]',
