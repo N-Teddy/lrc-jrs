@@ -17,23 +17,38 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
 
-    const status = HttpStatus.INTERNAL_SERVER_ERROR;
-    const message =
+    let status = HttpStatus.INTERNAL_SERVER_ERROR;
+    let errorName = 'InternalServerError';
+    let message =
       exception instanceof Error
         ? exception.message
         : 'An unexpected internal server error occurred';
 
-    this.logger.error(
-      `Unhandled error at [${request.method}] ${request.url}`,
-      exception instanceof Error ? exception.stack : JSON.stringify(exception),
-    );
+    if (exception && typeof exception === 'object' && 'name' in exception) {
+      if ((exception as Error).name === 'ValidationError') {
+        status = HttpStatus.BAD_REQUEST;
+        errorName = 'ValidationError';
+      }
+    }
+
+    if (status === HttpStatus.INTERNAL_SERVER_ERROR) {
+      this.logger.error(
+        `Unhandled error at [${request.method}] ${request.url}`,
+        exception instanceof Error ? exception.stack : JSON.stringify(exception),
+      );
+    } else {
+       this.logger.warn(
+        `Mongoose validation error at [${request.method}] ${request.url}`,
+        exception instanceof Error ? exception.message : JSON.stringify(exception),
+      );
+    }
 
     const errorPayload: ApiErrorResponse = {
       success: false,
       statusCode: status,
-      error: 'InternalServerError',
+      error: errorName,
       message:
-        process.env.NODE_ENV === 'production'
+        status === HttpStatus.INTERNAL_SERVER_ERROR && process.env.NODE_ENV === 'production'
           ? 'Internal server error'
           : message,
       path: request.url,

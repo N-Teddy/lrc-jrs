@@ -487,7 +487,7 @@ export const RegisterMemberModal: React.FC<RegisterMemberModalProps> = ({
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-1.5">
                     <span className="text-xs font-bold text-[#1e1b19]">
-                      Contact Person (PC)
+                      PC
                     </span>
                     {isPcQuotaFull && (
                       <span className="px-1.5 py-0.2 rounded bg-[#ffdbcf] text-[#812901] text-[9px] font-bold">

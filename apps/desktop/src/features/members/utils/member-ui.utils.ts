@@ -64,7 +64,7 @@ export function getRoleDisplayInfo(role: UserRole | string | undefined) {
   switch (role) {
     case 'AP':
       return {
-        label: 'AP (Assistant PC)',
+        label: 'AP',
         shortLabel: 'AP',
         badgeBg: 'bg-[#ffdad4]',
         badgeText: 'text-[#881f14]',
@@ -72,7 +72,7 @@ export function getRoleDisplayInfo(role: UserRole | string | undefined) {
       };
     case 'PC':
       return {
-        label: 'Contact Person (PC)',
+        label: 'PC',
         shortLabel: 'PC',
         badgeBg: 'bg-[#ffdbcf]',
         badgeText: 'text-[#812901]',

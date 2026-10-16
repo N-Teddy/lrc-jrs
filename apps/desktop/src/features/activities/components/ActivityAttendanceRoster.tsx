@@ -80,6 +80,8 @@ function computeRosterSnapshot(
 export const ActivityAttendanceRoster: React.FC<
   ActivityAttendanceRosterProps
 > = ({ activity, onBack }) => {
+  // const { state, actions } = useActivityAttendanceWorkspace(activity);
+
   const { t, i18n } = useTranslation(['attendance', 'towns', 'common']);
   const isFrench = i18n.language?.startsWith('fr');
   const { canWrite } = useTownContext();
@@ -1368,11 +1370,7 @@ export const ActivityAttendanceRoster: React.FC<
                 Are you sure you want to finalize and seal attendance for this
                 activity? Once locked, check-in records are preserved and cannot
                 be altered without an
-                <strong className="text-[#1e1b19]">
-                  {' '}
-                  Apostolic Prefect (AP)
-                </strong>{' '}
-                override.
+                <strong className="text-[#1e1b19]"> AP</strong> override.
               </p>
 
               <div className="flex flex-col gap-1.5">
@@ -1448,7 +1446,7 @@ export const ActivityAttendanceRoster: React.FC<
               <p className="text-xs text-[#57423b] leading-relaxed">
                 Unlocking will reopen roll call for coordinator editing. An
                 administrative audit record will be permanently logged with your
-                Apostolic Prefect credentials.
+                AP credentials.
               </p>
 
               <div className="flex flex-col gap-1.5">

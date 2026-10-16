@@ -11,6 +11,7 @@ export type ActivityDocument = Activity & Document;
 @Schema({ _id: false })
 export class ActivityChangeLog {
   @Prop({
+    type: String,
     required: true,
     enum: ['RESCHEDULED', 'LOCATION_CHANGED', 'STATUS_CHANGED'],
   })
@@ -19,10 +20,10 @@ export class ActivityChangeLog {
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User', required: true })
   changedBy: Types.ObjectId;
 
-  @Prop({ required: true })
+  @Prop({ type: String, required: true })
   changedByName: string;
 
-  @Prop({ default: Date.now })
+  @Prop({ type: Date, default: Date.now })
   changedAt: Date;
 
   @Prop({ type: Object, default: {} })
@@ -40,31 +41,31 @@ export const ActivityChangeLogSchema =
 
 @Schema({ _id: false })
 export class ActivityReport {
-  @Prop({ required: true })
+  @Prop({ type: String, required: true })
   fileId: string;
 
-  @Prop({ required: true })
+  @Prop({ type: String, required: true })
   filename: string;
 
-  @Prop()
+  @Prop({ type: String })
   webViewLink?: string;
 
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User', required: true })
   uploadedBy: Types.ObjectId;
 
-  @Prop()
+  @Prop({ type: String })
   uploadedByName?: string;
 
-  @Prop({ default: Date.now })
+  @Prop({ type: Date, default: Date.now })
   uploadedAt: Date;
 
-  @Prop()
+  @Prop({ type: String })
   summary?: string;
 
-  @Prop()
+  @Prop({ type: String })
   folderId?: string;
 
-  @Prop()
+  @Prop({ type: Number })
   fileSize?: number;
 }
 
@@ -73,20 +74,21 @@ export const ActivityReportSchema =
 
 @Schema(baseSchemaOptions)
 export class Activity extends BaseDocument {
-  @Prop({ required: true, trim: true })
+  @Prop({ type: String, required: true, trim: true })
   title: string;
 
   @Prop({
+    type: String,
     required: true,
     enum: Object.values(ActivityType),
     index: true,
   })
   activityType: ActivityType;
 
-  @Prop({ required: true, index: true })
+  @Prop({ type: Date, required: true, index: true })
   startDate: Date;
 
-  @Prop({ required: true })
+  @Prop({ type: Date, required: true })
   endDate: Date;
 
   @Prop({
@@ -97,10 +99,10 @@ export class Activity extends BaseDocument {
   })
   townId: Types.ObjectId;
 
-  @Prop({ required: true, trim: true })
+  @Prop({ type: String, required: true, trim: true })
   locationVenue: string;
 
-  @Prop({ trim: true })
+  @Prop({ type: String, trim: true })
   notes?: string;
 
   @Prop({
@@ -112,6 +114,7 @@ export class Activity extends BaseDocument {
   hostTownId: Types.ObjectId;
 
   @Prop({
+    type: String,
     required: true,
     enum: Object.values(ActivityStatus),
     default: ActivityStatus.SCHEDULED,
@@ -122,16 +125,16 @@ export class Activity extends BaseDocument {
   @Prop({ type: [ActivityChangeLogSchema], default: [] })
   changeHistory: ActivityChangeLog[];
 
-  @Prop({ default: false, index: true })
+  @Prop({ type: Boolean, default: false, index: true })
   isAttendanceLocked: boolean;
 
-  @Prop()
+  @Prop({ type: Date })
   attendanceLockedAt?: Date;
 
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User' })
   attendanceLockedBy?: Types.ObjectId;
 
-  @Prop()
+  @Prop({ type: String })
   attendanceLockedByName?: string;
 
   @Prop({ type: ActivityReportSchema })
@@ -143,7 +146,7 @@ export class Activity extends BaseDocument {
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User', required: true })
   createdBy: Types.ObjectId;
 
-  @Prop({ default: false, index: true })
+  @Prop({ type: Boolean, default: false, index: true })
   isDeleted: boolean;
 }
 

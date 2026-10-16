@@ -156,7 +156,7 @@ export const TransferCardGridView: React.FC<TransferCardGridViewProps> = ({
                   </div>
                 </div>
 
-                {/* Pastoral Reason if present */}
+                {/* Relocation Reason if present */}
                 {item.reason && (
                   <div className="flex items-start gap-1.5 p-2.5 rounded-xl bg-[#faf2ee]/40 border border-[#f4ece9] text-xs text-[#57423b] italic">
                     <ChatCircleText

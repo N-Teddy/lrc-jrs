@@ -22,7 +22,7 @@ apps/server/src/
 │   ├── activities/      # Activities, attendance rosters, and reports
 │   ├── auth/            # JWT authentication, login, refresh tokens
 │   ├── towns/           # Town hubs and regional jurisdictional management
-│   └── users/           # User & member directory, canonical profiles
+│   └── users/           # User & member directory, official profiles
 │
 ├── services/
 │   ├── drive.service.ts # Google Drive Service Account file streaming & PDF exports

@@ -42,6 +42,8 @@ import {
 import { openUrl } from '@tauri-apps/plugin-opener';
 import type React from 'react';
 import { useMemo, useState } from 'react';
+// import { useActivityDetailWorkspace } from '../hooks/useActivityDetailWorkspace';
+
 import { UserAvatar } from '../../../components';
 import { formatCameroonPhone } from '../../members/utils/member-ui.utils';
 import {
@@ -72,6 +74,8 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
   onDeleteActivity,
   isPrivileged,
 }) => {
+  // const { state, actions } = useActivityDetailWorkspace(activity);
+
   const { t } = useTranslation();
   const { user } = useAuth();
   const { canWrite } = useTownContext();
@@ -567,7 +571,7 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
               <p className="text-xs text-[#57423b]">
                 {isLocked
                   ? 'Unlocking this attendance will allow coordinators to alter member check-in states. An audit record will be logged with your administrator credentials.'
-                  : 'Once locked, attendance records cannot be modified without an Apostolic Prefect (AP) administrative override. Ensure all member and guest attendance is accurate.'}
+                  : 'Once locked, attendance records cannot be modified without an AP administrative override. Ensure all member and guest attendance is accurate.'}
               </p>
               <div className="flex items-center gap-2">
                 <input
@@ -966,8 +970,8 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
                 No Reports Attached Yet
               </h4>
               <p className="text-xs text-[#8a726a] max-w-sm">
-                This activity has concluded. Parish coordinators can upload
-                session minutes, attendance summaries, photos, or pastoral notes
+                This activity has concluded. Hub coordinators can upload session
+                minutes, attendance summaries, photos, or pastoral notes
                 directly to Google Drive.
               </p>
               {isPrivileged && (

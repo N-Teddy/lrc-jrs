@@ -24,10 +24,10 @@ export class PasswordResetToken extends BaseDocument {
   @Prop({ index: true })
   resetToken?: string; // High-entropy 64-char token issued upon code verification
 
-  @Prop()
+  @Prop({ type: Date })
   resetTokenExpiresAt?: Date;
 
-  @Prop({ default: false })
+  @Prop({ type: Boolean, default: false })
   used: boolean;
 }
 

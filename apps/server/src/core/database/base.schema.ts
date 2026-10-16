@@ -28,9 +28,9 @@ export const baseSchemaOptions: SchemaOptions = {
 export abstract class BaseDocument {
   id: string;
 
-  @Prop()
+  @Prop({ type: Date })
   createdAt: Date;
 
-  @Prop()
+  @Prop({ type: Date })
   updatedAt: Date;
 }

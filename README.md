@@ -8,7 +8,7 @@
 [![MongoDB](https://img.shields.io/badge/database-MongoDB-47a248?style=flat&logo=mongodb)](https://www.mongodb.com/)
 [![License](https://img.shields.io/badge/license-Private-gray.svg)](#)
 
-> **LRC JRS** is an enterprise-grade, cross-platform youth fellowship and community management system. It provides real-time hub tracking, canonical membership registries, activity attendance tracking, inter-hub relocation ledgers, Google Drive document integration, and bilingual (English/French) support.
+> **LRC JRS** is an enterprise-grade, cross-platform youth fellowship and community management system. It provides real-time hub tracking, Official membership registries, activity attendance tracking, inter-hub relocation ledgers, Google Drive document integration, and bilingual (English/French) support.
 
 ---
 
@@ -52,7 +52,7 @@ jrs/
 ## ✨ Core Features
 
 - **Regional Hub Management:** Dynamic jurisdiction scoping across Cameroon town hubs with real-time switching.
-- **Canonical Membership Directory:** Complete member lifecycle tracking, age verification (18–30), contact cards, and account access controls.
+- **Official Membership Directory:** Complete member lifecycle tracking, age verification (18–30), contact cards, and account access controls.
 - **Activity Planning & Attendance Roster:** Schedule community activities, log real-time attendance, and track participation statistics.
 - **Town Transfer Management:** Inter-hub member relocation requests with chronological audit ledgers and route tracking.
 - **Google Drive Integration & In-App PDF Canvas:** Secure file streaming via Google Service Account and canvas document preview.

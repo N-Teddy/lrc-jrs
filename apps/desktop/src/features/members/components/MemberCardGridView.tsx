@@ -243,7 +243,7 @@ export const MemberCardGridView: React.FC<MemberCardGridViewProps> = ({
                         isEligibleJr ? 'text-[#486b52]' : 'text-[#8a726a]'
                       }`}
                     >
-                      {isEligibleJr ? 'Canonical JR Eligible' : 'Senior Cohort'}
+                      {isEligibleJr ? 'Eligible Youth' : 'Senior Cohort'}
                     </span>
                   </div>
                 )}

@@ -10,13 +10,13 @@ export type AttendanceDocument = Attendance & Document;
 
 @Schema({ _id: false })
 export class GuestInfo {
-  @Prop({ required: true, trim: true })
+  @Prop({ type: String, required: true, trim: true })
   fullName: string;
 
-  @Prop({ trim: true })
+  @Prop({ type: String, trim: true })
   phoneNumber?: string;
 
-  @Prop({ trim: true })
+  @Prop({ type: String, trim: true })
   notes?: string;
 }
 
@@ -25,6 +25,7 @@ export const GuestInfoSchema = SchemaFactory.createForClass(GuestInfo);
 @Schema({ _id: true })
 export class AttendanceItem {
   @Prop({
+    type: String,
     required: true,
     enum: Object.values(AttendeeType),
   })
@@ -36,10 +37,11 @@ export class AttendanceItem {
   @Prop({ type: GuestInfoSchema })
   guestInfo?: GuestInfo;
 
-  @Prop({ default: Date.now })
+  @Prop({ type: Date, default: Date.now })
   checkInTime: Date;
 
   @Prop({
+    type: String,
     required: true,
     enum: Object.values(AttendanceStatus),
     default: AttendanceStatus.PRESENT,
@@ -64,19 +66,19 @@ export class Attendance extends BaseDocument {
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User', required: true })
   recordedBy: Types.ObjectId;
 
-  @Prop({ default: Date.now })
+  @Prop({ type: Date, default: Date.now })
   recordedAt: Date;
 
   @Prop({ default: false, index: true })
   isLocked: boolean;
 
-  @Prop()
+  @Prop({ type: Date })
   lockedAt?: Date;
 
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User' })
   lockedBy?: Types.ObjectId;
 
-  @Prop()
+  @Prop({ type: String })
   lockReason?: string;
 
   @Prop({ type: [AttendanceItemSchema], default: [] })

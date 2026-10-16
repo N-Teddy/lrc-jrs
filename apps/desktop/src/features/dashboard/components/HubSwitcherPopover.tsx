@@ -245,7 +245,7 @@ export const HubSwitcherPopover: React.FC<HubSwitcherPopoverProps> = ({
           <div className="flex items-center justify-between text-[11px] text-[#8a726a] px-1">
             <span className="flex items-center gap-1.5">
               <Sparkle size={12} weight="fill" className="text-[#b85028]" />
-              <span>{t('common:appName')} Sanctuary</span>
+              <span>{t('common:appName')} Hub</span>
             </span>
             <span className="font-mono text-[10px]">
               {t('dashboard:hubSwitcher.tenRegionsScope')}

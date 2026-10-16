@@ -19,7 +19,7 @@ apps/desktop/
 │   │   ├── auth/        # Login, password reset & authentication screens
 │   │   ├── dashboard/   # Sidebar, layout shell & workspace metrics
 │   │   ├── drive/       # Drive file explorer & PDF canvas previewer
-│   │   ├── members/     # Canonical member directory, passport & attendance
+│   │   ├── members/     # Official member directory, passport & attendance
 │   │   ├── towns/       # Hub switcher modal & Cameroon map
 │   │   └── transfers/   # Town transfer ledger & relocation modals
 │   │

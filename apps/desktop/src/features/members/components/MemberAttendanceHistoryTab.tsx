@@ -339,7 +339,7 @@ export const MemberAttendanceHistoryTab: React.FC<
     ? getEngagementConfig(history.engagementLevel)
     : null;
 
-  // Pastoral pre-filled WhatsApp message
+  // Hub pre-filled WhatsApp message
   const pastoralMessage = encodeURIComponent(
     `Bonjour ${member.fullName}, nous avons remarqué votre absence aux récentes rencontres de la Jeunesse LRC. Nous espérons que vous vous portez bien et restons disponibles si vous avez besoin d'accompagnement ou de prière. Que Dieu vous bénisse !`,
   );
@@ -550,7 +550,7 @@ export const MemberAttendanceHistoryTab: React.FC<
         </div>
       </div>
 
-      {/* 2. Pastoral Care Alert Banner (When member needs follow-up) */}
+      {/* 2. Follow-Up Alert Banner (When member needs follow-up) */}
       {isNeedsFollowUp && (
         <div className="bg-[#fff2ee] border border-[#ffb59c] rounded-3xl p-5 shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex items-start gap-3.5">
@@ -559,7 +559,7 @@ export const MemberAttendanceHistoryTab: React.FC<
             </div>
             <div className="flex flex-col gap-1">
               <h4 className="text-xs font-bold text-[#812901] uppercase tracking-wider">
-                Pastoral Follow-Up Recommended
+                Follow-Up Recommended
               </h4>
               <p className="text-xs text-[#57423b] leading-relaxed">
                 {member.fullName} has missed{' '}
@@ -581,7 +581,7 @@ export const MemberAttendanceHistoryTab: React.FC<
               className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#c2e9ca] hover:bg-[#a9d0b2] text-[#2c4e37] text-xs font-bold transition-all shadow-2xs shrink-0 cursor-pointer"
             >
               <ChatCircleText size={18} weight="fill" />
-              <span>Send Pastoral Check-in</span>
+              <span>Send Follow-Up Check-in</span>
             </a>
           )}
         </div>

@@ -258,7 +258,7 @@ export const TransfersFeature: React.FC = () => {
             Town Transfers
           </h1>
           <p className="text-xs text-[#8a726a]">
-            Canonical registry of member relocations, pastoral jurisdictions,
+            Official registry of member relocations, pastoral jurisdictions,
             and inter-city transitions across Cameroon.
           </p>
         </div>

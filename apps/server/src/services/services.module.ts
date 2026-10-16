@@ -4,11 +4,12 @@ import { DriveService } from './drive.service';
 import { EmailService } from './email.service';
 import { MediaService } from './media.service';
 import { WhatsAppService } from './whatsapp.service';
+import { NotificationService } from './notification.service';
 
 @Global()
 @Module({
   imports: [ConfigModule],
-  providers: [WhatsAppService, EmailService, DriveService, MediaService],
-  exports: [WhatsAppService, EmailService, DriveService, MediaService],
+  providers: [WhatsAppService, EmailService, DriveService, MediaService, NotificationService],
+  exports: [WhatsAppService, EmailService, DriveService, MediaService, NotificationService],
 })
 export class ServicesModule {}

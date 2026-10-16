@@ -143,7 +143,7 @@ export const TownScopeModal: React.FC<TownScopeModalProps> = ({
                         {town.name}
                       </div>
                       <div className="text-[11px] text-[#8a726a]">
-                        Parish Hub Jurisdiction · Read-only audit access
+                        Hub Hub Jurisdiction · Read-only audit access
                       </div>
                     </div>
                   </div>

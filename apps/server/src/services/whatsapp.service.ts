@@ -3,14 +3,16 @@ import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
 import { PhoneSanitizer } from '../core/utils/phone-sanitizer.util';
 import { TemplateLoaderUtil } from '../core/utils/template-loader.util';
+import type { NotificationStrategy } from './notification.strategy';
 import type {
   IJiFiContactResponse,
   IJiFiSendMessageResponse,
 } from './whatsapp.types';
 
 @Injectable()
-export class WhatsAppService {
+export class WhatsAppService implements NotificationStrategy {
   private readonly logger = new Logger(WhatsAppService.name);
+  readonly channel = 'whatsapp';
   private readonly baseUrl: string;
   private readonly apiKey: string;
 
@@ -48,6 +50,10 @@ export class WhatsAppService {
       );
       return false;
     }
+  }
+
+  async send(recipient: string, message: string, metadata?: Record<string, unknown>): Promise<boolean> {
+    return this.sendTextMessage(recipient, message);
   }
 
   /**
