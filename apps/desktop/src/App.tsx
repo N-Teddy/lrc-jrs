@@ -9,6 +9,7 @@ import {
 } from './features/auth';
 import { DashboardLayout } from './features/dashboard';
 import { RegionSelectorScreen } from './features/towns';
+import { UpdateModal, useAppUpdater } from './features/updater';
 import { useDesktopAppFlow } from './hooks/use-desktop-app-flow';
 import { tauriStoreAdapter } from './storage/tauri-store.adapter';
 
@@ -42,6 +43,8 @@ function AppContent() {
     handlePasswordResetComplete,
     handleAcknowledgeSessionTerminated,
   } = useDesktopAppFlow();
+
+  const updater = useAppUpdater();
 
   if (isLoading) {
     return (
@@ -141,6 +144,8 @@ function AppContent() {
         isOpen={isSessionTerminated}
         onAcknowledge={handleAcknowledgeSessionTerminated}
       />
+
+      <UpdateModal updater={updater} />
     </>
   );
 }

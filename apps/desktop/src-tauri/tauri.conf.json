@@ -35,5 +35,13 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ]
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDFDNTJERUJCMUYzQzk0MzMKUldRemxEd2Z1OTVTSENYbHNPSzZjK1BiRVFQR0NoQkNZNy9hcGljU2tickFNNEluV1BYZDl1Y0UK",
+      "endpoints": [
+        "https://github.com/N-Teddy/lrc-jrs/releases/latest/download/latest.json"
+      ]
+    }
   }
 }
