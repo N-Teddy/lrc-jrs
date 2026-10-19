@@ -65,6 +65,28 @@ export const SEED_ADMIN_USERS: SeedUserData[] = [
 ];
 
 /**
+ * Production Personne Contact (PC).
+ * Ngangman Teddy (+237693087159 | teddy.webdev@gmail.com | 07 Oct 2005).
+ */
+export const SEED_PROD_PC_USER: SeedUserData = {
+  fullName: 'Ngangman Teddy',
+  phoneNumber: '+237693087159',
+  email: 'teddy.webdev@gmail.com',
+  dateOfBirth: '2005-10-07',
+  isJr: true,
+  role: UserRole.PC,
+  isActivePC: true,
+  homeTownCode: 'DLA',
+  isTemporaryPassword: true,
+  account: {
+    status: AccountStatus.MUST_CHANGE_PASSWORD,
+    hasAppAccess: true,
+    isAccessRevoked: false,
+    allowedReadTownCodes: ['DLA'],
+  },
+};
+
+/**
  * Personnes Contact (PCs) - 2 active PCs per town.
  * Age must be between 18 and 30 (JR age rule).
  */

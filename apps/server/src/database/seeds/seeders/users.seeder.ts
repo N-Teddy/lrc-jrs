@@ -6,12 +6,14 @@ import { PasswordGeneratorUtil } from '../../../core/utils/password-generator.ut
 import { PhoneSanitizer } from '../../../core/utils/phone-sanitizer.util';
 import { UsersService } from '../../../modules/users/users.service';
 import { EmailService } from '../../../services/email.service';
+import { WhatsAppService } from '../../../services/whatsapp.service';
 import { AccountStatus, Town, type TownDocument } from '../../schemas';
 import { SEED_MEMBERS_NO_APP_ACCESS } from '../data/members-no-access.data';
 import {
   SEED_ADMIN_USERS,
   SEED_MEMBER_USERS,
   SEED_PC_USERS,
+  SEED_PROD_PC_USER,
   type SeedUserData,
 } from '../data/users.data';
 
@@ -24,6 +26,7 @@ export interface SeededUserSummary {
   townCode: string;
   hasAppAccess: boolean;
   emailSent: boolean;
+  whatsappSent?: boolean;
   isTemporary?: boolean;
 }
 
@@ -34,6 +37,7 @@ export class UsersSeeder {
   constructor(
     private readonly usersService: UsersService,
     private readonly emailService: EmailService,
+    private readonly whatsappService: WhatsAppService,
     @InjectModel(Town.name) private readonly townModel: Model<TownDocument>,
   ) {}
 
@@ -58,8 +62,13 @@ export class UsersSeeder {
 
     const isProd = options.mode === 'prod';
     const primaryUsers: SeedUserData[] = isProd
-      ? [...SEED_ADMIN_USERS]
-      : [...SEED_ADMIN_USERS, ...SEED_PC_USERS, ...SEED_MEMBER_USERS];
+      ? [...SEED_ADMIN_USERS, SEED_PROD_PC_USER]
+      : [
+          ...SEED_ADMIN_USERS,
+          ...SEED_PC_USERS,
+          SEED_PROD_PC_USER,
+          ...SEED_MEMBER_USERS,
+        ];
 
     const usersToSeed: SeedUserData[] = isProd
       ? primaryUsers
@@ -164,9 +173,33 @@ export class UsersSeeder {
         await this.usersService.create(payload as any);
       }
 
-      // Send email notification to users who have application access
+      // Send notification to users who have application access
       let emailSent = false;
+      let whatsappSent = false;
       if (hasAppAccess && isTemporary) {
+        // 1. WhatsApp Notification via JiFi Hub
+        try {
+          whatsappSent =
+            await this.whatsappService.sendTemporaryPasswordMessage(
+              sanitizedPhone,
+              {
+                fullName: userData.fullName,
+                tempPassword: plainPassword,
+                expiresInHours: 48,
+              },
+            );
+          if (whatsappSent) {
+            this.logger.log(
+              `📲 Sent temporary password via WhatsApp to ${PhoneSanitizer.maskPhoneNumber(sanitizedPhone)}`,
+            );
+          }
+        } catch (waErr) {
+          this.logger.warn(
+            `Could not dispatch WhatsApp to ${sanitizedPhone}: ${waErr}`,
+          );
+        }
+
+        // 2. Email Notification via SMTP
         try {
           emailSent = await this.emailService.sendTemporaryPasswordEmail(
             userData.email,
@@ -174,7 +207,7 @@ export class UsersSeeder {
               fullName: userData.fullName,
               tempPassword: plainPassword,
               expiresInHours: 48,
-              loginUrl: 'http://localhost:5173/login',
+              loginUrl: 'https://lrcjrs.org/login',
             },
           );
           if (emailSent) {
@@ -199,6 +232,7 @@ export class UsersSeeder {
           townCode: userData.homeTownCode,
           hasAppAccess: true,
           emailSent,
+          whatsappSent,
           isTemporary,
         });
       } else {

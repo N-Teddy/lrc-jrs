@@ -15,6 +15,9 @@ import { RolesGuard } from './core/guards/roles.guard';
 import { TownScopeGuard } from './core/guards/town-scope.guard';
 import { LoggingInterceptor } from './core/interceptors/logging.interceptor';
 import { TransformResponseInterceptor } from './core/interceptors/transform-response.interceptor';
+import { ProductionInitService } from './database/seeds/production-init.service';
+import { TownsSeeder } from './database/seeds/seeders/towns.seeder';
+import { UsersSeeder } from './database/seeds/seeders/users.seeder';
 import { ActivitiesModule } from './modules/activities/activities.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { TownsModule } from './modules/towns/towns.module';
@@ -39,6 +42,9 @@ import { ServicesModule } from './services/services.module';
   controllers: [AppController],
   providers: [
     AppService,
+    TownsSeeder,
+    UsersSeeder,
+    ProductionInitService,
     // Global Exception Filters
     {
       provide: APP_FILTER,
