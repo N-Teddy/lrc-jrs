@@ -203,3 +203,103 @@ export function useDriveFilesQuery(folderId?: string) {
     staleTime: 60 * 1000,
   });
 }
+
+export function useUploadStandaloneDriveFilesMutation() {
+  const http = useHttp();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ formData }: { formData: FormData }) =>
+      http.post<any>('/activities/report/drive-upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['activities', 'drive-files'],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['activities', 'report-folders'],
+      });
+      queryClient.invalidateQueries({ queryKey: queryKeys.activities.all });
+    },
+  });
+}
+
+export function useDeleteDriveFileMutation() {
+  const http = useHttp();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (fileId: string) =>
+      http.delete<{ success: boolean; fileId: string }>(
+        `/activities/report/drive-file/${fileId}`,
+      ),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['activities', 'drive-files'],
+      });
+      queryClient.invalidateQueries({ queryKey: queryKeys.activities.all });
+    },
+  });
+}
+
+export function useCreateDriveFolderMutation() {
+  const http = useHttp();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ name, parentId }: { name: string; parentId?: string }) =>
+      http.post<IDriveFolderOption>('/activities/report/drive-folders', {
+        name,
+        parentId,
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['activities', 'report-folders'],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['activities', 'drive-files'],
+      });
+    },
+  });
+}
+
+export function useRenameDriveFolderMutation() {
+  const http = useHttp();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, name }: { id: string; name: string }) =>
+      http.patch<IDriveFolderOption>(`/activities/report/drive-folders/${id}`, {
+        name,
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['activities', 'report-folders'],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['activities', 'drive-files'],
+      });
+    },
+  });
+}
+
+export function useDeleteDriveFolderMutation() {
+  const http = useHttp();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) =>
+      http.delete<boolean>(`/activities/report/drive-folders/${id}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['activities', 'report-folders'],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['activities', 'drive-files'],
+      });
+    },
+  });
+}

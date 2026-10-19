@@ -14,7 +14,7 @@ import {
 } from '@phosphor-icons/react';
 import type React from 'react';
 import { useEffect, useRef, useState } from 'react';
-import { UserAvatar } from '../../../components';
+import { CardGridSkeleton, UserAvatar } from '../../../components';
 import {
   calculateAge,
   formatCameroonPhone,
@@ -80,26 +80,7 @@ export const MemberCardGridView: React.FC<MemberCardGridViewProps> = ({
   }, [openMenuId]);
 
   if (isLoading) {
-    return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 animate-pulse">
-        {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-          <div
-            key={i}
-            className="h-56 rounded-xl bg-white border border-[#e8e1dd] p-5 flex flex-col justify-between"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full bg-[#f4ece9]" />
-              <div className="space-y-2">
-                <div className="h-4 w-28 bg-[#f4ece9] rounded" />
-                <div className="h-3 w-16 bg-[#f4ece9] rounded" />
-              </div>
-            </div>
-            <div className="h-4 w-36 bg-[#f4ece9] rounded" />
-            <div className="h-8 w-full bg-[#f4ece9] rounded-md" />
-          </div>
-        ))}
-      </div>
-    );
+    return <CardGridSkeleton cardCount={Math.min(limit, 8)} />;
   }
 
   if (members.length === 0) {

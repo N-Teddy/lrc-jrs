@@ -230,6 +230,14 @@
       "noHubsFound": "Aucun centre de communauté correspondant trouvé.",
       "openMapView": "Ouvrir la carte du Cameroun",
       "tenRegionsScope": "Périmètre 10 régions"
+    },
+    "footer": {
+      "operational": "Systèmes Opérationnels",
+      "gateway": "Passerelle Centrale En Ligne",
+      "allRightsReserved": "© {{year}} Plateforme JRS. Tous droits réservés.",
+      "version": "v0.1.0",
+      "build": "Version 2026.10",
+      "desktopEdition": "Édition Bureau"
     }
   },
   "roles": {

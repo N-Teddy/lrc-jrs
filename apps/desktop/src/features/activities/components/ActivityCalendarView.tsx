@@ -10,6 +10,7 @@ import {
 } from '@phosphor-icons/react';
 import type React from 'react';
 import { useEffect, useMemo, useState } from 'react';
+import { ActivityCalendarSkeleton } from '../../../components';
 import {
   formatActivityTime,
   getActivityTypeConfig,
@@ -161,13 +162,7 @@ export const ActivityCalendarView: React.FC<ActivityCalendarViewProps> = ({
   const todayKey = formatLocalDateKey(new Date());
 
   if (isLoading) {
-    return (
-      <div className="bg-white rounded-xl border border-[#e8e1dd] shadow-xs p-8 flex flex-col items-center justify-center min-h-[400px] animate-pulse">
-        <div className="w-10 h-10 rounded-full bg-[#f4ece9] mb-4" />
-        <div className="h-4 w-48 bg-[#f4ece9] rounded mb-2" />
-        <div className="h-3 w-32 bg-[#f4ece9] rounded" />
-      </div>
-    );
+    return <ActivityCalendarSkeleton />;
   }
 
   return (

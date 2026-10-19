@@ -1,4 +1,5 @@
 import {
+  type IDriveFolderOption,
   useDeleteActivityReportMutation,
   useDriveFoldersQuery,
   useTranslation,
@@ -12,6 +13,7 @@ import {
   FilePdf,
   FileText,
   Folder,
+  FolderOpen,
   HardDrives,
   Trash,
   UploadSimple,
@@ -58,13 +60,75 @@ export const ActivityReportUploadModal: React.FC<
 
   const folderOptions: SelectOption[] = useMemo(() => {
     if (!driveFolders || driveFolders.length === 0) {
-      return [{ value: '', label: 'JRs (Default Root Folder)' }];
+      return [{ value: '', label: 'Default JRs Root Folder' }];
     }
-    return driveFolders.map((f) => ({
-      value: f.id,
-      label: f.path || f.name,
-      description: f.path !== f.name ? f.name : undefined,
-    }));
+
+    const folderById = new Map<string, IDriveFolderOption>();
+    for (const f of driveFolders) {
+      folderById.set(f.id, f);
+    }
+
+    const childrenByParent = new Map<string, IDriveFolderOption[]>();
+    const roots: IDriveFolderOption[] = [];
+
+    for (const f of driveFolders) {
+      if (f.parentId && folderById.has(f.parentId) && f.parentId !== f.id) {
+        const list = childrenByParent.get(f.parentId) || [];
+        list.push(f);
+        childrenByParent.set(f.parentId, list);
+      } else {
+        roots.push(f);
+      }
+    }
+
+    interface ITreeItem extends IDriveFolderOption {
+      level: number;
+      children: ITreeItem[];
+    }
+
+    const buildTree = (item: IDriveFolderOption, level: number): ITreeItem => {
+      const childItems = childrenByParent.get(item.id) || [];
+      return {
+        ...item,
+        level,
+        children: childItems.map((c) => buildTree(c, level + 1)),
+      };
+    };
+
+    const tree = roots.map((r) => buildTree(r, 0));
+
+    const flatten = (items: ITreeItem[]): ITreeItem[] => {
+      const result: ITreeItem[] = [];
+      for (const it of items) {
+        result.push(it);
+        if (it.children?.length) {
+          result.push(...flatten(it.children));
+        }
+      }
+      return result;
+    };
+
+    const flat = flatten(tree);
+    const rootId = driveFolders[0]?.id || '';
+
+    return flat.map((node) => {
+      const isRoot =
+        node.id === 'root' ||
+        node.id === 'mock-root' ||
+        node.id === rootId ||
+        node.level === 0;
+
+      return {
+        value: node.id,
+        label: isRoot ? 'Default JRs Root Folder' : node.name,
+        selectedLabel: isRoot
+          ? 'Default JRs Root Folder'
+          : node.path || node.name,
+        description: isRoot ? 'Top-level root directory' : undefined,
+        level: node.level,
+        icon: isRoot ? FolderOpen : Folder,
+      };
+    });
   }, [driveFolders]);
 
   // Smart folder pre-selection based on activity properties

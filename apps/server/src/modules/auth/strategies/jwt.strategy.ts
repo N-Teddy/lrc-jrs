@@ -9,6 +9,8 @@ export interface JwtPayload {
   role: string;
   homeTownId: string;
   isSetup?: boolean;
+  iat?: number;
+  exp?: number;
 }
 
 @Injectable()
@@ -42,6 +44,15 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
     if (user.account?.isAccessRevoked) {
       throw new UnauthorizedException('Your account access has been revoked');
+    }
+
+    if (payload.iat && user.lastLogoutAt) {
+      const logoutSec = Math.floor(user.lastLogoutAt.getTime() / 1000);
+      if (payload.iat < logoutSec) {
+        throw new UnauthorizedException(
+          'Session terminated. Token invalidated.',
+        );
+      }
     }
 
     return user;

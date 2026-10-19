@@ -21,8 +21,10 @@ const config: Config = {
   moduleNameMapper: {
     ...pathsToModuleNameMapper(paths, { prefix: '<rootDir>/' }),
     '^(\\.{1,2}/.*)\\.js$': '$1',
-    '^@dicebear/collection$': '<rootDir>/../../node_modules/.pnpm/@dicebear+collection@9.4.2_@dicebear+core@9.4.3/node_modules/@dicebear/collection/lib/index.js',
-    '^@dicebear/core$': '<rootDir>/../../node_modules/.pnpm/@dicebear+core@9.4.3/node_modules/@dicebear/core/lib/index.js'
+    '^@dicebear/collection$':
+      '<rootDir>/../../node_modules/.pnpm/@dicebear+collection@9.4.2_@dicebear+core@9.4.3/node_modules/@dicebear/collection/lib/index.js',
+    '^@dicebear/core$':
+      '<rootDir>/../../node_modules/.pnpm/@dicebear+core@9.4.3/node_modules/@dicebear/core/lib/index.js',
   },
   collectCoverageFrom: [
     'src/**/*.(t|j)s',

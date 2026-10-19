@@ -1,5 +1,9 @@
-import { useTownContext, useTranslation } from '@jrs/client-core';
-import type { IActivity } from '@jrs/shared';
+import {
+  useTownContext,
+  useTranslation,
+  useUpdateActivityMutation,
+} from '@jrs/client-core';
+import { ActivityStatus, type IActivity } from '@jrs/shared';
 import {
   CalendarBlank,
   Eye,
@@ -9,7 +13,7 @@ import {
 } from '@phosphor-icons/react';
 import type React from 'react';
 import { useState } from 'react';
-import { PaginationControl } from '../../../components';
+import { CardGridSkeleton, PaginationControl } from '../../../components';
 import {
   formatActivityDateRange,
   getActivityStatusConfig,
@@ -47,37 +51,46 @@ export const ActivityCardGridView: React.FC<ActivityCardGridViewProps> = ({
 }) => {
   const { t } = useTranslation();
   const { canWrite } = useTownContext();
+  const updateActivityMutation = useUpdateActivityMutation();
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
 
   const totalPages = Math.ceil(total / limit) || 1;
 
+  const handleCancelActivity = async (activity: IActivity) => {
+    if (
+      !window.confirm(
+        'Are you sure you want to cancel this gathering? You can restore it at any time.',
+      )
+    ) {
+      return;
+    }
+    await updateActivityMutation.mutateAsync({
+      id: activity.id,
+      dto: {
+        status: ActivityStatus.CANCELLED,
+        changeReason: 'Gathering cancelled by coordinator',
+      },
+    });
+  };
+
+  const handleUndoCancel = async (activity: IActivity) => {
+    await updateActivityMutation.mutateAsync({
+      id: activity.id,
+      dto: {
+        status: ActivityStatus.SCHEDULED,
+        changeReason: 'Gathering cancellation reversed and restored',
+      },
+    });
+  };
+
   if (isLoading) {
-    return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 animate-pulse">
-        {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-          <div
-            key={i}
-            className="h-48 rounded-xl bg-white border border-[#e8e1dd] p-4 flex flex-col justify-between"
-          >
-            <div className="flex items-center justify-between">
-              <div className="h-5 w-24 bg-[#f4ece9] rounded-md" />
-              <div className="h-5 w-16 bg-[#f4ece9] rounded-md" />
-            </div>
-            <div className="space-y-2">
-              <div className="h-4 w-3/4 bg-[#f4ece9] rounded" />
-              <div className="h-3 w-1/2 bg-[#f4ece9] rounded" />
-            </div>
-            <div className="h-8 w-full bg-[#f4ece9] rounded-md" />
-          </div>
-        ))}
-      </div>
-    );
+    return <CardGridSkeleton cardCount={Math.min(limit, 8)} />;
   }
 
   if (activities.length === 0) {
     return (
-      <div className="bg-white rounded-xl border border-[#e8e1dd] shadow-xs p-12 flex flex-col items-center justify-center text-center min-h-[320px]">
-        <div className="w-14 h-14 rounded-xl bg-[#faf2ee] border border-[#e8e1dd] flex items-center justify-center text-[#8a726a] mb-4">
+      <div className="bg-white rounded-md border border-[#e8e1dd] shadow-xs p-12 flex flex-col items-center justify-center text-center min-h-[320px]">
+        <div className="w-14 h-14 rounded-md bg-[#faf2ee] border border-[#e8e1dd] flex items-center justify-center text-[#8a726a] mb-4">
           <CalendarBlank size={28} weight="duotone" />
         </div>
         <h3 className="text-base font-bold text-[#1e1b19] mb-1">
@@ -106,20 +119,20 @@ export const ActivityCardGridView: React.FC<ActivityCardGridViewProps> = ({
           return (
             <div
               key={activity.id}
-              className="bg-white rounded-xl border border-[#e8e1dd] hover:border-[#b85028]/40 hover:shadow-md transition-all duration-200 p-4 flex flex-col justify-between gap-3 group"
+              className="bg-white rounded-md border border-[#e8e1dd] hover:border-[#b85028]/40 hover:shadow-md transition-all duration-200 p-4 flex flex-col justify-between gap-3 group"
             >
               {/* Header: Type, Status & Dropdown */}
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-1.5 min-w-0">
                   <span
-                    className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold border truncate ${typeConfig.badgeBg} ${typeConfig.badgeText} ${typeConfig.badgeBorder}`}
+                    className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold border truncate ${typeConfig.badgeBg} ${typeConfig.badgeText} ${typeConfig.badgeBorder}`}
                   >
                     <TypeIcon size={12} weight="bold" className="shrink-0" />
                     <span className="truncate">{typeConfig.label}</span>
                   </span>
 
                   <span
-                    className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-semibold border shrink-0 ${statusConfig.badgeBg} ${statusConfig.badgeText} ${statusConfig.badgeBorder}`}
+                    className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold border shrink-0 ${statusConfig.badgeBg} ${statusConfig.badgeText} ${statusConfig.badgeBorder}`}
                   >
                     <span
                       className={`w-1.5 h-1.5 rounded-full ${statusConfig.dotColor} ${
@@ -142,6 +155,8 @@ export const ActivityCardGridView: React.FC<ActivityCardGridViewProps> = ({
                   onViewDetails={onViewDetails}
                   onEditActivity={onEditActivity}
                   onViewHistory={onViewHistory}
+                  onCancelActivity={handleCancelActivity}
+                  onUndoCancelActivity={handleUndoCancel}
                   onDeleteActivity={onDeleteActivity}
                   isPrivileged={isPrivileged}
                 />
@@ -184,7 +199,7 @@ export const ActivityCardGridView: React.FC<ActivityCardGridViewProps> = ({
                 <button
                   type="button"
                   onClick={() => onViewDetails(activity)}
-                  className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-[#faf6f4] hover:bg-[#f4ede9] border border-[#f2ebe7] hover:border-[#b85028]/30 text-[11px] mt-0.5 cursor-pointer transition-colors text-left"
+                  className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-md bg-[#faf6f4] hover:bg-[#f4ede9] border border-[#f2ebe7] hover:border-[#b85028]/30 text-[11px] mt-0.5 cursor-pointer transition-colors text-left"
                   title="Click to view full activity & attendance details"
                 >
                   <div className="flex items-center gap-1.5">
@@ -212,7 +227,7 @@ export const ActivityCardGridView: React.FC<ActivityCardGridViewProps> = ({
                 <button
                   type="button"
                   onClick={() => onViewDetails(activity)}
-                  className="flex-1 h-8 px-2.5 rounded-lg bg-[#b85028] text-white hover:bg-[#a44520] font-bold text-xs shadow-2xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                  className="flex-1 h-8 px-2.5 rounded-md bg-[#b85028] text-white hover:bg-[#a44520] font-bold text-xs shadow-2xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
                 >
                   <Eye size={14} weight="bold" />
                   <span className="truncate">
@@ -224,7 +239,7 @@ export const ActivityCardGridView: React.FC<ActivityCardGridViewProps> = ({
                   <button
                     type="button"
                     onClick={() => onEditActivity(activity)}
-                    className="w-8 h-8 rounded-lg bg-[#faf2ee] border border-[#e8e1dd] hover:bg-white text-[#57423b] hover:text-[#1e1b19] flex items-center justify-center transition-colors cursor-pointer shrink-0"
+                    className="w-8 h-8 rounded-md bg-[#faf2ee] border border-[#e8e1dd] hover:bg-white text-[#57423b] hover:text-[#1e1b19] flex items-center justify-center transition-colors cursor-pointer shrink-0"
                     title="Edit or Reschedule"
                   >
                     <PencilSimple size={14} weight="bold" />
@@ -238,7 +253,7 @@ export const ActivityCardGridView: React.FC<ActivityCardGridViewProps> = ({
 
       {/* Pagination Footer */}
       {totalPages > 1 && (
-        <div className="bg-white rounded-xl border border-[#e8e1dd] shadow-xs py-3 px-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#8a726a]">
+        <div className="bg-white rounded-md border border-[#e8e1dd] shadow-xs py-3 px-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#8a726a]">
           <span>
             {t('common:showingActivities', {
               start: (page - 1) * limit + 1,

@@ -677,8 +677,25 @@ export class ActivitiesService {
       activity.locationVenue = dto.locationVenue.trim();
     }
 
-    // Auto-determine status based on schedule unless activity is cancelled
-    if (activity.status !== ActivityStatus.CANCELLED) {
+    // Handle activity cancellation and reopening
+    if (dto.status === ActivityStatus.CANCELLED) {
+      if (activity.status !== ActivityStatus.CANCELLED) {
+        statusChanged = true;
+        previousValues.status = activity.status;
+        newValues.status = ActivityStatus.CANCELLED;
+        activity.status = ActivityStatus.CANCELLED;
+      }
+    } else if (activity.status === ActivityStatus.CANCELLED && dto.status) {
+      // Reopen cancelled activity
+      const restoredStatus = this.determineStatus(
+        activity.startDate,
+        activity.endDate,
+      );
+      statusChanged = true;
+      previousValues.status = ActivityStatus.CANCELLED;
+      newValues.status = restoredStatus;
+      activity.status = restoredStatus;
+    } else if (activity.status !== ActivityStatus.CANCELLED) {
       const computedStatus = this.determineStatus(
         activity.startDate,
         activity.endDate,
@@ -689,11 +706,6 @@ export class ActivitiesService {
         newValues.status = computedStatus;
         activity.status = computedStatus;
       }
-    } else if (dto.status && dto.status !== activity.status) {
-      statusChanged = true;
-      previousValues.status = activity.status;
-      newValues.status = dto.status;
-      activity.status = dto.status;
     }
 
     if (dto.title) activity.title = dto.title.trim();
@@ -703,8 +715,15 @@ export class ActivitiesService {
     // Push to change history if audited field changed
     if (dateChanged || locationChanged || statusChanged) {
       let changeType = 'STATUS_CHANGED';
-      if (dateChanged) changeType = 'RESCHEDULED';
-      else if (locationChanged) changeType = 'LOCATION_CHANGED';
+      if (activity.status === ActivityStatus.CANCELLED) {
+        changeType = 'CANCELLED';
+      } else if (previousValues.status === ActivityStatus.CANCELLED) {
+        changeType = 'REOPENED';
+      } else if (dateChanged) {
+        changeType = 'RESCHEDULED';
+      } else if (locationChanged) {
+        changeType = 'LOCATION_CHANGED';
+      }
 
       activity.changeHistory.push({
         changeType,
@@ -1498,5 +1517,114 @@ export class ActivitiesService {
 
     await activity.save();
     return this.mapActivity(activity);
+  }
+
+  /**
+   * Upload standalone files directly to Google Drive without an activity
+   */
+  async uploadStandaloneDriveFiles(
+    files: Express.Multer.File[],
+    folderId: string | undefined,
+    summary: string | undefined,
+    currentUser: IAuthUser,
+  ) {
+    if (currentUser.role !== UserRole.AP && currentUser.role !== UserRole.PC) {
+      throw new ForbiddenException(
+        'Only coordinators or overseers can upload files to the drive.',
+      );
+    }
+
+    if (!files || files.length === 0) {
+      throw new BadRequestException('No files were provided for upload.');
+    }
+
+    const uploadedResults = [];
+    for (const file of files) {
+      const sanitizedFilename = file.originalname.replace(
+        /[^a-zA-Z0-9._-]/g,
+        '_',
+      );
+      const uploadResult = await this.driveService.uploadFile({
+        filename: sanitizedFilename,
+        mimeType: file.mimetype,
+        content: file.buffer,
+        folderId: folderId?.trim() || undefined,
+      });
+
+      uploadedResults.push({
+        fileId: uploadResult.fileId,
+        filename: file.originalname,
+        webViewLink: uploadResult.webViewLink,
+        uploadedByName: currentUser.fullName,
+        uploadedAt: new Date().toISOString(),
+        folderId: folderId?.trim() || undefined,
+        fileSize: file.size,
+        summary: summary?.trim(),
+      });
+    }
+
+    return uploadedResults;
+  }
+
+  /**
+   * Delete a file directly from Drive or from activity report if attached
+   */
+  async deleteDriveFile(fileId: string, currentUser: IAuthUser) {
+    if (currentUser.role !== UserRole.AP && currentUser.role !== UserRole.PC) {
+      throw new ForbiddenException(
+        'Only coordinators or overseers can delete files from the drive.',
+      );
+    }
+
+    // 1. Check if linked to any activity
+    const activity = await this.activityModel.findOne({
+      isDeleted: false,
+      $or: [{ 'reports.fileId': fileId }, { 'report.fileId': fileId }],
+    });
+
+    if (activity) {
+      activity.reports = (activity.reports || []).filter(
+        (r) => r.fileId !== fileId,
+      );
+      if (activity.report?.fileId === fileId) {
+        activity.report =
+          activity.reports.length > 0
+            ? activity.reports[activity.reports.length - 1]
+            : undefined;
+      }
+      await activity.save();
+    }
+
+    // 2. Delete from Drive
+    await this.driveService.deleteFile(fileId);
+
+    return { success: true, fileId };
+  }
+
+  /**
+   * Create a folder in Google Drive
+   */
+  async createDriveFolder(name: string, parentId?: string) {
+    if (!name || !name.trim()) {
+      throw new BadRequestException('Folder name cannot be empty.');
+    }
+    return this.driveService.createFolder(name.trim(), parentId);
+  }
+
+  /**
+   * Rename a folder in Google Drive
+   */
+  async renameDriveFolder(folderId: string, name: string) {
+    if (!name || !name.trim()) {
+      throw new BadRequestException('Folder name cannot be empty.');
+    }
+    return this.driveService.renameFolder(folderId, name.trim());
+  }
+
+  /**
+   * Delete a folder from Google Drive
+   */
+  async deleteDriveFolder(folderId: string) {
+    return this.driveService.deleteFolder(folderId);
   }
 }

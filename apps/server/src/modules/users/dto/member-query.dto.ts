@@ -1,6 +1,6 @@
 import { UserRole } from '@jrs/shared';
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import {
   IsBoolean,
   IsEnum,
@@ -59,7 +59,11 @@ export class MemberQueryDto {
     description: 'Filter only JR age-eligible youth (18-30)',
   })
   @IsOptional()
-  @Type(() => Boolean)
+  @Transform(({ value }) => {
+    if (value === 'true' || value === true) return true;
+    if (value === 'false' || value === false) return false;
+    return undefined;
+  })
   @IsBoolean()
   isJr?: boolean;
 
@@ -67,7 +71,11 @@ export class MemberQueryDto {
     description: 'Filter only members with or without platform app access',
   })
   @IsOptional()
-  @Type(() => Boolean)
+  @Transform(({ value }) => {
+    if (value === 'true' || value === true) return true;
+    if (value === 'false' || value === false) return false;
+    return undefined;
+  })
   @IsBoolean()
   hasAppAccess?: boolean;
 }

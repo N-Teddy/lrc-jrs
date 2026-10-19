@@ -1,9 +1,9 @@
-import { useTranslation } from '@jrs/client-core';
-import type { IActivity } from '@jrs/shared';
+import { useTranslation, useUpdateActivityMutation } from '@jrs/client-core';
+import { ActivityStatus, type IActivity } from '@jrs/shared';
 import { CalendarBlank } from '@phosphor-icons/react';
 import type React from 'react';
 import { useState } from 'react';
-import { PaginationControl } from '../../../components';
+import { PaginationControl, TableSkeleton } from '../../../components';
 import {
   formatActivityDateRange,
   getActivityStatusConfig,
@@ -39,17 +39,49 @@ export const ActivityTableView: React.FC<ActivityTableViewProps> = ({
   isPrivileged,
 }) => {
   const { t } = useTranslation();
+  const updateActivityMutation = useUpdateActivityMutation();
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
 
   const totalPages = Math.ceil(total / limit) || 1;
 
+  const handleCancelActivity = async (activity: IActivity) => {
+    if (
+      !window.confirm(
+        'Are you sure you want to cancel this gathering? You can restore it at any time.',
+      )
+    ) {
+      return;
+    }
+    await updateActivityMutation.mutateAsync({
+      id: activity.id,
+      dto: {
+        status: ActivityStatus.CANCELLED,
+        changeReason: 'Gathering cancelled by coordinator',
+      },
+    });
+  };
+
+  const handleUndoCancel = async (activity: IActivity) => {
+    await updateActivityMutation.mutateAsync({
+      id: activity.id,
+      dto: {
+        status: ActivityStatus.SCHEDULED,
+        changeReason: 'Gathering cancellation reversed and restored',
+      },
+    });
+  };
+
   if (isLoading) {
     return (
-      <div className="bg-white rounded-xl border border-[#e8e1dd] shadow-xs p-8 flex flex-col items-center justify-center min-h-[360px] animate-pulse">
-        <div className="w-10 h-10 rounded-full bg-[#f4ece9] mb-4" />
-        <div className="h-4 w-48 bg-[#f4ece9] rounded mb-2" />
-        <div className="h-3 w-32 bg-[#f4ece9] rounded" />
-      </div>
+      <TableSkeleton
+        columns={[
+          t('activities:table.activity', 'Activity Title'),
+          t('activities:table.schedule', 'Date & Venue'),
+          t('activities:table.status', 'Status'),
+          t('common:actions', 'Actions'),
+        ]}
+        rowCount={Math.min(limit, 8)}
+      />
     );
   }
 
@@ -192,6 +224,8 @@ export const ActivityTableView: React.FC<ActivityTableViewProps> = ({
                       onViewDetails={onViewDetails}
                       onEditActivity={onEditActivity}
                       onViewHistory={onViewHistory}
+                      onCancelActivity={handleCancelActivity}
+                      onUndoCancelActivity={handleUndoCancel}
                       onDeleteActivity={onDeleteActivity}
                       isPrivileged={isPrivileged}
                       openUpwards={

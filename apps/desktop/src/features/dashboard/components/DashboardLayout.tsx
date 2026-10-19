@@ -7,7 +7,9 @@ import {
   Sparkle,
   SquaresFour,
 } from '@phosphor-icons/react';
+import { motion } from 'motion/react';
 import type React from 'react';
+import { APP_VERSION } from '../../../constants/version';
 import { AccessFeature } from '../../access';
 import { ActivitiesFeature } from '../../activities';
 import { ChangePasswordModal } from '../../auth';
@@ -72,7 +74,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 
       {/* 3. Main Workspace Area */}
       <main
-        className={`pt-16 min-h-screen transition-all duration-200 ${
+        className={`pt-16 pb-14 min-h-screen transition-all duration-200 ${
           isSidebarCollapsed ? 'pl-[72px]' : 'pl-[260px]'
         }`}
       >
@@ -120,119 +122,173 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             </div>
           )}
 
-          {activeTab === 'members' ? (
-            <MembersFeature />
-          ) : activeTab === 'activities' ? (
-            <ActivitiesFeature />
-          ) : activeTab === 'access' ? (
-            <AccessFeature />
-          ) : activeTab === 'reports' ? (
-            <DriveExplorerFeature />
-          ) : activeTab === 'transfers' ? (
-            <TransfersFeature />
-          ) : (
-            /* Pristine Minimalist Workspace Card */
-            <div className="relative w-full min-h-[560px] rounded-xl bg-white border border-[#e8e1dd] shadow-xs flex flex-col justify-between p-8 sm:p-12 overflow-hidden">
-              {/* Background Subtle Hub Grid Pattern */}
-              <div className="absolute inset-0 pointer-events-none opacity-40">
-                <svg
-                  className="w-full h-full text-[#e8e1dd]"
-                  width="100%"
-                  height="100%"
-                >
-                  <defs>
-                    <pattern
-                      id="sanctuary-grid"
-                      width="40"
-                      height="40"
-                      patternUnits="userSpaceOnUse"
-                    >
-                      <circle cx="2" cy="2" r="1.2" fill="currentColor" />
-                    </pattern>
-                  </defs>
-                  <rect
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{
+              duration: 0.15,
+              ease: 'easeOut',
+            }}
+            className="w-full"
+          >
+            {activeTab === 'members' ? (
+              <MembersFeature />
+            ) : activeTab === 'activities' ? (
+              <ActivitiesFeature />
+            ) : activeTab === 'access' ? (
+              <AccessFeature />
+            ) : activeTab === 'reports' ? (
+              <DriveExplorerFeature />
+            ) : activeTab === 'transfers' ? (
+              <TransfersFeature />
+            ) : (
+              /* Pristine Minimalist Workspace Card */
+              <div className="relative w-full min-h-[560px] rounded-xl bg-white border border-[#e8e1dd] shadow-xs flex flex-col justify-between p-8 sm:p-12 overflow-hidden">
+                {/* Background Subtle Hub Grid Pattern */}
+                <div className="absolute inset-0 pointer-events-none opacity-40">
+                  <svg
+                    className="w-full h-full text-[#e8e1dd]"
                     width="100%"
                     height="100%"
-                    fill="url(#sanctuary-grid)"
-                  />
-                </svg>
-              </div>
-
-              {/* Top Baseline Metadata */}
-              <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div className="flex items-center gap-2.5 bg-[#faf2ee] border border-[#e8e1dd] px-3.5 py-1.5 rounded-full text-xs">
-                  <span className="w-2 h-2 rounded-full bg-[#486b52] animate-pulse" />
-                  <span className="font-bold text-[#1e1b19]">
-                    {activeTown
-                      ? `${activeTown.name} ${t('towns:hub')} (${activeTown.code})`
-                      : t('towns:activeHub')}
-                  </span>
-                  <span className="text-[#8a726a] font-mono text-[11px]">
-                    #LRC-JRS-PORTAL
-                  </span>
+                  >
+                    <defs>
+                      <pattern
+                        id="sanctuary-grid"
+                        width="40"
+                        height="40"
+                        patternUnits="userSpaceOnUse"
+                      >
+                        <circle cx="2" cy="2" r="1.2" fill="currentColor" />
+                      </pattern>
+                    </defs>
+                    <rect
+                      width="100%"
+                      height="100%"
+                      fill="url(#sanctuary-grid)"
+                    />
+                  </svg>
                 </div>
 
-                <div className="flex items-center gap-2 text-xs font-semibold text-[#8a726a]">
-                  <span>SANCTUARY CANVAS</span>
-                  <span className="px-2 py-0.5 rounded-md bg-[#faf2ee] border border-[#e8e1dd] text-[#1e1b19] font-mono text-[11px]">
-                    {t('common:ready')}
-                  </span>
-                </div>
-              </div>
-
-              {/* Central Pristine Workspace Focus */}
-              <div className="relative z-10 my-auto py-12 flex flex-col items-center text-center max-w-md mx-auto">
-                <div className="w-16 h-16 rounded-xl bg-[#faf2ee] border border-[#e8e1dd] flex items-center justify-center text-[#b85028] mb-5 shadow-xs">
-                  <SquaresFour size={32} weight="fill" />
-                </div>
-
-                <div className="inline-flex items-center gap-1.5 bg-[#ffdbcf]/50 text-[#812901] px-3 py-1 rounded-full text-xs font-bold mb-3 border border-[#ffb59c]/50">
-                  <Sparkle size={14} weight="fill" />
-                  <span>{t('dashboard:reservedWorkspace')}</span>
-                </div>
-
-                <h2 className="text-xl sm:text-2xl font-bold text-[#1e1b19] tracking-tight mb-2">
-                  {t('dashboard:pristineTitle')}
-                </h2>
-
-                <p className="text-xs sm:text-sm text-[#57423b] leading-relaxed">
-                  {t('dashboard:pristineDesc', {
-                    hub: activeTown ? activeTown.name : t('dashboard:assigned'),
-                  })}
-                </p>
-              </div>
-
-              {/* Bottom Footer Specs */}
-              <div className="relative z-10 flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-[#e8e1dd]">
-                <div className="flex items-center gap-4 text-xs text-[#8a726a]">
-                  <div className="flex items-center gap-1.5">
-                    <div className="w-2.5 h-2.5 rounded-full bg-[#b85028]" />
-                    <span>Terracotta</span>
+                {/* Top Baseline Metadata */}
+                <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                  <div className="flex items-center gap-2.5 bg-[#faf2ee] border border-[#e8e1dd] px-3.5 py-1.5 rounded-full text-xs">
+                    <span className="w-2 h-2 rounded-full bg-[#486b52] animate-pulse" />
+                    <span className="font-bold text-[#1e1b19]">
+                      {activeTown
+                        ? `${activeTown.name} ${t('towns:hub')} (${activeTown.code})`
+                        : t('towns:activeHub')}
+                    </span>
+                    <span className="text-[#8a726a] font-mono text-[11px]">
+                      #LRC-JRS-PORTAL
+                    </span>
                   </div>
-                  <div className="flex items-center gap-1.5">
-                    <div className="w-2.5 h-2.5 rounded-full bg-[#486b52]" />
-                    <span>Sage Olive</span>
+
+                  <div className="flex items-center gap-2 text-xs font-semibold text-[#8a726a]">
+                    <span>SANCTUARY CANVAS</span>
+                    <span className="px-2 py-0.5 rounded-md bg-[#faf2ee] border border-[#e8e1dd] text-[#1e1b19] font-mono text-[11px]">
+                      {t('common:ready')}
+                    </span>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-1.5 text-xs text-[#57423b] font-medium">
-                  <CheckCircle
-                    size={16}
-                    weight="fill"
-                    className="text-[#486b52]"
-                  />
-                  <span>
-                    {t('dashboard:signedInAs', {
-                      name: user.fullName,
-                      role: user.role,
+                {/* Central Pristine Workspace Focus */}
+                <div className="relative z-10 my-auto py-12 flex flex-col items-center text-center max-w-md mx-auto">
+                  <div className="w-16 h-16 rounded-xl bg-[#faf2ee] border border-[#e8e1dd] flex items-center justify-center text-[#b85028] mb-5 shadow-xs">
+                    <SquaresFour size={32} weight="fill" />
+                  </div>
+
+                  <div className="inline-flex items-center gap-1.5 bg-[#ffdbcf]/50 text-[#812901] px-3 py-1 rounded-full text-xs font-bold mb-3 border border-[#ffb59c]/50">
+                    <Sparkle size={14} weight="fill" />
+                    <span>{t('dashboard:reservedWorkspace')}</span>
+                  </div>
+
+                  <h2 className="text-xl sm:text-2xl font-bold text-[#1e1b19] tracking-tight mb-2">
+                    {t('dashboard:pristineTitle')}
+                  </h2>
+
+                  <p className="text-xs sm:text-sm text-[#57423b] leading-relaxed">
+                    {t('dashboard:pristineDesc', {
+                      hub: activeTown
+                        ? activeTown.name
+                        : t('dashboard:assigned'),
                     })}
-                  </span>
+                  </p>
+                </div>
+
+                {/* Bottom Footer Specs */}
+                <div className="relative z-10 flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-[#e8e1dd]">
+                  <div className="flex items-center gap-4 text-xs text-[#8a726a]">
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-2.5 h-2.5 rounded-full bg-[#b85028]" />
+                      <span>Terracotta</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-2.5 h-2.5 rounded-full bg-[#486b52]" />
+                      <span>Sage Olive</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-1.5 text-xs text-[#57423b] font-medium">
+                    <CheckCircle
+                      size={16}
+                      weight="fill"
+                      className="text-[#486b52]"
+                    />
+                    <span>
+                      {t('dashboard:signedInAs', {
+                        name: user.fullName,
+                        role: user.role,
+                      })}
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
+          </motion.div>
         </div>
       </main>
+
+      {/* 4. Global Stationary Operations Footer (Style 1 - Tech & System Status) */}
+      <footer
+        className={`fixed bottom-0 right-0 h-11 z-20 border-t border-[#e8e1dd] bg-white/80 backdrop-blur-md px-6 sm:px-8 transition-all duration-200 select-none flex items-center ${
+          isSidebarCollapsed ? 'left-[72px]' : 'left-[260px]'
+        }`}
+      >
+        <div className="w-full max-w-[1536px] mx-auto flex items-center justify-between gap-4 text-xs text-[#8a726a]">
+          {/* Left: Operational status with pulsing beacon */}
+          <div className="flex items-center gap-2.5 shrink-0">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#486b52] opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-[#486b52]" />
+            </span>
+            <span className="font-semibold text-[#1e1b19]">
+              {t('dashboard:footer.operational')}
+            </span>
+            <span className="text-[#8a726a]/60">•</span>
+            <span className="text-[#57423b]">
+              {t('dashboard:footer.gateway')}
+            </span>
+          </div>
+
+          {/* Center: Legal Copyright */}
+          <div className="text-center font-medium text-[#57423b] truncate hidden md:block">
+            {t('dashboard:footer.allRightsReserved', {
+              year: new Date().getFullYear(),
+            })}
+          </div>
+
+          {/* Right: Build & Edition Metadata */}
+          <div className="flex items-center gap-2 font-mono text-[11px] text-[#8a726a] shrink-0">
+            <span className="px-2 py-0.5 rounded-md bg-[#faf2ee] border border-[#e8e1dd] text-[#57423b] font-bold">
+              v{APP_VERSION}
+            </span>
+            <span>{t('dashboard:footer.build')}</span>
+            <span className="text-[#8a726a]/60">•</span>
+            <span>{t('dashboard:footer.desktopEdition')}</span>
+          </div>
+        </div>
+      </footer>
 
       {/* 4. Active Hub Switcher Popover */}
       <HubSwitcherPopover

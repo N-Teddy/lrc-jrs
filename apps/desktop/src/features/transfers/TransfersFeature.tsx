@@ -212,6 +212,7 @@ export const TransfersFeature: React.FC = () => {
       <div className="w-full flex flex-col gap-6">
         <MemberDetailPage
           memberId={selectedMemberId}
+          initialTab="transfers"
           onBack={() => setSelectedMemberId(null)}
           onEdit={(m) => setEditingMember(m)}
           onManageAccess={(m) => setAccessMember(m)}

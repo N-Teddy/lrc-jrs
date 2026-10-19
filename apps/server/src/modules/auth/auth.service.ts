@@ -275,11 +275,41 @@ export class AuthService {
   }
 
   /**
-   * Logs out user and revokes the refresh token.
+   * Logs out user, invalidates access token sessions by stamping lastLogoutAt,
+   * and revokes refresh tokens.
    */
-  async logout(refreshTokenDto: RefreshTokenDto) {
-    const tokenHash = this.hashToken(refreshTokenDto.refreshToken);
-    await this.refreshTokenModel.updateOne({ tokenHash }, { isRevoked: true });
+  async logout(refreshTokenDto?: RefreshTokenDto, authHeader?: string) {
+    let userId: string | null = null;
+
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const token = authHeader.substring(7);
+      try {
+        const decoded = this.jwtService.decode(token) as any;
+        if (decoded?.sub) {
+          userId = decoded.sub;
+        }
+      } catch {
+        // ignore decode errors
+      }
+    }
+
+    if (refreshTokenDto?.refreshToken) {
+      const tokenHash = this.hashToken(refreshTokenDto.refreshToken);
+      const storedToken = await this.refreshTokenModel.findOne({ tokenHash });
+      if (storedToken) {
+        storedToken.isRevoked = true;
+        await storedToken.save();
+        if (!userId) {
+          userId = storedToken.userId.toString();
+        }
+      }
+    }
+
+    if (userId) {
+      await this.usersService.update(userId, { lastLogoutAt: new Date() });
+      await this.refreshTokenModel.updateMany({ userId }, { isRevoked: true });
+    }
+
     return { message: 'Logged out successfully' };
   }
 

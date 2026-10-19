@@ -191,7 +191,8 @@ export class UsersService {
     const limit = Math.max(1, Math.min(100, Number(query.limit) || 20));
     const skip = (page - 1) * limit;
 
-    const filter: Record<string, unknown> = {};
+    const filter: Record<string, any> = {};
+    const andConditions: any[] = [];
 
     // Town resolution:
     // AP can query any town or leave open; PC is scoped to target town
@@ -228,18 +229,33 @@ export class UsersService {
 
     // App access filter
     if (query.hasAppAccess !== undefined) {
-      filter['account.hasAppAccess'] = query.hasAppAccess;
+      if (query.hasAppAccess) {
+        filter['account.hasAppAccess'] = true;
+      } else {
+        andConditions.push({
+          $or: [
+            { 'account.hasAppAccess': false },
+            { 'account.hasAppAccess': { $exists: false } },
+            { account: { $exists: false } },
+          ],
+        });
+      }
     }
 
     // Search query matching name, phone, or email
     if (query.search?.trim()) {
       const term = query.search.trim();
       const regex = new RegExp(term, 'i');
-      filter.$or = [
+      const searchCondition = [
         { fullName: regex },
         { phoneNumber: regex },
         { email: regex },
       ];
+      andConditions.push({ $or: searchCondition });
+    }
+
+    if (andConditions.length > 0) {
+      filter.$and = andConditions;
     }
 
     const [total, docs] = await Promise.all([

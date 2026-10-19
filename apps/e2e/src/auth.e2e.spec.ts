@@ -1,6 +1,7 @@
+import { AppModule } from '@jrs/server/src/app.module';
 import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { AppModule } from '@jrs/server/src/app.module';
+
 const request = require('supertest');
 
 describe('Auth & Role Adversarial Tests (e2e)', () => {
@@ -14,7 +15,13 @@ describe('Auth & Role Adversarial Tests (e2e)', () => {
     app = moduleFixture.createNestApplication();
     app.setGlobalPrefix('api');
     const { ValidationPipe } = require('@nestjs/common');
-    app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }));
+    app.useGlobalPipes(
+      new ValidationPipe({
+        whitelist: true,
+        forbidNonWhitelisted: true,
+        transform: true,
+      }),
+    );
     await app.init();
   });
 

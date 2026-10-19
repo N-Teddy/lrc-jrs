@@ -6,10 +6,12 @@ import { useClickOutside } from '../hooks/use-click-outside';
 export interface SelectOption<T = string> {
   value: T;
   label: string;
+  selectedLabel?: string;
   description?: string;
   badge?: React.ReactNode;
   icon?: React.ElementType;
   disabled?: boolean;
+  level?: number; // Tree indentation level (0 = root, 1 = subfolder, 2 = child, etc.)
 }
 
 export interface CustomSelectProps<T = string> {
@@ -105,7 +107,9 @@ export function CustomSelect<T extends string = string>({
             />
           )}
           <span className="truncate">
-            {selectedOption ? selectedOption.label : placeholder}
+            {selectedOption
+              ? selectedOption.selectedLabel || selectedOption.label
+              : placeholder}
           </span>
           {selectedOption?.badge && (
             <span className="shrink-0">{selectedOption.badge}</span>
@@ -130,11 +134,12 @@ export function CustomSelect<T extends string = string>({
               ? 'bottom-[calc(100%+4px)]'
               : 'top-[calc(100%+4px)]'
           } ${
-            menuClassName || 'min-w-[190px] w-full'
-          } max-h-64 overflow-y-auto bg-white rounded-xl border border-[#e8e1dd] shadow-xl p-1.5 animate-in fade-in zoom-in-95 duration-150 focus:outline-none`}
+            menuClassName || 'min-w-[210px] w-full'
+          } max-h-64 overflow-y-auto bg-white rounded-md border border-[#e8e1dd] shadow-xl p-1 animate-in fade-in zoom-in-95 duration-150 focus:outline-none`}
         >
           {options.map((option) => {
             const isSelected = option.value === value;
+            const level = option.level || 0;
             return (
               <button
                 type="button"
@@ -143,7 +148,10 @@ export function CustomSelect<T extends string = string>({
                 aria-selected={isSelected}
                 disabled={option.disabled}
                 onClick={() => handleSelect(option)}
-                className={`w-full text-left flex items-center justify-between gap-2.5 px-3 py-2 rounded-md text-xs font-semibold cursor-pointer transition-all ${
+                style={{
+                  paddingLeft: level > 0 ? `${level * 16 + 10}px` : undefined,
+                }}
+                className={`w-full text-left flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-md text-xs font-semibold cursor-pointer transition-all ${
                   option.disabled
                     ? 'opacity-40 cursor-not-allowed text-[#8a726a]'
                     : isSelected
@@ -151,14 +159,22 @@ export function CustomSelect<T extends string = string>({
                       : 'text-[#1e1b19] hover:bg-[#faf2ee] hover:text-[#b85028]'
                 }`}
               >
-                <div className="flex flex-col min-w-0">
-                  <div className="flex items-center gap-2">
+                <div className="flex flex-col min-w-0 flex-1">
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    {/* Visual tree branch connector for nested levels */}
+                    {level > 0 && (
+                      <span className="inline-flex items-center justify-center shrink-0 w-3 h-3 text-[#b09e97] -ml-0.5 mr-0.5">
+                        <span className="w-2.5 h-2.5 border-b-2 border-l-2 border-[#cfbeba] rounded-bl-xs" />
+                      </span>
+                    )}
+
                     {option.icon && (
                       <option.icon
                         size={15}
-                        className={
+                        weight={isSelected ? 'fill' : 'regular'}
+                        className={`shrink-0 ${
                           isSelected ? 'text-[#b85028]' : 'text-[#8a726a]'
-                        }
+                        }`}
                       />
                     )}
                     <span className="truncate">{option.label}</span>
@@ -166,7 +182,7 @@ export function CustomSelect<T extends string = string>({
                       <span className="shrink-0">{option.badge}</span>
                     )}
                   </div>
-                  {option.description && (
+                  {option.description && level === 0 && (
                     <span className="text-[10px] font-normal text-[#8a726a] mt-0.5 truncate">
                       {option.description}
                     </span>

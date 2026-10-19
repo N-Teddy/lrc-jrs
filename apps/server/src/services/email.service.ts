@@ -68,7 +68,11 @@ export class EmailService implements OnModuleInit, NotificationStrategy {
     }
   }
 
-  async send(recipient: string, message: string, metadata?: Record<string, unknown>): Promise<boolean> {
+  async send(
+    recipient: string,
+    message: string,
+    metadata?: Record<string, unknown>,
+  ): Promise<boolean> {
     return this.sendEmail({
       to: recipient,
       subject: (metadata?.subject as string) || 'Notification - LRC JRS',

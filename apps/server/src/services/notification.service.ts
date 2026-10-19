@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { EmailService } from './email.service';
-import { WhatsAppService } from './whatsapp.service';
 import type { NotificationStrategy } from './notification.strategy';
+import { WhatsAppService } from './whatsapp.service';
 
 @Injectable()
 export class NotificationService {
@@ -20,12 +20,14 @@ export class NotificationService {
     preferredChannel: 'whatsapp' | 'email',
     recipient: string,
     message: string,
-    metadata?: Record<string, unknown>
+    metadata?: Record<string, unknown>,
   ): Promise<boolean> {
     let strategy = this.strategies.get(preferredChannel);
 
     if (!strategy) {
-      this.logger.warn(`Strategy for channel ${preferredChannel} not found. Falling back to email.`);
+      this.logger.warn(
+        `Strategy for channel ${preferredChannel} not found. Falling back to email.`,
+      );
       strategy = this.strategies.get('email');
     }
 
@@ -37,7 +39,9 @@ export class NotificationService {
     let success = await strategy.send(recipient, message, metadata);
 
     if (!success && preferredChannel !== 'email') {
-      this.logger.log(`Failed to send via ${preferredChannel}. Falling back to email.`);
+      this.logger.log(
+        `Failed to send via ${preferredChannel}. Falling back to email.`,
+      );
       const fallbackStrategy = this.strategies.get('email');
       if (fallbackStrategy) {
         success = await fallbackStrategy.send(recipient, message, metadata);

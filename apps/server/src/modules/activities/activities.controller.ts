@@ -109,6 +109,69 @@ export class ActivitiesController {
     return this.activitiesService.getDriveFiles(folderId);
   }
 
+  @Post('report/drive-upload')
+  @HttpCode(HttpStatus.OK)
+  @UseInterceptors(AnyFilesInterceptor())
+  @ApiConsumes('multipart/form-data')
+  @ApiOperation({
+    summary: 'Upload standalone files to Google Drive without an activity',
+  })
+  @ApiResponse({ status: 200, description: 'Files uploaded successfully' })
+  async uploadStandaloneDriveFiles(
+    @UploadedFiles() files: Express.Multer.File[],
+    @Body('summary') summary: string,
+    @Body('folderId') folderId: string,
+    @CurrentUser() currentUser: IAuthUser,
+  ) {
+    return this.activitiesService.uploadStandaloneDriveFiles(
+      files,
+      folderId,
+      summary,
+      currentUser,
+    );
+  }
+
+  @Delete('report/drive-file/:fileId')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary:
+      'Delete a Google Drive file or activity report directly from the reports page',
+  })
+  @ApiResponse({ status: 200, description: 'File removed successfully' })
+  async deleteDriveFile(
+    @Param('fileId') fileId: string,
+    @CurrentUser() currentUser: IAuthUser,
+  ) {
+    return this.activitiesService.deleteDriveFile(fileId, currentUser);
+  }
+
+  @Post('report/drive-folders')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Create a new Google Drive folder' })
+  @ApiResponse({ status: 201, description: 'Folder created successfully' })
+  async createDriveFolder(
+    @Body('name') name: string,
+    @Body('parentId') parentId?: string,
+  ) {
+    return this.activitiesService.createDriveFolder(name, parentId);
+  }
+
+  @Patch('report/drive-folders/:id')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Rename a Google Drive folder' })
+  @ApiResponse({ status: 200, description: 'Folder renamed successfully' })
+  async renameDriveFolder(@Param('id') id: string, @Body('name') name: string) {
+    return this.activitiesService.renameDriveFolder(id, name);
+  }
+
+  @Delete('report/drive-folders/:id')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Delete a Google Drive folder' })
+  @ApiResponse({ status: 200, description: 'Folder deleted successfully' })
+  async deleteDriveFolder(@Param('id') id: string) {
+    return this.activitiesService.deleteDriveFolder(id);
+  }
+
   @Public()
   @Get('report/drive-file/:fileId/stream')
   @ApiOperation({

@@ -122,9 +122,9 @@ export function AuthProvider({ children, storage, http }: AuthProviderProps) {
   const signOut = useCallback(async (): Promise<void> => {
     try {
       const refreshToken = await storage.getItem('jrs_refresh_token');
-      if (refreshToken) {
-        await http.post('/auth/logout', { refreshToken }).catch(() => {});
-      }
+      await http
+        .post('/auth/logout', { refreshToken: refreshToken || undefined })
+        .catch(() => {});
     } finally {
       await storage.removeItem('jrs_access_token');
       await storage.removeItem('jrs_refresh_token');

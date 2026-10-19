@@ -77,7 +77,11 @@ export const AccessFeature: React.FC = () => {
   );
 
   const rawMembers = membersResponse?.items ?? [];
-  const offlineMembers = offlineMembersResponse?.items ?? [];
+  const offlineMembers = useMemo(() => {
+    return (offlineMembersResponse?.items ?? []).filter(
+      (m) => !m.account?.hasAppAccess,
+    );
+  }, [offlineMembersResponse]);
 
   // Local filter by Account Status (within members having app access)
   const filteredMembers = useMemo(() => {

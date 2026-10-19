@@ -1,11 +1,13 @@
 import { useTownContext, useTranslation } from '@jrs/client-core';
 import { ActivityStatus, type IActivity } from '@jrs/shared';
 import {
+  ArrowCounterClockwise,
   ClockCounterClockwise,
   DotsThreeVertical,
   Eye,
   PencilSimple,
   Trash,
+  XCircle,
 } from '@phosphor-icons/react';
 import type React from 'react';
 
@@ -17,6 +19,8 @@ export interface ActivityActionMenuProps {
   onViewDetails: (activity: IActivity) => void;
   onEditActivity: (activity: IActivity) => void;
   onViewHistory: (activity: IActivity) => void;
+  onCancelActivity?: (activity: IActivity) => void;
+  onUndoCancelActivity?: (activity: IActivity) => void;
   onDeleteActivity?: (activity: IActivity) => void;
   isPrivileged: boolean;
   align?: 'right' | 'left';
@@ -31,6 +35,8 @@ export const ActivityActionMenu: React.FC<ActivityActionMenuProps> = ({
   onViewDetails,
   onEditActivity,
   onViewHistory,
+  onCancelActivity,
+  onUndoCancelActivity,
   onDeleteActivity,
   isPrivileged,
   align = 'right',
@@ -40,6 +46,29 @@ export const ActivityActionMenu: React.FC<ActivityActionMenuProps> = ({
   const { canWrite } = useTownContext();
   const historyCount = activity.changeHistory?.length || 0;
   const isCompleted = activity.status === ActivityStatus.COMPLETED;
+  const isCancelled = activity.status === ActivityStatus.CANCELLED;
+
+  const startDate = new Date(activity.startDate);
+  const now = new Date();
+  const startDay = new Date(
+    startDate.getFullYear(),
+    startDate.getMonth(),
+    startDate.getDate(),
+    0,
+    0,
+    0,
+    0,
+  );
+  const todayDay = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate(),
+    0,
+    0,
+    0,
+    0,
+  );
+  const isDayOfActivityOrLater = todayDay.getTime() >= startDay.getTime();
 
   return (
     <div className="relative inline-flex items-center justify-end shrink-0">
@@ -86,6 +115,34 @@ export const ActivityActionMenu: React.FC<ActivityActionMenuProps> = ({
             </button>
           )}
 
+          {canWrite && !isCompleted && !isCancelled && onCancelActivity && (
+            <button
+              type="button"
+              onClick={() => {
+                onClose();
+                onCancelActivity(activity);
+              }}
+              className="w-full px-3 py-1.5 text-left text-xs text-[#ba1a1a] hover:bg-[#ffdad6] flex items-center gap-2 font-medium cursor-pointer"
+            >
+              <XCircle size={14} weight="bold" />
+              <span>Cancel Gathering</span>
+            </button>
+          )}
+
+          {canWrite && isCancelled && onUndoCancelActivity && (
+            <button
+              type="button"
+              onClick={() => {
+                onClose();
+                onUndoCancelActivity(activity);
+              }}
+              className="w-full px-3 py-1.5 text-left text-xs text-[#486b52] hover:bg-[#edf3ee] flex items-center gap-2 font-medium cursor-pointer"
+            >
+              <ArrowCounterClockwise size={14} weight="bold" />
+              <span>Restore Gathering</span>
+            </button>
+          )}
+
           <button
             type="button"
             onClick={() => {
@@ -102,19 +159,23 @@ export const ActivityActionMenu: React.FC<ActivityActionMenuProps> = ({
             </span>
           </button>
 
-          {canWrite && isPrivileged && onDeleteActivity && (
-            <button
-              type="button"
-              onClick={() => {
-                onClose();
-                onDeleteActivity(activity);
-              }}
-              className="w-full px-3 py-1.5 text-left text-xs text-[#ba1a1a] hover:bg-[#ffdad6] flex items-center gap-2 font-semibold cursor-pointer border-t border-[#f4ece9] mt-0.5"
-            >
-              <Trash size={14} weight="bold" />
-              <span>{t('activities:actions.delete')}</span>
-            </button>
-          )}
+          {/* Delete action is forbidden before start date per item 3 */}
+          {canWrite &&
+            isPrivileged &&
+            isDayOfActivityOrLater &&
+            onDeleteActivity && (
+              <button
+                type="button"
+                onClick={() => {
+                  onClose();
+                  onDeleteActivity(activity);
+                }}
+                className="w-full px-3 py-1.5 text-left text-xs text-[#ba1a1a] hover:bg-[#ffdad6] flex items-center gap-2 font-semibold cursor-pointer border-t border-[#f4ece9] mt-0.5"
+              >
+                <Trash size={14} weight="bold" />
+                <span>{t('activities:actions.delete')}</span>
+              </button>
+            )}
         </div>
       )}
     </div>

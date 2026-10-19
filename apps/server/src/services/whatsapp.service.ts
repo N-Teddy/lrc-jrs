@@ -52,7 +52,11 @@ export class WhatsAppService implements NotificationStrategy {
     }
   }
 
-  async send(recipient: string, message: string, metadata?: Record<string, unknown>): Promise<boolean> {
+  async send(
+    recipient: string,
+    message: string,
+    metadata?: Record<string, unknown>,
+  ): Promise<boolean> {
     return this.sendTextMessage(recipient, message);
   }
 

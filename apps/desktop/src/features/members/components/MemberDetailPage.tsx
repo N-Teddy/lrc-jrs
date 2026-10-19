@@ -27,7 +27,7 @@ import {
 } from '@phosphor-icons/react';
 import type React from 'react';
 import { useMemo, useState } from 'react';
-import { UserAvatar } from '../../../components';
+import { MemberDetailSkeleton, UserAvatar } from '../../../components';
 import {
   calculateAge,
   formatCameroonPhone,
@@ -44,6 +44,7 @@ interface MemberDetailPageProps {
   onManageAccess: (member: IUser) => void;
   onDelete?: (member: IUser) => void;
   isCurrentUserAp: boolean;
+  initialTab?: 'identity' | 'transfers' | 'attendance';
 }
 
 export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
@@ -53,6 +54,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
   onManageAccess,
   onDelete,
   isCurrentUserAp,
+  initialTab,
 }) => {
   const { t } = useTranslation();
   const { activeTown, canWrite } = useTownContext();
@@ -61,20 +63,14 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
 
   const [activeDetailTab, setActiveDetailTab] = useState<
     'identity' | 'transfers' | 'attendance'
-  >('identity');
+  >(initialTab ?? 'identity');
   const [copiedEmail, setCopiedEmail] = useState(false);
   const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
 
   const townsMap = useMemo(() => new Map(towns.map((t) => [t.id, t])), [towns]);
 
   if (isLoading) {
-    return (
-      <div className="flex flex-col gap-6 animate-pulse p-4">
-        <div className="h-6 w-48 bg-[#f4ece9] rounded" />
-        <div className="h-48 rounded-xl bg-white border border-[#e8e1dd]" />
-        <div className="h-64 rounded-xl bg-white border border-[#e8e1dd]" />
-      </div>
-    );
+    return <MemberDetailSkeleton />;
   }
 
   if (error || !member) {

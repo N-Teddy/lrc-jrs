@@ -100,6 +100,9 @@ export class User extends BaseDocument {
   @Prop({ type: Boolean, default: false })
   isTemporaryPassword: boolean;
 
+  @Prop({ type: Date })
+  lastLogoutAt?: Date;
+
   @Prop({ required: true })
   dateOfBirth: string;
 

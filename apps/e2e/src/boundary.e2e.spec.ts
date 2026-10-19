@@ -1,6 +1,6 @@
+import { AppModule } from '@jrs/server/src/app.module';
 import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { AppModule } from '@jrs/server/src/app.module';
 
 describe('Boundary & Malformed Inputs (e2e)', () => {
   let app: INestApplication;
@@ -13,7 +13,13 @@ describe('Boundary & Malformed Inputs (e2e)', () => {
     app = moduleFixture.createNestApplication();
     app.setGlobalPrefix('api');
     const { ValidationPipe } = require('@nestjs/common');
-    app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }));
+    app.useGlobalPipes(
+      new ValidationPipe({
+        whitelist: true,
+        forbidNonWhitelisted: true,
+        transform: true,
+      }),
+    );
     await app.init();
   });
 

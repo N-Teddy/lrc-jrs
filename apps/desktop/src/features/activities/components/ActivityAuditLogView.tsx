@@ -185,7 +185,7 @@ export const ActivityAuditLogView: React.FC<ActivityAuditLogViewProps> = ({
   };
 
   return (
-    <div className="flex flex-col gap-6 max-w-5xl mx-auto w-full animate-in fade-in duration-200">
+    <div className="flex flex-col gap-6 max-w-7xl mx-auto w-full animate-in fade-in duration-200">
       {/* 1. Breadcrumbs & Top Actions */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <nav className="flex items-center gap-2 text-xs font-semibold text-[#8a726a]">
@@ -430,161 +430,168 @@ export const ActivityAuditLogView: React.FC<ActivityAuditLogViewProps> = ({
           </p>
         </div>
       ) : (
-        <div className="relative pl-6 sm:pl-8 flex flex-col gap-5">
-          {/* Timeline Spine Line */}
-          <div
-            aria-hidden="true"
-            className="absolute left-3 sm:left-4 top-4 bottom-4 w-0.5 bg-[#e8e1dd]"
-          />
-
+        <div className="flex flex-col">
           {filteredHistory.map((log, index) => {
             const isReschedule = log.changeType === 'RESCHEDULED';
             const isLocation = log.changeType === 'LOCATION_CHANGED';
             const changedFields = getChangedFields(log);
+            const isLast = index === filteredHistory.length - 1;
 
             return (
-              <div
-                key={log.id || index}
-                className="relative bg-white rounded-xl border border-[#e8e1dd] shadow-xs p-5 flex flex-col gap-3"
-              >
-                {/* Node Dot Pin */}
-                <div
-                  className={`absolute -left-[31px] sm:-left-[39px] top-5 w-7 h-7 rounded-full flex items-center justify-center shadow-xs border-2 border-white ${
-                    isReschedule
-                      ? 'bg-[#b85028] text-white'
-                      : isLocation
-                        ? 'bg-[#486b52] text-white'
-                        : 'bg-[#1e1b19] text-white'
-                  }`}
-                >
-                  <ClockCounterClockwise size={14} weight="bold" />
+              <div key={log.id || index} className="flex gap-4 sm:gap-6">
+                {/* Timeline Spine Column: Icon is 100% centered on the vertical line */}
+                <div className="flex flex-col items-center shrink-0">
+                  <div
+                    className={`w-8 h-8 rounded-full flex items-center justify-center shadow-xs border-2 border-white shrink-0 z-10 ${
+                      isReschedule
+                        ? 'bg-[#b85028] text-white'
+                        : isLocation
+                          ? 'bg-[#486b52] text-white'
+                          : 'bg-[#1e1b19] text-white'
+                    }`}
+                  >
+                    <ClockCounterClockwise size={15} weight="bold" />
+                  </div>
+                  {!isLast && (
+                    <div className="w-0.5 flex-1 bg-[#e8e1dd] my-1" />
+                  )}
                 </div>
 
-                {/* Entry Header */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-[#e8e1dd]/70">
-                  <div className="flex items-center gap-2">
-                    <span
-                      className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
-                        isReschedule
-                          ? 'bg-[#ffdbcf] text-[#812901]'
-                          : isLocation
-                            ? 'bg-[#edf3ee] text-[#486b52]'
-                            : 'bg-[#faf2ee] text-[#1e1b19]'
-                      }`}
-                    >
-                      {log.changeType.replace('_', ' ')}
-                    </span>
-                    <span className="text-[11px] font-mono text-[#8a726a]">
-                      {t('activities:audit.revisionNumber', {
-                        number: history.indexOf(log) + 1,
-                        defaultValue: `Revision #${history.indexOf(log) + 1}`,
-                      })}
-                    </span>
-                  </div>
+                {/* Card Container */}
+                <div className="flex-1 pb-6">
+                  <div className="bg-white rounded-xl border border-[#e8e1dd] shadow-xs p-5 flex flex-col gap-3">
+                    {/* Entry Header */}
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-[#e8e1dd]/70">
+                      <div className="flex items-center gap-2">
+                        <span
+                          className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
+                            isReschedule
+                              ? 'bg-[#ffdbcf] text-[#812901]'
+                              : isLocation
+                                ? 'bg-[#edf3ee] text-[#486b52]'
+                                : 'bg-[#faf2ee] text-[#1e1b19]'
+                          }`}
+                        >
+                          {log.changeType.replace('_', ' ')}
+                        </span>
+                        <span className="text-[11px] font-mono text-[#8a726a]">
+                          {t('activities:audit.revisionNumber', {
+                            number: history.indexOf(log) + 1,
+                            defaultValue: `Revision #${history.indexOf(log) + 1}`,
+                          })}
+                        </span>
+                      </div>
 
-                  <div className="flex items-center gap-1.5 text-xs text-[#8a726a]">
-                    <Clock size={14} weight="bold" />
-                    <span>{new Date(log.changedAt).toLocaleString()}</span>
-                  </div>
-                </div>
-
-                {/* Actor Banner */}
-                <div className="flex items-center gap-2 bg-[#faf2ee] px-3 py-1.5 rounded-lg border border-[#e8e1dd]/60 text-xs">
-                  <div className="w-5 h-5 rounded-md overflow-hidden bg-white border border-[#e8e1dd] shrink-0 flex items-center justify-center">
-                    {log.changedByName ? (
-                      <img
-                        src={`https://api.dicebear.com/9.x/avataaars/svg?seed=${encodeURIComponent(log.changedByName)}`}
-                        alt={log.changedByName}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <User
-                        size={13}
-                        weight="bold"
-                        className="text-[#b85028]"
-                      />
-                    )}
-                  </div>
-                  <span className="font-semibold text-[#1e1b19]">
-                    {t('activities:audit.modifiedBy', {
-                      name: log.changedByName,
-                      defaultValue: `Modified by: ${log.changedByName}`,
-                    })}
-                  </span>
-                </div>
-
-                {/* Documented Reason */}
-                {log.reason && (
-                  <div className="text-xs text-[#57423b] bg-white p-3 rounded-lg border border-[#e8e1dd] flex flex-col gap-1">
-                    <span className="font-bold text-[11px] uppercase tracking-wider text-[#8a726a]">
-                      {t(
-                        'activities:audit.documentedReason',
-                        'Documented Reason:',
-                      )}
-                    </span>
-                    <p className="italic">"{log.reason}"</p>
-                  </div>
-                )}
-
-                {/* Before / After Comparison Grid */}
-                <div className="flex flex-col gap-2 pt-1">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                    {/* Previous State */}
-                    <div className="bg-[#faf2ee]/70 rounded-md p-3.5 border border-[#e8e1dd] flex flex-col gap-2.5">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-[#8a726a]">
-                        {t('activities:audit.previousState', 'Previous State')}
-                      </span>
-                      {changedFields.map((field) => {
-                        const Icon = field.icon;
-                        return (
-                          <div
-                            key={`prev-${field.id}`}
-                            className="flex flex-col gap-0.5 pb-1 border-b border-[#e8e1dd]/50 last:border-0 last:pb-0"
-                          >
-                            <span className="text-[10px] font-bold text-[#8a726a]">
-                              {field.label}
-                            </span>
-                            <div className="flex items-center gap-1.5 text-[#57423b]">
-                              <Icon
-                                size={13}
-                                weight="bold"
-                                className="shrink-0 text-[#8a726a]"
-                              />
-                              <span className="line-through truncate">
-                                {field.prev}
-                              </span>
-                            </div>
-                          </div>
-                        );
-                      })}
+                      <div className="flex items-center gap-1.5 text-xs text-[#8a726a]">
+                        <Clock size={14} weight="bold" />
+                        <span>{new Date(log.changedAt).toLocaleString()}</span>
+                      </div>
                     </div>
 
-                    {/* New State */}
-                    <div className="bg-[#edf3ee]/60 rounded-md p-3.5 border border-[#c2e9ca] flex flex-col gap-2.5">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-[#486b52]">
-                        {t('activities:audit.newState', 'New State')}
+                    {/* Actor Banner */}
+                    <div className="flex items-center gap-2 bg-[#faf2ee] px-3 py-1.5 rounded-lg border border-[#e8e1dd]/60 text-xs">
+                      <div className="w-5 h-5 rounded-md overflow-hidden bg-white border border-[#e8e1dd] shrink-0 flex items-center justify-center">
+                        {log.changedByName ? (
+                          <img
+                            src={`https://api.dicebear.com/9.x/avataaars/svg?seed=${encodeURIComponent(log.changedByName)}`}
+                            alt={log.changedByName}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <User
+                            size={13}
+                            weight="bold"
+                            className="text-[#b85028]"
+                          />
+                        )}
+                      </div>
+                      <span className="font-semibold text-[#1e1b19]">
+                        {t('activities:audit.modifiedBy', {
+                          name: log.changedByName,
+                          defaultValue: `Modified by: ${log.changedByName}`,
+                        })}
                       </span>
-                      {changedFields.map((field) => {
-                        const Icon = field.icon;
-                        return (
-                          <div
-                            key={`next-${field.id}`}
-                            className="flex flex-col gap-0.5 pb-1 border-b border-[#c2e9ca]/50 last:border-0 last:pb-0"
-                          >
-                            <span className="text-[10px] font-bold text-[#486b52]">
-                              {field.label}
-                            </span>
-                            <div className="flex items-center gap-1.5 text-[#2c4e37] font-semibold">
-                              <Icon
-                                size={13}
-                                weight="bold"
-                                className="shrink-0 text-[#486b52]"
-                              />
-                              <span className="truncate">{field.current}</span>
-                            </div>
-                          </div>
-                        );
-                      })}
+                    </div>
+
+                    {/* Documented Reason */}
+                    {log.reason && (
+                      <div className="text-xs text-[#57423b] bg-white p-3 rounded-lg border border-[#e8e1dd] flex flex-col gap-1">
+                        <span className="font-bold text-[11px] uppercase tracking-wider text-[#8a726a]">
+                          {t(
+                            'activities:audit.documentedReason',
+                            'Documented Reason:',
+                          )}
+                        </span>
+                        <p className="italic">"{log.reason}"</p>
+                      </div>
+                    )}
+
+                    {/* Before / After Comparison Grid */}
+                    <div className="flex flex-col gap-2 pt-1">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                        {/* Previous State */}
+                        <div className="bg-[#faf2ee]/70 rounded-md p-3.5 border border-[#e8e1dd] flex flex-col gap-2.5">
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-[#8a726a]">
+                            {t(
+                              'activities:audit.previousState',
+                              'Previous State',
+                            )}
+                          </span>
+                          {changedFields.map((field) => {
+                            const Icon = field.icon;
+                            return (
+                              <div
+                                key={`prev-${field.id}`}
+                                className="flex flex-col gap-0.5 pb-1 border-b border-[#e8e1dd]/50 last:border-0 last:pb-0"
+                              >
+                                <span className="text-[10px] font-bold text-[#8a726a]">
+                                  {field.label}
+                                </span>
+                                <div className="flex items-center gap-1.5 text-[#57423b]">
+                                  <Icon
+                                    size={13}
+                                    weight="bold"
+                                    className="shrink-0 text-[#8a726a]"
+                                  />
+                                  <span className="line-through truncate">
+                                    {field.prev}
+                                  </span>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+
+                        {/* New State */}
+                        <div className="bg-[#edf3ee]/60 rounded-md p-3.5 border border-[#c2e9ca] flex flex-col gap-2.5">
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-[#486b52]">
+                            {t('activities:audit.newState', 'New State')}
+                          </span>
+                          {changedFields.map((field) => {
+                            const Icon = field.icon;
+                            return (
+                              <div
+                                key={`next-${field.id}`}
+                                className="flex flex-col gap-0.5 pb-1 border-b border-[#c2e9ca]/50 last:border-0 last:pb-0"
+                              >
+                                <span className="text-[10px] font-bold text-[#486b52]">
+                                  {field.label}
+                                </span>
+                                <div className="flex items-center gap-1.5 text-[#2c4e37] font-semibold">
+                                  <Icon
+                                    size={13}
+                                    weight="bold"
+                                    className="shrink-0 text-[#486b52]"
+                                  />
+                                  <span className="truncate">
+                                    {field.current}
+                                  </span>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>

@@ -27,7 +27,7 @@ export const ManageAccessModal: React.FC<ManageAccessModalProps> = ({
   member,
   onUpdateAccess,
 }) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['members', 'access', 'common']);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -274,10 +274,16 @@ export const ManageAccessModal: React.FC<ManageAccessModalProps> = ({
                     </div>
                     <div className="flex flex-col">
                       <h4 className="text-xs font-bold text-[#1e1b19]">
-                        {t('members:accessModal.resendTempPassword')}
+                        {t(
+                          'members:accessModal.resendTempPassword',
+                          'Generate & Resend Temporary Password',
+                        )}
                       </h4>
                       <p className="text-[11px] text-[#57423b] mt-0.5 leading-relaxed">
-                        {t('members:accessModal.resendDesc')}
+                        {t(
+                          'members:accessModal.resendDesc',
+                          "Generates a fresh single-use password valid for 48 hours and sends it immediately to the member's WhatsApp and Email address.",
+                        )}
                       </p>
                     </div>
                   </div>
@@ -290,8 +296,14 @@ export const ManageAccessModal: React.FC<ManageAccessModalProps> = ({
                     <PaperPlaneTilt size={16} weight="bold" />
                     <span>
                       {isSubmitting
-                        ? t('members:accessModal.resending')
-                        : t('members:accessModal.resendAction')}
+                        ? t(
+                            'members:accessModal.resending',
+                            'Dispatching credentials...',
+                          )
+                        : t(
+                            'members:accessModal.resendAction',
+                            'Resend Temporary Password',
+                          )}
                     </span>
                   </button>
                 </div>
@@ -311,10 +323,16 @@ export const ManageAccessModal: React.FC<ManageAccessModalProps> = ({
                   </div>
                   <div className="flex flex-col">
                     <h4 className="text-xs font-bold text-[#1e1b19]">
-                      {t('members:accessModal.suspendTitle')}
+                      {t(
+                        'members:accessModal.suspendTitle',
+                        'Account Suspension & Status',
+                      )}
                     </h4>
                     <p className="text-[11px] text-[#57423b] mt-0.5 leading-relaxed">
-                      {t('members:accessModal.suspendDesc')}
+                      {t(
+                        'members:accessModal.suspendDesc',
+                        'Temporarily lock portal access without deleting the registry profile.',
+                      )}
                     </p>
                   </div>
                 </div>
@@ -330,8 +348,11 @@ export const ManageAccessModal: React.FC<ManageAccessModalProps> = ({
                 >
                   <span>
                     {!isRevoked
-                      ? t('members:accessModal.suspendAction')
-                      : t('members:accessModal.reactivateAction')}
+                      ? t('members:accessModal.suspendAction', 'Suspend Access')
+                      : t(
+                          'members:accessModal.reactivateAction',
+                          'Reactivate Access',
+                        )}
                   </span>
                 </button>
               </div>
@@ -346,7 +367,7 @@ export const ManageAccessModal: React.FC<ManageAccessModalProps> = ({
             onClick={onClose}
             className="px-4 py-2 rounded-md bg-white border border-[#e8e1dd] text-xs font-bold text-[#57423b] hover:bg-[#f4ece9] transition-colors cursor-pointer"
           >
-            {t('common:close')}
+            {t('common:close', 'Close')}
           </button>
         </div>
       </div>

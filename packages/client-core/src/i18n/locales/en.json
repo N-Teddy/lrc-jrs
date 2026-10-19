@@ -230,6 +230,14 @@
       "noHubsFound": "No matching fellowship hubs found.",
       "openMapView": "Open Cameroon Map View",
       "tenRegionsScope": "10 Regions Scope"
+    },
+    "footer": {
+      "operational": "All Systems Operational",
+      "gateway": "Central Gateway Online",
+      "allRightsReserved": "© {{year}} JRS Platform. All rights reserved.",
+      "version": "v0.1.0",
+      "build": "Build 2026.10",
+      "desktopEdition": "Desktop Edition"
     }
   },
   "roles": {

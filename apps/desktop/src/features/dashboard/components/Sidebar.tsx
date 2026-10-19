@@ -12,7 +12,16 @@ import {
   Warning,
   X,
 } from '@phosphor-icons/react';
-import React, { useState } from 'react';
+import { motion } from 'motion/react';
+import type React from 'react';
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react';
+import appIcon from '../../../assets/app-icon.jpg';
 import type { DashboardTabId } from '../hooks/use-dashboard-layout';
 
 interface SidebarProps {
@@ -34,6 +43,18 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const { user, signOut } = useAuth();
   const { activeTown } = useTownContext();
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+
+  const [indicatorStyle, setIndicatorStyle] = useState<{
+    top: number;
+    height: number;
+    opacity: number;
+  }>({
+    top: 0,
+    height: 0,
+    opacity: 0,
+  });
+  const navRef = useRef<HTMLElement>(null);
+  const itemRefs = useRef<Record<string, HTMLElement | null>>({});
 
   const navItems: {
     id: DashboardTabId;
@@ -81,6 +102,38 @@ export const Sidebar: React.FC<SidebarProps> = ({
     (item) => !item.requiresAdmin || isPrivileged,
   );
 
+  // Measure active nav item position for fluid sliding indicator
+  const updatePosition = useCallback(() => {
+    const activeElement = itemRefs.current[activeTab];
+    const navElement = navRef.current;
+    if (activeElement && navElement) {
+      const navRect = navElement.getBoundingClientRect();
+      const btnRect = activeElement.getBoundingClientRect();
+      const top = btnRect.top - navRect.top + navElement.scrollTop;
+      setIndicatorStyle({
+        top,
+        height: btnRect.height,
+        opacity: 1,
+      });
+    }
+  }, [activeTab]);
+
+  useLayoutEffect(() => {
+    updatePosition();
+  }, [updatePosition]);
+
+  useEffect(() => {
+    window.addEventListener('resize', updatePosition);
+    return () => window.removeEventListener('resize', updatePosition);
+  }, [updatePosition]);
+
+  useEffect(() => {
+    // Re-check resting position after sidebar collapse/expand animation completes (200ms)
+    const delay = isCollapsed ? 220 : 220;
+    const timer = setTimeout(updatePosition, delay);
+    return () => clearTimeout(timer);
+  }, [isCollapsed, updatePosition]);
+
   return (
     <>
       <aside
@@ -97,9 +150,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
             }`}
           >
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-[#b85028] text-white flex items-center justify-center font-black text-xs shadow-xs shrink-0">
-                JRS
-              </div>
+              <img
+                src={appIcon}
+                alt="JRS"
+                className="w-8 h-8 rounded-lg object-cover shadow-2xs shrink-0 border border-[#e8e1dd]"
+              />
               {!isCollapsed && (
                 <div className="flex flex-col min-w-0">
                   <span className="font-bold text-sm text-[#1e1b19] leading-tight truncate">
@@ -174,10 +229,93 @@ export const Sidebar: React.FC<SidebarProps> = ({
             )}
           </div>
 
-          {/* Navigation Items */}
-          <nav className="p-2 space-y-1">
+          {/* Navigation Items with Fluid Sliding Merged Active Tab & Concave Curve Scoops */}
+          <nav
+            ref={navRef}
+            className={`relative pt-3 pb-4 space-y-1.5 ${
+              isCollapsed ? 'px-0' : 'pl-3 pr-0'
+            }`}
+          >
+            {/* Sliding Indicator with Seamless Sanctuary Fill and Inverted Border Radius Scoops */}
+            <motion.div
+              className={`absolute z-10 pointer-events-none ${
+                isCollapsed ? 'left-2' : 'left-3'
+              } right-[-2px]`}
+              initial={false}
+              animate={{
+                y: indicatorStyle.top,
+                height: indicatorStyle.height,
+                opacity: indicatorStyle.opacity,
+              }}
+              transition={{
+                type: 'spring',
+                stiffness: 400,
+                damping: 34,
+                mass: 0.8,
+              }}
+              style={{
+                top: 0,
+              }}
+            >
+              {/* Active tab background fill & left rounded edge */}
+              <div className="absolute inset-0 bg-[#fff8f5] rounded-l-xl border-l border-[#e8e1dd]" />
+
+              {/* Top horizontal border: stops 16px before the right edge where scoop curves up */}
+              <div className="absolute top-0 left-3 right-4 h-px bg-[#e8e1dd]" />
+
+              {/* Bottom horizontal border: stops 16px before the right edge where scoop curves down */}
+              <div className="absolute bottom-0 left-3 right-4 h-px bg-[#e8e1dd]" />
+
+              {/* Right overlap fill: guarantees 0px gap merging with #fff8f5 canvas */}
+              <div className="absolute top-0 bottom-0 right-0 w-4 bg-[#fff8f5]" />
+
+              {/* Top Concave Inverted Curve Scoop */}
+              <div className="absolute -top-4 right-0 w-[18px] h-4 overflow-hidden pointer-events-none">
+                <svg
+                  width="18"
+                  height="16"
+                  viewBox="0 0 18 16"
+                  fill="none"
+                  className="w-full h-full"
+                >
+                  <path
+                    d="M 18 0 V 16 H 0 C 8.8366 16, 16 8.8366, 16 0 Z"
+                    fill="#fff8f5"
+                  />
+                  <path
+                    d="M 0 16 C 8.8366 16, 16 8.8366, 16 0"
+                    stroke="#e8e1dd"
+                    strokeWidth="1"
+                    fill="none"
+                  />
+                </svg>
+              </div>
+
+              {/* Bottom Concave Inverted Curve Scoop */}
+              <div className="absolute -bottom-4 right-0 w-[18px] h-4 overflow-hidden pointer-events-none">
+                <svg
+                  width="18"
+                  height="16"
+                  viewBox="0 0 18 16"
+                  fill="none"
+                  className="w-full h-full"
+                >
+                  <path
+                    d="M 0 0 H 18 V 16 H 16 C 16 7.1634, 8.8366 0, 0 0 Z"
+                    fill="#fff8f5"
+                  />
+                  <path
+                    d="M 0 0 C 8.8366 0, 16 7.1634, 16 16"
+                    stroke="#e8e1dd"
+                    strokeWidth="1"
+                    fill="none"
+                  />
+                </svg>
+              </div>
+            </motion.div>
+
             {!isCollapsed && (
-              <div className="px-3 pt-2 pb-1 text-[10px] font-bold uppercase tracking-wider text-[#8a726a]">
+              <div className="px-5 pt-1 pb-1.5 text-[10px] font-bold uppercase tracking-wider text-[#8a726a]">
                 {t('navigation:workspaceNavigation')}
               </div>
             )}
@@ -192,17 +330,37 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     key={item.id}
                     className="relative group flex justify-center py-0.5"
                   >
-                    <button
+                    <motion.button
+                      ref={(el) => {
+                        itemRefs.current[item.id] = el;
+                      }}
                       type="button"
                       onClick={() => onSelectTab(item.id)}
-                      className={`w-11 h-11 rounded-md flex items-center justify-center transition cursor-pointer ${
+                      whileTap={{ scale: 0.94 }}
+                      className={`relative z-20 w-11 h-11 flex items-center justify-center transition-colors duration-200 cursor-pointer ${
                         isActive
-                          ? 'bg-[#b85028] text-white shadow-xs'
-                          : 'text-[#57423b] hover:bg-[#faf2ee] hover:text-[#1e1b19]'
+                          ? 'text-[#b85028]'
+                          : 'rounded-lg text-[#57423b] hover:bg-[#faf2ee] hover:text-[#1e1b19]'
                       }`}
                     >
-                      <Icon size={21} weight={isActive ? 'fill' : 'bold'} />
-                    </button>
+                      <motion.span
+                        animate={{ scale: isActive ? 1.12 : 1 }}
+                        transition={{
+                          type: 'spring',
+                          stiffness: 500,
+                          damping: 25,
+                        }}
+                        className="flex items-center justify-center"
+                      >
+                        <Icon
+                          size={21}
+                          weight={isActive ? 'fill' : 'bold'}
+                          className={`transition-colors duration-200 ${
+                            isActive ? 'text-[#b85028]' : 'text-[#8a726a]'
+                          }`}
+                        />
+                      </motion.span>
+                    </motion.button>
 
                     <div className="absolute left-[78px] top-1/2 -translate-y-1/2 hidden group-hover:flex items-center z-50 pointer-events-none">
                       <div className="bg-[#1e1b19] text-white text-xs px-3 py-1.5 rounded-md shadow-lg whitespace-nowrap flex items-center gap-1.5">
@@ -219,23 +377,35 @@ export const Sidebar: React.FC<SidebarProps> = ({
               }
 
               return (
-                <button
+                <motion.button
                   key={item.id}
+                  ref={(el) => {
+                    itemRefs.current[item.id] = el;
+                  }}
                   type="button"
                   onClick={() => onSelectTab(item.id)}
-                  className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-md text-[13px] transition cursor-pointer ${
+                  whileTap={{ scale: 0.98 }}
+                  className={`relative z-20 flex items-center gap-3.5 pl-6 pr-4 h-11 text-[13px] transition-colors duration-200 cursor-pointer ${
                     isActive
-                      ? 'bg-[#ffdbcf]/35 text-[#b85028] font-bold'
-                      : 'font-medium text-[#57423b] hover:bg-[#faf2ee] hover:text-[#1e1b19]'
+                      ? 'w-full text-[#b85028] font-bold'
+                      : 'w-[calc(100%-12px)] rounded-lg font-medium text-[#57423b] hover:bg-[#faf2ee] hover:text-[#1e1b19]'
                   }`}
                 >
-                  <Icon
-                    size={20}
-                    weight={isActive ? 'fill' : 'bold'}
-                    className={isActive ? 'text-[#b85028]' : 'text-[#8a726a]'}
-                  />
+                  <motion.span
+                    animate={{ scale: isActive ? 1.08 : 1 }}
+                    transition={{ type: 'spring', stiffness: 500, damping: 25 }}
+                    className="shrink-0 flex items-center justify-center"
+                  >
+                    <Icon
+                      size={20}
+                      weight={isActive ? 'fill' : 'bold'}
+                      className={`transition-colors duration-200 ${
+                        isActive ? 'text-[#b85028]' : 'text-[#8a726a]'
+                      }`}
+                    />
+                  </motion.span>
                   <span className="truncate">{item.label}</span>
-                </button>
+                </motion.button>
               );
             })}
           </nav>

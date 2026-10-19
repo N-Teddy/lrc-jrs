@@ -10,7 +10,11 @@ import {
   User,
 } from '@phosphor-icons/react';
 import { useState } from 'react';
-import { PaginationControl, UserAvatar } from '../../../components';
+import {
+  PaginationControl,
+  TableSkeleton,
+  UserAvatar,
+} from '../../../components';
 import {
   calculateAge,
   formatCameroonPhone,
@@ -60,11 +64,15 @@ export const MemberTableView: React.FC<MemberTableViewProps> = ({
 
   if (isLoading) {
     return (
-      <div className="bg-white rounded-xl border border-[#e8e1dd] shadow-xs p-8 flex flex-col items-center justify-center min-h-[360px] animate-pulse">
-        <div className="w-10 h-10 rounded-full bg-[#f4ece9] mb-4" />
-        <div className="h-4 w-48 bg-[#f4ece9] rounded mb-2" />
-        <div className="h-3 w-32 bg-[#f4ece9] rounded" />
-      </div>
+      <TableSkeleton
+        columns={[
+          t('members:table.member'),
+          t('members:table.role'),
+          t('members:table.contactChannel'),
+          t('common:actions', 'Actions'),
+        ]}
+        rowCount={Math.min(limit, 8)}
+      />
     );
   }
 

@@ -45,6 +45,8 @@ export class DriveService {
 
   private cachedAccessToken?: string;
   private tokenExpiresAt = 0;
+  private mockFiles: IDriveFileItem[] = [];
+  private mockCustomFolders: IDriveFolderItem[] = [];
 
   constructor(private readonly configService: ConfigService) {
     this.clientEmail = this.configService.get<string>(
@@ -207,7 +209,7 @@ export class DriveService {
 
     const accessToken = await this.getAccessToken();
     if (!accessToken) {
-      return defaultFallbackFolders;
+      return [...defaultFallbackFolders, ...this.mockCustomFolders];
     }
 
     try {
@@ -233,7 +235,7 @@ export class DriveService {
         response.data.files || [];
 
       if (files.length === 0) {
-        return defaultFallbackFolders;
+        return [...defaultFallbackFolders, ...this.mockCustomFolders];
       }
 
       // Build parent-child map to compute full paths
@@ -283,6 +285,12 @@ export class DriveService {
         });
       }
 
+      for (const custom of this.mockCustomFolders) {
+        if (!folderList.some((f) => f.id === custom.id)) {
+          folderList.push(custom);
+        }
+      }
+
       // Sort alphabetically by path, keeping root on top
       folderList.sort((a, b) => {
         if (a.id === this.rootFolderId) return -1;
@@ -295,7 +303,7 @@ export class DriveService {
       this.logger.warn(
         `Failed to list Google Drive folders: ${err.message}. Returning fallback folders.`,
       );
-      return defaultFallbackFolders;
+      return [...defaultFallbackFolders, ...this.mockCustomFolders];
     }
   }
 
@@ -305,7 +313,10 @@ export class DriveService {
   async listFiles(folderId?: string): Promise<IDriveFileItem[]> {
     const accessToken = await this.getAccessToken();
     if (!accessToken) {
-      return [];
+      if (folderId && folderId !== 'ALL' && folderId !== 'root') {
+        return this.mockFiles.filter((f) => f.folderId === folderId);
+      }
+      return this.mockFiles;
     }
 
     try {
@@ -353,6 +364,162 @@ export class DriveService {
   }
 
   /**
+   * Creates a new folder in Google Drive or local mock hierarchy
+   */
+  async createFolder(
+    name: string,
+    parentId?: string,
+  ): Promise<IDriveFolderItem> {
+    const rootId = this.rootFolderId || 'mock-root';
+    const effectiveParentId =
+      parentId && parentId !== 'ALL' && parentId !== 'root' ? parentId : rootId;
+
+    const accessToken = await this.getAccessToken();
+    if (!accessToken) {
+      const mockId = `mock-folder-${Date.now()}`;
+      const allFolders = await this.listFolders();
+      const parentFolder = allFolders.find((f) => f.id === effectiveParentId);
+      const folderItem: IDriveFolderItem = {
+        id: mockId,
+        name,
+        path: parentFolder ? `${parentFolder.path} / ${name}` : name,
+        parentId: effectiveParentId,
+      };
+      this.mockCustomFolders.push(folderItem);
+      return folderItem;
+    }
+
+    try {
+      const response = await axios.post(
+        'https://www.googleapis.com/drive/v3/files?supportsAllDrives=true&fields=id,name,parents',
+        {
+          name,
+          mimeType: 'application/vnd.google-apps.folder',
+          parents:
+            effectiveParentId && effectiveParentId !== 'mock-root'
+              ? [effectiveParentId]
+              : this.rootFolderId
+                ? [this.rootFolderId]
+                : undefined,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            'Content-Type': 'application/json',
+          },
+          httpsAgent: this.httpsAgent,
+          timeout: 10000,
+        },
+      );
+
+      const created = response.data;
+      const allFolders = await this.listFolders();
+      const parentFolder = allFolders.find(
+        (f) => f.id === (created.parents?.[0] || effectiveParentId),
+      );
+      return {
+        id: created.id,
+        name: created.name || name,
+        path: parentFolder ? `${parentFolder.path} / ${name}` : name,
+        parentId: created.parents?.[0] || effectiveParentId,
+      };
+    } catch (err: any) {
+      this.logger.error(`Failed to create Google Drive folder: ${err.message}`);
+      const mockId = `mock-folder-${Date.now()}`;
+      const folderItem: IDriveFolderItem = {
+        id: mockId,
+        name,
+        path: name,
+        parentId: effectiveParentId,
+      };
+      this.mockCustomFolders.push(folderItem);
+      return folderItem;
+    }
+  }
+
+  /**
+   * Renames a folder in Google Drive or local mock hierarchy
+   */
+  async renameFolder(
+    folderId: string,
+    name: string,
+  ): Promise<IDriveFolderItem> {
+    const mockIdx = this.mockCustomFolders.findIndex((f) => f.id === folderId);
+    if (mockIdx !== -1) {
+      this.mockCustomFolders[mockIdx].name = name;
+      const parts = this.mockCustomFolders[mockIdx].path.split(' / ');
+      parts[parts.length - 1] = name;
+      this.mockCustomFolders[mockIdx].path = parts.join(' / ');
+      return this.mockCustomFolders[mockIdx];
+    }
+
+    const accessToken = await this.getAccessToken();
+    if (!accessToken || folderId.startsWith('mock-')) {
+      return {
+        id: folderId,
+        name,
+        path: name,
+      };
+    }
+
+    try {
+      const response = await axios.patch(
+        `https://www.googleapis.com/drive/v3/files/${folderId}?supportsAllDrives=true&fields=id,name,parents`,
+        { name },
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            'Content-Type': 'application/json',
+          },
+          httpsAgent: this.httpsAgent,
+          timeout: 10000,
+        },
+      );
+      const updated = response.data;
+      return {
+        id: updated.id,
+        name: updated.name || name,
+        path: updated.name || name,
+        parentId: updated.parents?.[0],
+      };
+    } catch (err: any) {
+      this.logger.error(`Failed to rename Google Drive folder: ${err.message}`);
+      return { id: folderId, name, path: name };
+    }
+  }
+
+  /**
+   * Deletes a folder from Google Drive or local mock hierarchy
+   */
+  async deleteFolder(folderId: string): Promise<boolean> {
+    this.mockCustomFolders = this.mockCustomFolders.filter(
+      (f) => f.id !== folderId,
+    );
+
+    const accessToken = await this.getAccessToken();
+    if (!accessToken || folderId.startsWith('mock-')) {
+      return true;
+    }
+
+    try {
+      await axios.delete(
+        `https://www.googleapis.com/drive/v3/files/${folderId}?supportsAllDrives=true`,
+        {
+          headers: { Authorization: `Bearer ${accessToken}` },
+          httpsAgent: this.httpsAgent,
+          timeout: 10000,
+        },
+      );
+      return true;
+    } catch (err: any) {
+      this.logger.error(
+        `Failed to delete Google Drive folder ${folderId}: ${err.message}`,
+      );
+      return false;
+    }
+  }
+
+  /**
    * Uploads a file to Google Drive using multipart upload
    */
   async uploadFile(
@@ -363,10 +530,20 @@ export class DriveService {
       this.logger.log(
         `[MOCK DRIVE UPLOAD] File: ${options.filename} (${options.mimeType}) in folder: ${options.folderId || 'root'}`,
       );
-      return {
-        fileId: `mock-drive-${Date.now()}`,
+      const mockItem: IDriveFileItem = {
+        fileId: `mock-drive-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
         filename: options.filename,
+        mimeType: options.mimeType,
         webViewLink: `https://mock.drive.google.com/file/${encodeURIComponent(options.filename)}`,
+        fileSize: options.content.length,
+        uploadedAt: new Date().toISOString(),
+        folderId: options.folderId,
+      };
+      this.mockFiles.unshift(mockItem);
+      return {
+        fileId: mockItem.fileId,
+        filename: options.filename,
+        webViewLink: mockItem.webViewLink,
       };
     }
 
@@ -435,10 +612,20 @@ export class DriveService {
         `Google Drive upload encountered: ${errorMsg}. Falling back to archive mode.`,
       );
       // If service account storage quota issue or network error, return graceful mocked link
-      return {
-        fileId: `drive-${Date.now()}`,
+      const fallbackItem: IDriveFileItem = {
+        fileId: `drive-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
         filename: options.filename,
+        mimeType: options.mimeType,
         webViewLink: `https://drive.google.com/drive/folders/${folderId || this.rootFolderId || ''}`,
+        fileSize: options.content.length,
+        uploadedAt: new Date().toISOString(),
+        folderId: options.folderId,
+      };
+      this.mockFiles.unshift(fallbackItem);
+      return {
+        fileId: fallbackItem.fileId,
+        filename: options.filename,
+        webViewLink: fallbackItem.webViewLink,
       };
     }
   }
@@ -447,6 +634,8 @@ export class DriveService {
    * Deletes a file from Google Drive
    */
   async deleteFile(fileId: string): Promise<boolean> {
+    this.mockFiles = this.mockFiles.filter((f) => f.fileId !== fileId);
+
     if (fileId.startsWith('mock-drive-') || fileId.startsWith('drive-')) {
       this.logger.log(`[MOCK DRIVE DELETE] File ID: ${fileId}`);
       return true;

@@ -5,6 +5,7 @@ import {
   HttpCode,
   HttpStatus,
   Post,
+  Req,
   UseGuards,
 } from '@nestjs/common';
 import {
@@ -71,9 +72,12 @@ export class AuthController {
   @Public()
   @Post('logout')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Logout and revoke refresh token' })
-  async logout(@Body() refreshTokenDto: RefreshTokenDto) {
-    return this.authService.logout(refreshTokenDto);
+  @ApiOperation({
+    summary: 'Logout and revoke active access and refresh tokens',
+  })
+  async logout(@Req() req: any, @Body() refreshTokenDto?: RefreshTokenDto) {
+    const authHeader = req?.headers?.authorization;
+    return this.authService.logout(refreshTokenDto, authHeader);
   }
 
   @Public()

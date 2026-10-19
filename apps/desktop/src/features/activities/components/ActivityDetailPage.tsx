@@ -6,6 +6,7 @@ import {
   useTownContext,
   useTranslation,
   useUnlockAttendanceMutation,
+  useUpdateActivityMutation,
 } from '@jrs/client-core';
 import {
   ActivityStatus,
@@ -15,6 +16,7 @@ import {
   type IActivityReport,
 } from '@jrs/shared';
 import {
+  ArrowCounterClockwise,
   ArrowLeft,
   ArrowSquareOut,
   CalendarBlank,
@@ -38,12 +40,14 @@ import {
   Users,
   WarningCircle,
   X,
+  XCircle,
 } from '@phosphor-icons/react';
 import { openUrl } from '@tauri-apps/plugin-opener';
 import type React from 'react';
 import { useMemo, useState } from 'react';
 
-import { UserAvatar } from '../../../components';
+import Skeleton from 'react-loading-skeleton';
+import { AppSkeletonTheme, UserAvatar } from '../../../components';
 import { formatCameroonPhone } from '../../members/utils/member-ui.utils';
 import {
   formatActivityDate,
@@ -77,7 +81,8 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
   const { user } = useAuth();
   const { canWrite } = useTownContext();
 
-  const [activeTab, setActiveTab] = useState<ActivityDetailTab>('overview');
+  const [activeTabState, setActiveTab] =
+    useState<ActivityDetailTab>('overview');
   const [search, setSearch] = useState('');
   const [attendanceFilter, setAttendanceFilter] = useState<'ALL' | 'GUESTS'>(
     'ALL',
@@ -97,17 +102,70 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
   const lockMutation = useLockAttendanceMutation();
   const unlockMutation = useUnlockAttendanceMutation();
   const deleteReportMutation = useDeleteActivityReportMutation();
+  const updateActivityMutation = useUpdateActivityMutation();
 
   const isCurrentUserAp = user?.role === 'AP';
   const isLocked = Boolean(
     activity.isAttendanceLocked || attendanceData?.isLocked,
   );
 
-  // STRICT REQUIREMENT: Report available ONLY after activity AND if completed
   const now = new Date();
+  const startDate = new Date(activity.startDate);
+  const startDay = new Date(
+    startDate.getFullYear(),
+    startDate.getMonth(),
+    startDate.getDate(),
+    0,
+    0,
+    0,
+    0,
+  );
+  const todayDay = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate(),
+    0,
+    0,
+    0,
+    0,
+  );
+  const isDayOfActivityOrLater = todayDay.getTime() >= startDay.getTime();
+  const isCancelled = activity.status === ActivityStatus.CANCELLED;
   const isPastActivity = now >= new Date(activity.endDate);
   const isCompleted = activity.status === ActivityStatus.COMPLETED;
-  const canShowReportUi = isCompleted && isPastActivity;
+  const canShowReportUi = isCompleted && isPastActivity && !isCancelled;
+
+  const activeTab =
+    !isDayOfActivityOrLater && activeTabState === 'attendance'
+      ? 'overview'
+      : activeTabState;
+
+  const handleCancelActivity = async () => {
+    if (
+      !window.confirm(
+        'Are you sure you want to cancel this gathering? You can undo this cancellation at any time.',
+      )
+    ) {
+      return;
+    }
+    await updateActivityMutation.mutateAsync({
+      id: activity.id,
+      dto: {
+        status: ActivityStatus.CANCELLED,
+        changeReason: 'Gathering cancelled by coordinator',
+      },
+    });
+  };
+
+  const handleUndoCancel = async () => {
+    await updateActivityMutation.mutateAsync({
+      id: activity.id,
+      dto: {
+        status: ActivityStatus.SCHEDULED,
+        changeReason: 'Gathering cancellation reversed and restored',
+      },
+    });
+  };
 
   // Existing reports list
   const reports: IActivityReport[] = useMemo(() => {
@@ -235,18 +293,66 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
             </button>
           )}
 
-          {canWrite && isPrivileged && onDeleteActivity && (
+          {canWrite && !isCompleted && !isCancelled && (
             <button
               type="button"
-              onClick={() => onDeleteActivity(activity)}
+              onClick={handleCancelActivity}
               className="px-3.5 py-1.5 rounded-md bg-white border border-[#ffdad6] hover:bg-[#ffdad6]/40 text-xs font-bold text-[#ba1a1a] transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs"
             >
-              <Trash size={14} weight="bold" />
-              <span>Delete</span>
+              <XCircle size={14} weight="bold" />
+              <span>Cancel Activity</span>
+            </button>
+          )}
+
+          {canWrite && isCancelled && (
+            <button
+              type="button"
+              onClick={handleUndoCancel}
+              className="px-3.5 py-1.5 rounded-md bg-white border border-[#c2e9ca] hover:bg-[#edf3ee] text-xs font-bold text-[#486b52] transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs"
+            >
+              <ArrowCounterClockwise size={14} weight="bold" />
+              <span>Restore Gathering</span>
+            </button>
+          )}
+
+          {/* Delete action is forbidden before activity start date per item 3 */}
+          {canWrite &&
+            isPrivileged &&
+            isDayOfActivityOrLater &&
+            onDeleteActivity && (
+              <button
+                type="button"
+                onClick={() => onDeleteActivity(activity)}
+                className="px-3.5 py-1.5 rounded-md bg-white border border-[#ffdad6] hover:bg-[#ffdad6]/40 text-xs font-bold text-[#ba1a1a] transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs"
+              >
+                <Trash size={14} weight="bold" />
+                <span>Delete</span>
+              </button>
+            )}
+        </div>
+      </div>
+
+      {/* Cancelled Alert Banner */}
+      {isCancelled && (
+        <div className="p-4 rounded-xl bg-[#ffdad6]/60 border border-[#ffdad6] flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+          <div className="flex items-center gap-2.5 text-[#ba1a1a]">
+            <XCircle size={20} weight="fill" />
+            <span className="font-bold">
+              This activity gathering has been cancelled.
+            </span>
+          </div>
+          {canWrite && (
+            <button
+              type="button"
+              onClick={handleUndoCancel}
+              className="px-3.5 py-1.5 rounded-md bg-white border border-[#ffdad6] text-[#ba1a1a] font-bold hover:bg-[#ffdad6] transition-colors cursor-pointer self-start sm:self-auto flex items-center gap-1.5"
+            >
+              <ArrowCounterClockwise size={14} weight="bold" />
+              <span>Undo Cancel & Restore</span>
             </button>
           )}
         </div>
-      </div>
+      )}
 
       {/* 2. Activity Hero Banner */}
       <section className="bg-white rounded-xl border border-[#e8e1dd] shadow-xs p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -314,30 +420,45 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
 
         {/* Primary Action Button */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 shrink-0">
-          <button
-            type="button"
-            onClick={() => onTrackAttendance(activity)}
-            disabled={isLocked && !isCurrentUserAp}
-            className={`h-11 px-5 rounded-md font-bold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs ${
-              isLocked && !isCurrentUserAp
-                ? 'bg-[#8a726a]/30 text-[#8a726a] cursor-not-allowed'
-                : 'bg-[#b85028] hover:bg-[#a44520] text-white'
-            }`}
-            title={
-              isLocked && !isCurrentUserAp
-                ? 'Attendance roll-call is sealed. Only an AP can modify.'
-                : 'Open live attendance roll-call roster'
-            }
-          >
-            <UserCheck size={18} weight="bold" />
-            <span>
-              {isLocked
-                ? isCurrentUserAp
-                  ? 'Modify Attendance (AP Override)'
-                  : 'Attendance Sealed'
-                : 'Track Attendance'}
-            </span>
-          </button>
+          {isCancelled ? (
+            <div className="h-11 px-5 rounded-md bg-[#ffdad6]/60 border border-[#ffdad6] text-[#ba1a1a] font-bold text-xs flex items-center justify-center gap-2 select-none shadow-2xs">
+              <XCircle size={18} weight="bold" />
+              <span>Activity Cancelled</span>
+            </div>
+          ) : !isDayOfActivityOrLater ? (
+            <div
+              className="h-11 px-5 rounded-md bg-[#faf2ee] border border-[#e8e1dd] text-[#8a726a] font-semibold text-xs flex items-center justify-center gap-2 select-none shadow-2xs"
+              title="Attendance roll-call opens on the day of the activity"
+            >
+              <Clock size={18} weight="bold" className="text-[#b85028]" />
+              <span>Attendance Opens on Activity Day</span>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => onTrackAttendance(activity)}
+              disabled={isLocked && !isCurrentUserAp}
+              className={`h-11 px-5 rounded-md font-bold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs ${
+                isLocked && !isCurrentUserAp
+                  ? 'bg-[#8a726a]/30 text-[#8a726a] cursor-not-allowed'
+                  : 'bg-[#b85028] hover:bg-[#a44520] text-white'
+              }`}
+              title={
+                isLocked && !isCurrentUserAp
+                  ? 'Attendance roll-call is sealed. Only an AP can modify.'
+                  : 'Open live attendance roll-call roster'
+              }
+            >
+              <UserCheck size={18} weight="bold" />
+              <span>
+                {isLocked
+                  ? isCurrentUserAp
+                    ? 'Modify Attendance (AP Override)'
+                    : 'Attendance Sealed'
+                  : 'Track Attendance'}
+              </span>
+            </button>
+          )}
 
           {canShowReportUi && (
             <button
@@ -376,18 +497,21 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
             <span>Overview</span>
           </button>
 
-          <button
-            type="button"
-            onClick={() => setActiveTab('attendance')}
-            className={`px-4 py-2 rounded-md text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
-              activeTab === 'attendance'
-                ? 'bg-white text-[#1e1b19] shadow-2xs border border-[#e8e1dd]/60'
-                : 'text-[#8a726a] hover:text-[#1e1b19]'
-            }`}
-          >
-            <UserCheck size={15} weight="bold" />
-            <span>Attendance ({summary.totalPresent})</span>
-          </button>
+          {/* Attendance tab ONLY appears on or after the day of the activity */}
+          {isDayOfActivityOrLater && (
+            <button
+              type="button"
+              onClick={() => setActiveTab('attendance')}
+              className={`px-4 py-2 rounded-md text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+                activeTab === 'attendance'
+                  ? 'bg-white text-[#1e1b19] shadow-2xs border border-[#e8e1dd]/60'
+                  : 'text-[#8a726a] hover:text-[#1e1b19]'
+              }`}
+            >
+              <UserCheck size={15} weight="bold" />
+              <span>Attendance ({summary.totalPresent})</span>
+            </button>
+          )}
 
           {/* Strictly conditional Report Tab - ONLY visible if activity completed and past */}
           {canShowReportUi && (
@@ -619,7 +743,7 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
       )}
 
       {/* TAB 2: ATTENDANCE */}
-      {activeTab === 'attendance' && (
+      {isDayOfActivityOrLater && activeTab === 'attendance' && (
         <div className="bg-white rounded-xl border border-[#e8e1dd] shadow-xs p-6 flex flex-col gap-6 animate-in fade-in duration-150">
           {/* Attendees Toolbar */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
@@ -685,9 +809,25 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
           {/* Attendees Cards Grid */}
           <div>
             {isAttendanceLoading ? (
-              <div className="p-12 text-center text-xs text-[#8a726a] animate-pulse">
-                Loading attendance records...
-              </div>
+              <AppSkeletonTheme>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                  {Array.from({ length: 8 }).map((_, i) => (
+                    <div
+                      key={i}
+                      className="rounded-xl border border-[#e8e1dd] bg-white p-4 flex items-center justify-between shadow-2xs"
+                    >
+                      <div className="flex items-center gap-3">
+                        <Skeleton circle width={40} height={40} />
+                        <div className="flex flex-col gap-1">
+                          <Skeleton width={110} height={14} />
+                          <Skeleton width={70} height={11} />
+                        </div>
+                      </div>
+                      <Skeleton width={48} height={20} borderRadius={6} />
+                    </div>
+                  ))}
+                </div>
+              </AppSkeletonTheme>
             ) : filteredAttendees.length === 0 ? (
               <div className="p-12 text-center flex flex-col items-center justify-center text-xs text-[#8a726a] border border-[#e8e1dd] rounded-xl bg-[#faf2ee]/30">
                 <Users size={32} className="text-[#b85028]/60 mb-2" />

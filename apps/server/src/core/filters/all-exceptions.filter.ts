@@ -19,7 +19,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
     let status = HttpStatus.INTERNAL_SERVER_ERROR;
     let errorName = 'InternalServerError';
-    let message =
+    const message =
       exception instanceof Error
         ? exception.message
         : 'An unexpected internal server error occurred';
@@ -34,12 +34,16 @@ export class AllExceptionsFilter implements ExceptionFilter {
     if (status === HttpStatus.INTERNAL_SERVER_ERROR) {
       this.logger.error(
         `Unhandled error at [${request.method}] ${request.url}`,
-        exception instanceof Error ? exception.stack : JSON.stringify(exception),
+        exception instanceof Error
+          ? exception.stack
+          : JSON.stringify(exception),
       );
     } else {
-       this.logger.warn(
+      this.logger.warn(
         `Mongoose validation error at [${request.method}] ${request.url}`,
-        exception instanceof Error ? exception.message : JSON.stringify(exception),
+        exception instanceof Error
+          ? exception.message
+          : JSON.stringify(exception),
       );
     }
 
@@ -48,7 +52,8 @@ export class AllExceptionsFilter implements ExceptionFilter {
       statusCode: status,
       error: errorName,
       message:
-        status === HttpStatus.INTERNAL_SERVER_ERROR && process.env.NODE_ENV === 'production'
+        status === HttpStatus.INTERNAL_SERVER_ERROR &&
+        process.env.NODE_ENV === 'production'
           ? 'Internal server error'
           : message,
       path: request.url,

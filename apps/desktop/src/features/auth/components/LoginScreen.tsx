@@ -14,8 +14,10 @@ import {
   WarningCircle,
 } from '@phosphor-icons/react';
 import type React from 'react';
+import appLogo from '../../../assets/app-logo.jpg';
 import fellowshipHero from '../../../assets/fellowship-hero.jpg';
 import { LanguageToggle } from '../../../components/LanguageToggle';
+import { APP_VERSION } from '../../../constants/version';
 import { useLogin } from '../hooks/use-login';
 import { AccountRevokedModal } from './AccountRevokedModal';
 
@@ -73,8 +75,15 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
 
         <div className="mx-auto w-full max-w-xl py-8">
           <div className="bg-white rounded-2xl border border-[#e8e1dd] p-6 sm:p-10 shadow-sm flex flex-col">
-            {/* Header */}
+            {/* Brand Logo & Header */}
             <div className="mb-7">
+              <div className="mb-5 flex items-center">
+                <img
+                  src={appLogo}
+                  alt="JRS Portal"
+                  className="h-9 w-auto object-contain rounded-md"
+                />
+              </div>
               <h1 className="text-2xl font-bold tracking-tight text-[#1e1b19] sm:text-3xl">
                 {t('auth:login.title')}
               </h1>
@@ -258,6 +267,17 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
                 </button>
               </div>
             </form>
+          </div>
+
+          {/* Version Indicator */}
+          <div className="mt-6 flex items-center justify-center gap-2 text-xs font-mono text-[#8a726a] select-none">
+            <span className="font-medium text-[#57423b]">JRS Portal</span>
+            <span className="text-[#8a726a]/50">•</span>
+            <span className="px-2 py-0.5 rounded-md bg-[#faf2ee] border border-[#e8e1dd] text-[#57423b] font-bold text-[11px]">
+              v{APP_VERSION}
+            </span>
+            <span className="text-[#8a726a]/50">•</span>
+            <span>Desktop Edition</span>
           </div>
         </div>
       </div>

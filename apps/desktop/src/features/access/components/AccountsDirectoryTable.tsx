@@ -14,7 +14,11 @@ import {
 } from '@phosphor-icons/react';
 import type React from 'react';
 import { useEffect, useRef, useState } from 'react';
-import { PaginationControl, UserAvatar } from '../../../components';
+import {
+  PaginationControl,
+  TableSkeleton,
+  UserAvatar,
+} from '../../../components';
 import {
   formatCameroonPhone,
   getCleanDigitsForWhatsApp,
@@ -80,12 +84,15 @@ export const AccountsDirectoryTable: React.FC<AccountsDirectoryTableProps> = ({
 
   if (isLoading) {
     return (
-      <div className="bg-white rounded-xl border border-[#e8e1dd] shadow-xs p-6 flex flex-col gap-4 animate-pulse">
-        <div className="h-10 bg-[#faf2ee] rounded-md w-full" />
-        {[1, 2, 3, 4, 5, 6].map((i) => (
-          <div key={i} className="h-12 bg-[#faf2ee] rounded-md w-full" />
-        ))}
-      </div>
+      <TableSkeleton
+        columns={[
+          t('access:table.member', 'Member / Identity'),
+          t('access:table.appAccess', 'Portal Status'),
+          t('access:table.activeTown', 'Assigned Hub'),
+          t('common:actions', 'Actions'),
+        ]}
+        rowCount={Math.min(limit, 8)}
+      />
     );
   }
 

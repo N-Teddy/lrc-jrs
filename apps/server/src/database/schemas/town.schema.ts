@@ -12,7 +12,10 @@ export class Town extends BaseDocument {
   @Prop({ type: String, required: true, trim: true, unique: true })
   name: string;
 
-  @Prop({ type: String, required: true, trim: true,
+  @Prop({
+    type: String,
+    required: true,
+    trim: true,
     uppercase: true,
     unique: true,
     index: true,
