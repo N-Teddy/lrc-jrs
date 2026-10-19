@@ -17,10 +17,17 @@ export class WhatsAppService implements NotificationStrategy {
   private readonly apiKey: string;
 
   constructor(private readonly configService: ConfigService) {
-    this.baseUrl = this.configService.getOrThrow<string>(
-      'WHATSAPP_API_BASE_URL',
-    );
-    this.apiKey = this.configService.getOrThrow<string>('WHATSAPP_API_KEY');
+    this.baseUrl = this.configService
+      .getOrThrow<string>('WHATSAPP_API_BASE_URL')
+      .trim()
+      .replace(/\/+$/, '');
+    const rawKey = this.configService
+      .getOrThrow<string>('WHATSAPP_API_KEY')
+      .trim()
+      .replace(/^["']|["']$/g, '');
+    this.apiKey = rawKey.startsWith('Bearer ')
+      ? rawKey.slice(7).trim()
+      : rawKey;
   }
 
   /**
@@ -102,9 +109,15 @@ export class WhatsAppService implements NotificationStrategy {
 
       return isSuccess;
     } catch (error: unknown) {
-      const err = error as { message?: string };
+      const err = error as {
+        message?: string;
+        response?: { data?: unknown; status?: number };
+      };
+      const responseDetails = err.response?.data
+        ? ` (Details: ${JSON.stringify(err.response.data)})`
+        : '';
       this.logger.error(
-        `Error dispatching WhatsApp to ${sanitized}: ${err.message || 'Unknown error'}`,
+        `Error dispatching WhatsApp to ${sanitized}: ${err.message || 'Unknown error'}${responseDetails}`,
       );
       return false;
     }
