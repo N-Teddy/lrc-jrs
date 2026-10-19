@@ -22,7 +22,13 @@ import { BatchInviteModal } from './BatchInviteModal';
 import { ChangeTownPcModal } from './ChangeTownPcModal';
 import { TownScopeModal } from './TownScopeModal';
 
-export const AccessFeature: React.FC = () => {
+export interface AccessFeatureProps {
+  showHeader?: boolean;
+}
+
+export const AccessFeature: React.FC<AccessFeatureProps> = ({
+  showHeader = false,
+}) => {
   const { t } = useTranslation(['access', 'common']);
   const { user } = useAuth();
   const { activeTownId } = useTownContext();
@@ -188,15 +194,17 @@ export const AccessFeature: React.FC = () => {
   return (
     <div className="flex flex-col gap-6 animate-in fade-in duration-200">
       {/* 1. Header Hero Title Strip */}
-      <div className="flex flex-col gap-1">
-        <h1 className="text-xl sm:text-2xl font-black text-[#1e1b19] tracking-tight">
-          {t('access:title') || 'Access & Accounts Command Center'}
-        </h1>
-        <p className="text-xs sm:text-sm text-[#8a726a]">
-          {t('access:subtitle') ||
-            'Manage member platform onboarding, temporary passwords, security freezes, and hub jurisdictions'}
-        </p>
-      </div>
+      {showHeader && (
+        <div className="flex flex-col gap-1">
+          <h1 className="text-xl sm:text-2xl font-black text-[#1e1b19] tracking-tight">
+            {t('access:title') || 'Access & Accounts Command Center'}
+          </h1>
+          <p className="text-xs sm:text-sm text-[#8a726a]">
+            {t('access:subtitle') ||
+              'Manage member platform onboarding, temporary passwords, security freezes, and hub jurisdictions'}
+          </p>
+        </div>
+      )}
 
       {/* 2. Top Security & KPI Cards */}
       <AccessStatsOverview

@@ -4,7 +4,6 @@ import {
   CalendarBlank,
   ChartBar,
   MapPin,
-  ShieldCheck,
   SidebarSimple,
   SignOut,
   SquaresFour,
@@ -81,12 +80,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
       id: 'transfers',
       label: t('navigation:transfers'),
       icon: ArrowsLeftRight,
-      requiresAdmin: true,
-    },
-    {
-      id: 'access',
-      label: t('navigation:access'),
-      icon: ShieldCheck,
       requiresAdmin: true,
     },
     {

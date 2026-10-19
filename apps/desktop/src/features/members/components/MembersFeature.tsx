@@ -36,7 +36,7 @@ interface MembersFeatureProps {
 export const MembersFeature: React.FC<MembersFeatureProps> = ({
   initialSubTab = 'directory',
 }) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['members', 'access', 'common']);
   const { user } = useAuth();
   const { activeTown, activeTownId } = useTownContext();
 
@@ -138,12 +138,13 @@ export const MembersFeature: React.FC<MembersFeatureProps> = ({
               <h1 className="text-xl sm:text-2xl font-bold text-[#1e1b19] tracking-tight">
                 {activeSubTab === 'directory'
                   ? t('members:title')
-                  : 'Access & Accounts Command Center'}
+                  : t('access:title') || 'Access & Accounts Command Center'}
               </h1>
               <p className="text-xs text-[#8a726a]">
                 {activeSubTab === 'directory'
                   ? 'Directory roster, demographic profiles, and status records'
-                  : 'Platform credentials, coordinator assignments, and cross-hub permissions'}
+                  : t('access:subtitle') ||
+                    'Manage member platform onboarding, temporary passwords, security freezes, and hub jurisdictions'}
               </p>
             </div>
 
@@ -264,7 +265,7 @@ export const MembersFeature: React.FC<MembersFeatureProps> = ({
               />
             </>
           ) : (
-            <AccessFeature />
+            <AccessFeature showHeader={false} />
           )}
         </>
       )}
