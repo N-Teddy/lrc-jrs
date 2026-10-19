@@ -20,7 +20,7 @@ fn main() {
                 fn g_set_prgname(prgname: *const std::os::raw::c_char);
                 fn g_set_application_name(app_name: *const std::os::raw::c_char);
             }
-            g_set_prgname(b"desktop\0".as_ptr() as *const _);
+            g_set_prgname(b"com.ngangman-teddy.lrc-jrs\0".as_ptr() as *const _);
             g_set_application_name(b"LRC JRS\0".as_ptr() as *const _);
         }
     }
