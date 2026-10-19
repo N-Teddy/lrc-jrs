@@ -77,12 +77,13 @@ export const SEED_PROD_PC_USER: SeedUserData = {
   role: UserRole.PC,
   isActivePC: true,
   homeTownCode: 'DLA',
+  password: 'TempPassword123!',
   isTemporaryPassword: true,
   account: {
     status: AccountStatus.MUST_CHANGE_PASSWORD,
     hasAppAccess: true,
     isAccessRevoked: false,
-    allowedReadTownCodes: ['DLA'],
+    allowedReadTownCodes: ['DLA', 'YDE', 'EDA', 'BAF'],
   },
 };
 

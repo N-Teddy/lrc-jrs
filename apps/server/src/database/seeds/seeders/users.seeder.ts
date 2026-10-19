@@ -62,7 +62,7 @@ export class UsersSeeder {
 
     const isProd = options.mode === 'prod';
     const primaryUsers: SeedUserData[] = isProd
-      ? [...SEED_ADMIN_USERS, SEED_PROD_PC_USER]
+      ? [SEED_PROD_PC_USER]
       : [
           ...SEED_ADMIN_USERS,
           ...SEED_PC_USERS,
@@ -71,7 +71,7 @@ export class UsersSeeder {
         ];
 
     const usersToSeed: SeedUserData[] = isProd
-      ? primaryUsers
+      ? [SEED_PROD_PC_USER]
       : [...primaryUsers, ...SEED_MEMBERS_NO_APP_ACCESS];
 
     const summaries: SeededUserSummary[] = [];

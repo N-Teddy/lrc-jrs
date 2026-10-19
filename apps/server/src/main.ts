@@ -35,8 +35,10 @@ async function bootstrap() {
     credentials: true,
   });
 
-  // Set global API prefix
-  app.setGlobalPrefix(apiPrefix);
+  // Set global API prefix (exclude root for cloud health checks)
+  app.setGlobalPrefix(apiPrefix, {
+    exclude: ['/'],
+  });
 
   // Global strict DTO Validation Pipe
   app.useGlobalPipes(
