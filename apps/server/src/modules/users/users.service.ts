@@ -30,6 +30,7 @@ import { EmailService } from '../../services/email.service';
 import { MediaService } from '../../services/media.service';
 import { WhatsAppService } from '../../services/whatsapp.service';
 import type {
+  ChangeTownPcDto,
   CreateMemberDto,
   MemberQueryDto,
   TransferTownDto,
@@ -863,5 +864,126 @@ export class UsersService {
           this.logger.warn(`Failed sending Email invite: ${err.message}`),
         );
     }
+  }
+
+  /**
+   * Transitions PC (Parish Coordinator) leadership in a town.
+   * Can replace an outgoing PC by either:
+   * 1. Demoting them to a regular member (keeping member app access)
+   * 2. Revoking their account access completely
+   */
+  async changeTownPc(
+    dto: ChangeTownPcDto,
+    currentUser: IAuthUser,
+  ): Promise<{
+    message: string;
+    newPc: UserDocument;
+    outgoingPc?: UserDocument;
+  }> {
+    // 1. Authorization: Only AP or the active PC of that town can transition leadership
+    const isAP = currentUser.role === UserRole.AP;
+    const isCurrentTownPC =
+      currentUser.role === UserRole.PC &&
+      currentUser.homeTownId?.toString() === dto.townId;
+
+    if (!isAP && !isCurrentTownPC) {
+      throw new ForbiddenException(
+        'Only Animateurs Principaux (AP) or the current Town PC can transition PC leadership.',
+      );
+    }
+
+    const townObjectId = new Types.ObjectId(dto.townId);
+
+    // 2. Fetch new PC candidate
+    const newPc = await this.userModel.findById(dto.newPcUserId).exec();
+    if (!newPc) {
+      throw new NotFoundException('Selected new PC member not found.');
+    }
+
+    // Validate age eligibility for PC (18-30)
+    const isJr = isJrAgeEligible(newPc.dateOfBirth);
+    const age = calculateAge(newPc.dateOfBirth);
+    if (!isJr) {
+      throw new BadRequestException(
+        `Parish Coordinators (PCs) must be aged between ${JR_AGE_RANGE.MIN} and ${JR_AGE_RANGE.MAX} years old (candidate age: ${age}).`,
+      );
+    }
+
+    let outgoingPc: UserDocument | null = null;
+
+    // 3. Handle outgoing PC if specified
+    if (dto.outgoingPcUserId) {
+      if (dto.outgoingPcUserId === dto.newPcUserId) {
+        throw new BadRequestException(
+          'The outgoing PC and new PC cannot be the same member.',
+        );
+      }
+
+      outgoingPc = await this.userModel.findById(dto.outgoingPcUserId).exec();
+
+      if (!outgoingPc) {
+        throw new NotFoundException('Outgoing PC member not found.');
+      }
+
+      // Step down from PC role
+      outgoingPc.role = UserRole.MEMBER;
+      outgoingPc.isActivePC = false;
+
+      if (dto.outgoingPcDisposition === 'revoke_access') {
+        outgoingPc.account.isAccessRevoked = true;
+        outgoingPc.account.hasAppAccess = false;
+        outgoingPc.lastLogoutAt = new Date();
+      } else {
+        // Demote to regular member with app access intact
+        outgoingPc.account.isAccessRevoked = false;
+        outgoingPc.account.hasAppAccess = true;
+      }
+
+      await outgoingPc.save();
+    }
+
+    // 4. Verify PC quota for this town (max 2 active PCs)
+    const activePcs = await this.countActivePcsForTown(townObjectId);
+    if (activePcs >= 2) {
+      throw new BadRequestException(
+        'This town already has the maximum of 2 active Contact Persons (PCs). Please specify an outgoing PC to replace.',
+      );
+    }
+
+    // 5. Promote new PC
+    newPc.role = UserRole.PC;
+    newPc.isActivePC = true;
+    newPc.homeTownId = townObjectId;
+
+    // Ensure new PC has app access enabled
+    let generatedPassword: string | undefined;
+    if (!newPc.account?.hasAppAccess || newPc.account?.isAccessRevoked) {
+      newPc.account.hasAppAccess = true;
+      newPc.account.isAccessRevoked = false;
+      generatedPassword = PasswordGeneratorUtil.generateTemporaryPassword();
+      newPc.passwordHash = await bcrypt.hash(generatedPassword, 10);
+      newPc.tempPasswordHash = newPc.passwordHash;
+      newPc.tempPasswordExpiresAt = new Date(Date.now() + 48 * 60 * 60 * 1000);
+      newPc.isTemporaryPassword = true;
+    }
+
+    await newPc.save();
+
+    if (generatedPassword) {
+      this.dispatchCredentials(
+        newPc.fullName,
+        newPc.phoneNumber,
+        newPc.email,
+        generatedPassword,
+      );
+    }
+
+    return {
+      message: outgoingPc
+        ? `PC leadership transferred from ${outgoingPc.fullName} to ${newPc.fullName} successfully.`
+        : `${newPc.fullName} has been appointed as PC successfully.`,
+      newPc,
+      outgoingPc: outgoingPc || undefined,
+    };
   }
 }

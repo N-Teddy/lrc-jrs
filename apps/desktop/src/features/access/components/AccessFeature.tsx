@@ -19,6 +19,7 @@ import {
 import { AccessStatsOverview } from './AccessStatsOverview';
 import { AccountsDirectoryTable } from './AccountsDirectoryTable';
 import { BatchInviteModal } from './BatchInviteModal';
+import { ChangeTownPcModal } from './ChangeTownPcModal';
 import { TownScopeModal } from './TownScopeModal';
 
 export const AccessFeature: React.FC = () => {
@@ -45,6 +46,8 @@ export const AccessFeature: React.FC = () => {
   const [accessMember, setAccessMember] = useState<IUser | null>(null);
   const [scopeMember, setScopeMember] = useState<IUser | null>(null);
   const [isBatchInviteOpen, setIsBatchInviteOpen] = useState(false);
+  const [isChangePcOpen, setIsChangePcOpen] = useState(false);
+  const [changePcTargetPc, setChangePcTargetPc] = useState<IUser | null>(null);
 
   // Towns Query
   const { data: townsData } = useTownsQuery();
@@ -226,6 +229,10 @@ export const AccessFeature: React.FC = () => {
           setPage(1);
         }}
         onOpenBatchInvite={() => setIsBatchInviteOpen(true)}
+        onOpenChangePc={() => {
+          setChangePcTargetPc(null);
+          setIsChangePcOpen(true);
+        }}
         isPrivileged={isPrivileged}
       />
 
@@ -239,6 +246,10 @@ export const AccessFeature: React.FC = () => {
         onPageChange={setPage}
         onOpenManageAccess={(m) => setAccessMember(m)}
         onOpenScopeModal={(m) => setScopeMember(m)}
+        onOpenChangePc={(pc) => {
+          setChangePcTargetPc(pc);
+          setIsChangePcOpen(true);
+        }}
         onViewMemberDetail={(id) => setSelectedMemberDetailId(id)}
         availableTowns={availableTowns}
         isCurrentUserAp={isCurrentUserAp}
@@ -268,6 +279,19 @@ export const AccessFeature: React.FC = () => {
         onClose={() => setIsBatchInviteOpen(false)}
         offlineMembers={offlineMembers}
         onBatchInvite={handleBatchInvite}
+      />
+
+      {/* Change Town PC Modal */}
+      <ChangeTownPcModal
+        isOpen={isChangePcOpen}
+        onClose={() => {
+          setIsChangePcOpen(false);
+          setChangePcTargetPc(null);
+        }}
+        targetTownId={
+          changePcTargetPc?.homeTownId || selectedTownId || undefined
+        }
+        targetOutgoingPc={changePcTargetPc}
       />
     </div>
   );

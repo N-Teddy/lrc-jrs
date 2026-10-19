@@ -308,22 +308,75 @@ export class DriveService {
   }
 
   /**
-   * Retrieves files within Google Drive, optionally filtered by folder
+   * Returns a set of folder IDs containing the specified root folder
+   * and all of its recursively nested descendant subfolder IDs.
+   */
+  async getFolderAndDescendantIds(folderId: string): Promise<Set<string>> {
+    const folders = await this.listFolders();
+    const result = new Set<string>([folderId]);
+
+    // Build parent -> children map
+    const childrenMap = new Map<string, string[]>();
+    for (const f of folders) {
+      if (f.parentId) {
+        const list = childrenMap.get(f.parentId) || [];
+        list.push(f.id);
+        childrenMap.set(f.parentId, list);
+      }
+    }
+
+    // Traverse BFS
+    const queue = [folderId];
+    while (queue.length > 0) {
+      const current = queue.shift();
+      if (!current) continue;
+      const children = childrenMap.get(current) || [];
+      for (const child of children) {
+        if (!result.has(child)) {
+          result.add(child);
+          queue.push(child);
+        }
+      }
+    }
+
+    return result;
+  }
+
+  /**
+   * Retrieves files within Google Drive, optionally filtered by folder and its descendant subfolders
    */
   async listFiles(folderId?: string): Promise<IDriveFileItem[]> {
     const accessToken = await this.getAccessToken();
+
+    // 1. Resolve folder IDs including all subfolders if filtered
+    let targetIds: Set<string> | null = null;
+    if (folderId && folderId !== 'ALL' && folderId !== 'root') {
+      targetIds = await this.getFolderAndDescendantIds(folderId);
+    }
+
+    // 2. Mock mode if no access token
     if (!accessToken) {
-      if (folderId && folderId !== 'ALL' && folderId !== 'root') {
-        return this.mockFiles.filter((f) => f.folderId === folderId);
+      if (targetIds) {
+        return this.mockFiles.filter(
+          (f) => f.folderId && targetIds.has(f.folderId),
+        );
       }
       return this.mockFiles;
     }
 
+    // 3. Live Google Drive API
     try {
       let q =
         "trashed = false and mimeType != 'application/vnd.google-apps.folder'";
-      if (folderId && folderId !== 'ALL' && folderId !== 'root') {
-        q += ` and '${folderId}' in parents`;
+
+      if (targetIds && targetIds.size > 0) {
+        const parentsClause =
+          targetIds.size === 1
+            ? `'${folderId}' in parents`
+            : `(${Array.from(targetIds)
+                .map((id) => `'${id}' in parents`)
+                .join(' or ')})`;
+        q += ` and ${parentsClause}`;
       }
 
       const response = await axios.get(

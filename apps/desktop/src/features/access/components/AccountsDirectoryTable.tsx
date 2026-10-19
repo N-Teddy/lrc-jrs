@@ -3,6 +3,7 @@ import type { ITown, IUser } from '@jrs/shared';
 import {
   ChatCircleText,
   ClockCountdown,
+  Crown,
   DotsThreeVertical,
   EnvelopeSimple,
   Globe,
@@ -34,6 +35,7 @@ interface AccountsDirectoryTableProps {
   onPageChange: (page: number) => void;
   onOpenManageAccess: (member: IUser) => void;
   onOpenScopeModal: (member: IUser) => void;
+  onOpenChangePc?: (member: IUser) => void;
   onViewMemberDetail: (memberId: string) => void;
   availableTowns: ITown[];
   isCurrentUserAp: boolean;
@@ -48,6 +50,7 @@ export const AccountsDirectoryTable: React.FC<AccountsDirectoryTableProps> = ({
   onPageChange,
   onOpenManageAccess,
   onOpenScopeModal,
+  onOpenChangePc,
   onViewMemberDetail,
   availableTowns,
   isCurrentUserAp,
@@ -320,6 +323,20 @@ export const AccountsDirectoryTable: React.FC<AccountsDirectoryTableProps> = ({
                                   'Cross-Hub Scopes'}
                               </span>
                             </button>
+
+                            {onOpenChangePc && m.role === 'PC' && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setOpenMenuId(null);
+                                  onOpenChangePc(m);
+                                }}
+                                className="w-full px-3 py-2 text-left text-xs text-[#b85028] hover:bg-[#fff2ee] flex items-center gap-2 font-medium cursor-pointer"
+                              >
+                                <Crown size={14} weight="bold" />
+                                <span>Change Town PC</span>
+                              </button>
+                            )}
 
                             <button
                               type="button"

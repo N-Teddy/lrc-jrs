@@ -1,6 +1,11 @@
 import { useTranslation } from '@jrs/client-core';
 import type { ITown } from '@jrs/shared';
-import { MagnifyingGlass, PaperPlaneTilt, X } from '@phosphor-icons/react';
+import {
+  Crown,
+  MagnifyingGlass,
+  PaperPlaneTilt,
+  X,
+} from '@phosphor-icons/react';
 import type React from 'react';
 import { useMemo } from 'react';
 import { CustomSelect, type SelectOption } from '../../../components';
@@ -18,6 +23,7 @@ interface AccessFilterToolbarProps {
   roleFilter: string;
   onRoleFilterChange: (role: string) => void;
   onOpenBatchInvite: () => void;
+  onOpenChangePc?: () => void;
   isPrivileged: boolean;
 }
 
@@ -32,6 +38,7 @@ export const AccessFilterToolbar: React.FC<AccessFilterToolbarProps> = ({
   roleFilter,
   onRoleFilterChange,
   onOpenBatchInvite,
+  onOpenChangePc,
   isPrivileged,
 }) => {
   const { t } = useTranslation(['access', 'common']);
@@ -154,6 +161,18 @@ export const AccessFilterToolbar: React.FC<AccessFilterToolbarProps> = ({
           size="md"
           className="w-40"
         />
+
+        {/* Change Town PC Button (AP or PC) */}
+        {isPrivileged && onOpenChangePc && (
+          <button
+            type="button"
+            onClick={onOpenChangePc}
+            className="h-10 px-4 rounded-md bg-[#faf2ee] hover:bg-[#fff2ee] border border-[#ffdbcf] text-[#b85028] text-xs font-bold transition-all shadow-xs flex items-center gap-2 cursor-pointer"
+          >
+            <Crown size={16} weight="bold" />
+            <span>Change Town PC</span>
+          </button>
+        )}
 
         {/* Batch Invite Button (AP or PC) */}
         {isPrivileged && (

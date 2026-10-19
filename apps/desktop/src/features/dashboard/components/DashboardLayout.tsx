@@ -10,7 +10,6 @@ import {
 import { motion } from 'motion/react';
 import type React from 'react';
 import { APP_VERSION } from '../../../constants/version';
-import { AccessFeature } from '../../access';
 import { ActivitiesFeature } from '../../activities';
 import { ChangePasswordModal } from '../../auth';
 import { DriveExplorerFeature } from '../../drive';
@@ -133,11 +132,11 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             className="w-full"
           >
             {activeTab === 'members' ? (
-              <MembersFeature />
+              <MembersFeature initialSubTab="directory" />
             ) : activeTab === 'activities' ? (
               <ActivitiesFeature />
             ) : activeTab === 'access' ? (
-              <AccessFeature />
+              <MembersFeature initialSubTab="access" />
             ) : activeTab === 'reports' ? (
               <DriveExplorerFeature />
             ) : activeTab === 'transfers' ? (

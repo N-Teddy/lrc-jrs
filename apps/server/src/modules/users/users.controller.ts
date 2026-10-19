@@ -28,6 +28,7 @@ import { TownScope } from '../../core/decorators/town-scope.decorator';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
 import { TownScopeGuard } from '../../core/guards/town-scope.guard';
 import {
+  ChangeTownPcDto,
   CreateMemberDto,
   MemberQueryDto,
   TransferTownDto,
@@ -143,6 +144,25 @@ export class UsersController {
     @CurrentUser() currentUser: IAuthUser,
   ) {
     return this.usersService.updateAccess(id, dto, currentUser);
+  }
+
+  @Post('change-pc')
+  @ApiOperation({
+    summary:
+      'Transition PC leadership in a town, optionally demoting or revoking outgoing PC access',
+  })
+  @ApiResponse({ status: 200, description: 'PC leadership transitioned' })
+  @ApiResponse({ status: 400, description: 'Validation or quota error' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden (requires AP or Town PC)',
+  })
+  @ApiResponse({ status: 404, description: 'Member not found' })
+  async changeTownPc(
+    @Body() dto: ChangeTownPcDto,
+    @CurrentUser() currentUser: IAuthUser,
+  ) {
+    return this.usersService.changeTownPc(dto, currentUser);
   }
 
   @Post(':id/transfer')

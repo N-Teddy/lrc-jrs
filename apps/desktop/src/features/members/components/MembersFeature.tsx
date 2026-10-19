@@ -15,8 +15,10 @@ import type {
   IUser,
   UserRole,
 } from '@jrs/shared';
+import { ShieldCheck, Users } from '@phosphor-icons/react';
 import type React from 'react';
 import { useState } from 'react';
+import { AccessFeature } from '../../access';
 import { DeleteMemberDialog } from './DeleteMemberDialog';
 import { EditMemberModal } from './EditMemberModal';
 import { ManageAccessModal } from './ManageAccessModal';
@@ -27,10 +29,20 @@ import { MemberStatsOverview } from './MemberStatsOverview';
 import { MemberTableView } from './MemberTableView';
 import { RegisterMemberModal } from './RegisterMemberModal';
 
-export const MembersFeature: React.FC = () => {
+interface MembersFeatureProps {
+  initialSubTab?: 'directory' | 'access';
+}
+
+export const MembersFeature: React.FC<MembersFeatureProps> = ({
+  initialSubTab = 'directory',
+}) => {
   const { t } = useTranslation();
   const { user } = useAuth();
   const { activeTown, activeTownId } = useTownContext();
+
+  const [activeSubTab, setActiveSubTab] = useState<'directory' | 'access'>(
+    initialSubTab,
+  );
 
   // Navigation State
   const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
@@ -120,92 +132,140 @@ export const MembersFeature: React.FC = () => {
         />
       ) : (
         <>
-          {/* 1. Header & Title */}
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
-            <div className="flex flex-col gap-1">
-              <h1 className="text-2xl font-extrabold text-[#1e1b19] tracking-tight">
-                {t('members:title')}
+          {/* 1. Header & Subtab Bar */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-[#f4ece9]">
+            <div className="flex flex-col gap-0.5">
+              <h1 className="text-xl sm:text-2xl font-bold text-[#1e1b19] tracking-tight">
+                {activeSubTab === 'directory'
+                  ? t('members:title')
+                  : 'Access & Accounts Command Center'}
               </h1>
+              <p className="text-xs text-[#8a726a]">
+                {activeSubTab === 'directory'
+                  ? 'Directory roster, demographic profiles, and status records'
+                  : 'Platform credentials, coordinator assignments, and cross-hub permissions'}
+              </p>
+            </div>
+
+            {/* Subtab Switcher */}
+            <div className="flex items-center gap-1.5 p-1 rounded-lg bg-[#faf2ee] border border-[#e8e1dd] self-start sm:self-auto shadow-2xs">
+              <button
+                type="button"
+                onClick={() => setActiveSubTab('directory')}
+                className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md text-xs font-bold transition-all cursor-pointer ${
+                  activeSubTab === 'directory'
+                    ? 'bg-white text-[#b85028] shadow-xs border border-[#e8e1dd]'
+                    : 'text-[#8a726a] hover:text-[#57423b] hover:bg-[#f4ece9] border border-transparent'
+                }`}
+              >
+                <Users
+                  size={16}
+                  weight={activeSubTab === 'directory' ? 'fill' : 'regular'}
+                />
+                <span>Fellowship Directory</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveSubTab('access')}
+                className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md text-xs font-bold transition-all cursor-pointer ${
+                  activeSubTab === 'access'
+                    ? 'bg-white text-[#b85028] shadow-xs border border-[#e8e1dd]'
+                    : 'text-[#8a726a] hover:text-[#57423b] hover:bg-[#f4ece9] border border-transparent'
+                }`}
+              >
+                <ShieldCheck
+                  size={16}
+                  weight={activeSubTab === 'access' ? 'fill' : 'regular'}
+                />
+                <span>Access & Accounts</span>
+              </button>
             </div>
           </div>
 
-          {/* 2. Top Metric Cards */}
-          <MemberStatsOverview
-            stats={stats}
-            isLoading={isStatsLoading}
-            hubName={activeTown ? activeTown.name : 'Hub'}
-          />
+          {activeSubTab === 'directory' ? (
+            <>
+              {/* 2. Top Metric Cards */}
+              <MemberStatsOverview
+                stats={stats}
+                isLoading={isStatsLoading}
+                hubName={activeTown ? activeTown.name : 'Hub'}
+              />
 
-          {/* 3. Filter Toolbar */}
-          <MemberFilterToolbar
-            search={search}
-            onSearchChange={(val) => {
-              setSearch(val);
-              setPage(1);
-            }}
-            roleFilter={roleFilter}
-            onRoleFilterChange={(role) => {
-              setRoleFilter(role);
-              setPage(1);
-            }}
-            isJrOnly={isJrOnly}
-            onToggleJrOnly={() => {
-              setIsJrOnly(!isJrOnly);
-              setPage(1);
-            }}
-            viewMode={viewMode}
-            onViewModeChange={(mode) => {
-              setViewMode(mode);
-              setPage(1);
-            }}
-            onOpenRegisterModal={() => setIsRegisterModalOpen(true)}
-          />
+              {/* 3. Filter Toolbar */}
+              <MemberFilterToolbar
+                search={search}
+                onSearchChange={(val) => {
+                  setSearch(val);
+                  setPage(1);
+                }}
+                roleFilter={roleFilter}
+                onRoleFilterChange={(role) => {
+                  setRoleFilter(role);
+                  setPage(1);
+                }}
+                isJrOnly={isJrOnly}
+                onToggleJrOnly={() => {
+                  setIsJrOnly(!isJrOnly);
+                  setPage(1);
+                }}
+                viewMode={viewMode}
+                onViewModeChange={(mode) => {
+                  setViewMode(mode);
+                  setPage(1);
+                }}
+                onOpenRegisterModal={() => setIsRegisterModalOpen(true)}
+              />
 
-          {/* 4. Directory View (Table or Grid) */}
-          {viewMode === 'table' ? (
-            <MemberTableView
-              members={members}
-              isLoading={isMembersLoading}
-              total={total}
-              page={page}
-              limit={limit}
-              onPageChange={setPage}
-              onViewMember={(id) => setSelectedMemberId(id)}
-              onEditMember={(m) => setEditingMember(m)}
-              onManageAccess={(m) => setAccessMember(m)}
-              onDeleteMember={
-                isCurrentUserAp ? (m) => setDeletingMember(m) : undefined
-              }
-              isCurrentUserAp={isCurrentUserAp}
-            />
+              {/* 4. Directory View (Table or Grid) */}
+              {viewMode === 'table' ? (
+                <MemberTableView
+                  members={members}
+                  isLoading={isMembersLoading}
+                  total={total}
+                  page={page}
+                  limit={limit}
+                  onPageChange={setPage}
+                  onViewMember={(id) => setSelectedMemberId(id)}
+                  onEditMember={(m) => setEditingMember(m)}
+                  onManageAccess={(m) => setAccessMember(m)}
+                  onDeleteMember={
+                    isCurrentUserAp ? (m) => setDeletingMember(m) : undefined
+                  }
+                  isCurrentUserAp={isCurrentUserAp}
+                />
+              ) : (
+                <MemberCardGridView
+                  members={members}
+                  isLoading={isMembersLoading}
+                  total={total}
+                  page={page}
+                  limit={limit}
+                  onPageChange={setPage}
+                  onViewMember={(id) => setSelectedMemberId(id)}
+                  onEditMember={(m) => setEditingMember(m)}
+                  onManageAccess={(m) => setAccessMember(m)}
+                  onDeleteMember={
+                    isCurrentUserAp ? (m) => setDeletingMember(m) : undefined
+                  }
+                  isCurrentUserAp={isCurrentUserAp}
+                />
+              )}
+
+              {/* 5. Modals */}
+              <RegisterMemberModal
+                isOpen={isRegisterModalOpen}
+                onClose={() => setIsRegisterModalOpen(false)}
+                onSubmit={handleCreateMember}
+                activeTownName={activeTown ? activeTown.name : 'Hub'}
+                activeTownCode={activeTown ? activeTown.code : 'HUB'}
+                activePcCount={stats?.activePcCount ?? 0}
+                isSubmitting={createMemberMutation.isPending}
+              />
+            </>
           ) : (
-            <MemberCardGridView
-              members={members}
-              isLoading={isMembersLoading}
-              total={total}
-              page={page}
-              limit={limit}
-              onPageChange={setPage}
-              onViewMember={(id) => setSelectedMemberId(id)}
-              onEditMember={(m) => setEditingMember(m)}
-              onManageAccess={(m) => setAccessMember(m)}
-              onDeleteMember={
-                isCurrentUserAp ? (m) => setDeletingMember(m) : undefined
-              }
-              isCurrentUserAp={isCurrentUserAp}
-            />
+            <AccessFeature />
           )}
-
-          {/* 5. Modals */}
-          <RegisterMemberModal
-            isOpen={isRegisterModalOpen}
-            onClose={() => setIsRegisterModalOpen(false)}
-            onSubmit={handleCreateMember}
-            activeTownName={activeTown ? activeTown.name : 'Hub'}
-            activeTownCode={activeTown ? activeTown.code : 'HUB'}
-            activePcCount={stats?.activePcCount ?? 0}
-            isSubmitting={createMemberMutation.isPending}
-          />
         </>
       )}
 

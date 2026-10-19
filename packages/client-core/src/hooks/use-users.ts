@@ -1,4 +1,5 @@
 import type {
+  IChangeTownPcDto,
   ICreateMemberDto,
   IMemberQueryDto,
   IMemberStats,
@@ -130,6 +131,35 @@ export function useUpdateMemberAccessMutation() {
       queryClient.invalidateQueries({
         queryKey: queryKeys.users.detail(variables.id),
       });
+    },
+  });
+}
+
+/**
+ * Hook to transition Town PC leadership (appoint new PC, demote/revoke outgoing PC)
+ */
+export function useChangeTownPcMutation() {
+  const http = useHttp();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (dto: IChangeTownPcDto) =>
+      http.post<{ message: string; newPc: IUser; outgoingPc?: IUser }>(
+        '/users/change-pc',
+        dto,
+      ),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.users.all });
+      queryClient.invalidateQueries({ queryKey: ['users', 'stats'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.towns.all });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.users.detail(variables.newPcUserId),
+      });
+      if (variables.outgoingPcUserId) {
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.users.detail(variables.outgoingPcUserId),
+        });
+      }
     },
   });
 }

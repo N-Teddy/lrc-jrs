@@ -1,3 +1,4 @@
+export * from './change-town-pc.dto';
 export * from './create-member.dto';
 export * from './member-query.dto';
 export * from './transfer-town.dto';

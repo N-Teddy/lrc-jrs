@@ -125,6 +125,13 @@ export interface IUpdateMemberAccessDto {
   allowedReadTownIds?: string[];
 }
 
+export interface IChangeTownPcDto {
+  townId: string;
+  newPcUserId: string;
+  outgoingPcUserId?: string;
+  outgoingPcDisposition?: 'demote_to_member' | 'revoke_access';
+}
+
 export interface IMemberQueryDto {
   page?: number;
   limit?: number;

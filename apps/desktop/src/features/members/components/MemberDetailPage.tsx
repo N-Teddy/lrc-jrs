@@ -15,6 +15,7 @@ import {
   ChatCircleText,
   CheckCircle,
   Copy,
+  Crown,
   IdentificationCard,
   Key,
   MapPin,
@@ -28,6 +29,7 @@ import {
 import type React from 'react';
 import { useMemo, useState } from 'react';
 import { MemberDetailSkeleton, UserAvatar } from '../../../components';
+import { ChangeTownPcModal } from '../../access/components/ChangeTownPcModal';
 import {
   calculateAge,
   formatCameroonPhone,
@@ -44,7 +46,7 @@ interface MemberDetailPageProps {
   onManageAccess: (member: IUser) => void;
   onDelete?: (member: IUser) => void;
   isCurrentUserAp: boolean;
-  initialTab?: 'identity' | 'transfers' | 'attendance';
+  initialTab?: 'identity' | 'transfers' | 'attendance' | 'access';
 }
 
 export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
@@ -62,10 +64,11 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
   const { data: towns = [] } = useTownsQuery();
 
   const [activeDetailTab, setActiveDetailTab] = useState<
-    'identity' | 'transfers' | 'attendance'
+    'identity' | 'transfers' | 'attendance' | 'access'
   >(initialTab ?? 'identity');
   const [copiedEmail, setCopiedEmail] = useState(false);
   const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
+  const [isChangePcOpen, setIsChangePcOpen] = useState(false);
 
   const townsMap = useMemo(() => new Map(towns.map((t) => [t.id, t])), [towns]);
 
@@ -299,6 +302,22 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
             weight={activeDetailTab === 'attendance' ? 'bold' : 'regular'}
           />
           <span>{t('members:detail.tabAttendance')}</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveDetailTab('access')}
+          className={`flex items-center justify-center min-w-[140px] gap-2 px-4 py-2 rounded-md text-xs font-bold transition-all cursor-pointer ${
+            activeDetailTab === 'access'
+              ? 'bg-white text-[#b85028] shadow-xs border border-[#e8e1dd]'
+              : 'text-[#8a726a] hover:text-[#57423b] hover:bg-[#f4ece9] border border-transparent'
+          }`}
+        >
+          <ShieldCheck
+            size={18}
+            weight={activeDetailTab === 'access' ? 'fill' : 'regular'}
+          />
+          <span>Access & Account</span>
         </button>
       </div>
 
@@ -779,11 +798,206 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
         <MemberAttendanceHistoryTab member={member} />
       )}
 
+      {/* 7. Tab 4: Account Access & Security */}
+      {activeDetailTab === 'access' && (
+        <div className="flex flex-col gap-6 animate-in fade-in duration-200">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Account Credentials & Status */}
+            <div className="lg:col-span-2 flex flex-col gap-6">
+              <div className="bg-white rounded-xl border border-[#e8e1dd] p-6 shadow-xs flex flex-col gap-5">
+                <div className="flex items-center justify-between pb-4 border-b border-[#f4ece9]">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-[#fff2ee] border border-[#ffdbcf] text-[#b85028] flex items-center justify-center">
+                      <Key size={22} weight="duotone" />
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-bold text-[#1e1b19]">
+                        Portal Account & Credentials
+                      </h3>
+                      <p className="text-xs text-[#8a726a]">
+                        Manage application login permissions, security state,
+                        and temporary passwords.
+                      </p>
+                    </div>
+                  </div>
+                  <span
+                    className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold ${
+                      isRevoked
+                        ? 'bg-[#ffdad6] text-[#ba1a1a]'
+                        : hasAppAccess
+                          ? 'bg-[#c2e9ca] text-[#2c4e37]'
+                          : 'bg-[#faf2ee] text-[#8a726a]'
+                    }`}
+                  >
+                    <span
+                      className={`w-2 h-2 rounded-full ${
+                        isRevoked
+                          ? 'bg-[#ba1a1a]'
+                          : hasAppAccess
+                            ? 'bg-[#486b52]'
+                            : 'bg-[#8a726a]'
+                      }`}
+                    />
+                    {isRevoked
+                      ? 'Access Suspended'
+                      : hasAppAccess
+                        ? 'Active App Access'
+                        : 'Offline Only (No Login)'}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                  <div className="p-3.5 rounded-lg bg-[#faf2ee] border border-[#e8e1dd] flex flex-col gap-1">
+                    <span className="text-[#8a726a] font-medium">
+                      Login Identifier (Phone)
+                    </span>
+                    <span className="font-mono font-bold text-[#1e1b19] text-sm">
+                      {formatCameroonPhone(member.phoneNumber)}
+                    </span>
+                  </div>
+
+                  <div className="p-3.5 rounded-lg bg-[#faf2ee] border border-[#e8e1dd] flex flex-col gap-1">
+                    <span className="text-[#8a726a] font-medium">
+                      Notification Email
+                    </span>
+                    <span className="font-bold text-[#1e1b19] text-sm truncate">
+                      {member.email || 'None configured'}
+                    </span>
+                  </div>
+
+                  <div className="p-3.5 rounded-lg bg-[#faf2ee] border border-[#e8e1dd] flex flex-col gap-1">
+                    <span className="text-[#8a726a] font-medium">
+                      Assigned Role
+                    </span>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <span
+                        className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold border ${roleInfo.badgeBg} ${roleInfo.badgeText} ${roleInfo.border}`}
+                      >
+                        {roleInfo.label}
+                      </span>
+                      {member.isActivePC && (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold bg-[#ffdbcf] text-[#812901]">
+                          <Crown size={12} weight="fill" />
+                          Active PC
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="p-3.5 rounded-lg bg-[#faf2ee] border border-[#e8e1dd] flex flex-col gap-1">
+                    <span className="text-[#8a726a] font-medium">
+                      Credential Status
+                    </span>
+                    <span className="font-bold text-[#1e1b19] text-sm">
+                      {member.isTemporaryPassword
+                        ? 'Temporary Password (Pending update)'
+                        : hasAppAccess
+                          ? 'Permanent Password Set'
+                          : 'No Credentials Issued'}
+                    </span>
+                  </div>
+                </div>
+
+                {canWrite && (
+                  <div className="flex items-center gap-3 pt-3 border-t border-[#f4ece9]">
+                    <button
+                      type="button"
+                      onClick={() => onManageAccess(member)}
+                      className="flex-1 py-2.5 px-4 rounded-md bg-[#b85028] hover:bg-[#a44520] text-white text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs"
+                    >
+                      <Key size={16} />
+                      <span>Manage Platform Access & Credentials</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Leadership Role Card */}
+              {member.role === 'PC' && (
+                <div className="bg-[#fff8f5] rounded-xl border border-[#ffdbcf] p-6 shadow-xs flex flex-col gap-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-[#fff2ee] border border-[#ffdbcf] text-[#b85028] flex items-center justify-center">
+                        <Crown size={22} weight="fill" />
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-bold text-[#1e1b19]">
+                          Parish Coordinator (PC) Leadership
+                        </h4>
+                        <p className="text-xs text-[#8a726a]">
+                          {member.fullName} currently serves as Contact Person
+                          for {member.homeTown?.name || 'Assigned Town'}.
+                        </p>
+                      </div>
+                    </div>
+                    {canWrite && (
+                      <button
+                        type="button"
+                        onClick={() => setIsChangePcOpen(true)}
+                        className="py-2 px-3.5 rounded-md bg-white border border-[#ffb59c] text-[#b85028] hover:bg-[#fff2ee] text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-2xs"
+                      >
+                        <ArrowsLeftRight size={15} weight="bold" />
+                        <span>Transfer PC Leadership</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Read Scopes & Permissions Side Column */}
+            <div className="flex flex-col gap-6">
+              <div className="bg-white rounded-xl border border-[#e8e1dd] p-5 shadow-xs flex flex-col gap-4">
+                <div className="flex items-center gap-2.5">
+                  <ShieldCheck size={20} className="text-[#b85028]" />
+                  <h4 className="text-xs font-bold text-[#1e1b19] uppercase tracking-wider">
+                    Cross-Hub Read Scopes
+                  </h4>
+                </div>
+                <p className="text-xs text-[#8a726a] leading-relaxed">
+                  External parish hubs this member is permitted to inspect in
+                  read-only mode.
+                </p>
+
+                <div className="flex flex-wrap gap-1.5 pt-2 border-t border-[#f4ece9]">
+                  {member.account?.allowedReadTownIds &&
+                  member.account.allowedReadTownIds.length > 0 ? (
+                    member.account.allowedReadTownIds.map((id) => {
+                      const town = towns.find((t) => t.id === id);
+                      return (
+                        <span
+                          key={id}
+                          className="px-2.5 py-1 rounded-md text-[11px] font-bold bg-[#faf2ee] text-[#57423b] border border-[#e8e1dd]"
+                        >
+                          {town?.name || id}
+                        </span>
+                      );
+                    })
+                  ) : (
+                    <span className="text-xs text-[#8a726a] italic">
+                      Home hub only ({member.homeTown?.name || 'Local'})
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Transfer Town Modal */}
       <TransferTownModal
         isOpen={isTransferModalOpen}
         onClose={() => setIsTransferModalOpen(false)}
         member={member}
+      />
+
+      {/* Change Town PC Modal */}
+      <ChangeTownPcModal
+        isOpen={isChangePcOpen}
+        onClose={() => setIsChangePcOpen(false)}
+        targetTownId={member.homeTownId}
+        targetOutgoingPc={member}
       />
     </div>
   );

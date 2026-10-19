@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "desktop",
+  "productName": "LRC JRS",
   "version": "0.0.0",
   "identifier": "com.ngangman-teddy.lrc-jrs",
   "build": {
@@ -12,6 +12,7 @@
   "app": {
     "windows": [
       {
+        "label": "main",
         "title": "LRC JRS - Youth Fellowship Portal",
         "width": 1400,
         "height": 900,
