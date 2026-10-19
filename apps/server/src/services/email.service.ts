@@ -24,7 +24,9 @@ export class EmailService implements OnModuleInit, NotificationStrategy {
         : isMaildev
           ? 1025
           : 587;
-    const secure = this.configService.get<string>('SMTP_SECURE') === 'true';
+    const smtpSecureEnv = this.configService.get<string>('SMTP_SECURE');
+    const secure =
+      smtpSecureEnv !== undefined ? smtpSecureEnv === 'true' : port === 465;
     const user = this.configService.get<string>('SMTP_USER');
     const pass = this.configService.get<string>('SMTP_PASS');
 
@@ -33,13 +35,21 @@ export class EmailService implements OnModuleInit, NotificationStrategy {
       'LRC JRS <noreply@lrcjrs.org>';
 
     if (host) {
+      if (!isDev && isMaildev) {
+        this.logger.warn(
+          '⚠️ SMTP_HOST is set to localhost in a production environment. Render containers do not have Maildev. Please configure an external SMTP provider (e.g. Gmail, Brevo, SendGrid).',
+        );
+      }
+
       this.transporter = nodemailer.createTransport({
         host,
         port,
         secure,
         ignoreTLS: isMaildev,
         auth: user && pass ? { user, pass } : undefined,
-        connectionTimeout: 5000,
+        connectionTimeout: 15000,
+        greetingTimeout: 15000,
+        socketTimeout: 30000,
       });
 
       if (isMaildev) {

@@ -28,14 +28,9 @@ export class ProductionInitService implements OnApplicationBootstrap {
       );
       const existingUser = await this.usersService.findByPhone(sanitizedPhone);
 
-      const needsSync =
-        !existingUser ||
-        (existingUser.account?.allowedReadTownIds?.length || 0) < 4 ||
-        existingUser.account?.status === 'MUST_CHANGE_PASSWORD';
-
-      if (needsSync) {
+      if (!existingUser) {
         this.logger.log(
-          `🌱 Syncing production credentials and town scopes for PC Ngangman Teddy (${sanitizedPhone})...`,
+          `🌱 PC Ngangman Teddy (${sanitizedPhone}) not found. Auto-seeding production credentials...`,
         );
 
         const summaries = await this.usersSeeder.seed(townMap, {
@@ -49,12 +44,34 @@ export class ProductionInitService implements OnApplicationBootstrap {
 
         if (teddySummary) {
           this.logger.log(
-            `✅ Production PC Ngangman Teddy updated with temporary password and full town access.`,
+            `✅ Production PC Ngangman Teddy created with temporary credentials.`,
           );
         }
       } else {
+        // User already exists: ensure full town read scope without resetting credentials or re-dispatching
+        const allTownIds = Array.from(townMap.values()).map((id) =>
+          id.toString(),
+        );
+        const currentAllowedIds =
+          existingUser.account?.allowedReadTownIds || [];
+        const missingTownIds = allTownIds.filter(
+          (id) => !currentAllowedIds.includes(id),
+        );
+
+        if (missingTownIds.length > 0) {
+          this.logger.log(
+            `🔄 Syncing missing town scopes for PC Ngangman Teddy (${allTownIds.length} towns)...`,
+          );
+          await this.usersService.update(existingUser._id, {
+            account: {
+              ...existingUser.account,
+              allowedReadTownIds: allTownIds,
+            },
+          } as any);
+        }
+
         this.logger.log(
-          `✅ PC Ngangman Teddy is already verified & active (${existingUser.email}). Skipping auto-seed.`,
+          `✅ PC Ngangman Teddy is already initialized (${existingUser.email}). Skipping credential re-seed.`,
         );
       }
     } catch (err: unknown) {

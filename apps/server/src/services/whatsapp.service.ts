@@ -44,6 +44,9 @@ export class WhatsAppService implements NotificationStrategy {
         {
           headers: {
             Authorization: `Bearer ${this.apiKey}`,
+            'User-Agent':
+              'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+            Accept: 'application/json, text/plain, */*',
           },
           timeout: 10000,
         },
@@ -91,6 +94,9 @@ export class WhatsAppService implements NotificationStrategy {
           headers: {
             Authorization: `Bearer ${this.apiKey}`,
             'Content-Type': 'application/json',
+            'User-Agent':
+              'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+            Accept: 'application/json, text/plain, */*',
           },
           timeout: 10000,
         },
@@ -113,9 +119,16 @@ export class WhatsAppService implements NotificationStrategy {
         message?: string;
         response?: { data?: unknown; status?: number };
       };
-      const responseDetails = err.response?.data
-        ? ` (Details: ${JSON.stringify(err.response.data)})`
-        : '';
+      let responseDetails = '';
+      if (
+        typeof err.response?.data === 'string' &&
+        err.response.data.includes('<html')
+      ) {
+        responseDetails =
+          ' (Blocked by Cloudflare Bot Protection / Managed Challenge on dash.jifihub.com)';
+      } else if (err.response?.data) {
+        responseDetails = ` (Details: ${JSON.stringify(err.response.data)})`;
+      }
       this.logger.error(
         `Error dispatching WhatsApp to ${sanitized}: ${err.message || 'Unknown error'}${responseDetails}`,
       );
