@@ -47,7 +47,7 @@ jobs:
         run: pnpm install
 
       - name: Build shared workspace packages
-        run: pnpm --filter @jrs/shared build && pnpm --filter @jrs/api-client build
+        run: pnpm --filter "./packages/**" build
 
       - name: Build Tauri Desktop Application & Create Release
         uses: tauri-apps/tauri-action@v0
