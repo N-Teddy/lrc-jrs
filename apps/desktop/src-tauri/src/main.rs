@@ -12,6 +12,17 @@ fn main() {
         if std::env::var("WEBKIT_DISABLE_SANDBOX_THIS_IS_DANGEROUS").is_err() {
             std::env::set_var("WEBKIT_DISABLE_SANDBOX_THIS_IS_DANGEROUS", "1");
         }
+
+        // Set GLib and GTK application metadata for Linux desktop environments (Wayland/X11)
+        unsafe {
+            #[link(name = "glib-2.0")]
+            extern "C" {
+                fn g_set_prgname(prgname: *const std::os::raw::c_char);
+                fn g_set_application_name(app_name: *const std::os::raw::c_char);
+            }
+            g_set_prgname(b"desktop\0".as_ptr() as *const _);
+            g_set_application_name(b"LRC JRS\0".as_ptr() as *const _);
+        }
     }
 
     desktop_lib::run()
