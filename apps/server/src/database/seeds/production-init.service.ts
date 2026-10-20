@@ -1,6 +1,7 @@
 import { Injectable, Logger, OnApplicationBootstrap } from '@nestjs/common';
 import { PhoneSanitizer } from '../../core/utils/phone-sanitizer.util';
 import { UsersService } from '../../modules/users/users.service';
+import { MediaService } from '../../services/media.service';
 import { SEED_PROD_PC_USER } from './data/users.data';
 import { TownsSeeder } from './seeders/towns.seeder';
 import { UsersSeeder } from './seeders/users.seeder';
@@ -13,6 +14,7 @@ export class ProductionInitService implements OnApplicationBootstrap {
     private readonly townsSeeder: TownsSeeder,
     private readonly usersSeeder: UsersSeeder,
     private readonly usersService: UsersService,
+    private readonly mediaService: MediaService,
   ) {}
 
   async onApplicationBootstrap() {
@@ -58,21 +60,70 @@ export class ProductionInitService implements OnApplicationBootstrap {
           (id) => !currentAllowedIds.includes(id),
         );
 
+        const updates: Record<string, any> = {};
+
         if (missingTownIds.length > 0) {
           this.logger.log(
             `🔄 Syncing missing town scopes for PC Ngangman Teddy (${allTownIds.length} towns)...`,
           );
-          await this.usersService.update(existingUser._id, {
-            account: {
-              ...existingUser.account,
-              allowedReadTownIds: allTownIds,
-            },
-          } as any);
+          updates.account = {
+            ...existingUser.account,
+            allowedReadTownIds: allTownIds,
+          };
+        }
+
+        if (!existingUser.avatarUrl) {
+          try {
+            this.logger.log(
+              `🎨 Generating missing avatar for PC Ngangman Teddy...`,
+            );
+            const avatarUrl =
+              await this.mediaService.generateAndSaveDefaultAvatar(
+                existingUser.fullName,
+                sanitizedPhone,
+                existingUser.gender || 'MALE',
+              );
+            updates.avatarUrl = avatarUrl;
+          } catch (avatarErr) {
+            this.logger.warn(
+              `Could not generate avatar for PC Ngangman Teddy: ${avatarErr}`,
+            );
+          }
+        }
+
+        if (Object.keys(updates).length > 0) {
+          await this.usersService.update(existingUser._id, updates as any);
         }
 
         this.logger.log(
           `✅ PC Ngangman Teddy is already initialized (${existingUser.email}). Skipping credential re-seed.`,
         );
+      }
+
+      // 3. Auto-populate missing avatars for any existing users in the database
+      const usersNeedingAvatars =
+        await this.usersService.findUsersWithoutAvatars();
+      if (usersNeedingAvatars.length > 0) {
+        this.logger.log(
+          `🎨 Found ${usersNeedingAvatars.length} user(s) with missing avatars. Auto-generating...`,
+        );
+        for (const u of usersNeedingAvatars) {
+          try {
+            const identifier = u.phoneNumber || u._id.toString();
+            const avatarUrl =
+              await this.mediaService.generateAndSaveDefaultAvatar(
+                u.fullName,
+                identifier,
+                u.gender,
+              );
+            await this.usersService.update(u._id, { avatarUrl } as any);
+          } catch (err) {
+            this.logger.warn(
+              `Failed generating avatar for "${u.fullName}": ${err}`,
+            );
+          }
+        }
+        this.logger.log(`✅ Finished generating missing avatars.`);
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);

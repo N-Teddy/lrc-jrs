@@ -6,6 +6,7 @@ import { PasswordGeneratorUtil } from '../../../core/utils/password-generator.ut
 import { PhoneSanitizer } from '../../../core/utils/phone-sanitizer.util';
 import { UsersService } from '../../../modules/users/users.service';
 import { EmailService } from '../../../services/email.service';
+import { MediaService } from '../../../services/media.service';
 import { WhatsAppService } from '../../../services/whatsapp.service';
 import { AccountStatus, Town, type TownDocument } from '../../schemas';
 import { SEED_MEMBERS_NO_APP_ACCESS } from '../data/members-no-access.data';
@@ -38,6 +39,7 @@ export class UsersSeeder {
     private readonly usersService: UsersService,
     private readonly emailService: EmailService,
     private readonly whatsappService: WhatsAppService,
+    private readonly mediaService: MediaService,
     @InjectModel(Town.name) private readonly townModel: Model<TownDocument>,
   ) {}
 
@@ -138,10 +140,27 @@ export class UsersSeeder {
         .map((code) => townMap.get(code)?.toString())
         .filter((id): id is string => Boolean(id));
 
+      let avatarUrl = userData.avatarUrl;
+      if (!avatarUrl) {
+        try {
+          avatarUrl = await this.mediaService.generateAndSaveDefaultAvatar(
+            userData.fullName,
+            sanitizedPhone,
+            userData.gender,
+          );
+        } catch (avatarErr) {
+          this.logger.warn(
+            `Could not generate avatar for ${userData.fullName}: ${avatarErr}`,
+          );
+        }
+      }
+
       const payload: Record<string, unknown> = {
         fullName: userData.fullName,
         phoneNumber: sanitizedPhone,
         email: userData.email.toLowerCase().trim(),
+        avatarUrl,
+        gender: userData.gender,
         passwordHash,
         tempPasswordHash,
         tempPasswordExpiresAt,
@@ -161,13 +180,17 @@ export class UsersSeeder {
 
       const existing = await this.usersService.findByPhone(sanitizedPhone);
       if (existing) {
+        const updatePayload = {
+          ...payload,
+          avatarUrl: existing.avatarUrl || avatarUrl,
+        };
         if (!isTemporary) {
           await this.usersService.update(existing._id, {
-            ...payload,
+            ...updatePayload,
             $unset: { tempPasswordHash: 1, tempPasswordExpiresAt: 1 },
           } as any);
         } else {
-          await this.usersService.update(existing._id, payload as any);
+          await this.usersService.update(existing._id, updatePayload as any);
         }
       } else {
         await this.usersService.create(payload as any);

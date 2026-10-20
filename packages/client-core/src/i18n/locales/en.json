@@ -608,6 +608,7 @@
       "noAccess": "Offline",
       "inviteNow": "Invite",
       "resend": "Resend Credentials",
+      "manageAccess": "Manage Credentials",
       "manageScopes": "Hub Scopes",
       "suspend": "Suspend Access",
       "reactivate": "Reactivate Access",

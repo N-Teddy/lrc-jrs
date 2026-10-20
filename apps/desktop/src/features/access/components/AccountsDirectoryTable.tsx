@@ -119,7 +119,7 @@ export const AccountsDirectoryTable: React.FC<AccountsDirectoryTableProps> = ({
 
   return (
     <div className="bg-white rounded-xl border border-[#e8e1dd] shadow-xs flex flex-col overflow-hidden">
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto min-h-[340px]">
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-[#faf2ee] border-b border-[#e8e1dd] text-[11px] font-bold text-[#8a726a] uppercase tracking-wider">
@@ -144,7 +144,7 @@ export const AccountsDirectoryTable: React.FC<AccountsDirectoryTableProps> = ({
             </tr>
           </thead>
           <tbody className="divide-y divide-[#f4ece9] text-xs text-[#1e1b19]">
-            {members.map((m) => {
+            {members.map((m, index) => {
               const roleInfo = getRoleDisplayInfo(m.role);
               const formattedPhone = formatCameroonPhone(m.phoneNumber);
               const cleanDigits = getCleanDigitsForWhatsApp(m.phoneNumber);
@@ -152,6 +152,11 @@ export const AccountsDirectoryTable: React.FC<AccountsDirectoryTableProps> = ({
               const isRevoked = m.account?.isAccessRevoked ?? false;
               const isTempPassword = m.isTemporaryPassword ?? false;
               const allowedTownIds = m.account?.allowedReadTownIds || [];
+
+              // Open dropdown upwards for bottom rows to prevent vertical table overflow and scrollbars
+              const openUpwards =
+                index >= 2 &&
+                index >= members.length - (members.length >= 5 ? 3 : 2);
 
               // Town codes for granted external hubs
               const externalTownCodes = allowedTownIds
@@ -276,7 +281,7 @@ export const AccountsDirectoryTable: React.FC<AccountsDirectoryTableProps> = ({
                     <div className="relative inline-flex items-center gap-2 justify-end">
                       {/* Three-dot dropdown menu */}
                       <div
-                        className="relative"
+                        className={`relative ${openMenuId === m.id ? 'z-30' : ''}`}
                         ref={openMenuId === m.id ? menuRef : undefined}
                       >
                         <button
@@ -290,7 +295,13 @@ export const AccountsDirectoryTable: React.FC<AccountsDirectoryTableProps> = ({
                         </button>
 
                         {openMenuId === m.id && (
-                          <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-xl border border-[#e8e1dd] shadow-lg py-1 z-30 flex flex-col animate-in fade-in zoom-in-95 duration-100 text-left">
+                          <div
+                            className={`absolute right-0 ${
+                              openUpwards
+                                ? 'bottom-full mb-1.5 origin-bottom-right'
+                                : 'top-full mt-1 origin-top-right'
+                            } w-48 bg-white rounded-xl border border-[#e8e1dd] shadow-lg py-1 z-40 flex flex-col animate-in fade-in zoom-in-95 duration-100 text-left`}
+                          >
                             <button
                               type="button"
                               onClick={() => {
@@ -302,10 +313,14 @@ export const AccountsDirectoryTable: React.FC<AccountsDirectoryTableProps> = ({
                               <Key size={14} className="text-[#8a726a]" />
                               <span>
                                 {isTempPassword
-                                  ? t('access:table.resend') ||
-                                    'Resend Credentials'
-                                  : t('access:table.manageAccess') ||
-                                    'Manage Credentials'}
+                                  ? t(
+                                      'access:table.resend',
+                                      'Resend Credentials',
+                                    )
+                                  : t(
+                                      'access:table.manageAccess',
+                                      'Manage Credentials',
+                                    )}
                               </span>
                             </button>
 
@@ -319,8 +334,10 @@ export const AccountsDirectoryTable: React.FC<AccountsDirectoryTableProps> = ({
                             >
                               <Globe size={14} className="text-[#8a726a]" />
                               <span>
-                                {t('access:table.manageScopes') ||
-                                  'Cross-Hub Scopes'}
+                                {t(
+                                  'access:table.manageScopes',
+                                  'Cross-Hub Scopes',
+                                )}
                               </span>
                             </button>
 
@@ -370,10 +387,14 @@ export const AccountsDirectoryTable: React.FC<AccountsDirectoryTableProps> = ({
                                   <Prohibit size={14} weight="bold" />
                                   <span>
                                     {!isRevoked
-                                      ? t('access:table.suspend') ||
-                                        'Suspend Access'
-                                      : t('access:table.reactivate') ||
-                                        'Reactivate Access'}
+                                      ? t(
+                                          'access:table.suspend',
+                                          'Suspend Access',
+                                        )
+                                      : t(
+                                          'access:table.reactivate',
+                                          'Reactivate Access',
+                                        )}
                                   </span>
                                 </button>
                               </>

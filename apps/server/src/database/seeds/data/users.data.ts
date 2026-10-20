@@ -12,6 +12,8 @@ export interface SeedUserData {
   homeTownCode: string;
   password?: string;
   isTemporaryPassword?: boolean;
+  gender?: 'MALE' | 'FEMALE';
+  avatarUrl?: string;
   account: {
     status: AccountStatus;
     hasAppAccess: boolean;
@@ -79,6 +81,7 @@ export const SEED_PROD_PC_USER: SeedUserData = {
   homeTownCode: 'DLA',
   password: 'TempPassword123!',
   isTemporaryPassword: true,
+  gender: 'MALE',
   account: {
     status: AccountStatus.MUST_CHANGE_PASSWORD,
     hasAppAccess: true,

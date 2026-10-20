@@ -180,6 +180,18 @@ export class UsersService {
     return this.userModel.findByIdAndUpdate(id, data, { new: true }).exec();
   }
 
+  async findUsersWithoutAvatars(): Promise<UserDocument[]> {
+    return this.userModel
+      .find({
+        $or: [
+          { avatarUrl: { $exists: false } },
+          { avatarUrl: null },
+          { avatarUrl: '' },
+        ],
+      })
+      .exec();
+  }
+
   /**
    * Lists members with pagination, filtering, search, and town scoping
    */
