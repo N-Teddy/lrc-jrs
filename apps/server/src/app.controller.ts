@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Head } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AppService } from './app.service';
 import { Public } from './core/decorators/public.decorator';
@@ -10,6 +10,7 @@ export class AppController {
 
   @Public()
   @Get()
+  @Head()
   @ApiOperation({ summary: 'Health check and API status' })
   getHello(): {
     status: string;
@@ -18,6 +19,14 @@ export class AppController {
     minClientVersion: string;
     serverTime: string;
   } {
+    return this.appService.getStatus();
+  }
+
+  @Public()
+  @Get('api')
+  @Head('api')
+  @ApiOperation({ summary: 'Health check and API status for /api prefix' })
+  getApiHello() {
     return this.appService.getStatus();
   }
 }

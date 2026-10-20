@@ -72,10 +72,14 @@ export class ProductionInitService implements OnApplicationBootstrap {
           };
         }
 
-        if (!existingUser.avatarUrl) {
+        const isBrokenAvatar =
+          !existingUser.avatarUrl ||
+          existingUser.avatarUrl.includes('/raw/upload/');
+
+        if (isBrokenAvatar) {
           try {
             this.logger.log(
-              `🎨 Generating missing avatar for PC Ngangman Teddy...`,
+              `🎨 Generating valid avatar for PC Ngangman Teddy...`,
             );
             const avatarUrl =
               await this.mediaService.generateAndSaveDefaultAvatar(

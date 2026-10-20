@@ -187,6 +187,7 @@ export class UsersService {
           { avatarUrl: { $exists: false } },
           { avatarUrl: null },
           { avatarUrl: '' },
+          { avatarUrl: { $regex: '/raw/upload/' } },
         ],
       })
       .exec();

@@ -49,7 +49,9 @@ export class MediaService implements OnModuleInit {
 
     const port = this.configService.get<number>('PORT', 3000);
     const host =
-      this.configService.get<string>('APP_URL') || `http://localhost:${port}`;
+      this.configService.get<string>('APP_URL') ||
+      this.configService.get<string>('RENDER_EXTERNAL_URL') ||
+      `http://localhost:${port}`;
     this.baseUrl = host.replace(/\/$/, '');
 
     const customUploadDir = this.configService.get<string>('UPLOAD_DIR');
@@ -117,10 +119,33 @@ export class MediaService implements OnModuleInit {
     }
 
     if (this.shouldUseCloudinary()) {
-      return this.uploadBufferToCloudinary(
-        file.buffer,
-        'avatars',
-        file.mimetype,
+      try {
+        return await this.uploadBufferToCloudinary(
+          file.buffer,
+          'avatars',
+          file.mimetype,
+        );
+      } catch (err) {
+        if (this.isProd) {
+          throw new BadRequestException(
+            `Failed to upload avatar to cloud storage: ${(err as Error)?.message}`,
+          );
+        }
+        this.logger.warn(
+          `Cloudinary upload failed for avatar (${(err as Error)?.message}). Falling back to local storage in development.`,
+        );
+        return this.saveBufferLocally(
+          file.buffer,
+          'avatars',
+          file.originalname,
+          file.mimetype,
+        );
+      }
+    }
+
+    if (this.isProd) {
+      throw new BadRequestException(
+        'Cloud storage (Cloudinary) is required for uploading media in production.',
       );
     }
 
@@ -228,16 +253,39 @@ export class MediaService implements OnModuleInit {
 
     const avatar = createAvatar(selectedStyle, avatarOptions);
 
+    if (this.shouldUseCloudinary()) {
+      try {
+        const svgString = avatar.toString();
+        const buffer = Buffer.from(svgString, 'utf-8');
+        return await this.uploadBufferToCloudinary(
+          buffer,
+          'avatars',
+          'image/svg+xml',
+        );
+      } catch (err) {
+        this.logger.warn(
+          `Cloudinary upload failed for default avatar (${(err as Error)?.message}).`,
+        );
+        if (this.isProd) {
+          this.logger.log(
+            `Using embedded SVG data URI fallback for avatar on production (zero disk writes).`,
+          );
+          return avatar.toDataUri();
+        }
+      }
+    }
+
+    if (this.isProd) {
+      // In production without Cloudinary, return standalone SVG data URI directly (zero disk writes)
+      return avatar.toDataUri();
+    }
+
     const svgString = avatar.toString();
     const buffer = Buffer.from(svgString, 'utf-8');
     const safeBaseName = (identifier || seedName || 'avatar')
       .toLowerCase()
       .replace(/[^a-z0-9]/g, '-');
     const filename = `${safeBaseName}-${Date.now()}.svg`;
-
-    if (this.shouldUseCloudinary()) {
-      return this.uploadBufferToCloudinary(buffer, 'avatars', 'image/svg+xml');
-    }
 
     return this.saveBufferLocally(buffer, 'avatars', filename, 'image/svg+xml');
   }
@@ -290,12 +338,21 @@ export class MediaService implements OnModuleInit {
       `lrc-jrs/${subfolder}`,
     );
 
+    const isSvg = mimeType === 'image/svg+xml';
+
     return new Promise((resolve, reject) => {
+      const uploadOptions: Record<string, any> = {
+        folder: cloudFolder,
+        resource_type: 'image',
+      };
+
+      // For SVG avatars, request PNG format from Cloudinary so it serves inline without attachment header
+      if (isSvg) {
+        uploadOptions.format = 'png';
+      }
+
       const uploadStream = cloudinary.uploader.upload_stream(
-        {
-          folder: cloudFolder,
-          resource_type: mimeType === 'image/svg+xml' ? 'raw' : 'image',
-        },
+        uploadOptions,
         (error: any, result: UploadApiResponse | undefined) => {
           if (error || !result) {
             this.logger.error(
