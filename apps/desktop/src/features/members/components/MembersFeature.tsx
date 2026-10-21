@@ -4,6 +4,7 @@ import {
   useDeleteMemberMutation,
   useMemberStatsQuery,
   useMembersQuery,
+  usePendingReviewsQuery,
   useTownContext,
   useTranslation,
   useUpdateMemberAccessMutation,
@@ -15,18 +16,20 @@ import type {
   IUser,
   UserRole,
 } from '@jrs/shared';
-import { ShieldCheck, Users } from '@phosphor-icons/react';
+import { ArrowRight, ShieldCheck, Users } from '@phosphor-icons/react';
 import type React from 'react';
 import { useState } from 'react';
 import { AccessFeature } from '../../access';
 import { DeleteMemberDialog } from './DeleteMemberDialog';
 import { EditMemberModal } from './EditMemberModal';
+import { IntakeLinksModal } from './IntakeLinksModal';
 import { ManageAccessModal } from './ManageAccessModal';
 import { MemberCardGridView } from './MemberCardGridView';
 import { MemberDetailPage } from './MemberDetailPage';
 import { MemberFilterToolbar, type ViewMode } from './MemberFilterToolbar';
 import { MemberStatsOverview } from './MemberStatsOverview';
 import { MemberTableView } from './MemberTableView';
+import { PendingIntakeReviewsModal } from './PendingIntakeReviewsModal';
 import { RegisterMemberModal } from './RegisterMemberModal';
 
 interface MembersFeatureProps {
@@ -58,12 +61,19 @@ export const MembersFeature: React.FC<MembersFeatureProps> = ({
 
   // Modals State
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
+  const [isIntakeLinksModalOpen, setIsIntakeLinksModalOpen] = useState(false);
+  const [isPendingReviewsModalOpen, setIsPendingReviewsModalOpen] =
+    useState(false);
   const [editingMember, setEditingMember] = useState<IUser | null>(null);
   const [accessMember, setAccessMember] = useState<IUser | null>(null);
   const [deletingMember, setDeletingMember] = useState<IUser | null>(null);
 
   // Queries
   const { data: stats, isLoading: isStatsLoading } = useMemberStatsQuery(
+    activeTownId || undefined,
+  );
+
+  const { data: pendingReviews = [] } = usePendingReviewsQuery(
     activeTownId || undefined,
   );
 
@@ -193,6 +203,38 @@ export const MembersFeature: React.FC<MembersFeatureProps> = ({
                 hubName={activeTown ? activeTown.name : 'Hub'}
               />
 
+              {/* Review Queue Alert Banner */}
+              {pendingReviews.length > 0 && (
+                <div className="p-4 rounded-xl bg-gradient-to-r from-[#fff2ee] via-white to-white border border-[#ffdbcf] shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-in fade-in duration-200">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-[#b85028] text-white flex items-center justify-center shrink-0 shadow-2xs">
+                      <ShieldCheck size={22} weight="fill" />
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-bold text-[#1e1b19] flex items-center gap-2">
+                        <span>
+                          {pendingReviews.length} Intake Registration
+                          {pendingReviews.length > 1 ? 's' : ''} Awaiting Review
+                        </span>
+                        <span className="w-2 h-2 rounded-full bg-[#b85028] animate-ping" />
+                      </h4>
+                      <p className="text-[11px] text-[#8a726a]">
+                        Prospective members submitted their info via public
+                        invitation link. Review and accept into directory.
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setIsPendingReviewsModalOpen(true)}
+                    className="px-4 py-2 rounded-lg bg-[#b85028] hover:bg-[#a44520] text-white text-xs font-bold transition-all shadow-xs shrink-0 cursor-pointer flex items-center gap-1.5 self-start sm:self-auto"
+                  >
+                    <span>Review Submissions ({pendingReviews.length})</span>
+                    <ArrowRight size={14} weight="bold" />
+                  </button>
+                </div>
+              )}
+
               {/* 3. Filter Toolbar */}
               <MemberFilterToolbar
                 search={search}
@@ -216,6 +258,11 @@ export const MembersFeature: React.FC<MembersFeatureProps> = ({
                   setPage(1);
                 }}
                 onOpenRegisterModal={() => setIsRegisterModalOpen(true)}
+                onOpenIntakeLinksModal={() => setIsIntakeLinksModalOpen(true)}
+                pendingReviewsCount={pendingReviews.length}
+                onOpenPendingReviewsModal={() =>
+                  setIsPendingReviewsModalOpen(true)
+                }
               />
 
               {/* 4. Directory View (Table or Grid) */}
@@ -293,6 +340,21 @@ export const MembersFeature: React.FC<MembersFeatureProps> = ({
         onClose={() => setDeletingMember(null)}
         onConfirmDelete={handleConfirmDelete}
         isDeleting={deleteMemberMutation.isPending}
+      />
+
+      <IntakeLinksModal
+        isOpen={isIntakeLinksModalOpen}
+        onClose={() => setIsIntakeLinksModalOpen(false)}
+        activeTownId={activeTownId || undefined}
+        activeTownName={activeTown ? activeTown.name : 'Hub'}
+        activeTownCode={activeTown ? activeTown.code : 'HUB'}
+      />
+
+      <PendingIntakeReviewsModal
+        isOpen={isPendingReviewsModalOpen}
+        onClose={() => setIsPendingReviewsModalOpen(false)}
+        activeTownId={activeTownId || undefined}
+        activeTownName={activeTown ? activeTown.name : 'Hub'}
       />
     </div>
   );

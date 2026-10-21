@@ -15,6 +15,12 @@ export enum AccountStatus {
   REVOKED = 'REVOKED',
 }
 
+export enum IntakeStatus {
+  PENDING_REVIEW = 'PENDING_REVIEW',
+  APPROVED = 'APPROVED',
+  REJECTED = 'REJECTED',
+}
+
 @Schema({ _id: false })
 class UserAccountInfo {
   @Prop({
@@ -129,6 +135,20 @@ export class User extends BaseDocument {
 
   @Prop({ type: [TownTransferRecord], default: [] })
   transferHistory: TownTransferRecord[];
+
+  @Prop({
+    type: String,
+    enum: IntakeStatus,
+    default: IntakeStatus.APPROVED,
+    index: true,
+  })
+  intakeStatus: IntakeStatus;
+
+  @Prop({ type: Types.ObjectId, ref: 'RegistrationLink', index: true })
+  registrationLinkId?: Types.ObjectId;
+
+  @Prop({ type: String, trim: true })
+  intakeNote?: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

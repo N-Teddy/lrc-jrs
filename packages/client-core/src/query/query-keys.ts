@@ -27,4 +27,10 @@ export const queryKeys = {
       ['attendance', 'activity', activityId] as const,
     byMember: (memberId: string) => ['attendance', 'member', memberId] as const,
   },
+  registrationLinks: {
+    all: ['registration-links'] as const,
+    list: (townId?: string) => ['registration-links', 'list', townId] as const,
+    pendingReviews: (townId?: string) =>
+      ['registration-links', 'pending-reviews', townId] as const,
+  },
 };

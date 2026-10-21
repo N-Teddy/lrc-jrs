@@ -16,6 +16,7 @@
     "android:build": "pnpm --filter @jrs/mobile android:build",
     "server": "pnpm --filter @jrs/server start:dev",
     "backend": "pnpm --filter @jrs/server start:dev",
+    "intake": "pnpm --filter @jrs/intake dev",
     "maildev": "maildev",
     "prepare": "husky"
   },

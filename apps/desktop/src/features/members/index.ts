@@ -1,5 +1,6 @@
 export * from './components/DeleteMemberDialog';
 export * from './components/EditMemberModal';
+export * from './components/IntakeLinksModal';
 export * from './components/ManageAccessModal';
 export * from './components/MemberAttendanceHistoryTab';
 export * from './components/MemberCardGridView';
@@ -8,6 +9,7 @@ export * from './components/MemberFilterToolbar';
 export * from './components/MemberStatsOverview';
 export * from './components/MembersFeature';
 export * from './components/MemberTableView';
+export * from './components/PendingIntakeReviewsModal';
 export * from './components/RegisterMemberModal';
 export * from './components/TransferTownModal';
 export * from './utils/member-ui.utils';

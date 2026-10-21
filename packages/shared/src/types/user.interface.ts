@@ -37,6 +37,9 @@ export interface IUser {
   integrationDate?: string;
   account: IUserAccount;
   transferHistory: ITownTransfer[];
+  intakeStatus?: 'PENDING_REVIEW' | 'APPROVED' | 'REJECTED';
+  registrationLinkId?: string;
+  intakeNote?: string;
   createdAt?: string;
   updatedAt?: string;
 }

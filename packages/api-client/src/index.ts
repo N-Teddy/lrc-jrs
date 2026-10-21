@@ -2,6 +2,7 @@ import { type ClientConfig, HttpClient } from './client';
 import { ActivitiesApi } from './modules/activities.api';
 import { AttendanceApi } from './modules/attendance.api';
 import { AuthApi } from './modules/auth.api';
+import { RegistrationLinksApi } from './modules/registration-links.api';
 import { TownsApi } from './modules/towns.api';
 import { UsersApi } from './modules/users.api';
 
@@ -9,6 +10,7 @@ export * from './client';
 export * from './modules/activities.api';
 export * from './modules/attendance.api';
 export * from './modules/auth.api';
+export * from './modules/registration-links.api';
 export * from './modules/towns.api';
 export * from './modules/users.api';
 
@@ -19,6 +21,7 @@ export class JrsApiClient {
   public readonly users: UsersApi;
   public readonly activities: ActivitiesApi;
   public readonly attendance: AttendanceApi;
+  public readonly registrationLinks: RegistrationLinksApi;
 
   constructor(config: ClientConfig) {
     this.http = new HttpClient(config);
@@ -27,6 +30,7 @@ export class JrsApiClient {
     this.users = new UsersApi(this.http);
     this.activities = new ActivitiesApi(this.http);
     this.attendance = new AttendanceApi(this.http);
+    this.registrationLinks = new RegistrationLinksApi(this.http);
   }
 
   public setBaseUrl(url: string): void {
