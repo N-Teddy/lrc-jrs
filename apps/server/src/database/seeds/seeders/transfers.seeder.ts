@@ -4,10 +4,8 @@ import { InjectModel } from '@nestjs/mongoose';
 import { type Model, Types } from 'mongoose';
 import { PhoneSanitizer } from '../../../core/utils/phone-sanitizer.util';
 import {
-  Town,
   type TownDocument,
   type TownTransferRecord,
-  User,
   type UserDocument,
 } from '../../schemas';
 import {
@@ -40,8 +38,8 @@ export class TransfersSeeder {
   private readonly logger = new Logger(TransfersSeeder.name);
 
   constructor(
-    @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
-    @InjectModel(Town.name) private readonly townModel: Model<TownDocument>,
+    @InjectModel('User') private readonly userModel: Model<UserDocument>,
+    @InjectModel('Town') private readonly townModel: Model<TownDocument>,
   ) {}
 
   /**

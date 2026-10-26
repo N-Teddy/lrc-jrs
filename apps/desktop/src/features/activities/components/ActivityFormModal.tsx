@@ -166,6 +166,10 @@ export const ActivityFormModal: React.FC<ActivityFormModalProps> = ({
       value: ActivityType.JPO,
       label: t('activities:types.JPO'),
     },
+    {
+      value: ActivityType.AG,
+      label: t('activities:types.AG'),
+    },
   ];
 
   const townOptions: SelectOption<string>[] = towns.map((t) => ({

@@ -80,6 +80,12 @@ const ACTIVITY_TEMPLATES: {
       `Journée Portes Ouvertes JR (${month} - ${town})`,
     durationHours: 6,
   },
+  {
+    type: ActivityType.AG,
+    titleGenerator: (_month, town, year) =>
+      `Assemblée Générale (AG) ${year} (${town})`,
+    durationHours: 5,
+  },
 ];
 
 const MONTH_NAMES = [

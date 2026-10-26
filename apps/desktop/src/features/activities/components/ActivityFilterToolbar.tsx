@@ -73,6 +73,7 @@ export const ActivityFilterToolbar: React.FC<ActivityFilterToolbarProps> = ({
       },
       { value: ActivityType.CAUSERIE, label: t('activities:types.CAUSERIE') },
       { value: ActivityType.JPO, label: t('activities:types.JPO') },
+      { value: ActivityType.AG, label: t('activities:types.AG') },
     ],
     [t],
   );

@@ -8,11 +8,9 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { type Model, Types } from 'mongoose';
 import {
-  Activity,
   type ActivityDocument,
-  Attendance,
   type AttendanceDocument,
-  User,
+  type TownDocument,
   type UserDocument,
 } from '../../schemas';
 import { SEED_ACTIVITIES } from '../data/activities.data';
@@ -22,12 +20,12 @@ export class ActivitiesSeeder {
   private readonly logger = new Logger(ActivitiesSeeder.name);
 
   constructor(
-    @InjectModel(Activity.name)
+    @InjectModel('Activity')
     private readonly activityModel: Model<ActivityDocument>,
-    @InjectModel(Attendance.name)
+    @InjectModel('Attendance')
     private readonly attendanceModel: Model<AttendanceDocument>,
-    @InjectModel(User.name)
-    private readonly userModel: Model<UserDocument>,
+    @InjectModel('User') private readonly userModel: Model<UserDocument>,
+    @InjectModel('Town') private readonly townModel: Model<TownDocument>,
   ) {}
 
   /**

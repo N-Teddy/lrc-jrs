@@ -8,6 +8,7 @@ import {
   HandHeart,
   type Icon,
   Megaphone,
+  UsersThree,
 } from '@phosphor-icons/react';
 
 export interface ActivityTypeConfig {
@@ -79,6 +80,14 @@ export function getActivityTypeConfig(
         badgeText: 'text-[#1e1b19]',
         badgeBorder: 'border-[#e8e1dd]',
         icon: Megaphone,
+      };
+    case ActivityType.AG:
+      return {
+        label: t ? t('activities:types.AG') : 'Assemblée Générale (AG)',
+        badgeBg: 'bg-[#ffdad4]/60',
+        badgeText: 'text-[#8c1d18]',
+        badgeBorder: 'border-[#ffb4a8]',
+        icon: UsersThree,
       };
     default:
       return {

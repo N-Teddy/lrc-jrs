@@ -296,7 +296,8 @@
       "SERVICE": "Service",
       "CAUSERIE": "Causerie",
       "CONFERENCE": "Conference",
-      "JPO": "JPO"
+      "JPO": "JPO",
+      "AG": "General Assembly (AG)"
     },
     "statuses": {
       "SCHEDULED": "Scheduled",

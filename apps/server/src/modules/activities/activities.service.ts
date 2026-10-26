@@ -453,6 +453,7 @@ export class ActivitiesService {
       [ActivityType.CAUSERIE]: 0,
       [ActivityType.CONFERENCE]: 0,
       [ActivityType.JPO]: 0,
+      [ActivityType.AG]: 0,
     };
 
     for (const act of activities) {
