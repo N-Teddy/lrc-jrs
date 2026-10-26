@@ -1,6 +1,5 @@
 import * as crypto from 'node:crypto';
 import {
-  calculateAge,
   ErrorCode,
   type IAuthUser,
   type IRegistrationLink,
@@ -338,8 +337,8 @@ export class RegistrationLinksService {
     }
 
     // Age validation
-    const age = calculateAge(dto.dateOfBirth);
-    const isJr = isJrAgeEligible(dto.dateOfBirth);
+    const _isJr = isJrAgeEligible(dto.dateOfBirth);
+    const isJr = _isJr;
     if (!isJr) {
       throw new BadRequestAppException(ErrorCode.MEMBER_AGE_INELIGIBLE, {
         min: JR_AGE_RANGE.MIN,

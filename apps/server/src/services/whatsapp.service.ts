@@ -142,6 +142,7 @@ export class WhatsAppService implements NotificationStrategy {
   async sendPasswordResetMessage(
     to: string,
     data: { fullName: string; code: string; expiresInMinutes: number },
+    _metadata?: Record<string, unknown>,
   ): Promise<boolean> {
     const message = TemplateLoaderUtil.render(
       'whatsapp/password-reset.txt',

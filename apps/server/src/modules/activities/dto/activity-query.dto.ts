@@ -1,30 +1,14 @@
 import { ActivityStatus, ActivityType } from '@jrs/shared';
-import { ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiPropertyOptional, IntersectionType } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsEnum, IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
+import { PaginationQueryDto } from '../../../common/dto/pagination-query.dto';
+import { TownFilterDto } from '../../../common/dto/town-filter.dto';
 
-export class ActivityQueryDto {
-  @ApiPropertyOptional({ default: 1, minimum: 1 })
-  @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  @Min(1)
-  page?: number = 1;
-
-  @ApiPropertyOptional({ default: 20, minimum: 1 })
-  @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  @Min(1)
-  limit?: number = 20;
-
-  @ApiPropertyOptional({
-    description: 'Filter by activity location town ID',
-  })
-  @IsOptional()
-  @IsString()
-  townId?: string;
-
+export class ActivityQueryDto extends IntersectionType(
+  PaginationQueryDto,
+  TownFilterDto,
+) {
   @ApiPropertyOptional({
     description: 'Filter by host town ID organizing the activity',
   })
@@ -71,11 +55,4 @@ export class ActivityQueryDto {
   @IsOptional()
   @IsEnum(ActivityStatus)
   status?: ActivityStatus;
-
-  @ApiPropertyOptional({
-    description: 'Search string matching title, notes, or venue',
-  })
-  @IsOptional()
-  @IsString()
-  search?: string;
 }
