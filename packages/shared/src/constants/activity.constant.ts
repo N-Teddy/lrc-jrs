@@ -5,6 +5,7 @@ export enum ActivityType {
   CAUSERIE = 'CAUSERIE',
   CONFERENCE = 'CONFERENCE',
   JPO = 'JPO',
+  AG = 'AG',
 }
 
 export enum ActivityStatus {

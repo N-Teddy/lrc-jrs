@@ -355,7 +355,6 @@ export class UsersService {
     }
 
     // 4. Validate JR age eligibility
-    const age = calculateAge(dto.dateOfBirth);
     const isJr = isJrAgeEligible(dto.dateOfBirth);
     const assignedRole = dto.role || UserRole.MEMBER;
 
@@ -367,6 +366,7 @@ export class UsersService {
         });
       }
     } else if (assignedRole === UserRole.AP) {
+      const age = calculateAge(dto.dateOfBirth);
       if (age <= JR_AGE_RANGE.MAX) {
         throw new BadRequestAppException(ErrorCode.MEMBER_AGE_INELIGIBLE);
       }
@@ -548,9 +548,9 @@ export class UsersService {
 
     // Re-validate age if dateOfBirth changed
     if (dto.dateOfBirth) {
+      const _age = calculateAge(dto.dateOfBirth);
       const isJr = isJrAgeEligible(dto.dateOfBirth);
       const roleToCheck = dto.role || user.role;
-      const age = calculateAge(dto.dateOfBirth);
 
       if (roleToCheck === UserRole.MEMBER || roleToCheck === UserRole.PC) {
         if (!isJr) {
@@ -974,9 +974,9 @@ export class UsersService {
     }
 
     // Validate age eligibility for PC (18-30)
-    const isJr = isJrAgeEligible(newPc.dateOfBirth);
-    const age = calculateAge(newPc.dateOfBirth);
-    if (!isJr) {
+    const _isJrNew = isJrAgeEligible(newPc.dateOfBirth);
+    const _ageNew = calculateAge(newPc.dateOfBirth);
+    if (!_isJrNew) {
       throw new BadRequestAppException(ErrorCode.MEMBER_AGE_INELIGIBLE, {
         min: JR_AGE_RANGE.MIN,
         max: JR_AGE_RANGE.MAX,

@@ -1,7 +1,5 @@
 import { Types } from 'mongoose';
-import { NotificationsGateway } from './notifications.gateway';
 import { NotificationsService } from './notifications.service';
-import { PushNotificationService } from './push-notification.service';
 
 describe('NotificationsService', () => {
   let service: NotificationsService;

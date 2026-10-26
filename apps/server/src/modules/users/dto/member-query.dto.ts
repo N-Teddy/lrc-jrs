@@ -1,44 +1,14 @@
 import { UserRole } from '@jrs/shared';
-import { ApiPropertyOptional } from '@nestjs/swagger';
-import { Transform, Type } from 'class-transformer';
-import {
-  IsBoolean,
-  IsEnum,
-  IsInt,
-  IsOptional,
-  IsString,
-  Min,
-} from 'class-validator';
+import { ApiPropertyOptional, IntersectionType } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
+import { IsBoolean, IsEnum, IsOptional, IsString } from 'class-validator';
+import { PaginationQueryDto } from '../../../common/dto/pagination-query.dto';
+import { TownFilterDto } from '../../../common/dto/town-filter.dto';
 
-export class MemberQueryDto {
-  @ApiPropertyOptional({ default: 1, minimum: 1 })
-  @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  @Min(1)
-  page?: number = 1;
-
-  @ApiPropertyOptional({ default: 20, minimum: 1 })
-  @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  @Min(1)
-  limit?: number = 20;
-
-  @ApiPropertyOptional({
-    description: 'Search string matching name, phone, or email',
-  })
-  @IsOptional()
-  @IsString()
-  search?: string;
-
-  @ApiPropertyOptional({
-    description: 'Filter by home town ID or code',
-  })
-  @IsOptional()
-  @IsString()
-  townId?: string;
-
+export class MemberQueryDto extends IntersectionType(
+  PaginationQueryDto,
+  TownFilterDto,
+) {
   @ApiPropertyOptional({
     enum: UserRole,
     description: 'Filter by fellowship role',
