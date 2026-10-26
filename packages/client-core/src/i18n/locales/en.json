@@ -433,6 +433,7 @@
   },
   "members": {
     "title": "Primary Members Directory",
+    "intakeReviewsTitle": "Intake Registration Reviews",
     "subtitle": "Registry Index",
     "registerMember": "Register Member",
     "stats": {
@@ -622,27 +623,27 @@
       "selectedCount": "{{count}} members selected",
       "sendInvites": "Dispatch {{count}} Invitations",
       "scopesTitle": "Cross-Hub Read Scopes",
-      "scopesSubtitle": "Grant {{name}} read-only access to browse external parish gathering rosters",
+      "scopesSubtitle": "Grant {{name}} read-only access to browse external regional gathering rosters",
       "saveScopes": "Save Scope Permissions"
     },
     "permissions": {
       "title": "Role & Hierarchy Governance",
-      "subtitle": "Overview of permission boundaries across diocesan ranks",
+      "subtitle": "Overview of permission boundaries across organizational ranks",
       "apRole": "AP",
       "apDesc": "Full executive authority across all towns. Can register and remove members, create and reschedule activities, grant portal accounts, and assign cross-hub scopes.",
       "pcRole": "PC",
       "pcDesc": "Hub-level administrator. Full read/write management within home town hub. Has read-only auditing into assigned external hubs.",
       "memberRole": "Youth Member",
-      "memberDesc": "Fellowship member. Can view assigned parish gatherings, track attendance history, and engage in mentorship circles.",
+      "memberDesc": "Active member. Can view assigned regional gatherings, track attendance history, and engage in peer circles.",
       "interHubDelegations": "Cross-Hub Read Scopes & Jurisdictions",
-      "interHubSubtitle": "Hub coordinators and officers granted read-only visibility into other parish gatherings",
+      "interHubSubtitle": "Hub coordinators and officers granted read-only visibility into other regional gatherings",
       "activeDelegations": "{{count}} active delegations",
       "noDelegations": "No members currently have cross-town read scopes assigned. All members are strictly restricted to their home hubs.",
       "homeHub": "Home Hub: {{hub}}",
       "grantedExternal": "Granted External Hubs",
       "editScopes": "Edit Scopes",
-      "apFooter": "Inter-Hub Clergy & Senior Directors",
-      "pcFooter": "Hub Leaders & Youth Pastors",
+      "apFooter": "Regional Directors & Lead Coordinators",
+      "pcFooter": "Hub Leaders & Contact Persons",
       "memberFooter": "Active Fellowship Youth Cohort",
       "permInterHubWrite": "Inter-Hub Multi-Hub Write Access",
       "permAccountGrant": "Member Account Grant & Suspension",
@@ -670,13 +671,13 @@
       "passwordSetTitle": "Permanent Password Configured",
       "passwordSetDesc": "{{name}} completed the first-time setup phase and initialized a permanent password. Account is active in good standing.",
       "scopeTitle": "Cross-Town Read Scope Assigned",
-      "scopeDesc": "{{count}} external parish hubs granted to {{name}} for read-only roster auditing."
+      "scopeDesc": "{{count}} external regional hubs granted to {{name}} for read-only roster auditing."
     }
   },
   "transfers": {
     "title": "Town Transfers",
     "subtitle": "Regional Fellowship Relocations & Inter-Hub Mobility Ledger",
-    "description": "Official registry of member relocations, pastoral jurisdictions, and inter-city transitions across Cameroon.",
+    "description": "Official registry of member relocations, operational jurisdictions, and inter-city transitions across Cameroon.",
     "initiateTransfer": "Initiate Transfer",
     "stats": {
       "totalRelocations": "Total Relocations",

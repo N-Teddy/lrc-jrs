@@ -1,24 +1,25 @@
 import {
   calculateAge,
+  ErrorCode,
   type IAuthUser,
   type IUser,
   isJrAgeEligible,
   JR_AGE_RANGE,
   UserRole,
 } from '@jrs/shared';
-import {
-  BadRequestException,
-  ConflictException,
-  ForbiddenException,
-  Injectable,
-  Logger,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import * as bcrypt from 'bcrypt';
 import { type Model, Types } from 'mongoose';
+import {
+  BadRequestAppException,
+  ConflictAppException,
+  ForbiddenAppException,
+  NotFoundAppException,
+} from '../../core/exceptions/app.exception';
 import { PasswordGeneratorUtil } from '../../core/utils/password-generator.util';
 import { PhoneSanitizer } from '../../core/utils/phone-sanitizer.util';
+import { UserMapperUtil } from '../../core/utils/user-mapper.util';
 import {
   AccountStatus,
   Town,
@@ -76,59 +77,7 @@ export class UsersService {
    * Helper to map a mongoose user document to a clean IUser object
    */
   private mapUser(doc: UserDocument): IUser {
-    const rawTown = doc.homeTownId as unknown;
-    const hasPopulatedTown =
-      rawTown &&
-      typeof rawTown === 'object' &&
-      'name' in (rawTown as Record<string, unknown>);
-
-    const townObj = hasPopulatedTown
-      ? (rawTown as { _id: Types.ObjectId; name: string; code: string })
-      : undefined;
-
-    return {
-      id: doc._id.toString(),
-      fullName: doc.fullName,
-      phoneNumber: doc.phoneNumber,
-      email: doc.email,
-      avatarUrl: doc.avatarUrl,
-      gender: doc.gender,
-      integrationDate: doc.integrationDate,
-      isWhatsappVerified: doc.isWhatsappVerified,
-      dateOfBirth: doc.dateOfBirth,
-      isJr: doc.isJr,
-      homeTownId: townObj
-        ? townObj._id.toString()
-        : doc.homeTownId?.toString() || '',
-      homeTown: townObj
-        ? {
-            id: townObj._id.toString(),
-            name: townObj.name,
-            code: townObj.code,
-            activePcCount: 0,
-          }
-        : undefined,
-      role: doc.role,
-      isActivePC: doc.isActivePC || false,
-      account: {
-        hasAppAccess: doc.account?.hasAppAccess ?? true,
-        isAccessRevoked: doc.account?.isAccessRevoked ?? false,
-        allowedReadTownIds: doc.account?.allowedReadTownIds || [],
-        invitedBy: doc.account?.invitedBy,
-        invitedAt: doc.account?.invitedAt
-          ? doc.account.invitedAt.toISOString()
-          : undefined,
-      },
-      transferHistory: (doc.transferHistory || []).map((t) => ({
-        fromTownId: t.fromTownId,
-        toTownId: t.toTownId,
-        transferredAt: t.transferredAt,
-        transferredBy: t.transferredBy,
-        reason: t.reason,
-      })),
-      createdAt: doc.createdAt?.toISOString(),
-      updatedAt: doc.updatedAt?.toISOString(),
-    };
+    return UserMapperUtil.mapUser(doc);
   }
 
   async findById(id: string | Types.ObjectId): Promise<UserDocument | null> {
@@ -355,7 +304,7 @@ export class UsersService {
       .populate('homeTownId')
       .exec();
     if (!user) {
-      throw new NotFoundException(`Member with ID "${id}" was not found.`);
+      throw new NotFoundAppException(ErrorCode.MEMBER_NOT_FOUND, { id });
     }
     return this.mapUser(user);
   }
@@ -374,9 +323,7 @@ export class UsersService {
       dto.homeTownId || activeTownId || currentUser.homeTownId;
     const townObjectId = await this.resolveTownObjectId(targetTownIdentifier);
     if (!townObjectId) {
-      throw new BadRequestException(
-        'A valid fellowship home town is required.',
-      );
+      throw new BadRequestAppException(ErrorCode.TOWN_NOT_FOUND);
     }
 
     // 2. Sanitize and validate phone
@@ -384,18 +331,14 @@ export class UsersService {
       dto.phoneNumber,
     );
     if (!sanitizedPhone) {
-      throw new BadRequestException(
-        'Invalid telephone format. Please use a valid Cameroon phone number.',
-      );
+      throw new BadRequestAppException(ErrorCode.BAD_REQUEST);
     }
 
     const existingPhone = await this.userModel
       .findOne({ phoneNumber: sanitizedPhone })
       .exec();
     if (existingPhone) {
-      throw new ConflictException(
-        'A member with this phone number is already registered.',
-      );
+      throw new ConflictAppException(ErrorCode.MEMBER_ALREADY_EXISTS);
     }
 
     // 3. Email uniqueness if provided
@@ -405,9 +348,7 @@ export class UsersService {
         .findOne({ email: normalizedEmail })
         .exec();
       if (existingEmail) {
-        throw new ConflictException(
-          'A member with this email address is already registered.',
-        );
+        throw new ConflictAppException(ErrorCode.MEMBER_ALREADY_EXISTS);
       }
     }
 
@@ -418,15 +359,14 @@ export class UsersService {
 
     if (assignedRole === UserRole.MEMBER || assignedRole === UserRole.PC) {
       if (!isJr) {
-        throw new BadRequestException(
-          `Members and Contact Persons (PCs) must be aged between ${JR_AGE_RANGE.MIN} and ${JR_AGE_RANGE.MAX} years old (computed age: ${age}).`,
-        );
+        throw new BadRequestAppException(ErrorCode.MEMBER_AGE_INELIGIBLE, {
+          min: JR_AGE_RANGE.MIN,
+          max: JR_AGE_RANGE.MAX,
+        });
       }
     } else if (assignedRole === UserRole.AP) {
       if (age <= JR_AGE_RANGE.MAX) {
-        throw new BadRequestException(
-          'Animateurs Principaux (AP / Overseers) must be older than 30 years old.',
-        );
+        throw new BadRequestAppException(ErrorCode.MEMBER_AGE_INELIGIBLE);
       }
     }
 
@@ -435,9 +375,7 @@ export class UsersService {
     if (isPC) {
       const currentActivePcs = await this.countActivePcsForTown(townObjectId);
       if (currentActivePcs >= 2) {
-        throw new BadRequestException(
-          'This town already has the maximum of 2 active Contact Persons (PCs).',
-        );
+        throw new BadRequestAppException(ErrorCode.BAD_REQUEST);
       }
     }
 
@@ -537,7 +475,7 @@ export class UsersService {
   ): Promise<IUser> {
     const user = await this.userModel.findById(id).exec();
     if (!user) {
-      throw new NotFoundException(`Member with ID "${id}" was not found.`);
+      throw new NotFoundAppException(ErrorCode.MEMBER_NOT_FOUND, { id });
     }
 
     // Check phone uniqueness if modified
@@ -548,9 +486,7 @@ export class UsersService {
           .findOne({ phoneNumber: sanitized })
           .exec();
         if (conflict) {
-          throw new ConflictException(
-            'A member with this phone number is already registered.',
-          );
+          throw new ConflictAppException(ErrorCode.MEMBER_ALREADY_EXISTS);
         }
         user.phoneNumber = sanitized;
       }
@@ -564,9 +500,7 @@ export class UsersService {
           .findOne({ email: normEmail })
           .exec();
         if (conflict) {
-          throw new ConflictException(
-            'A member with this email address is already registered.',
-          );
+          throw new ConflictAppException(ErrorCode.MEMBER_ALREADY_EXISTS);
         }
       }
       user.email = normEmail || undefined;
@@ -584,9 +518,10 @@ export class UsersService {
 
       if (roleToCheck === UserRole.MEMBER || roleToCheck === UserRole.PC) {
         if (!isJr) {
-          throw new BadRequestException(
-            `Members and Contact Persons must be aged between 18 and 30 years old (computed age: ${age}).`,
-          );
+          throw new BadRequestAppException(ErrorCode.MEMBER_AGE_INELIGIBLE, {
+            min: JR_AGE_RANGE.MIN,
+            max: JR_AGE_RANGE.MAX,
+          });
         }
       }
       user.dateOfBirth = dto.dateOfBirth;
@@ -603,9 +538,7 @@ export class UsersService {
         // Enforce quota
         const currentPcs = await this.countActivePcsForTown(user.homeTownId);
         if (currentPcs >= 2) {
-          throw new BadRequestException(
-            'This town already has the maximum of 2 active Contact Persons (PCs).',
-          );
+          throw new BadRequestAppException(ErrorCode.BAD_REQUEST);
         }
       }
       user.isActivePC = dto.isActivePC;
@@ -664,7 +597,7 @@ export class UsersService {
   ): Promise<IUser> {
     const user = await this.userModel.findById(id).exec();
     if (!user) {
-      throw new NotFoundException(`Member with ID "${id}" was not found.`);
+      throw new NotFoundAppException(ErrorCode.MEMBER_NOT_FOUND, { id });
     }
 
     if (dto.hasAppAccess !== undefined) {
@@ -703,9 +636,7 @@ export class UsersService {
     // Resend invite / generate fresh temporary password
     if (dto.resendInvite) {
       if (!user.isTemporaryPassword) {
-        throw new BadRequestException(
-          'Cannot resend temporary password, user has already passed setup phase.',
-        );
+        throw new BadRequestAppException(ErrorCode.BAD_REQUEST);
       }
       const tempPassword = PasswordGeneratorUtil.generateTemporaryPassword();
       const hash = await bcrypt.hash(tempPassword, 10);
@@ -739,14 +670,12 @@ export class UsersService {
    */
   async deleteMember(id: string, currentUser: IAuthUser): Promise<void> {
     if (currentUser.role !== UserRole.AP) {
-      throw new ForbiddenException(
-        'Only Animateurs Principaux (APs) are permitted to remove members.',
-      );
+      throw new ForbiddenAppException(ErrorCode.FORBIDDEN);
     }
 
     const user = await this.userModel.findById(id).exec();
     if (!user) {
-      throw new NotFoundException(`Member with ID "${id}" was not found.`);
+      throw new NotFoundAppException(ErrorCode.MEMBER_NOT_FOUND, { id });
     }
 
     const townId = user.homeTownId;
@@ -773,44 +702,40 @@ export class UsersService {
     currentUser: IAuthUser,
   ): Promise<IUser> {
     if (!Types.ObjectId.isValid(userId)) {
-      throw new BadRequestException('Invalid member ID');
+      throw new BadRequestAppException(ErrorCode.MEMBER_INVALID_ID);
     }
     if (!Types.ObjectId.isValid(dto.toTownId)) {
-      throw new BadRequestException('Invalid destination town ID');
+      throw new BadRequestAppException(ErrorCode.TOWN_INVALID_ID);
     }
 
     const user = await this.userModel.findById(userId).exec();
     if (!user) {
-      throw new NotFoundException(`Member with ID ${userId} not found`);
+      throw new NotFoundAppException(ErrorCode.MEMBER_NOT_FOUND, {
+        id: userId,
+      });
     }
 
     const currentTownIdStr = user.homeTownId?.toString();
     const destTownIdStr = dto.toTownId.toString();
 
     if (currentTownIdStr === destTownIdStr) {
-      throw new BadRequestException(
-        'Member is already assigned to this town hub',
-      );
+      throw new BadRequestAppException(ErrorCode.BAD_REQUEST);
     }
 
     const destTown = await this.townModel.findById(dto.toTownId).exec();
     if (!destTown) {
-      throw new NotFoundException('Destination town hub does not exist');
+      throw new NotFoundAppException(ErrorCode.TOWN_NOT_FOUND);
     }
 
     // Role check: AP can transfer anyone; PC can only transfer members out of their assigned hub
     const isAP = currentUser.role === UserRole.AP;
     const isPC = currentUser.role === UserRole.PC;
     if (!isAP && !isPC) {
-      throw new ForbiddenException(
-        'Only Coordinators or Overseers can transfer members between hubs',
-      );
+      throw new ForbiddenAppException(ErrorCode.FORBIDDEN);
     }
 
     if (isPC && !isAP && currentTownIdStr !== currentUser.homeTownId) {
-      throw new ForbiddenException(
-        'You can only initiate transfers for members within your home hub',
-      );
+      throw new ForbiddenAppException(ErrorCode.FORBIDDEN);
     }
 
     // Build transfer record
@@ -900,9 +825,7 @@ export class UsersService {
       currentUser.homeTownId?.toString() === dto.townId;
 
     if (!isAP && !isCurrentTownPC) {
-      throw new ForbiddenException(
-        'Only Animateurs Principaux (AP) or the current Town PC can transition PC leadership.',
-      );
+      throw new ForbiddenAppException(ErrorCode.FORBIDDEN);
     }
 
     const townObjectId = new Types.ObjectId(dto.townId);
@@ -910,16 +833,17 @@ export class UsersService {
     // 2. Fetch new PC candidate
     const newPc = await this.userModel.findById(dto.newPcUserId).exec();
     if (!newPc) {
-      throw new NotFoundException('Selected new PC member not found.');
+      throw new NotFoundAppException(ErrorCode.MEMBER_NOT_FOUND);
     }
 
     // Validate age eligibility for PC (18-30)
     const isJr = isJrAgeEligible(newPc.dateOfBirth);
     const age = calculateAge(newPc.dateOfBirth);
     if (!isJr) {
-      throw new BadRequestException(
-        `Parish Coordinators (PCs) must be aged between ${JR_AGE_RANGE.MIN} and ${JR_AGE_RANGE.MAX} years old (candidate age: ${age}).`,
-      );
+      throw new BadRequestAppException(ErrorCode.MEMBER_AGE_INELIGIBLE, {
+        min: JR_AGE_RANGE.MIN,
+        max: JR_AGE_RANGE.MAX,
+      });
     }
 
     let outgoingPc: UserDocument | null = null;
@@ -927,15 +851,13 @@ export class UsersService {
     // 3. Handle outgoing PC if specified
     if (dto.outgoingPcUserId) {
       if (dto.outgoingPcUserId === dto.newPcUserId) {
-        throw new BadRequestException(
-          'The outgoing PC and new PC cannot be the same member.',
-        );
+        throw new BadRequestAppException(ErrorCode.BAD_REQUEST);
       }
 
       outgoingPc = await this.userModel.findById(dto.outgoingPcUserId).exec();
 
       if (!outgoingPc) {
-        throw new NotFoundException('Outgoing PC member not found.');
+        throw new NotFoundAppException(ErrorCode.MEMBER_NOT_FOUND);
       }
 
       // Step down from PC role
@@ -958,9 +880,7 @@ export class UsersService {
     // 4. Verify PC quota for this town (max 2 active PCs)
     const activePcs = await this.countActivePcsForTown(townObjectId);
     if (activePcs >= 2) {
-      throw new BadRequestException(
-        'This town already has the maximum of 2 active Contact Persons (PCs). Please specify an outgoing PC to replace.',
-      );
+      throw new BadRequestAppException(ErrorCode.BAD_REQUEST);
     }
 
     // 5. Promote new PC

@@ -8,6 +8,7 @@ import { HttpService } from '../http/axios-client';
 import { i18n, initI18n } from '../i18n/i18n';
 import { createQueryClient } from '../query/query-client';
 import type { IStorageAdapter } from '../storage/storage.interface';
+import { ToastProvider } from '../toast/toast.context';
 
 export interface CoreProvidersProps {
   children: React.ReactNode;
@@ -71,9 +72,11 @@ export function CoreProviders({
   return (
     <QueryClientProvider client={activeQueryClient}>
       <HttpProvider http={http}>
-        <AuthProvider storage={activeStorage} http={http}>
-          <TownProvider storage={activeStorage}>{children}</TownProvider>
-        </AuthProvider>
+        <ToastProvider>
+          <AuthProvider storage={activeStorage} http={http}>
+            <TownProvider storage={activeStorage}>{children}</TownProvider>
+          </AuthProvider>
+        </ToastProvider>
       </HttpProvider>
     </QueryClientProvider>
   );

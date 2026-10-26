@@ -104,7 +104,7 @@ export const TownSelectorScreen: React.FC<TownSelectorScreenProps> = ({
         <Text style={styles.screenSubtitle}>
           {isFrench
             ? 'Touchez une ville sur la carte pour entrer'
-            : 'Tap a fellowship town on the map to enter'}
+            : 'Tap a regional hub on the map to enter'}
         </Text>
       </View>
 

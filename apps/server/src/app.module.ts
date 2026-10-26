@@ -20,6 +20,7 @@ import { TownsSeeder } from './database/seeds/seeders/towns.seeder';
 import { UsersSeeder } from './database/seeds/seeders/users.seeder';
 import { ActivitiesModule } from './modules/activities/activities.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
 import { RegistrationLinksModule } from './modules/registration-links/registration-links.module';
 import { TownsModule } from './modules/towns/towns.module';
 import { UsersModule } from './modules/users/users.module';
@@ -40,6 +41,7 @@ import { ServicesModule } from './services/services.module';
     ActivitiesModule,
     AuthModule,
     RegistrationLinksModule,
+    NotificationsModule,
   ],
   controllers: [AppController],
   providers: [

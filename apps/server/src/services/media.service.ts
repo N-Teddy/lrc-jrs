@@ -11,14 +11,11 @@ import {
   personas,
 } from '@dicebear/collection';
 import { createAvatar } from '@dicebear/core';
-import {
-  BadRequestException,
-  Injectable,
-  Logger,
-  OnModuleInit,
-} from '@nestjs/common';
+import { ErrorCode } from '@jrs/shared';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { v2 as cloudinary, type UploadApiResponse } from 'cloudinary';
+import { BadRequestAppException } from '../core/exceptions/app.exception';
 
 const AVATAR_STYLES: Record<string, any> = {
   avataaars,
@@ -102,7 +99,7 @@ export class MediaService implements OnModuleInit {
    */
   async uploadAvatar(file: Express.Multer.File): Promise<string> {
     if (!file?.buffer) {
-      throw new BadRequestException('No file buffer provided for upload.');
+      throw new BadRequestAppException(ErrorCode.BAD_REQUEST);
     }
 
     const allowedMimeTypes = [
@@ -113,9 +110,7 @@ export class MediaService implements OnModuleInit {
       'image/gif',
     ];
     if (!allowedMimeTypes.includes(file.mimetype)) {
-      throw new BadRequestException(
-        `Invalid file type "${file.mimetype}". Allowed types are JPEG, PNG, WEBP, SVG, and GIF.`,
-      );
+      throw new BadRequestAppException(ErrorCode.BAD_REQUEST);
     }
 
     if (this.shouldUseCloudinary()) {
@@ -127,9 +122,7 @@ export class MediaService implements OnModuleInit {
         );
       } catch (err) {
         if (this.isProd) {
-          throw new BadRequestException(
-            `Failed to upload avatar to cloud storage: ${(err as Error)?.message}`,
-          );
+          throw new BadRequestAppException(ErrorCode.BAD_REQUEST);
         }
         this.logger.warn(
           `Cloudinary upload failed for avatar (${(err as Error)?.message}). Falling back to local storage in development.`,
@@ -144,9 +137,7 @@ export class MediaService implements OnModuleInit {
     }
 
     if (this.isProd) {
-      throw new BadRequestException(
-        'Cloud storage (Cloudinary) is required for uploading media in production.',
-      );
+      throw new BadRequestAppException(ErrorCode.BAD_REQUEST);
     }
 
     return this.saveBufferLocally(
@@ -358,11 +349,7 @@ export class MediaService implements OnModuleInit {
             this.logger.error(
               `Cloudinary upload failed: ${error?.message || 'Unknown error'}`,
             );
-            return reject(
-              new BadRequestException(
-                `Failed to upload media to cloud storage: ${error?.message}`,
-              ),
-            );
+            return reject(new BadRequestAppException(ErrorCode.BAD_REQUEST));
           }
           this.logger.debug(
             `Uploaded media to Cloudinary: ${result.secure_url}`,

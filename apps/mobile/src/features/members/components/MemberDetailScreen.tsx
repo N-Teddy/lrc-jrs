@@ -251,13 +251,13 @@ export const MemberDetailScreen: React.FC<MemberDetailScreenProps> = ({
             </View>
           </View>
 
-          {/* Fellowship Hub */}
+          {/* Regional Hub */}
           <View style={styles.infoRow}>
             <View style={styles.infoIconBox}>
               <MapPin size={18} weight="bold" color={colors.primary} />
             </View>
             <View style={styles.infoContent}>
-              <Text style={styles.infoLabel}>Fellowship Town</Text>
+              <Text style={styles.infoLabel}>Regional Hub</Text>
               <Text style={styles.infoValue}>
                 {member.homeTown?.name || 'Assigned Hub'}
               </Text>

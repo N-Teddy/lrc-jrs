@@ -13,6 +13,7 @@ import type { IStorageAdapter } from '../storage/storage.interface';
 
 export interface AuthContextValue {
   user: IAuthUser | null;
+  token: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   signIn: (identifier: string, password: string) => Promise<ILoginResponse>;
@@ -35,6 +36,7 @@ export interface AuthProviderProps {
 export function AuthProvider({ children, storage, http }: AuthProviderProps) {
   const queryClient = useQueryClient();
   const [user, setUser] = useState<IAuthUser | null>(null);
+  const [token, setToken] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -50,11 +52,12 @@ export function AuthProvider({ children, storage, http }: AuthProviderProps) {
         if (token && userJson && isMounted) {
           const parsedUser = JSON.parse(userJson) as IAuthUser;
           setUser(parsedUser);
+          setToken(token);
           setIsAuthenticated(true);
 
           // Refresh user profile asynchronously to sync avatarUrl or role updates
           http
-            .get<IAuthUser>('/auth/me')
+            .get<IAuthUser>('/auth/me', { skipToast: true })
             .then(async (freshUser) => {
               if (isMounted && freshUser?.id) {
                 setUser(freshUser);
@@ -88,6 +91,7 @@ export function AuthProvider({ children, storage, http }: AuthProviderProps) {
   useEffect(() => {
     const unsubscribe = http.onUnauthorizedEvent(() => {
       setUser(null);
+      setToken(null);
       setIsAuthenticated(false);
       queryClient.clear();
     });
@@ -103,6 +107,7 @@ export function AuthProvider({ children, storage, http }: AuthProviderProps) {
 
       if (res.accessToken) {
         await storage.setItem('jrs_access_token', res.accessToken);
+        setToken(res.accessToken);
       }
       if (res.refreshToken) {
         await storage.setItem('jrs_refresh_token', res.refreshToken);
@@ -130,6 +135,7 @@ export function AuthProvider({ children, storage, http }: AuthProviderProps) {
       await storage.removeItem('jrs_refresh_token');
       await storage.removeItem('jrs_user');
       setUser(null);
+      setToken(null);
       setIsAuthenticated(false);
       queryClient.clear();
     }
@@ -164,6 +170,7 @@ export function AuthProvider({ children, storage, http }: AuthProviderProps) {
 
       if (res.accessToken) {
         await storage.setItem('jrs_access_token', res.accessToken);
+        setToken(res.accessToken);
       }
       if (res.refreshToken) {
         await storage.setItem('jrs_refresh_token', res.refreshToken);
@@ -184,6 +191,7 @@ export function AuthProvider({ children, storage, http }: AuthProviderProps) {
     <AuthContext.Provider
       value={{
         user,
+        token,
         isAuthenticated,
         isLoading,
         signIn,

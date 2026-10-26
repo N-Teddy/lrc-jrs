@@ -1,4 +1,5 @@
 import type { ITown } from './town.interface.js';
+import { Gender } from './user.interface.js';
 
 export type IntakeStatus = 'PENDING_REVIEW' | 'APPROVED' | 'REJECTED';
 
@@ -37,7 +38,7 @@ export interface IPublicMemberRegistrationDto {
   phoneNumber: string;
   email?: string;
   dateOfBirth: string;
-  gender?: 'MALE' | 'FEMALE';
+  gender?: Gender;
   integrationDate?: string;
   intakeNote?: string;
 }

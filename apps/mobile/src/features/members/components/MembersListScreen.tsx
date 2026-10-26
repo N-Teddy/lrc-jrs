@@ -213,7 +213,7 @@ export const MembersListScreen: React.FC<MembersListScreenProps> = ({
               <Text style={styles.emptySubtitle}>
                 {searchQuery || hasActiveFilters
                   ? 'No members match your current search or filter criteria.'
-                  : 'No fellowship members registered in this hub yet.'}
+                  : 'No members registered in this hub yet.'}
               </Text>
               {hasActiveFilters && (
                 <TouchableOpacity

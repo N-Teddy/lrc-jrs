@@ -1,12 +1,12 @@
-import { type IAuthUser, UserRole } from '@jrs/shared';
+import { ErrorCode, type IAuthUser, UserRole } from '@jrs/shared';
 import {
   type CanActivate,
   type ExecutionContext,
-  ForbiddenException,
   Injectable,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { TOWN_SCOPE_KEY } from '../decorators/town-scope.decorator';
+import { ForbiddenAppException } from '../exceptions/app.exception';
 
 @Injectable()
 export class TownScopeGuard implements CanActivate {
@@ -27,14 +27,12 @@ export class TownScopeGuard implements CanActivate {
     const user = request.user as IAuthUser | undefined;
 
     if (!user) {
-      throw new ForbiddenException('User is not authenticated');
+      throw new ForbiddenAppException(ErrorCode.FORBIDDEN);
     }
 
     // Check account revocation status
     if (user.account?.isAccessRevoked) {
-      throw new ForbiddenException(
-        'Your access to the platform has been revoked',
-      );
+      throw new ForbiddenAppException(ErrorCode.FORBIDDEN);
     }
 
     // Determine target town ID from params, query, body, or x-town-id header
@@ -66,9 +64,7 @@ export class TownScopeGuard implements CanActivate {
       }
       // PC in other towns: Read-only access
       if (isWriteMethod) {
-        throw new ForbiddenException(
-          'Contact Persons (PCs) only have write permissions within their assigned town',
-        );
+        throw new ForbiddenAppException(ErrorCode.FORBIDDEN);
       }
       return true;
     }
@@ -76,27 +72,21 @@ export class TownScopeGuard implements CanActivate {
     // Rule 3: Invited JR Member
     if (user.role === UserRole.MEMBER) {
       if (!user.account?.hasAppAccess) {
-        throw new ForbiddenException(
-          'You do not have access to view this town',
-        );
+        throw new ForbiddenAppException(ErrorCode.FORBIDDEN);
       }
 
       if (isWriteMethod) {
-        throw new ForbiddenException(
-          'Members only have read access to town data',
-        );
+        throw new ForbiddenAppException(ErrorCode.FORBIDDEN);
       }
 
       const allowedTowns = (user.account.allowedReadTownIds || []).map(String);
       if (!allowedTowns.includes(String(targetTownId))) {
-        throw new ForbiddenException(
-          'You have not been granted access to view this town',
-        );
+        throw new ForbiddenAppException(ErrorCode.FORBIDDEN);
       }
 
       return true;
     }
 
-    throw new ForbiddenException('Permission denied for this town operation');
+    throw new ForbiddenAppException(ErrorCode.FORBIDDEN);
   }
 }

@@ -3,26 +3,34 @@ import type { IAuthUser } from '@jrs/shared';
 import {
   ArrowRight,
   At,
-  Check,
   EnvelopeSimple,
   Eye,
   EyeSlash,
-  Info,
+  Fingerprint,
   Lock,
   Phone,
+  Sparkle,
+  Users,
   WarningCircle,
 } from 'phosphor-react-native';
 import React, { useState } from 'react';
 import {
   ActivityIndicator,
+  Alert,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+  SafeAreaView,
+  ScrollView,
+  StatusBar,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   View,
 } from 'react-native';
 import { colors } from '../../../theme/colors';
-import { AuthScreenContainer } from './AuthScreenContainer';
 
 interface LoginScreenProps {
   onRequiresPasswordChange: (data: {
@@ -37,17 +45,19 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
   onForgotPasswordClick,
 }) => {
   const { signIn } = useAuth();
-  const { t } = useTranslation();
+  const { i18n } = useTranslation();
+  const isFrench = i18n.language?.startsWith('fr');
 
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [keepSignedIn, setKeepSignedIn] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [isTempExpired, setIsTempExpired] = useState(false);
 
-  // Dynamic input type detection
+  const toggleLanguage = (lang: 'en' | 'fr') => {
+    i18n.changeLanguage(lang);
+  };
+
   const trimmed = identifier.trim();
   const isPhoneInput =
     trimmed.length > 0 &&
@@ -55,17 +65,25 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
   const isEmailInput = trimmed.includes('@');
 
   const handleLogin = async () => {
+    Keyboard.dismiss();
     if (!identifier.trim()) {
-      setErrorMessage('Please enter your email or phone number.');
+      setErrorMessage(
+        isFrench
+          ? 'Veuillez saisir votre adresse e-mail ou numéro de téléphone.'
+          : 'Please enter your email or phone number.',
+      );
       return;
     }
     if (!password) {
-      setErrorMessage('Please enter your password.');
+      setErrorMessage(
+        isFrench
+          ? 'Veuillez entrer votre mot de passe.'
+          : 'Please enter your password.',
+      );
       return;
     }
 
     setErrorMessage(null);
-    setIsTempExpired(false);
     setIsLoading(true);
 
     try {
@@ -81,420 +99,573 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
       const msg: string =
         err?.response?.data?.message ||
         err?.message ||
-        'Unable to sign in. Please verify your credentials.';
+        (isFrench
+          ? 'Identifiant ou mot de passe incorrect.'
+          : 'Unable to sign in. Please verify your credentials.');
 
-      if (
-        typeof msg === 'string' &&
-        msg.toLowerCase().includes('temporary password has expired')
-      ) {
-        setIsTempExpired(true);
-      }
       setErrorMessage(msg);
     } finally {
       setIsLoading(false);
     }
   };
 
+  const handleBiometricPress = () => {
+    Alert.alert(
+      isFrench ? 'Authentification Biométrique' : 'Biometric Sign In',
+      isFrench
+        ? 'Connectez-vous d’abord avec votre mot de passe pour enregistrer l’accès biométrique sur cet appareil.'
+        : 'Sign in once with your password to activate Biometric access on this device.',
+      [{ text: 'OK' }],
+    );
+  };
+
   return (
-    <AuthScreenContainer scrollContentStyle={styles.scrollContent}>
-      {/* Header Title */}
-      <View style={styles.header}>
-        <Text style={styles.title}>
-          {t('auth:login.title') || 'Welcome Back'}
-        </Text>
-        <Text style={styles.subtitle}>
-          {t('auth:login.subtitle') ||
-            'Sign in to your youth fellowship portal'}
-        </Text>
-      </View>
-
-      {/* First-time Member Guidance Banner */}
-      <View style={styles.noticeBox}>
-        <Info
-          size={20}
-          weight="bold"
-          color={colors.primary}
-          style={styles.noticeIcon}
-        />
-        <View style={styles.noticeTextContainer}>
-          <Text style={styles.noticeTitle}>
-            {t('auth:login.firstTimeNoticeTitle') || 'First-time signing in?'}
-          </Text>
-          <Text style={styles.noticeText}>
-            {t('auth:login.firstTimeNoticeDesc') ||
-              'Enter the temporary password sent to your WhatsApp or Email to set up your permanent account.'}
-          </Text>
-        </View>
-      </View>
-
-      {/* Error Notification */}
-      {errorMessage && (
-        <View style={styles.errorBox}>
-          <WarningCircle
-            size={20}
-            weight="fill"
-            color={colors.error}
-            style={styles.errorIcon}
-          />
-          <View style={styles.errorTextContainer}>
-            <Text style={styles.errorText}>{errorMessage}</Text>
-            {isTempExpired && (
-              <TouchableOpacity
-                onPress={() => onForgotPasswordClick?.(identifier)}
-                style={styles.resetNowButton}
-              >
-                <Text style={styles.resetNowText}>
-                  {t('auth:login.resetNow') || 'Reset Password Now →'}
-                </Text>
-              </TouchableOpacity>
-            )}
-          </View>
-        </View>
-      )}
-
-      {/* Form Fields */}
-      <View style={styles.form}>
-        {/* Identifier Field */}
-        <View style={styles.fieldGroup}>
-          <Text style={styles.label}>
-            {t('auth:login.identifierLabel') || 'Phone Number or Email'}{' '}
-            <Text style={styles.required}>*</Text>
-          </Text>
-          <View style={styles.inputContainer}>
-            <View style={styles.inputIconContainer}>
-              {isPhoneInput ? (
-                <Phone size={20} weight="bold" color={colors.primary} />
-              ) : isEmailInput ? (
-                <EnvelopeSimple
-                  size={20}
-                  weight="bold"
-                  color={colors.primary}
-                />
-              ) : (
-                <At size={20} weight="bold" color={colors.textMuted} />
-              )}
-            </View>
-            <TextInput
-              style={styles.input}
-              placeholder={
-                t('auth:login.identifierPlaceholder') ||
-                'e.g. 670 000 000 or name@domain.org'
-              }
-              placeholderTextColor={colors.textMuted}
-              value={identifier}
-              onChangeText={setIdentifier}
-              autoCapitalize="none"
-              autoCorrect={false}
-              keyboardType={isPhoneInput ? 'phone-pad' : 'email-address'}
-              returnKeyType="next"
-              editable={!isLoading}
-            />
-          </View>
-        </View>
-
-        {/* Password Field */}
-        <View style={styles.fieldGroup}>
-          <View style={styles.passwordHeaderRow}>
-            <Text style={styles.label}>
-              {t('auth:login.passwordLabel') || 'Password'}{' '}
-              <Text style={styles.required}>*</Text>
-            </Text>
-            <TouchableOpacity
-              onPress={() => onForgotPasswordClick?.(identifier)}
-              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-            >
-              <Text style={styles.forgotPasswordText}>
-                {t('auth:login.forgotPassword') || 'Forgot Password?'}
-              </Text>
-            </TouchableOpacity>
-          </View>
-          <View style={styles.inputContainer}>
-            <View style={styles.inputIconContainer}>
-              <Lock size={20} weight="bold" color={colors.textMuted} />
-            </View>
-            <TextInput
-              style={styles.input}
-              placeholder={
-                t('auth:login.passwordPlaceholder') || 'Enter your password'
-              }
-              placeholderTextColor={colors.textMuted}
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry={!showPassword}
-              autoCapitalize="none"
-              autoCorrect={false}
-              returnKeyType="done"
-              onSubmitEditing={handleLogin}
-              editable={!isLoading}
-            />
-            <TouchableOpacity
-              style={styles.eyeButton}
-              onPress={() => setShowPassword(!showPassword)}
-              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-            >
-              {showPassword ? (
-                <EyeSlash
-                  size={20}
-                  weight="bold"
-                  color={colors.textSecondary}
-                />
-              ) : (
-                <Eye size={20} weight="bold" color={colors.textSecondary} />
-              )}
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {/* Keep Signed In Checkbox */}
-        <TouchableOpacity
-          style={styles.checkboxRow}
-          onPress={() => setKeepSignedIn(!keepSignedIn)}
-          activeOpacity={0.8}
+    <SafeAreaView style={styles.safeArea}>
+      <StatusBar barStyle="dark-content" backgroundColor={colors.surface} />
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <KeyboardAvoidingView
+          style={styles.keyboardContainer}
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         >
-          <View
-            style={[
-              styles.checkbox,
-              keepSignedIn ? styles.checkboxChecked : styles.checkboxUnchecked,
-            ]}
+          <ScrollView
+            contentContainerStyle={styles.scrollContent}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
           >
-            {keepSignedIn && <Check size={14} weight="bold" color="#fff" />}
-          </View>
-          <Text style={styles.checkboxLabel}>
-            {t('auth:login.keepSignedIn') || 'Keep me signed in'}
-          </Text>
-        </TouchableOpacity>
-
-        {/* Submit CTA */}
-        <TouchableOpacity
-          style={[
-            styles.submitButton,
-            isLoading && styles.submitButtonDisabled,
-          ]}
-          onPress={handleLogin}
-          disabled={isLoading}
-          activeOpacity={0.85}
-        >
-          {isLoading ? (
-            <ActivityIndicator color="#FFFFFF" size="small" />
-          ) : (
-            <View style={styles.submitButtonContent}>
-              <Text style={styles.submitButtonText}>
-                {t('auth:login.signInButton') || 'Sign In'}
-              </Text>
-              <ArrowRight size={18} weight="bold" color="#FFFFFF" />
+            {/* Top Bar: Language Switcher Pill */}
+            <View style={styles.topUtilityBar}>
+              <View style={styles.langPillContainer}>
+                <TouchableOpacity
+                  style={[
+                    styles.langPillButton,
+                    !isFrench && styles.langPillButtonActive,
+                  ]}
+                  onPress={() => toggleLanguage('en')}
+                  activeOpacity={0.8}
+                >
+                  <Text
+                    style={[
+                      styles.langPillText,
+                      !isFrench && styles.langPillTextActive,
+                    ]}
+                  >
+                    EN
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[
+                    styles.langPillButton,
+                    isFrench && styles.langPillButtonActive,
+                  ]}
+                  onPress={() => toggleLanguage('fr')}
+                  activeOpacity={0.8}
+                >
+                  <Text
+                    style={[
+                      styles.langPillText,
+                      isFrench && styles.langPillTextActive,
+                    ]}
+                  >
+                    FR
+                  </Text>
+                </TouchableOpacity>
+              </View>
             </View>
-          )}
-        </TouchableOpacity>
-      </View>
-    </AuthScreenContainer>
+
+            {/* Emblem & Branding Section */}
+            <View style={styles.brandingSection}>
+              <View style={styles.emblemContainer}>
+                <Sparkle size={32} weight="fill" color={colors.primary} />
+              </View>
+              <Text style={styles.headline}>
+                {isFrench ? 'Bon retour' : 'Welcome Back'}
+              </Text>
+              <Text style={styles.subtitle}>
+                {isFrench
+                  ? 'Entrez vos identifiants enregistrés pour accéder à votre espace régional.'
+                  : 'Enter your registered credentials to access your regional workspace.'}
+              </Text>
+            </View>
+
+            {/* Error Notification */}
+            {errorMessage ? (
+              <View style={styles.errorBox}>
+                <WarningCircle
+                  size={20}
+                  weight="fill"
+                  color={colors.error}
+                  style={styles.errorIcon}
+                />
+                <Text style={styles.errorText}>{errorMessage}</Text>
+              </View>
+            ) : null}
+
+            {/* Form Fields */}
+            <View style={styles.formContainer}>
+              {/* Field 1: Universal Identifier */}
+              <View style={styles.fieldGroup}>
+                <View style={styles.labelRow}>
+                  <Text style={styles.fieldLabel}>
+                    {isFrench ? 'E-mail ou Téléphone' : 'Email or Phone Number'}
+                  </Text>
+                  <Text style={styles.countryBadge}>CM / Global</Text>
+                </View>
+                <View style={styles.inputContainer}>
+                  <View style={styles.inputIconPrefix}>
+                    {isPhoneInput ? (
+                      <Phone size={20} weight="bold" color={colors.primary} />
+                    ) : isEmailInput ? (
+                      <EnvelopeSimple
+                        size={20}
+                        weight="bold"
+                        color={colors.primary}
+                      />
+                    ) : (
+                      <At
+                        size={20}
+                        weight="bold"
+                        color={colors.onSurfaceVariant}
+                      />
+                    )}
+                  </View>
+                  <TextInput
+                    style={styles.input}
+                    placeholder={
+                      isFrench
+                        ? '+237 6XX XX XX XX ou membre@domaine.com'
+                        : '+237 6XX XX XX XX or member@domain.com'
+                    }
+                    placeholderTextColor={colors.outline}
+                    value={identifier}
+                    onChangeText={(val) => {
+                      setIdentifier(val);
+                      if (errorMessage) setErrorMessage(null);
+                    }}
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    keyboardType={isPhoneInput ? 'phone-pad' : 'email-address'}
+                    returnKeyType="next"
+                    editable={!isLoading}
+                  />
+                </View>
+              </View>
+
+              {/* Field 2: Password with Reveal Toggle */}
+              <View style={styles.fieldGroup}>
+                <Text style={styles.fieldLabel}>
+                  {isFrench ? 'Mot de passe' : 'Password'}
+                </Text>
+                <View style={styles.inputContainer}>
+                  <View style={styles.inputIconPrefix}>
+                    <Lock
+                      size={20}
+                      weight="bold"
+                      color={colors.onSurfaceVariant}
+                    />
+                  </View>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="••••••••••••"
+                    placeholderTextColor={colors.outline}
+                    value={password}
+                    onChangeText={(val) => {
+                      setPassword(val);
+                      if (errorMessage) setErrorMessage(null);
+                    }}
+                    secureTextEntry={!showPassword}
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    returnKeyType="go"
+                    onSubmitEditing={handleLogin}
+                    editable={!isLoading}
+                  />
+                  <TouchableOpacity
+                    style={styles.eyeButton}
+                    onPress={() => setShowPassword((prev) => !prev)}
+                    hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+                  >
+                    {showPassword ? (
+                      <EyeSlash
+                        size={20}
+                        weight="bold"
+                        color={colors.onSurfaceVariant}
+                      />
+                    ) : (
+                      <Eye
+                        size={20}
+                        weight="bold"
+                        color={colors.onSurfaceVariant}
+                      />
+                    )}
+                  </TouchableOpacity>
+                </View>
+              </View>
+
+              {/* Forgot Password Target */}
+              <View style={styles.forgotPasswordRow}>
+                <TouchableOpacity
+                  onPress={() => onForgotPasswordClick?.(identifier.trim())}
+                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.forgotPasswordText}>
+                    {isFrench ? 'Mot de passe oublié ?' : 'Forgot Password?'}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+
+              {/* Primary Action CTA */}
+              <TouchableOpacity
+                style={[
+                  styles.signInButton,
+                  isLoading && styles.signInButtonDisabled,
+                ]}
+                onPress={handleLogin}
+                disabled={isLoading}
+                activeOpacity={0.88}
+              >
+                {isLoading ? (
+                  <ActivityIndicator color={colors.onPrimary} size="small" />
+                ) : (
+                  <>
+                    <Text style={styles.signInButtonText}>
+                      {isFrench ? 'Se connecter' : 'Sign In'}
+                    </Text>
+                    <ArrowRight
+                      size={20}
+                      weight="bold"
+                      color={colors.onPrimary}
+                    />
+                  </>
+                )}
+              </TouchableOpacity>
+
+              {/* Biometric Fast-Path Divider */}
+              <View style={styles.biometricDividerRow}>
+                <View style={styles.dividerLine} />
+                <Text style={styles.dividerText}>
+                  {isFrench ? 'ou continuer avec' : 'or continue with'}
+                </Text>
+                <View style={styles.dividerLine} />
+              </View>
+
+              {/* Biometric Action Button */}
+              <View style={styles.biometricActionContainer}>
+                <TouchableOpacity
+                  style={styles.biometricButton}
+                  onPress={handleBiometricPress}
+                  activeOpacity={0.75}
+                  accessibilityLabel="Sign in using Biometrics"
+                >
+                  <Fingerprint size={26} weight="bold" color={colors.primary} />
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            {/* Grounded First-Time Notice Card */}
+            <View style={styles.firstTimeNoticeCard}>
+              <View style={styles.noticeIconCircle}>
+                <Users
+                  size={18}
+                  weight="bold"
+                  color={colors.onSecondaryContainer}
+                />
+              </View>
+              <View style={styles.noticeTextStack}>
+                <Text style={styles.noticeTitle}>
+                  {isFrench
+                    ? 'Première inscription ?'
+                    : 'First time using the platform?'}
+                </Text>
+                <Text style={styles.noticeDesc}>
+                  {isFrench
+                    ? 'Contactez votre animateur pour obtenir vos identifiants temporaires.'
+                    : 'Connect with your regional coordinator for access.'}
+                </Text>
+              </View>
+            </View>
+
+            {/* Platform Version Footer */}
+            <View style={styles.footerContainer}>
+              <Text style={styles.footerText}>
+                LRC Youth Records System • Version 1.0
+              </Text>
+            </View>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </TouchableWithoutFeedback>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: colors.surface,
   },
-  container: {
+  keyboardContainer: {
     flex: 1,
   },
   scrollContent: {
     flexGrow: 1,
     paddingHorizontal: 24,
-    paddingTop: 24,
-    paddingBottom: 40,
+    paddingTop: 12,
+    paddingBottom: 32,
     justifyContent: 'center',
   },
-  header: {
+  topUtilityBar: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  langPillContainer: {
+    flexDirection: 'row',
+    backgroundColor: colors.surfaceContainer,
+    borderRadius: 20,
+    padding: 3,
+  },
+  langPillButton: {
+    minHeight: 32,
+    paddingHorizontal: 12,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  langPillButtonActive: {
+    backgroundColor: colors.surfaceContainerLowest,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  langPillText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: colors.onSurfaceVariant,
+  },
+  langPillTextActive: {
+    color: colors.primary,
+  },
+  brandingSection: {
+    alignItems: 'center',
+    textAlign: 'center',
+    marginTop: 8,
     marginBottom: 24,
   },
-  brandBadge: {
-    alignSelf: 'flex-start',
-    backgroundColor: colors.primaryLight,
-    borderColor: colors.primaryBorder,
-    borderWidth: 1,
+  emblemContainer: {
+    width: 64,
+    height: 64,
     borderRadius: 20,
-    paddingHorizontal: 12,
-    paddingVertical: 5,
-    marginBottom: 14,
+    backgroundColor: colors.surfaceContainerLow,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: colors.cardBorder,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 4,
+    elevation: 2,
   },
-  brandBadgeText: {
-    color: colors.primary,
-    fontSize: 11,
-    fontWeight: '800',
-    letterSpacing: 0.8,
-  },
-  title: {
+  headline: {
     fontSize: 28,
     fontWeight: '800',
-    color: colors.text,
+    color: colors.onSurface,
     letterSpacing: -0.5,
+    marginBottom: 6,
+    textAlign: 'center',
   },
   subtitle: {
     fontSize: 14,
-    color: colors.textSecondary,
-    marginTop: 6,
     lineHeight: 20,
+    color: colors.onSurfaceVariant,
+    textAlign: 'center',
+    maxWidth: 300,
   },
-  noticeBox: {
+  errorBox: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
-    backgroundColor: colors.primaryLight,
-    borderColor: colors.primaryBorder,
+    alignItems: 'center',
+    backgroundColor: colors.errorContainer,
+    borderColor: 'rgba(186, 26, 26, 0.25)',
     borderWidth: 1,
     borderRadius: 14,
     padding: 14,
-    marginBottom: 20,
+    marginBottom: 16,
   },
-  noticeIcon: {
+  errorIcon: {
     marginRight: 10,
-    marginTop: 2,
   },
-  noticeTextContainer: {
+  errorText: {
+    flex: 1,
+    fontSize: 13,
+    fontWeight: '600',
+    color: colors.onErrorContainer,
+    lineHeight: 18,
+  },
+  formContainer: {
+    width: '100%',
+    gap: 16,
+  },
+  fieldGroup: {
+    gap: 6,
+  },
+  labelRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  fieldLabel: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: colors.onSurface,
+  },
+  countryBadge: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: colors.onSurfaceVariant,
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    height: 52,
+    borderRadius: 14,
+    backgroundColor: colors.surfaceContainerLowest,
+    borderWidth: 1,
+    borderColor: colors.cardBorder,
+    paddingHorizontal: 14,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  inputIconPrefix: {
+    marginRight: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  input: {
+    flex: 1,
+    fontSize: 15,
+    color: colors.onSurface,
+    paddingVertical: 0,
+  },
+  eyeButton: {
+    padding: 6,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  forgotPasswordRow: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    paddingTop: 2,
+  },
+  forgotPasswordText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: colors.primary,
+  },
+  signInButton: {
+    height: 54,
+    borderRadius: 16,
+    backgroundColor: colors.primaryContainer,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    marginTop: 4,
+    shadowColor: colors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  signInButtonDisabled: {
+    opacity: 0.7,
+  },
+  signInButtonText: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: colors.onPrimary,
+    letterSpacing: 0.2,
+  },
+  biometricDividerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 10,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: colors.surfaceVariant,
+  },
+  dividerText: {
+    paddingHorizontal: 12,
+    fontSize: 12,
+    fontWeight: '600',
+    color: colors.onSurfaceVariant,
+    textTransform: 'uppercase',
+    letterSpacing: 0.6,
+  },
+  biometricActionContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  biometricButton: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: colors.surfaceContainerLow,
+    borderWidth: 1,
+    borderColor: colors.cardBorder,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  firstTimeNoticeCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.secondaryContainer,
+    borderRadius: 14,
+    padding: 12,
+    marginTop: 24,
+    gap: 12,
+  },
+  noticeIconCircle: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: colors.surfaceContainerLowest,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  noticeTextStack: {
     flex: 1,
   },
   noticeTitle: {
     fontSize: 13,
     fontWeight: '700',
-    color: colors.text,
-    marginBottom: 2,
+    color: colors.onSecondaryContainer,
   },
-  noticeText: {
+  noticeDesc: {
     fontSize: 12,
-    color: colors.textSecondary,
-    lineHeight: 17,
+    color: colors.onSecondaryFixedVariant,
+    marginTop: 1,
   },
-  errorBox: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    backgroundColor: colors.errorLight,
-    borderColor: 'rgba(186, 26, 26, 0.25)',
-    borderWidth: 1,
-    borderRadius: 14,
-    padding: 14,
-    marginBottom: 20,
+  footerContainer: {
+    marginTop: 24,
+    alignItems: 'center',
   },
-  errorIcon: {
-    marginRight: 10,
-    marginTop: 2,
-  },
-  errorTextContainer: {
-    flex: 1,
-  },
-  errorText: {
-    fontSize: 13,
+  footerText: {
+    fontSize: 11,
     fontWeight: '600',
-    color: colors.errorDark,
-    lineHeight: 18,
-  },
-  resetNowButton: {
-    marginTop: 6,
-  },
-  resetNowText: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: colors.errorDark,
-    textDecorationLine: 'underline',
-  },
-  form: {
-    gap: 18,
-  },
-  fieldGroup: {
-    marginBottom: 2,
-  },
-  label: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: colors.text,
-    marginBottom: 8,
-  },
-  required: {
-    color: colors.primary,
-  },
-  passwordHeaderRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  forgotPasswordText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: colors.primary,
-  },
-  inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    height: 54,
-    backgroundColor: colors.inputBg,
-    borderColor: colors.inputBorder,
-    borderWidth: 1.2,
-    borderRadius: 14,
-    paddingHorizontal: 14,
-  },
-  inputIconContainer: {
-    marginRight: 10,
-  },
-  input: {
-    flex: 1,
-    fontSize: 15,
-    color: colors.text,
-    height: '100%',
-  },
-  eyeButton: {
-    padding: 6,
-  },
-  checkboxRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 4,
-  },
-  checkbox: {
-    width: 22,
-    height: 22,
-    borderRadius: 6,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 10,
-    borderWidth: 1.5,
-  },
-  checkboxChecked: {
-    backgroundColor: colors.success,
-    borderColor: colors.success,
-  },
-  checkboxUnchecked: {
-    backgroundColor: colors.card,
-    borderColor: colors.cardBorder,
-  },
-  checkboxLabel: {
-    fontSize: 13,
-    fontWeight: '500',
-    color: colors.textSecondary,
-  },
-  submitButton: {
-    height: 54,
-    backgroundColor: colors.primary,
-    borderRadius: 14,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 8,
-    shadowColor: colors.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  submitButtonDisabled: {
-    opacity: 0.65,
-  },
-  submitButtonContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  submitButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '700',
+    color: colors.outline,
   },
 });

@@ -1,5 +1,5 @@
 import { useTownContext, useTranslation } from '@jrs/client-core';
-import type { IAuthUser } from '@jrs/shared';
+import type { IAuthUser, NotificationResource } from '@jrs/shared';
 import {
   ArrowUUpLeft,
   Buildings,
@@ -9,11 +9,12 @@ import {
 } from '@phosphor-icons/react';
 import { motion } from 'motion/react';
 import type React from 'react';
+import { useState } from 'react';
 import { APP_VERSION } from '../../../constants/version';
 import { ActivitiesFeature } from '../../activities';
 import { ChangePasswordModal } from '../../auth';
 import { DriveExplorerFeature } from '../../drive';
-import { MembersFeature } from '../../members';
+import { type MemberSubTab, MembersFeature } from '../../members';
 import { TransfersFeature } from '../../transfers';
 import { useDashboardLayout } from '../hooks/use-dashboard-layout';
 import { Header } from './Header';
@@ -31,8 +32,13 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   onSwitchRegion,
 }) => {
   const { t } = useTranslation();
-  const { activeTown, isViewingHomeTown, setActiveTownId, canWrite } =
-    useTownContext();
+  const {
+    activeTown,
+    availableTowns,
+    isViewingHomeTown,
+    setActiveTownId,
+    canWrite,
+  } = useTownContext();
 
   const {
     isSidebarCollapsed,
@@ -47,10 +53,83 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     closeChangePassword,
   } = useDashboardLayout();
 
+  // Resource Navigation Deep-link States
+  const [memberSubTab, setMemberSubTab] = useState<MemberSubTab>('directory');
+  const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
+  const [activitySubTab, setActivitySubTab] = useState<
+    'overview' | 'attendance' | 'report' | 'history' | 'audit-log' | undefined
+  >(undefined);
+  const [selectedActivityId, setSelectedActivityId] = useState<string | null>(
+    null,
+  );
+
   const tabTitle =
     activeTab === 'dashboard'
       ? t('dashboard:overview')
       : t(`navigation:${activeTab}`);
+
+  const handleNavigateToResource = (resource: NotificationResource) => {
+    // 1. Auto-switch town context if townId differs and user has access
+    if (resource.townId && resource.townId !== activeTown?.id) {
+      const townTarget = availableTowns.find(
+        (t) =>
+          t.id === resource.townId ||
+          t.code?.toLowerCase() === resource.townId?.toLowerCase(),
+      );
+      if (townTarget) {
+        void setActiveTownId(townTarget.id);
+      }
+    }
+
+    // 2. Route to entity screen and specific sub-tabs
+    switch (resource.entityType) {
+      case 'ACTIVITY':
+      case 'ATTENDANCE':
+        setSelectedActivityId(resource.entityId || null);
+        if (
+          resource.subTab === 'attendance' ||
+          resource.entityType === 'ATTENDANCE'
+        ) {
+          setActivitySubTab('attendance');
+        } else if (
+          resource.subTab === 'audit-log' ||
+          resource.subTab === 'history'
+        ) {
+          setActivitySubTab('history');
+        } else if (resource.subTab === 'report') {
+          setActivitySubTab('report');
+        } else {
+          setActivitySubTab('overview');
+        }
+        setActiveTab('activities');
+        break;
+
+      case 'MEMBER':
+      case 'INTAKE':
+        setSelectedMemberId(resource.entityId || null);
+        if (resource.subTab === 'reviews' || resource.entityType === 'INTAKE') {
+          setMemberSubTab('reviews');
+        } else if (resource.subTab === 'access') {
+          setMemberSubTab('access');
+        } else {
+          setMemberSubTab('directory');
+        }
+        setActiveTab('members');
+        break;
+
+      case 'TOWN_TRANSFER':
+        setActiveTab('transfers');
+        break;
+
+      case 'ACCESS':
+        setMemberSubTab('access');
+        setActiveTab('access');
+        break;
+
+      default:
+        setActiveTab('dashboard');
+    }
+  };
 
   return (
     <div className="min-h-screen w-full bg-[#fff8f5] text-[#1e1b19]">
@@ -68,6 +147,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         isSidebarCollapsed={isSidebarCollapsed}
         onToggleSidebar={toggleSidebar}
         onOpenChangePassword={openChangePassword}
+        onNavigateToResource={handleNavigateToResource}
         title={tabTitle}
       />
 
@@ -132,11 +212,20 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             className="w-full"
           >
             {activeTab === 'members' ? (
-              <MembersFeature initialSubTab="directory" />
+              <MembersFeature
+                initialSubTab={memberSubTab}
+                initialMemberId={selectedMemberId}
+              />
             ) : activeTab === 'activities' ? (
-              <ActivitiesFeature />
+              <ActivitiesFeature
+                initialSubTab={activitySubTab}
+                initialActivityId={selectedActivityId}
+              />
             ) : activeTab === 'access' ? (
-              <MembersFeature initialSubTab="access" />
+              <MembersFeature
+                initialSubTab="access"
+                initialMemberId={selectedMemberId}
+              />
             ) : activeTab === 'reports' ? (
               <DriveExplorerFeature />
             ) : activeTab === 'transfers' ? (

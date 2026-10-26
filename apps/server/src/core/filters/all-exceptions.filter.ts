@@ -1,4 +1,4 @@
-import type { ApiErrorResponse } from '@jrs/shared';
+import { type ApiErrorResponse, ErrorCode } from '@jrs/shared';
 import {
   type ArgumentsHost,
   Catch,
@@ -50,6 +50,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const errorPayload: ApiErrorResponse = {
       success: false,
       statusCode: status,
+      errorCode: ErrorCode.INTERNAL_SERVER_ERROR,
       error: errorName,
       message:
         status === HttpStatus.INTERNAL_SERVER_ERROR &&

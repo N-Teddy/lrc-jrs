@@ -1,0 +1,28 @@
+{
+  "SUCCESS_OPERATION": "Operation completed successfully.",
+  "SUCCESS_AUTH_LOGIN": "Signed in successfully. Welcome back!",
+  "SUCCESS_AUTH_LOGOUT": "You have been safely signed out.",
+  "SUCCESS_AUTH_PASSWORD_UPDATED": "Your password has been updated successfully.",
+  "SUCCESS_AUTH_OTP_SENT": "A 6-digit verification code has been sent to your contact.",
+  "SUCCESS_AUTH_SETUP_COMPLETED": "Account setup completed successfully. Welcome!",
+
+  "SUCCESS_MEMBER_CREATED": "Member registered successfully.",
+  "SUCCESS_MEMBER_UPDATED": "Member profile updated successfully.",
+  "SUCCESS_MEMBER_DELETED": "Member record removed successfully.",
+  "SUCCESS_INTAKE_SUBMITTED": "Your membership request has been submitted for review.",
+  "SUCCESS_INTAKE_APPROVED": "Membership application approved successfully.",
+  "SUCCESS_INTAKE_REJECTED": "Membership application marked as rejected.",
+  "SUCCESS_ACCESS_UPDATED": "Member access permissions updated successfully.",
+  "SUCCESS_ACCESS_REVOKED": "Member app access has been revoked.",
+  "SUCCESS_TOWN_TRANSFERRED": "Member relocated to new town successfully.",
+
+  "SUCCESS_ACTIVITY_CREATED": "New activity created and scheduled successfully.",
+  "SUCCESS_ACTIVITY_UPDATED": "Activity details saved successfully.",
+  "SUCCESS_ACTIVITY_DELETED": "Activity deleted successfully.",
+  "SUCCESS_ACTIVITY_CLOSED": "Activity has been successfully closed.",
+  "SUCCESS_ATTENDANCE_RECORDED": "Attendance roster saved successfully.",
+
+  "SUCCESS_NOTIFICATION_MARKED_READ": "Notification marked as read.",
+  "SUCCESS_NOTIFICATIONS_ALL_MARKED_READ": "All notifications marked as read.",
+  "SUCCESS_PUSH_TOKEN_REGISTERED": "Device registered for push notifications."
+}

@@ -48,6 +48,21 @@ class UserAccountInfo {
 }
 
 @Schema({ _id: false })
+export class UserPushToken {
+  @Prop({ required: true })
+  token: string;
+
+  @Prop({ required: true, enum: ['ios', 'android', 'desktop'] })
+  platform: 'ios' | 'android' | 'desktop';
+
+  @Prop({ type: String })
+  deviceName?: string;
+
+  @Prop({ type: Date, default: () => new Date() })
+  updatedAt: Date;
+}
+
+@Schema({ _id: false })
 export class TownTransferRecord {
   @Prop({ required: true })
   fromTownId: string;
@@ -149,6 +164,9 @@ export class User extends BaseDocument {
 
   @Prop({ type: String, trim: true })
   intakeNote?: string;
+
+  @Prop({ type: [UserPushToken], default: [] })
+  pushTokens: UserPushToken[];
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

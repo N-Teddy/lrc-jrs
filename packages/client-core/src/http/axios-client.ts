@@ -4,8 +4,15 @@ import axios, {
   type AxiosRequestConfig,
   type InternalAxiosRequestConfig,
 } from 'axios';
+import { ErrorService } from '../error/error.service';
 import type { IStorageAdapter } from '../storage/storage.interface';
 import { ApiError } from './api-error';
+
+declare module 'axios' {
+  export interface AxiosRequestConfig {
+    skipToast?: boolean;
+  }
+}
 
 export interface HttpServiceConfig {
   baseUrl: string;
@@ -187,12 +194,18 @@ export class HttpService {
           // If the failed endpoint is an unauthenticated entry endpoint (e.g. invalid login password),
           // do NOT attempt refresh and do NOT treat it as a session termination.
           if (isPublicAuthEndpoint) {
-            throw new ApiError(
+            const apiError = new ApiError(
               status || 500,
               errBody?.error || error.name || 'HttpError',
               errBody?.message || error.message || 'Unknown network error',
               errBody?.path,
+              errBody?.errorCode,
+              errBody?.details,
             );
+            if (!originalRequest?.skipToast) {
+              ErrorService.handle(apiError);
+            }
+            throw apiError;
           }
 
           if (originalRequest && !originalRequest._retry) {
@@ -213,12 +226,20 @@ export class HttpService {
           this.notifyUnauthorized();
         }
 
-        throw new ApiError(
+        const apiError = new ApiError(
           status || 500,
           errBody?.error || error.name || 'HttpError',
           errBody?.message || error.message || 'Unknown network error',
           errBody?.path,
+          errBody?.errorCode,
+          errBody?.details,
         );
+
+        if (!error.config?.skipToast) {
+          ErrorService.handle(apiError);
+        }
+
+        throw apiError;
       },
     );
   }

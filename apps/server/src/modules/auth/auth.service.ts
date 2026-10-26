@@ -1,15 +1,15 @@
 import * as crypto from 'node:crypto';
-import {
-  BadRequestException,
-  ForbiddenException,
-  Injectable,
-  Logger,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { ErrorCode } from '@jrs/shared';
+import { Injectable, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/mongoose';
 import * as bcrypt from 'bcrypt';
 import type { Model, Types } from 'mongoose';
+import {
+  BadRequestAppException,
+  ForbiddenAppException,
+  UnauthorizedAppException,
+} from '../../core/exceptions/app.exception';
 import { PasswordGeneratorUtil } from '../../core/utils/password-generator.util';
 import { PhoneSanitizer } from '../../core/utils/phone-sanitizer.util';
 import {
@@ -108,17 +108,15 @@ export class AuthService {
   async login(loginDto: LoginDto) {
     const user = await this.usersService.findByIdentifier(loginDto.identifier);
     if (!user) {
-      throw new UnauthorizedException('Invalid identifier or password');
+      throw new UnauthorizedAppException(ErrorCode.AUTH_INVALID_CREDENTIALS);
     }
 
     if (user.account?.isAccessRevoked) {
-      throw new ForbiddenException('Your account access has been revoked');
+      throw new ForbiddenAppException(ErrorCode.AUTH_ACCOUNT_REVOKED);
     }
 
     if (user.account?.hasAppAccess === false) {
-      throw new ForbiddenException(
-        'Your account is pending activation. Application access has not been granted.',
-      );
+      throw new ForbiddenAppException(ErrorCode.AUTH_NO_APP_ACCESS);
     }
 
     // Check temporary password first if user has one
@@ -134,8 +132,8 @@ export class AuthService {
           user.tempPasswordExpiresAt &&
           new Date() > user.tempPasswordExpiresAt
         ) {
-          throw new UnauthorizedException(
-            'Your temporary password has expired. Please use Forgot Password or request a new invitation.',
+          throw new UnauthorizedAppException(
+            ErrorCode.AUTH_TEMP_PASSWORD_EXPIRED,
           );
         }
 
@@ -157,12 +155,12 @@ export class AuthService {
 
     // Check permanent password
     if (!user.passwordHash) {
-      throw new UnauthorizedException('Invalid identifier or password');
+      throw new UnauthorizedAppException(ErrorCode.AUTH_INVALID_CREDENTIALS);
     }
 
     const isMatch = await bcrypt.compare(loginDto.password, user.passwordHash);
     if (!isMatch) {
-      throw new UnauthorizedException('Invalid identifier or password');
+      throw new UnauthorizedAppException(ErrorCode.AUTH_INVALID_CREDENTIALS);
     }
 
     const accessToken = this.generateAccessToken(user);
@@ -185,7 +183,7 @@ export class AuthService {
   async completeSetup(userId: string, completeSetupDto: CompleteSetupDto) {
     const user = await this.usersService.findById(userId);
     if (!user) {
-      throw new UnauthorizedException('User not found');
+      throw new UnauthorizedAppException(ErrorCode.AUTH_USER_NOT_FOUND);
     }
 
     const passwordHash = await bcrypt.hash(
@@ -225,7 +223,7 @@ export class AuthService {
     const storedToken = await this.refreshTokenModel.findOne({ tokenHash });
 
     if (!storedToken) {
-      throw new UnauthorizedException('Invalid refresh token');
+      throw new UnauthorizedAppException(ErrorCode.AUTH_INVALID_TOKEN);
     }
 
     // Reuse detection: If token was already revoked, someone may have compromised it!
@@ -237,16 +235,16 @@ export class AuthService {
         { userId: storedToken.userId },
         { isRevoked: true },
       );
-      throw new UnauthorizedException('Invalid refresh token');
+      throw new UnauthorizedAppException(ErrorCode.AUTH_INVALID_TOKEN);
     }
 
     if (new Date() > storedToken.expiresAt) {
-      throw new UnauthorizedException('Refresh token has expired');
+      throw new UnauthorizedAppException(ErrorCode.AUTH_REFRESH_TOKEN_EXPIRED);
     }
 
     const user = await this.usersService.findById(storedToken.userId);
     if (!user || user.account?.isAccessRevoked) {
-      throw new ForbiddenException('Account is inactive or revoked');
+      throw new ForbiddenAppException(ErrorCode.AUTH_ACCOUNT_REVOKED);
     }
 
     // Rotate token
@@ -394,7 +392,9 @@ export class AuthService {
       verifyResetCodeDto.identifier,
     );
     if (!user) {
-      throw new BadRequestException('Invalid or expired verification code');
+      throw new BadRequestAppException(
+        ErrorCode.AUTH_INVALID_VERIFICATION_CODE,
+      );
     }
 
     const resetRecord = await this.passwordResetModel
@@ -406,15 +406,15 @@ export class AuthService {
       .sort({ createdAt: -1 });
 
     if (!resetRecord) {
-      throw new BadRequestException('Invalid or expired verification code');
+      throw new BadRequestAppException(
+        ErrorCode.AUTH_INVALID_VERIFICATION_CODE,
+      );
     }
 
     if (resetRecord.attempts >= 5) {
       resetRecord.used = true;
       await resetRecord.save();
-      throw new BadRequestException(
-        'Too many failed attempts. Please request a new code.',
-      );
+      throw new BadRequestAppException(ErrorCode.AUTH_TOO_MANY_ATTEMPTS);
     }
 
     resetRecord.attempts += 1;
@@ -425,7 +425,9 @@ export class AuthService {
     );
     if (!isMatch) {
       await resetRecord.save();
-      throw new BadRequestException('Invalid verification code');
+      throw new BadRequestAppException(
+        ErrorCode.AUTH_INVALID_VERIFICATION_CODE,
+      );
     }
 
     // Generate high-entropy resetToken
@@ -453,14 +455,12 @@ export class AuthService {
     });
 
     if (!resetRecord) {
-      throw new BadRequestException(
-        'Invalid or expired reset session. Please request a new code.',
-      );
+      throw new BadRequestAppException(ErrorCode.AUTH_RESET_SESSION_INVALID);
     }
 
     const user = await this.usersService.findById(resetRecord.userId);
     if (!user) {
-      throw new BadRequestException('User not found');
+      throw new BadRequestAppException(ErrorCode.AUTH_USER_NOT_FOUND);
     }
 
     const newHash = await bcrypt.hash(
@@ -497,7 +497,7 @@ export class AuthService {
   async changePassword(userId: string, changePasswordDto: ChangePasswordDto) {
     const user = await this.usersService.findById(userId);
     if (!user?.passwordHash) {
-      throw new UnauthorizedException('User not found');
+      throw new UnauthorizedAppException(ErrorCode.AUTH_USER_NOT_FOUND);
     }
 
     const isMatch = await bcrypt.compare(
@@ -505,7 +505,9 @@ export class AuthService {
       user.passwordHash,
     );
     if (!isMatch) {
-      throw new BadRequestException('Current password does not match');
+      throw new BadRequestAppException(
+        ErrorCode.AUTH_CURRENT_PASSWORD_INCORRECT,
+      );
     }
 
     user.passwordHash = await bcrypt.hash(

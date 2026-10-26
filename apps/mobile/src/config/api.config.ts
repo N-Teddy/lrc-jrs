@@ -35,3 +35,28 @@ export function getApiBaseUrl(): string {
 
   return envUrl;
 }
+
+/**
+ * Resolves a media / avatar URL to ensure it is accessible on mobile/Android devices.
+ */
+export function resolveMediaUrl(url?: string | null): string | null {
+  if (!url) return null;
+  const baseUrl = getApiBaseUrl().replace(/\/api\/?$/, '');
+
+  if (url.startsWith('/')) {
+    return `${baseUrl}${url}`;
+  }
+
+  if (
+    Platform.OS === 'android' &&
+    (url.includes('localhost') || url.includes('127.0.0.1'))
+  ) {
+    const match = baseUrl.match(/^https?:\/\/([^:/]+)/);
+    const host = match?.[1];
+    if (host && host !== 'localhost' && host !== '127.0.0.1') {
+      return url.replace(/localhost|127\.0\.0\.1/, host);
+    }
+  }
+
+  return url;
+}

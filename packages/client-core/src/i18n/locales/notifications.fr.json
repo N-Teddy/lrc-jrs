@@ -1,0 +1,49 @@
+{
+  "title": "Notifications",
+  "all": "Toutes",
+  "unread": "Non lues",
+  "markAllRead": "Tout marquer comme lu",
+  "markAsRead": "Marquer comme lu",
+  "empty": "Aucune notification",
+  "emptyUnread": "Aucune notification non lue",
+  "justNow": "À l'instant",
+  "minutesAgo": "Il y a {{count}} min",
+  "hoursAgo": "Il y a {{count}} h",
+  "daysAgo": "Il y a {{count}} j",
+
+  "activityCreatedTitle": "Nouvelle activité programmée",
+  "activityCreatedBody": "{{name}} programmée pour le {{date}}",
+
+  "activityUpdatedTitle": "Activité modifiée",
+  "activityUpdatedBody": "Les informations de {{name}} ont été mises à jour",
+
+  "activityCancelledTitle": "Activité annulée",
+  "activityCancelledBody": "L'activité {{name}} du {{date}} a été annulée",
+
+  "attendanceRecordedTitle": "Présences enregistrées",
+  "attendanceRecordedBody": "La feuille de présence pour {{name}} a été validée",
+
+  "memberRegisteredTitle": "Nouveau membre inscrit",
+  "memberRegisteredBody": "{{name}} a rejoint la ville de {{town}}",
+
+  "memberIntakeSubmittedTitle": "Nouvelle demande d'adhésion",
+  "memberIntakeSubmittedBody": "{{name}} a soumis une demande d'inscription pour {{town}}",
+
+  "memberIntakeApprovedTitle": "Demande approuvée",
+  "memberIntakeApprovedBody": "Votre inscription pour rejoindre {{town}} a été acceptée",
+
+  "townTransferTitle": "Mutation de ville",
+  "townTransferBody": "{{name}} a été transféré de {{fromTown}} vers {{toTown}}",
+
+  "accessGrantedTitle": "Accès à l'application activé",
+  "accessGrantedBody": "Votre accès au portail LRC JRS est désormais actif",
+
+  "accessRevokedTitle": "Accès à l'application révoqué",
+  "accessRevokedBody": "Votre accès a été révoqué par la coordination",
+
+  "roleChangedTitle": "Rôle modifié",
+  "roleChangedBody": "Votre rôle a été mis à jour : {{role}}",
+
+  "systemAnnouncementTitle": "Communiqué de la coordination",
+  "systemAnnouncementBody": "{{message}}"
+}

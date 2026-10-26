@@ -119,7 +119,7 @@ export const EditMemberScreen: React.FC<EditMemberScreenProps> = ({
   const handleDelete = () => {
     Alert.alert(
       'Deactivate Member',
-      `Are you sure you want to remove ${formData.fullName || 'this member'} from the active fellowship registry?`,
+      `Are you sure you want to remove ${formData.fullName || 'this member'} from the active registry?`,
       [
         { text: 'Cancel', style: 'cancel' },
         {
@@ -192,8 +192,7 @@ export const EditMemberScreen: React.FC<EditMemberScreenProps> = ({
               {formData.fullName || 'Member Name'}
             </Text>
             <Text style={styles.avatarMeta}>
-              {member?.role || 'MEMBER'} •{' '}
-              {member?.homeTown?.name || 'Fellowship'}
+              {member?.role || 'MEMBER'} • {member?.homeTown?.name || 'Hub'}
             </Text>
           </View>
 

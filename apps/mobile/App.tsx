@@ -12,6 +12,8 @@ import {
   VerifyOtpScreen,
 } from './src/features/auth';
 import { MainAppTabBar } from './src/features/main';
+import { usePushNotifications } from './src/features/notifications';
+import { MobileToastContainer } from './src/features/toast';
 import { TownSelectorScreen } from './src/features/towns';
 import { mobileSecureStoreAdapter } from './src/storage/secure-store.adapter';
 import { colors } from './src/theme/colors';
@@ -43,6 +45,9 @@ function AppContent() {
     handlePasswordResetComplete,
   } = useMobileAuthFlow();
 
+  // Register push notifications
+  usePushNotifications();
+
   if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
@@ -52,76 +57,84 @@ function AppContent() {
     );
   }
 
-  // 1. Authenticated Flow
-  if (isAuthenticated && user) {
-    // If user has access to multiple towns and has not selected one or requested a switch
-    if (shouldShowRegionSelector) {
+  const renderScreen = () => {
+    // 1. Authenticated Flow
+    if (isAuthenticated && user) {
+      if (shouldShowRegionSelector) {
+        return (
+          <TownSelectorScreen user={user} onTownSelected={handleTownSelected} />
+        );
+      }
+
       return (
-        <TownSelectorScreen user={user} onTownSelected={handleTownSelected} />
+        <MainAppTabBar
+          onSwitchTown={handleSwitchRegion}
+          hasMultiTownAccess={hasMultiTownAccess}
+        />
       );
     }
 
+    // 2. First-Time Setup Flow
+    if (currentScreen === 'setup' && setupData) {
+      return (
+        <FirstTimeSetupScreen
+          setupToken={setupData.setupToken}
+          user={setupData.user}
+          onCancel={handleCancelSetup}
+          onSetupComplete={handleSetupComplete}
+        />
+      );
+    }
+
+    // 3. Forgot Password Flow
+    if (currentScreen === 'forgot-password') {
+      return (
+        <ForgotPasswordScreen
+          initialIdentifier={recoveryIdentifier}
+          onBackToSignIn={handleBackToSignIn}
+          onCodeSent={handleCodeSent}
+        />
+      );
+    }
+
+    // 4. 6-Digit OTP Verification Flow
+    if (currentScreen === 'verify-otp') {
+      return (
+        <VerifyOtpScreen
+          identifier={recoveryIdentifier}
+          channel={recoveryChannel}
+          onBackToChangeContact={handleBackToChangeContact}
+          onCodeVerified={handleCodeVerified}
+        />
+      );
+    }
+
+    // 5. Reset Password Flow
+    if (currentScreen === 'reset-password') {
+      return (
+        <ResetPasswordScreen
+          resetToken={resetToken}
+          identifier={recoveryIdentifier}
+          onBackToSignIn={handleBackToSignIn}
+          onPasswordResetComplete={handlePasswordResetComplete}
+        />
+      );
+    }
+
+    // 6. Default Sign-In Screen
     return (
-      <MainAppTabBar
-        onSwitchTown={handleSwitchRegion}
-        hasMultiTownAccess={hasMultiTownAccess}
+      <LoginScreen
+        onRequiresPasswordChange={handleRequiresPasswordChange}
+        onForgotPasswordClick={handleForgotPasswordClick}
       />
     );
-  }
+  };
 
-  // 2. First-Time Setup Flow (Temporary Password login requires mandatory password change)
-  if (currentScreen === 'setup' && setupData) {
-    return (
-      <FirstTimeSetupScreen
-        setupToken={setupData.setupToken}
-        user={setupData.user}
-        onCancel={handleCancelSetup}
-        onSetupComplete={handleSetupComplete}
-      />
-    );
-  }
-
-  // 3. Forgot Password Flow
-  if (currentScreen === 'forgot-password') {
-    return (
-      <ForgotPasswordScreen
-        initialIdentifier={recoveryIdentifier}
-        onBackToSignIn={handleBackToSignIn}
-        onCodeSent={handleCodeSent}
-      />
-    );
-  }
-
-  // 4. 6-Digit OTP Verification Flow
-  if (currentScreen === 'verify-otp') {
-    return (
-      <VerifyOtpScreen
-        identifier={recoveryIdentifier}
-        channel={recoveryChannel}
-        onBackToChangeContact={handleBackToChangeContact}
-        onCodeVerified={handleCodeVerified}
-      />
-    );
-  }
-
-  // 5. Reset Password Flow
-  if (currentScreen === 'reset-password') {
-    return (
-      <ResetPasswordScreen
-        resetToken={resetToken}
-        identifier={recoveryIdentifier}
-        onBackToSignIn={handleBackToSignIn}
-        onPasswordResetComplete={handlePasswordResetComplete}
-      />
-    );
-  }
-
-  // 6. Default Sign-In Screen
   return (
-    <LoginScreen
-      onRequiresPasswordChange={handleRequiresPasswordChange}
-      onForgotPasswordClick={handleForgotPasswordClick}
-    />
+    <>
+      {renderScreen()}
+      <MobileToastContainer />
+    </>
   );
 }
 

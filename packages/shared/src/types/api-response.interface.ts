@@ -17,8 +17,10 @@ export interface ApiResponse<T> {
 export interface ApiErrorResponse {
   success: false;
   statusCode: number;
+  errorCode?: string;
   error: string;
   message: string | string[];
+  details?: Record<string, unknown>;
   path?: string;
   timestamp: string;
 }

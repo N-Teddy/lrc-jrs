@@ -1,3 +1,4 @@
+import type { NotificationResource } from '@jrs/client-core';
 import { useAuth, useTownContext, useTranslation } from '@jrs/client-core';
 import {
   CaretDown,
@@ -8,13 +9,18 @@ import {
 } from '@phosphor-icons/react';
 import type React from 'react';
 import { useEffect, useRef, useState } from 'react';
-import { LanguageToggle, UserAvatar } from '../../../components';
+import {
+  LanguageToggle,
+  NotificationBell,
+  UserAvatar,
+} from '../../../components';
 import { formatDashboardDate } from '../utils/dashboard.utils';
 
 interface HeaderProps {
   isSidebarCollapsed: boolean;
   onToggleSidebar: () => void;
   onOpenChangePassword: () => void;
+  onNavigateToResource?: (resource: NotificationResource) => void;
   title?: string;
 }
 
@@ -22,6 +28,7 @@ export const Header: React.FC<HeaderProps> = ({
   isSidebarCollapsed,
   onToggleSidebar,
   onOpenChangePassword,
+  onNavigateToResource,
   title = 'Dashboard Overview',
 }) => {
   const { t, i18n } = useTranslation();
@@ -118,8 +125,9 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
       </div>
 
-      {/* 3. Right: Language Switcher & User Profile Button */}
+      {/* 3. Right: Notification Bell, Language Switcher & User Profile Button */}
       <div className="flex items-center gap-3 shrink-0">
+        <NotificationBell onNavigateToResource={onNavigateToResource} />
         <LanguageToggle size="md" />
 
         <div ref={profileMenuRef} className="relative">

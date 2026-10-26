@@ -177,9 +177,9 @@ export const MemberFormFields: React.FC<MemberFormFieldsProps> = ({
         </View>
       </View>
 
-      {/* Role in Fellowship */}
+      {/* Member Role */}
       <View style={styles.fieldGroup}>
-        <Text style={styles.label}>Role in Fellowship</Text>
+        <Text style={styles.label}>Role</Text>
         <View style={styles.roleRow}>
           {ROLES.map((item) => (
             <TouchableOpacity

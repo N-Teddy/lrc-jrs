@@ -1,6 +1,7 @@
 export * from './components/DeleteMemberDialog';
 export * from './components/EditMemberModal';
 export * from './components/IntakeLinksModal';
+export * from './components/IntakeReviewsTab';
 export * from './components/ManageAccessModal';
 export * from './components/MemberAttendanceHistoryTab';
 export * from './components/MemberCardGridView';

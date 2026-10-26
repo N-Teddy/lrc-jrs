@@ -5,24 +5,31 @@ import type {
 } from '@jrs/shared';
 import {
   ArrowRight,
-  CheckCircle,
+  CaretLeft,
+  Clock,
   EnvelopeSimple,
-  PencilSimple,
   ShieldCheck,
-  Timer,
+  WarningCircle,
   WhatsappLogo,
 } from 'phosphor-react-native';
 import React, { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
+  Alert,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+  SafeAreaView,
+  ScrollView,
+  StatusBar,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   View,
 } from 'react-native';
 import { colors } from '../../../theme/colors';
-import { AuthErrorBanner, AuthScreenContainer } from './AuthScreenContainer';
 
 interface VerifyOtpScreenProps {
   identifier: string;
@@ -38,11 +45,11 @@ export const VerifyOtpScreen: React.FC<VerifyOtpScreenProps> = ({
   onCodeVerified,
 }) => {
   const http = useHttp();
-  const { t } = useTranslation();
+  const { i18n } = useTranslation();
+  const isFrench = i18n.language?.startsWith('fr');
 
   const [digits, setDigits] = useState<string[]>(['', '', '', '', '', '']);
-  const [secondsRemaining, setSecondsRemaining] = useState(600); // 10 minutes
-  const [attemptsRemaining, setAttemptsRemaining] = useState(5);
+  const [secondsRemaining, setSecondsRemaining] = useState(60); // 60s cooldown for resend
   const [isLoading, setIsLoading] = useState(false);
   const [isResending, setIsResending] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -50,7 +57,7 @@ export const VerifyOtpScreen: React.FC<VerifyOtpScreenProps> = ({
 
   const inputRefs = useRef<Array<TextInput | null>>([]);
 
-  // Countdown timer
+  // Countdown timer for resend
   useEffect(() => {
     if (secondsRemaining <= 0) return;
     const interval = setInterval(() => {
@@ -59,20 +66,18 @@ export const VerifyOtpScreen: React.FC<VerifyOtpScreenProps> = ({
     return () => clearInterval(interval);
   }, [secondsRemaining]);
 
-  const formattedTimer = `${Math.floor(secondsRemaining / 60)
-    .toString()
-    .padStart(2, '0')}:${(secondsRemaining % 60).toString().padStart(2, '0')}`;
-
+  const formattedTimer = `00:${secondsRemaining.toString().padStart(2, '0')}`;
   const isFormComplete = digits.every((d) => d.length === 1);
 
   // Masked identifier for display
   const maskedId = identifier.includes('@')
     ? identifier.replace(/(.{2})(.*)(@.*)/, '$1***$3')
-    : identifier.replace(/(\+?\d{3})\d+(\d{2})/, '$1 *** *** $2');
+    : identifier.replace(/(\+?\d{3})\d+(\d{2})/, '$1 •• •• $2');
 
   const handleCellChange = (text: string, index: number) => {
-    // Handle paste of 6-digit code
     const cleaned = text.replace(/[^0-9]/g, '');
+
+    // Multi-digit paste (e.g. from SMS/WhatsApp autofill)
     if (cleaned.length > 1) {
       const nextDigits = [...digits];
       for (let i = 0; i < 6; i++) {
@@ -87,6 +92,7 @@ export const VerifyOtpScreen: React.FC<VerifyOtpScreenProps> = ({
     const nextDigits = [...digits];
     nextDigits[index] = cleaned;
     setDigits(nextDigits);
+    if (errorMessage) setErrorMessage(null);
 
     if (cleaned && index < 5) {
       inputRefs.current[index + 1]?.focus();
@@ -100,9 +106,14 @@ export const VerifyOtpScreen: React.FC<VerifyOtpScreenProps> = ({
   };
 
   const handleVerify = async () => {
+    Keyboard.dismiss();
     const code = digits.join('');
     if (code.length !== 6) {
-      setErrorMessage('Please enter the complete 6-digit code.');
+      setErrorMessage(
+        isFrench
+          ? 'Veuillez renseigner le code complet à 6 chiffres.'
+          : 'Please enter the complete 6-digit code.',
+      );
       return;
     }
 
@@ -121,13 +132,21 @@ export const VerifyOtpScreen: React.FC<VerifyOtpScreenProps> = ({
 
       if (res.valid && res.resetToken) {
         onCodeVerified(res.resetToken);
+      } else {
+        setErrorMessage(
+          res.message ||
+            (isFrench
+              ? 'Code de vérification invalide ou expiré.'
+              : 'Invalid or expired verification code.'),
+        );
       }
     } catch (err: any) {
-      setAttemptsRemaining((prev) => Math.max(0, prev - 1));
       const msg =
         err?.response?.data?.message ||
         err?.message ||
-        'Invalid or expired verification code.';
+        (isFrench
+          ? 'Code de vérification invalide.'
+          : 'Invalid or expired verification code.');
       setErrorMessage(msg);
     } finally {
       setIsLoading(false);
@@ -139,244 +158,366 @@ export const VerifyOtpScreen: React.FC<VerifyOtpScreenProps> = ({
 
     setIsResending(true);
     setErrorMessage(null);
-    setResendNotice(null);
 
     try {
       await http.post<IForgotPasswordResponse>('/auth/forgot-password', {
         identifier,
-        channel,
       });
-      setSecondsRemaining(600);
-      setAttemptsRemaining(5);
+
+      setSecondsRemaining(60);
+      setResendNotice(
+        isFrench
+          ? 'Un nouveau code de vérification a été envoyé !'
+          : 'A new verification code has been dispatched!',
+      );
       setDigits(['', '', '', '', '', '']);
       inputRefs.current[0]?.focus();
-      setResendNotice('A new verification code has been dispatched.');
     } catch (err: any) {
       const msg =
         err?.response?.data?.message ||
         err?.message ||
-        'Unable to resend code. Please try again.';
+        (isFrench
+          ? 'Impossible de renvoyer le code. Veuillez réessayer plus tard.'
+          : 'Unable to resend code. Please try again.');
       setErrorMessage(msg);
     } finally {
       setIsResending(false);
     }
   };
 
+  const handleNeedHelp = () => {
+    Alert.alert(
+      isFrench ? 'Assistance Support' : 'Support Assistance',
+      isFrench
+        ? 'Si vous ne recevez pas le code, contactez l’animateur principal de votre centre pour réinitialiser vos accès manuellement.'
+        : 'If you cannot receive your verification code, please contact your Regional Lead or PC to reset your credentials manually.',
+      [{ text: 'OK' }],
+    );
+  };
+
+  const isEmail = channel === 'email' || identifier.includes('@');
+
   return (
-    <AuthScreenContainer
-      onBack={onBackToChangeContact}
-      backLabel={t('auth:verifyOtp.changeContact') || 'Change Identifier'}
-    >
-      {/* Header */}
-      <View style={styles.header}>
-        <View style={styles.iconCircle}>
-          <ShieldCheck size={32} weight="fill" color={colors.primary} />
-        </View>
-        <Text style={styles.title}>
-          {t('auth:verifyOtp.title') || 'Enter 6-Digit Code'}
-        </Text>
-        <Text style={styles.subtitle}>
-          {t('auth:verifyOtp.subtitle') ||
-            'We sent a secure verification code to:'}
-        </Text>
-
-        {/* Destination badge */}
-        <TouchableOpacity
-          style={styles.destinationBadge}
-          onPress={onBackToChangeContact}
+    <SafeAreaView style={styles.safeArea}>
+      <StatusBar barStyle="dark-content" backgroundColor={colors.surface} />
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <KeyboardAvoidingView
+          style={styles.keyboardContainer}
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         >
-          {channel === 'whatsapp' ? (
-            <WhatsappLogo size={18} weight="bold" color="#25D366" />
-          ) : (
-            <EnvelopeSimple size={18} weight="bold" color={colors.primary} />
-          )}
-          <Text style={styles.destinationText}>{maskedId}</Text>
-          <PencilSimple size={14} weight="bold" color={colors.textMuted} />
-        </TouchableOpacity>
-      </View>
-
-      {/* Notifications */}
-      <AuthErrorBanner message={errorMessage} />
-
-      {resendNotice && (
-        <View style={styles.successBox}>
-          <CheckCircle
-            size={20}
-            weight="fill"
-            color={colors.success}
-            style={styles.errorIcon}
-          />
-          <Text style={styles.successText}>{resendNotice}</Text>
-        </View>
-      )}
-
-      {/* 6-Digit Input Row */}
-      <View style={styles.otpRow}>
-        {digits.map((digit, index) => (
-          <TextInput
-            key={index}
-            ref={(ref) => {
-              inputRefs.current[index] = ref;
-            }}
-            style={[
-              styles.otpBox,
-              digit ? styles.otpBoxFilled : null,
-              errorMessage ? styles.otpBoxError : null,
-            ]}
-            value={digit}
-            onChangeText={(text) => handleCellChange(text, index)}
-            onKeyPress={(e) => handleKeyPress(e, index)}
-            keyboardType="number-pad"
-            maxLength={index === 0 ? 6 : 1}
-            selectTextOnFocus
-            textAlign="center"
-            editable={!isLoading}
-          />
-        ))}
-      </View>
-
-      {/* Countdown & Attempts Info */}
-      <View style={styles.statusRow}>
-        <View style={styles.timerContainer}>
-          <Timer size={16} weight="bold" color={colors.textSecondary} />
-          <Text style={styles.timerText}>
-            {t('auth:verifyOtp.codeExpiresIn') || 'Expires in'} {formattedTimer}
-          </Text>
-        </View>
-        <Text style={styles.attemptsText}>
-          {t('auth:verifyOtp.attemptsRemaining', {
-            count: attemptsRemaining,
-          }) || `${attemptsRemaining} attempts left`}
-        </Text>
-      </View>
-
-      {/* Submit Action */}
-      <TouchableOpacity
-        style={[
-          styles.submitButton,
-          (!isFormComplete || isLoading) && styles.submitButtonDisabled,
-        ]}
-        onPress={handleVerify}
-        disabled={!isFormComplete || isLoading}
-        activeOpacity={0.85}
-      >
-        {isLoading ? (
-          <ActivityIndicator color="#FFFFFF" size="small" />
-        ) : (
-          <View style={styles.submitButtonContent}>
-            <Text style={styles.submitButtonText}>
-              {t('auth:verifyOtp.verifyAndProceed') || 'Verify & Continue'}
-            </Text>
-            <ArrowRight size={18} weight="bold" color="#FFFFFF" />
-          </View>
-        )}
-      </TouchableOpacity>
-
-      {/* Resend Code Link */}
-      <View style={styles.resendContainer}>
-        <Text style={styles.resendLabel}>
-          {t('auth:verifyOtp.didNotReceive') || "Didn't receive the code? "}
-        </Text>
-        <TouchableOpacity
-          onPress={handleResend}
-          disabled={secondsRemaining > 0 || isResending}
-        >
-          {isResending ? (
-            <ActivityIndicator size="small" color={colors.primary} />
-          ) : (
-            <Text
-              style={[
-                styles.resendAction,
-                secondsRemaining > 0 && styles.resendActionDisabled,
-              ]}
+          {/* Top Bar with Back Button */}
+          <View style={styles.topBar}>
+            <TouchableOpacity
+              style={styles.backIconButton}
+              onPress={onBackToChangeContact}
+              hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+              activeOpacity={0.7}
             >
-              {t('auth:verifyOtp.resendCode') || 'Resend Code'}
+              <CaretLeft size={24} weight="bold" color={colors.onSurface} />
+            </TouchableOpacity>
+            <Text style={styles.topBarTitle}>
+              {isFrench ? 'Vérification' : 'Verification'}
             </Text>
-          )}
-        </TouchableOpacity>
-      </View>
-    </AuthScreenContainer>
+            <View style={{ width: 40 }} />
+          </View>
+
+          <ScrollView
+            contentContainerStyle={styles.scrollContent}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+          >
+            {/* Header Emblem & Title */}
+            <View style={styles.headerSection}>
+              <View style={styles.emblemContainer}>
+                <ShieldCheck size={32} weight="fill" color={colors.primary} />
+              </View>
+              <Text style={styles.headline}>
+                {isFrench
+                  ? 'Entrez le code de vérification'
+                  : 'Enter Verification Code'}
+              </Text>
+              <Text style={styles.subtitle}>
+                {isFrench
+                  ? 'Nous avons envoyé un code à 6 chiffres à :'
+                  : 'We have sent a 6-digit code via your selected channel to:'}
+              </Text>
+
+              {/* Masked Recipient Pill */}
+              <View style={styles.recipientPill}>
+                <View style={styles.recipientIconCircle}>
+                  {isEmail ? (
+                    <EnvelopeSimple
+                      size={14}
+                      weight="bold"
+                      color={colors.onSecondaryContainer}
+                    />
+                  ) : (
+                    <WhatsappLogo
+                      size={14}
+                      weight="fill"
+                      color={colors.onSecondaryContainer}
+                    />
+                  )}
+                </View>
+                <Text style={styles.recipientText}>{maskedId}</Text>
+                <Text style={styles.recipientDot}>•</Text>
+                <TouchableOpacity
+                  onPress={onBackToChangeContact}
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                >
+                  <Text style={styles.changeContactLink}>
+                    {isFrench ? 'Modifier' : 'Change'}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            {/* Error or Resend Notice */}
+            {errorMessage ? (
+              <View style={styles.errorBox}>
+                <WarningCircle
+                  size={20}
+                  weight="fill"
+                  color={colors.error}
+                  style={styles.errorIcon}
+                />
+                <Text style={styles.errorText}>{errorMessage}</Text>
+              </View>
+            ) : null}
+
+            {resendNotice ? (
+              <View style={styles.successBox}>
+                <Text style={styles.successText}>{resendNotice}</Text>
+              </View>
+            ) : null}
+
+            {/* 6-Digit OTP Cells */}
+            <View style={styles.otpCellsContainer}>
+              {digits.map((digit, index) => {
+                const isFocused =
+                  !digit && digits.slice(0, index).every((d) => d);
+                return (
+                  <View
+                    key={index}
+                    style={[
+                      styles.otpCell,
+                      digit ? styles.otpCellFilled : null,
+                      isFocused ? styles.otpCellFocused : null,
+                    ]}
+                  >
+                    <TextInput
+                      ref={(ref) => {
+                        inputRefs.current[index] = ref;
+                      }}
+                      style={styles.otpInput}
+                      value={digit}
+                      onChangeText={(text) => handleCellChange(text, index)}
+                      onKeyPress={(e) => handleKeyPress(e, index)}
+                      keyboardType="number-pad"
+                      maxLength={6}
+                      selectTextOnFocus
+                      autoFocus={index === 0}
+                      textContentType="oneTimeCode"
+                      editable={!isLoading}
+                    />
+                  </View>
+                );
+              })}
+            </View>
+
+            {/* Resend Status & Counter Section */}
+            <View style={styles.resendSection}>
+              {secondsRemaining > 0 ? (
+                <View style={styles.timerPill}>
+                  <Clock size={16} weight="bold" color={colors.secondary} />
+                  <Text style={styles.timerText}>
+                    {isFrench ? 'Renvoyer dans ' : 'Resend code in '}
+                    <Text style={styles.timerCountdown}>{formattedTimer}</Text>
+                  </Text>
+                </View>
+              ) : (
+                <TouchableOpacity
+                  style={styles.resendActiveButton}
+                  onPress={handleResend}
+                  disabled={isResending}
+                  activeOpacity={0.8}
+                >
+                  {isResending ? (
+                    <ActivityIndicator size="small" color={colors.primary} />
+                  ) : (
+                    <Text style={styles.resendActiveText}>
+                      {isFrench
+                        ? 'Code non reçu ? Renvoyer le code'
+                        : "Didn't receive a code? Resend Code"}
+                    </Text>
+                  )}
+                </TouchableOpacity>
+              )}
+            </View>
+
+            {/* Primary Action Button */}
+            <View style={styles.actionZone}>
+              <TouchableOpacity
+                style={[
+                  styles.verifyButton,
+                  (!isFormComplete || isLoading) && styles.verifyButtonDisabled,
+                ]}
+                onPress={handleVerify}
+                disabled={!isFormComplete || isLoading}
+                activeOpacity={0.88}
+              >
+                {isLoading ? (
+                  <ActivityIndicator color={colors.onPrimary} size="small" />
+                ) : (
+                  <>
+                    <Text style={styles.verifyButtonText}>
+                      {isFrench ? 'Vérifier et continuer' : 'Verify & Proceed'}
+                    </Text>
+                    <ArrowRight
+                      size={20}
+                      weight="bold"
+                      color={colors.onPrimary}
+                    />
+                  </>
+                )}
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.helpButton}
+                onPress={handleNeedHelp}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.helpText}>
+                  {isFrench
+                    ? 'Besoin d’aide ? '
+                    : 'Need help recovering account? '}
+                  <Text style={styles.helpTextHighlight}>
+                    {isFrench ? 'Contacter l’animateur' : 'Contact Coordinator'}
+                  </Text>
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </TouchableWithoutFeedback>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: colors.surface,
   },
-  container: {
+  keyboardContainer: {
     flex: 1,
   },
+  topBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    height: 52,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(0,0,0,0.03)',
+  },
+  backIconButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  topBarTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: colors.onSurface,
+  },
   scrollContent: {
-    flexGrow: 1,
     paddingHorizontal: 24,
     paddingTop: 16,
     paddingBottom: 40,
-  },
-  backButton: {
-    flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    marginBottom: 20,
-    alignSelf: 'flex-start',
   },
-  backButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: colors.textSecondary,
-  },
-  header: {
+  headerSection: {
     alignItems: 'center',
-    marginBottom: 24,
-  },
-  iconCircle: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: colors.primaryLight,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  title: {
-    fontSize: 26,
-    fontWeight: '800',
-    color: colors.text,
-    letterSpacing: -0.5,
     textAlign: 'center',
+    marginBottom: 28,
+    width: '100%',
+  },
+  emblemContainer: {
+    width: 64,
+    height: 64,
+    borderRadius: 20,
+    backgroundColor: colors.surfaceContainerLow,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: colors.cardBorder,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  headline: {
+    fontSize: 24,
+    fontWeight: '800',
+    color: colors.onSurface,
+    textAlign: 'center',
+    letterSpacing: -0.4,
+    marginBottom: 6,
   },
   subtitle: {
     fontSize: 14,
-    color: colors.textSecondary,
-    marginTop: 6,
+    lineHeight: 20,
+    color: colors.onSurfaceVariant,
     textAlign: 'center',
+    maxWidth: 290,
   },
-  destinationBadge: {
+  recipientPill: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    backgroundColor: colors.inputBg,
-    borderColor: colors.inputBorder,
-    borderWidth: 1,
+    backgroundColor: colors.surfaceContainerLow,
     borderRadius: 20,
     paddingHorizontal: 14,
-    paddingVertical: 6,
-    marginTop: 12,
+    paddingVertical: 8,
+    marginTop: 14,
+    gap: 8,
   },
-  destinationText: {
+  recipientIconCircle: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: colors.secondaryContainer,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  recipientText: {
     fontSize: 13,
     fontWeight: '700',
-    color: colors.text,
+    color: colors.onSurface,
+    letterSpacing: 0.3,
+  },
+  recipientDot: {
+    color: colors.outlineVariant,
+  },
+  changeContactLink: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: colors.primary,
   },
   errorBox: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.errorLight,
+    backgroundColor: colors.errorContainer,
     borderColor: 'rgba(186, 26, 26, 0.25)',
     borderWidth: 1,
     borderRadius: 14,
     padding: 14,
-    marginBottom: 18,
+    marginBottom: 20,
+    width: '100%',
   },
   errorIcon: {
     marginRight: 10,
@@ -385,112 +526,126 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 13,
     fontWeight: '600',
-    color: colors.errorDark,
+    color: colors.onErrorContainer,
     lineHeight: 18,
   },
   successBox: {
-    flexDirection: 'row',
+    backgroundColor: colors.secondaryContainer,
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 16,
+    width: '100%',
     alignItems: 'center',
-    backgroundColor: colors.successLight,
-    borderColor: 'rgba(67, 102, 77, 0.25)',
-    borderWidth: 1,
-    borderRadius: 14,
-    padding: 14,
-    marginBottom: 18,
   },
   successText: {
-    flex: 1,
     fontSize: 13,
-    fontWeight: '600',
-    color: colors.success,
-    lineHeight: 18,
+    fontWeight: '700',
+    color: colors.onSecondaryContainer,
   },
-  otpRow: {
+  otpCellsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginVertical: 14,
+    width: '100%',
+    maxWidth: 340,
+    marginBottom: 24,
   },
-  otpBox: {
+  otpCell: {
     width: 48,
     height: 56,
-    backgroundColor: colors.inputBg,
-    borderColor: colors.inputBorder,
+    borderRadius: 14,
+    backgroundColor: colors.surfaceContainerLowest,
     borderWidth: 1.5,
-    borderRadius: 12,
+    borderColor: colors.cardBorder,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  otpCellFilled: {
+    borderColor: colors.primaryContainer,
+    backgroundColor: colors.surfaceContainerLowest,
+  },
+  otpCellFocused: {
+    borderColor: colors.primary,
+    borderWidth: 2,
+  },
+  otpInput: {
+    width: '100%',
+    height: '100%',
+    textAlign: 'center',
     fontSize: 22,
     fontWeight: '800',
-    color: colors.text,
+    color: colors.onSurface,
   },
-  otpBoxFilled: {
-    borderColor: colors.primary,
-    backgroundColor: '#FFFFFF',
-  },
-  otpBoxError: {
-    borderColor: colors.error,
-  },
-  statusRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  resendSection: {
     alignItems: 'center',
-    marginBottom: 24,
-    paddingHorizontal: 4,
+    marginBottom: 32,
   },
-  timerContainer: {
+  timerPill: {
     flexDirection: 'row',
     alignItems: 'center',
+    backgroundColor: colors.surfaceContainer,
+    borderRadius: 20,
+    paddingHorizontal: 14,
+    paddingVertical: 7,
     gap: 6,
   },
   timerText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: colors.textSecondary,
-  },
-  attemptsText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: colors.textMuted,
-  },
-  submitButton: {
-    height: 54,
-    backgroundColor: colors.primary,
-    borderRadius: 14,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: colors.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  submitButtonDisabled: {
-    opacity: 0.5,
-  },
-  submitButtonContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  submitButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '700',
-  },
-  resendContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 20,
-  },
-  resendLabel: {
     fontSize: 13,
-    color: colors.textSecondary,
+    color: colors.onSurfaceVariant,
   },
-  resendAction: {
+  timerCountdown: {
+    fontWeight: '700',
+    color: colors.onSurface,
+  },
+  resendActiveButton: {
+    paddingVertical: 6,
+  },
+  resendActiveText: {
     fontSize: 13,
     fontWeight: '700',
     color: colors.primary,
+    textDecorationLine: 'underline',
   },
-  resendActionDisabled: {
-    color: colors.textMuted,
+  actionZone: {
+    width: '100%',
+    gap: 16,
+  },
+  verifyButton: {
+    height: 54,
+    borderRadius: 16,
+    backgroundColor: colors.primaryContainer,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    shadowColor: colors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  verifyButtonDisabled: {
+    opacity: 0.5,
+  },
+  verifyButtonText: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: colors.onPrimary,
+  },
+  helpButton: {
+    alignItems: 'center',
+    paddingVertical: 6,
+  },
+  helpText: {
+    fontSize: 13,
+    color: colors.onSurfaceVariant,
+  },
+  helpTextHighlight: {
+    fontWeight: '700',
+    color: colors.primary,
   },
 });

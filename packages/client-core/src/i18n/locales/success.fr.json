@@ -1,0 +1,28 @@
+{
+  "SUCCESS_OPERATION": "Opération effectuée avec succès.",
+  "SUCCESS_AUTH_LOGIN": "Connexion réussie. Bienvenue !",
+  "SUCCESS_AUTH_LOGOUT": "Vous avez été déconnecté en toute sécurité.",
+  "SUCCESS_AUTH_PASSWORD_UPDATED": "Votre mot de passe a été modifié avec succès.",
+  "SUCCESS_AUTH_OTP_SENT": "Un code de vérification à 6 chiffres a été envoyé.",
+  "SUCCESS_AUTH_SETUP_COMPLETED": "Configuration initiale terminée avec succès. Bienvenue !",
+
+  "SUCCESS_MEMBER_CREATED": "Membre enregistré avec succès.",
+  "SUCCESS_MEMBER_UPDATED": "Profil du membre mis à jour avec succès.",
+  "SUCCESS_MEMBER_DELETED": "Membre supprimé avec succès.",
+  "SUCCESS_INTAKE_SUBMITTED": "Votre demande d'adhésion a été transmise pour examen.",
+  "SUCCESS_INTAKE_APPROVED": "Demande d'adhésion approuvée avec succès.",
+  "SUCCESS_INTAKE_REJECTED": "Demande d'adhésion rejetée.",
+  "SUCCESS_ACCESS_UPDATED": "Droits d'accès du membre mis à jour avec succès.",
+  "SUCCESS_ACCESS_REVOKED": "L'accès à l'application du membre a été révoqué.",
+  "SUCCESS_TOWN_TRANSFERRED": "Membre transféré vers sa nouvelle ville avec succès.",
+
+  "SUCCESS_ACTIVITY_CREATED": "Nouvelle activité programmée avec succès.",
+  "SUCCESS_ACTIVITY_UPDATED": "Détails de l'activité enregistrés avec succès.",
+  "SUCCESS_ACTIVITY_DELETED": "Activité supprimée avec succès.",
+  "SUCCESS_ACTIVITY_CLOSED": "L'activité a été clôturée avec succès.",
+  "SUCCESS_ATTENDANCE_RECORDED": "Feuille de présence enregistrée avec succès.",
+
+  "SUCCESS_NOTIFICATION_MARKED_READ": "Notification marquée comme lue.",
+  "SUCCESS_NOTIFICATIONS_ALL_MARKED_READ": "Toutes les notifications ont été marquées comme lues.",
+  "SUCCESS_PUSH_TOKEN_REGISTERED": "Appareil configuré pour les notifications push."
+}

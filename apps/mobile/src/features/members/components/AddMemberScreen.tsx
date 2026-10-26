@@ -69,7 +69,7 @@ export const AddMemberScreen: React.FC<AddMemberScreenProps> = ({
       return;
     }
     if (!activeTown?.id) {
-      setErrorMessage('No active fellowship hub selected.');
+      setErrorMessage('No active hub selected.');
       return;
     }
 

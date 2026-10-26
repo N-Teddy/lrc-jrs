@@ -11,7 +11,7 @@ import {
 } from '@jrs/client-core';
 import { ActivityStatus, ActivityType, type IActivity } from '@jrs/shared';
 import type React from 'react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ActivityAttendanceRoster } from './ActivityAttendanceRoster';
 import { ActivityAuditLogView } from './ActivityAuditLogView';
 import { ActivityCalendarView } from './ActivityCalendarView';
@@ -28,7 +28,20 @@ import { DeleteActivityDialog } from './DeleteActivityDialog';
 
 type ActivitySubView = 'list' | 'details' | 'attendance' | 'audit-log';
 
-export const ActivitiesFeature: React.FC = () => {
+export interface ActivitiesFeatureProps {
+  initialActivityId?: string | null;
+  initialSubTab?:
+    | 'overview'
+    | 'attendance'
+    | 'report'
+    | 'history'
+    | 'audit-log';
+}
+
+export const ActivitiesFeature: React.FC<ActivitiesFeatureProps> = ({
+  initialActivityId,
+  initialSubTab,
+}) => {
   const { t } = useTranslation();
   const { user } = useAuth();
   const { activeTown, activeTownId } = useTownContext();
@@ -89,6 +102,27 @@ export const ActivitiesFeature: React.FC = () => {
 
   const { data: activitiesData, isLoading: isActivitiesLoading } =
     useActivitiesQuery(queryParams);
+
+  useEffect(() => {
+    if (initialActivityId && activitiesData?.items) {
+      const found = activitiesData.items.find(
+        (a) => a.id === initialActivityId,
+      );
+      if (found) {
+        setSelectedActivity(found);
+        if (initialSubTab === 'attendance') {
+          setSubView('attendance');
+        } else if (
+          initialSubTab === 'audit-log' ||
+          initialSubTab === 'history'
+        ) {
+          setSubView('audit-log');
+        } else {
+          setSubView('details');
+        }
+      }
+    }
+  }, [initialActivityId, initialSubTab, activitiesData]);
 
   // Mutations
   const createActivityMutation = useCreateActivityMutation();
@@ -181,6 +215,15 @@ export const ActivitiesFeature: React.FC = () => {
           onEditActivity={handleEditActivity}
           onDeleteActivity={(act) => setDeletingActivity(act)}
           isPrivileged={isPrivileged}
+          initialTab={
+            initialSubTab === 'history'
+              ? 'history'
+              : initialSubTab === 'attendance'
+                ? 'attendance'
+                : initialSubTab === 'report'
+                  ? 'report'
+                  : 'overview'
+          }
         />
       ) : subView === 'attendance' && selectedActivity ? (
         /* 2. Attendance Roster View */

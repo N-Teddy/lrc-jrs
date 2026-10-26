@@ -13,17 +13,18 @@
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
-    "react-native-svg": "15.15.4",
     "@jrs/client-core": "workspace:*",
     "@jrs/shared": "workspace:*",
     "buffer": "^6.0.3",
     "expo": "~57.0.27",
-    "react-native-safe-area-context": "^5.10.1",
+    "expo-notifications": "^58.1.6",
     "expo-secure-store": "~57.0.4",
     "expo-status-bar": "~57.0.1",
     "phosphor-react-native": "^2.1.0",
     "react": "19.2.3",
-    "react-native": "0.86.3"
+    "react-native": "0.86.3",
+    "react-native-safe-area-context": "^5.10.1",
+    "react-native-svg": "15.15.4"
   },
   "devDependencies": {
     "@types/react": "~19.2.2",

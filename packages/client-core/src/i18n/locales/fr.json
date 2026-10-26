@@ -247,7 +247,7 @@
     "ageWarning": "Le groupe JR est destiné aux jeunes âgés de 18 à 30 ans."
   },
   "activities": {
-    "title": "Activités de Communion",
+    "title": "Activités des Jeunes",
     "subtitle": "Planning & Rassemblements Communautaires",
     "createActivity": "Planifier une Activité",
     "editActivity": "Modifier l'Activité",
@@ -433,6 +433,7 @@
   },
   "members": {
     "title": "Annuaire Principal des Membres",
+    "intakeReviewsTitle": "Validation des Inscriptions en Ligne",
     "subtitle": "Registre Officiel",
     "registerMember": "Enregistrer un Membre",
     "stats": {
@@ -518,7 +519,7 @@
       "sectionRole": "Rôle & Périmètre de Communauté",
       "jrMemberDesc": "Membre régulier participant aux cercles de partage et missions.",
       "pcDesc": "Responsable coordonnant les activités et l'animation du centre.",
-      "apDesc": "Animateur diocésain supervisant les programmes pastoraux.",
+      "apDesc": "Animateur principal supervisant les programmes régionaux.",
       "quotaFull": "Quota Plein (2/2 PC Actifs)",
       "quotaAlert": "Alerte Quota : 2 PC déjà désignés pour ce centre.",
       "sectionAccess": "Accorder l'Accès au Portail Mobile & Desktop",
@@ -627,11 +628,11 @@
     },
     "permissions": {
       "title": "Gouvernance des Rôles & Permissions",
-      "subtitle": "Aperçu des droits et limites par niveau diocésain",
+      "subtitle": "Aperçu des droits et limites par niveau hiérarchique",
       "apRole": "AP",
-      "apDesc": "Autorité diocésaine complète. Gestion de tous les centres, création et modification des activités, attribution des comptes et permissions.",
+      "apDesc": "Autorité régionale complète. Gestion de tous les centres, création et modification des activités, attribution des comptes et permissions.",
       "pcRole": "PC",
-      "pcDesc": "Gestion complète au sein de son centre paroissial d'attache. Consultation en lecture seule sur les centres autorisés.",
+      "pcDesc": "Gestion complète au sein de son centre d'attache. Consultation en lecture seule sur les centres autorisés.",
       "memberRole": "Membre de la Jeunesse",
       "memberDesc": "Accès individuel aux activités, suivi de présence et cercles de partage.",
       "interHubDelegations": "Périmètres et juridictions de lecture inter-centres",
@@ -641,8 +642,8 @@
       "homeHub": "Centre d'origine : {{hub}}",
       "grantedExternal": "Centres externes accordés",
       "editScopes": "Modifier les périmètres",
-      "apFooter": "Clergé inter-centres & directeurs principaux",
-      "pcFooter": "Responsables de centre & pasteurs de jeunes",
+      "apFooter": "Direction régionale & animateurs principaux",
+      "pcFooter": "Responsables de centre & personnes contact",
       "memberFooter": "Cohorte active des jeunes de la communauté",
       "permInterHubWrite": "Accès en écriture multi-centres",
       "permAccountGrant": "Attribution & suspension de comptes membres",
@@ -676,7 +677,7 @@
   "transfers": {
     "title": "Mutations de Ville",
     "subtitle": "Registre des mutations et de mobilité inter-centres de la communauté",
-    "description": "Registre officiel des mutations de membres, juridictions pastorales et transitions interurbaines au Cameroun.",
+    "description": "Registre officiel des mutations de membres, juridictions opérationnelles et transitions interurbaines au Cameroun.",
     "initiateTransfer": "Initier une mutation",
     "stats": {
       "totalRelocations": "Total des mutations",

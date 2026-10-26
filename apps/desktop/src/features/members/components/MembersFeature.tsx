@@ -16,13 +16,19 @@ import type {
   IUser,
   UserRole,
 } from '@jrs/shared';
-import { ArrowRight, ShieldCheck, Users } from '@phosphor-icons/react';
+import {
+  ArrowRight,
+  ShieldCheck,
+  UserCheck,
+  Users,
+} from '@phosphor-icons/react';
 import type React from 'react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { AccessFeature } from '../../access';
 import { DeleteMemberDialog } from './DeleteMemberDialog';
 import { EditMemberModal } from './EditMemberModal';
 import { IntakeLinksModal } from './IntakeLinksModal';
+import { IntakeReviewsTab } from './IntakeReviewsTab';
 import { ManageAccessModal } from './ManageAccessModal';
 import { MemberCardGridView } from './MemberCardGridView';
 import { MemberDetailPage } from './MemberDetailPage';
@@ -32,23 +38,39 @@ import { MemberTableView } from './MemberTableView';
 import { PendingIntakeReviewsModal } from './PendingIntakeReviewsModal';
 import { RegisterMemberModal } from './RegisterMemberModal';
 
-interface MembersFeatureProps {
-  initialSubTab?: 'directory' | 'access';
+export type MemberSubTab = 'directory' | 'access' | 'reviews';
+
+export interface MembersFeatureProps {
+  initialSubTab?: MemberSubTab;
+  initialMemberId?: string | null;
 }
 
 export const MembersFeature: React.FC<MembersFeatureProps> = ({
   initialSubTab = 'directory',
+  initialMemberId,
 }) => {
   const { t } = useTranslation(['members', 'access', 'common']);
   const { user } = useAuth();
   const { activeTown, activeTownId } = useTownContext();
 
-  const [activeSubTab, setActiveSubTab] = useState<'directory' | 'access'>(
-    initialSubTab,
-  );
+  const [activeSubTab, setActiveSubTab] = useState<MemberSubTab>(initialSubTab);
+
+  useEffect(() => {
+    if (initialSubTab) {
+      setActiveSubTab(initialSubTab);
+    }
+  }, [initialSubTab]);
 
   // Navigation State
-  const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
+  const [selectedMemberId, setSelectedMemberId] = useState<string | null>(
+    initialMemberId || null,
+  );
+
+  useEffect(() => {
+    if (initialMemberId !== undefined) {
+      setSelectedMemberId(initialMemberId);
+    }
+  }, [initialMemberId]);
 
   // Filter & View State
   const [search, setSearch] = useState('');
@@ -148,18 +170,25 @@ export const MembersFeature: React.FC<MembersFeatureProps> = ({
               <h1 className="text-xl sm:text-2xl font-bold text-[#1e1b19] tracking-tight">
                 {activeSubTab === 'directory'
                   ? t('members:title')
-                  : t('access:title') || 'Access & Accounts Command Center'}
+                  : activeSubTab === 'access'
+                    ? t('access:title') || 'Access & Accounts Command Center'
+                    : t('members:intakeReviewsTitle') ||
+                      'Intake Registration Reviews'}
               </h1>
               <p className="text-xs text-[#8a726a]">
                 {activeSubTab === 'directory'
                   ? 'Directory roster, demographic profiles, and status records'
-                  : t('access:subtitle') ||
-                    'Manage member platform onboarding, temporary passwords, security freezes, and hub jurisdictions'}
+                  : activeSubTab === 'access'
+                    ? t('access:subtitle') ||
+                      'Manage member platform onboarding, temporary passwords, security freezes, and hub jurisdictions'
+                    : `Review and approve prospective members registered through invitation links for ${
+                        activeTown ? activeTown.name : 'this Hub'
+                      }`}
               </p>
             </div>
 
             {/* Subtab Switcher */}
-            <div className="flex items-center gap-1.5 p-1 rounded-lg bg-[#faf2ee] border border-[#e8e1dd] self-start sm:self-auto shadow-2xs">
+            <div className="flex items-center gap-1.5 p-1 rounded-lg bg-[#faf2ee] border border-[#e8e1dd] self-start sm:self-auto shadow-2xs flex-wrap">
               <button
                 type="button"
                 onClick={() => setActiveSubTab('directory')}
@@ -190,6 +219,33 @@ export const MembersFeature: React.FC<MembersFeatureProps> = ({
                   weight={activeSubTab === 'access' ? 'fill' : 'regular'}
                 />
                 <span>Access & Accounts</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveSubTab('reviews')}
+                className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md text-xs font-bold transition-all cursor-pointer ${
+                  activeSubTab === 'reviews'
+                    ? 'bg-white text-[#b85028] shadow-xs border border-[#e8e1dd]'
+                    : 'text-[#8a726a] hover:text-[#57423b] hover:bg-[#f4ece9] border border-transparent'
+                }`}
+              >
+                <UserCheck
+                  size={16}
+                  weight={activeSubTab === 'reviews' ? 'fill' : 'regular'}
+                />
+                <span>Intake Registration Review</span>
+                {pendingReviews.length > 0 && (
+                  <span
+                    className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${
+                      activeSubTab === 'reviews'
+                        ? 'bg-[#b85028] text-white'
+                        : 'bg-[#ffdad6] text-[#ba1a1a]'
+                    }`}
+                  >
+                    {pendingReviews.length}
+                  </span>
+                )}
               </button>
             </div>
           </div>
@@ -226,7 +282,7 @@ export const MembersFeature: React.FC<MembersFeatureProps> = ({
                   </div>
                   <button
                     type="button"
-                    onClick={() => setIsPendingReviewsModalOpen(true)}
+                    onClick={() => setActiveSubTab('reviews')}
                     className="px-4 py-2 rounded-lg bg-[#b85028] hover:bg-[#a44520] text-white text-xs font-bold transition-all shadow-xs shrink-0 cursor-pointer flex items-center gap-1.5 self-start sm:self-auto"
                   >
                     <span>Review Submissions ({pendingReviews.length})</span>
@@ -260,9 +316,7 @@ export const MembersFeature: React.FC<MembersFeatureProps> = ({
                 onOpenRegisterModal={() => setIsRegisterModalOpen(true)}
                 onOpenIntakeLinksModal={() => setIsIntakeLinksModalOpen(true)}
                 pendingReviewsCount={pendingReviews.length}
-                onOpenPendingReviewsModal={() =>
-                  setIsPendingReviewsModalOpen(true)
-                }
+                onOpenPendingReviewsModal={() => setActiveSubTab('reviews')}
               />
 
               {/* 4. Directory View (Table or Grid) */}
@@ -311,8 +365,14 @@ export const MembersFeature: React.FC<MembersFeatureProps> = ({
                 isSubmitting={createMemberMutation.isPending}
               />
             </>
-          ) : (
+          ) : activeSubTab === 'access' ? (
             <AccessFeature showHeader={false} />
+          ) : (
+            <IntakeReviewsTab
+              activeTownId={activeTownId || undefined}
+              activeTownName={activeTown ? activeTown.name : 'Hub'}
+              onOpenIntakeLinksModal={() => setIsIntakeLinksModalOpen(true)}
+            />
           )}
         </>
       )}

@@ -6,5 +6,37 @@
   },
   "env": {
     "node": true
-  }
+  },
+  "overrides": [
+    {
+      "files": ["src/core/exceptions/**/*.ts", "src/core/filters/**/*.ts"],
+      "rules": {
+        "no-restricted-imports": "off"
+      }
+    },
+    {
+      "files": ["src/**/*.ts"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "paths": [
+              {
+                "name": "@nestjs/common",
+                "importNames": [
+                  "BadRequestException",
+                  "NotFoundException",
+                  "ForbiddenException",
+                  "UnauthorizedException",
+                  "ConflictException",
+                  "GoneException"
+                ],
+                "message": "Use AppException subclasses from core/exceptions/app.exception instead of NestJS exceptions."
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
 }

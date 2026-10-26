@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "skills": {
+    "mobile-design": {
+      "source": "/tmp/oasis-blobless",
+      "sourceType": "local",
+      "computedHash": "1ea6ac6ae7d2890708bcb3daba0b48e3e65c62f3ad9eca56b5d23fd0b9a6498d"
+    }
+  }
+}

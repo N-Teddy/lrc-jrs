@@ -1,7 +1,13 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import en from './locales/en.json';
+import errorsEn from './locales/errors.en.json';
+import errorsFr from './locales/errors.fr.json';
 import fr from './locales/fr.json';
+import notificationsEn from './locales/notifications.en.json';
+import notificationsFr from './locales/notifications.fr.json';
+import successEn from './locales/success.en.json';
+import successFr from './locales/success.fr.json';
 
 export const defaultNS = 'common';
 export const resources = {
@@ -18,6 +24,9 @@ export const resources = {
     access: fr.access,
     transfers: fr.transfers,
     drive: fr.drive,
+    errors: errorsFr,
+    success: successFr,
+    notifications: notificationsFr,
   },
   en: {
     common: en.common,
@@ -32,6 +41,9 @@ export const resources = {
     access: en.access,
     transfers: en.transfers,
     drive: en.drive,
+    errors: errorsEn,
+    success: successEn,
+    notifications: notificationsEn,
   },
 } as const;
 
@@ -55,6 +67,9 @@ export function initI18n(initialLanguage = 'fr'): typeof i18n {
         'access',
         'transfers',
         'drive',
+        'errors',
+        'success',
+        'notifications',
       ],
       interpolation: {
         escapeValue: false,

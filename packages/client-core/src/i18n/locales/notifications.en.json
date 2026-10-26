@@ -1,0 +1,49 @@
+{
+  "title": "Notifications",
+  "all": "All",
+  "unread": "Unread",
+  "markAllRead": "Mark all as read",
+  "markAsRead": "Mark as read",
+  "empty": "No notifications yet",
+  "emptyUnread": "No unread notifications",
+  "justNow": "Just now",
+  "minutesAgo": "{{count}}m ago",
+  "hoursAgo": "{{count}}h ago",
+  "daysAgo": "{{count}}d ago",
+
+  "activityCreatedTitle": "New Activity Added",
+  "activityCreatedBody": "{{name}} scheduled for {{date}}",
+
+  "activityUpdatedTitle": "Activity Updated",
+  "activityUpdatedBody": "Details for {{name}} have been updated",
+
+  "activityCancelledTitle": "Activity Cancelled",
+  "activityCancelledBody": "{{name}} scheduled for {{date}} has been cancelled",
+
+  "attendanceRecordedTitle": "Attendance Finalized",
+  "attendanceRecordedBody": "Attendance for {{name}} has been recorded",
+
+  "memberRegisteredTitle": "New Member Joined",
+  "memberRegisteredBody": "{{name}} has joined {{town}}",
+
+  "memberIntakeSubmittedTitle": "New Membership Application",
+  "memberIntakeSubmittedBody": "{{name}} submitted a registration request for {{town}}",
+
+  "memberIntakeApprovedTitle": "Application Approved",
+  "memberIntakeApprovedBody": "Your application to join {{town}} has been accepted",
+
+  "townTransferTitle": "Town Relocation",
+  "townTransferBody": "{{name}} was transferred from {{fromTown}} to {{toTown}}",
+
+  "accessGrantedTitle": "App Access Granted",
+  "accessGrantedBody": "Your access to the LRC JRS portal is now active",
+
+  "accessRevokedTitle": "App Access Revoked",
+  "accessRevokedBody": "Your account access has been revoked by administration",
+
+  "roleChangedTitle": "Role Updated",
+  "roleChangedBody": "Your role has been updated to {{role}}",
+
+  "systemAnnouncementTitle": "Notice from Administration",
+  "systemAnnouncementBody": "{{message}}"
+}

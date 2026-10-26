@@ -1,6 +1,7 @@
 import * as crypto from 'node:crypto';
 import {
   calculateAge,
+  ErrorCode,
   type IAuthUser,
   type IRegistrationLink,
   type IRegistrationLinkPublicInfo,
@@ -9,26 +10,23 @@ import {
   JR_AGE_RANGE,
   UserRole,
 } from '@jrs/shared';
-import {
-  BadRequestException,
-  ConflictException,
-  ForbiddenException,
-  GoneException,
-  Injectable,
-  Logger,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { type Model, Types } from 'mongoose';
+import {
+  BadRequestAppException,
+  ConflictAppException,
+  ForbiddenAppException,
+  GoneAppException,
+  NotFoundAppException,
+} from '../../core/exceptions/app.exception';
 import { PhoneSanitizer } from '../../core/utils/phone-sanitizer.util';
+import { UserMapperUtil } from '../../core/utils/user-mapper.util';
 import {
   AccountStatus,
   IntakeStatus,
-  RegistrationLink,
   type RegistrationLinkDocument,
-  Town,
   type TownDocument,
-  User,
   type UserDocument,
 } from '../../database/schemas';
 import { MediaService } from '../../services/media.service';
@@ -44,11 +42,11 @@ export class RegistrationLinksService {
   private readonly logger = new Logger(RegistrationLinksService.name);
 
   constructor(
-    @InjectModel(RegistrationLink.name)
+    @InjectModel('RegistrationLink')
     private readonly linkModel: Model<RegistrationLinkDocument>,
-    @InjectModel(User.name)
+    @InjectModel('User')
     private readonly userModel: Model<UserDocument>,
-    @InjectModel(Town.name)
+    @InjectModel('Town')
     private readonly townModel: Model<TownDocument>,
     private readonly mediaService: MediaService,
   ) {}
@@ -57,62 +55,7 @@ export class RegistrationLinksService {
    * Helper to map a mongoose user document to a clean IUser object
    */
   private mapUser(doc: UserDocument): IUser {
-    const rawTown = doc.homeTownId as unknown;
-    const hasPopulatedTown =
-      rawTown &&
-      typeof rawTown === 'object' &&
-      'name' in (rawTown as Record<string, unknown>);
-
-    const townObj = hasPopulatedTown
-      ? (rawTown as { _id: Types.ObjectId; name: string; code: string })
-      : undefined;
-
-    return {
-      id: doc._id.toString(),
-      fullName: doc.fullName,
-      phoneNumber: doc.phoneNumber,
-      email: doc.email,
-      avatarUrl: doc.avatarUrl,
-      gender: doc.gender,
-      integrationDate: doc.integrationDate,
-      isWhatsappVerified: doc.isWhatsappVerified,
-      dateOfBirth: doc.dateOfBirth,
-      isJr: doc.isJr,
-      homeTownId: townObj
-        ? townObj._id.toString()
-        : doc.homeTownId?.toString() || '',
-      homeTown: townObj
-        ? {
-            id: townObj._id.toString(),
-            name: townObj.name,
-            code: townObj.code,
-            activePcCount: 0,
-          }
-        : undefined,
-      role: doc.role,
-      isActivePC: doc.isActivePC || false,
-      account: {
-        hasAppAccess: doc.account?.hasAppAccess ?? false,
-        isAccessRevoked: doc.account?.isAccessRevoked ?? false,
-        allowedReadTownIds: doc.account?.allowedReadTownIds || [],
-        invitedBy: doc.account?.invitedBy,
-        invitedAt: doc.account?.invitedAt
-          ? doc.account.invitedAt.toISOString()
-          : undefined,
-      },
-      transferHistory: (doc.transferHistory || []).map((t) => ({
-        fromTownId: t.fromTownId,
-        toTownId: t.toTownId,
-        transferredAt: t.transferredAt,
-        transferredBy: t.transferredBy,
-        reason: t.reason,
-      })),
-      intakeStatus: doc.intakeStatus,
-      registrationLinkId: doc.registrationLinkId?.toString(),
-      intakeNote: doc.intakeNote,
-      createdAt: (doc as any).createdAt?.toISOString(),
-      updatedAt: (doc as any).updatedAt?.toISOString(),
-    };
+    return UserMapperUtil.mapUser(doc);
   }
 
   /**
@@ -129,7 +72,7 @@ export class RegistrationLinksService {
         : currentUser.homeTownId;
 
     if (!targetTownId) {
-      throw new BadRequestException('A target fellowship town is required.');
+      throw new BadRequestAppException(ErrorCode.INTAKE_TARGET_TOWN_REQUIRED);
     }
 
     const townObjectId = Types.ObjectId.isValid(targetTownId)
@@ -138,9 +81,7 @@ export class RegistrationLinksService {
           ?._id;
 
     if (!townObjectId) {
-      throw new BadRequestException(
-        'The specified fellowship town was not found.',
-      );
+      throw new BadRequestAppException(ErrorCode.TOWN_NOT_FOUND);
     }
 
     // Determine expiration
@@ -148,7 +89,7 @@ export class RegistrationLinksService {
     if (dto.expiresAt) {
       expiresAt = new Date(dto.expiresAt);
       if (Number.isNaN(expiresAt.getTime()) || expiresAt <= new Date()) {
-        throw new BadRequestException('Expiration date must be in the future.');
+        throw new BadRequestAppException(ErrorCode.INTAKE_EXPIRATION_INVALID);
       }
     } else {
       const hours = dto.expiresInHours || 72; // default 3 days
@@ -272,7 +213,7 @@ export class RegistrationLinksService {
   ): Promise<{ success: boolean; message: string }> {
     const link = await this.linkModel.findById(linkId).exec();
     if (!link) {
-      throw new NotFoundException('Registration link not found.');
+      throw new NotFoundAppException(ErrorCode.INTAKE_LINK_NOT_FOUND);
     }
 
     // Role check: PC cannot deactivate links for other towns
@@ -280,9 +221,7 @@ export class RegistrationLinksService {
       currentUser.role !== UserRole.AP &&
       link.homeTownId.toString() !== currentUser.homeTownId
     ) {
-      throw new ForbiddenException(
-        'You can only manage registration links for your home town.',
-      );
+      throw new ForbiddenAppException(ErrorCode.FORBIDDEN);
     }
 
     link.isActive = false;
@@ -304,9 +243,7 @@ export class RegistrationLinksService {
       .exec();
 
     if (!link) {
-      throw new NotFoundException(
-        'This member intake link does not exist or has been removed.',
-      );
+      throw new NotFoundAppException(ErrorCode.INTAKE_LINK_NOT_FOUND);
     }
 
     const now = new Date();
@@ -348,29 +285,21 @@ export class RegistrationLinksService {
   }> {
     const link = await this.linkModel.findOne({ token }).exec();
     if (!link) {
-      throw new NotFoundException(
-        'This member intake link does not exist or has been removed.',
-      );
+      throw new NotFoundAppException(ErrorCode.INTAKE_LINK_NOT_FOUND);
     }
 
     // Check validity
     if (!link.isActive) {
-      throw new GoneException(
-        'This registration link has been deactivated by fellowship leadership.',
-      );
+      throw new GoneAppException(ErrorCode.INTAKE_LINK_INVALID);
     }
 
     const now = new Date();
     if (now > link.expiresAt) {
-      throw new GoneException(
-        'This registration link has expired. Please request a new link from your fellowship leader.',
-      );
+      throw new GoneAppException(ErrorCode.INTAKE_LINK_EXPIRED);
     }
 
     if (link.maxUses && link.usageCount >= link.maxUses) {
-      throw new GoneException(
-        'This registration link has reached its maximum quota of submissions.',
-      );
+      throw new GoneAppException(ErrorCode.INTAKE_LINK_USAGE_EXCEEDED);
     }
 
     // Sanitize phone
@@ -378,9 +307,7 @@ export class RegistrationLinksService {
       dto.phoneNumber,
     );
     if (!sanitizedPhone) {
-      throw new BadRequestException(
-        'Please enter a valid Cameroon phone number (e.g. +237 671 234 567).',
-      );
+      throw new BadRequestAppException(ErrorCode.BAD_REQUEST);
     }
 
     // Check phone uniqueness
@@ -389,13 +316,9 @@ export class RegistrationLinksService {
       .exec();
     if (existingPhone) {
       if (existingPhone.intakeStatus === IntakeStatus.PENDING_REVIEW) {
-        throw new ConflictException(
-          'A registration with this phone number has already been submitted and is currently pending leader review.',
-        );
+        throw new ConflictAppException(ErrorCode.INTAKE_ALREADY_REVIEWED);
       }
-      throw new ConflictException(
-        'A fellowship member with this phone number is already registered in the system.',
-      );
+      throw new ConflictAppException(ErrorCode.MEMBER_ALREADY_EXISTS);
     }
 
     // Email check if provided
@@ -405,9 +328,10 @@ export class RegistrationLinksService {
         .findOne({ email: normalizedEmail })
         .exec();
       if (existingEmail) {
-        throw new ConflictException(
-          'A member with this email address is already registered in the system.',
-        );
+        if (existingEmail.intakeStatus === IntakeStatus.PENDING_REVIEW) {
+          throw new ConflictAppException(ErrorCode.INTAKE_ALREADY_REVIEWED);
+        }
+        throw new ConflictAppException(ErrorCode.MEMBER_ALREADY_EXISTS);
       }
     }
 
@@ -415,9 +339,10 @@ export class RegistrationLinksService {
     const age = calculateAge(dto.dateOfBirth);
     const isJr = isJrAgeEligible(dto.dateOfBirth);
     if (!isJr) {
-      throw new BadRequestException(
-        `Youth fellowship members must be aged between ${JR_AGE_RANGE.MIN} and ${JR_AGE_RANGE.MAX} years old (calculated age: ${age}).`,
-      );
+      throw new BadRequestAppException(ErrorCode.MEMBER_AGE_INELIGIBLE, {
+        min: JR_AGE_RANGE.MIN,
+        max: JR_AGE_RANGE.MAX,
+      });
     }
 
     // Avatar resolution
@@ -537,13 +462,11 @@ export class RegistrationLinksService {
       .populate('homeTownId')
       .exec();
     if (!member) {
-      throw new NotFoundException('Member record not found.');
+      throw new NotFoundAppException(ErrorCode.MEMBER_NOT_FOUND);
     }
 
     if (member.intakeStatus !== IntakeStatus.PENDING_REVIEW) {
-      throw new BadRequestException(
-        `Member is not pending review (current status: ${member.intakeStatus}).`,
-      );
+      throw new BadRequestAppException(ErrorCode.INTAKE_INVALID_STATUS);
     }
 
     // Role check: PC can only review members in their town
@@ -551,9 +474,7 @@ export class RegistrationLinksService {
       currentUser.role !== UserRole.AP &&
       member.homeTownId?.toString() !== currentUser.homeTownId
     ) {
-      throw new ForbiddenException(
-        'You only have permission to review members in your assigned town.',
-      );
+      throw new ForbiddenAppException(ErrorCode.FORBIDDEN);
     }
 
     if (dto.action === IntakeReviewAction.APPROVE) {

@@ -33,4 +33,9 @@ export const queryKeys = {
     pendingReviews: (townId?: string) =>
       ['registration-links', 'pending-reviews', townId] as const,
   },
+  notifications: {
+    all: ['notifications'] as const,
+    list: (query?: unknown) => ['notifications', 'list', query] as const,
+    unreadCount: ['notifications', 'unread-count'] as const,
+  },
 };

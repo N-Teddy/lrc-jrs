@@ -1,7 +1,9 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { ErrorCode } from '@jrs/shared';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
+import { UnauthorizedAppException } from '../../../core/exceptions/app.exception';
 import { UsersService } from '../../users/users.service';
 
 export interface JwtPayload {
@@ -39,19 +41,17 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   async validate(payload: JwtPayload) {
     const user = await this.usersService.findById(payload.sub);
     if (!user) {
-      throw new UnauthorizedException('User not found');
+      throw new UnauthorizedAppException(ErrorCode.AUTH_USER_NOT_FOUND);
     }
 
     if (user.account?.isAccessRevoked) {
-      throw new UnauthorizedException('Your account access has been revoked');
+      throw new UnauthorizedAppException(ErrorCode.AUTH_ACCOUNT_REVOKED);
     }
 
     if (payload.iat && user.lastLogoutAt) {
       const logoutSec = Math.floor(user.lastLogoutAt.getTime() / 1000);
       if (payload.iat < logoutSec) {
-        throw new UnauthorizedException(
-          'Session terminated. Token invalidated.',
-        );
+        throw new UnauthorizedAppException(ErrorCode.AUTH_TOKEN_EXPIRED);
       }
     }
 

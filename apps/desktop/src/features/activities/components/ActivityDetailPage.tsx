@@ -44,7 +44,7 @@ import {
 } from '@phosphor-icons/react';
 import { openUrl } from '@tauri-apps/plugin-opener';
 import type React from 'react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import Skeleton from 'react-loading-skeleton';
 import { AppSkeletonTheme, UserAvatar } from '../../../components';
@@ -65,6 +65,7 @@ interface ActivityDetailPageProps {
   onEditActivity: (activity: IActivity) => void;
   onDeleteActivity?: (activity: IActivity) => void;
   isPrivileged: boolean;
+  initialTab?: ActivityDetailTab;
 }
 
 type ActivityDetailTab = 'overview' | 'attendance' | 'report' | 'history';
@@ -76,13 +77,20 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
   onEditActivity,
   onDeleteActivity,
   isPrivileged,
+  initialTab = 'overview',
 }) => {
   const { t } = useTranslation();
   const { user } = useAuth();
   const { canWrite } = useTownContext();
 
   const [activeTabState, setActiveTab] =
-    useState<ActivityDetailTab>('overview');
+    useState<ActivityDetailTab>(initialTab);
+
+  useEffect(() => {
+    if (initialTab) {
+      setActiveTab(initialTab);
+    }
+  }, [initialTab]);
   const [search, setSearch] = useState('');
   const [attendanceFilter, setAttendanceFilter] = useState<'ALL' | 'GUESTS'>(
     'ALL',

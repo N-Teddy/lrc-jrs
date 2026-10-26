@@ -122,7 +122,7 @@ export const MemberFilterSheet: React.FC<MemberFilterSheetProps> = ({
 
               {/* Filter 2: Role */}
               <View style={styles.section}>
-                <Text style={styles.sectionLabel}>Role in Fellowship</Text>
+                <Text style={styles.sectionLabel}>Role</Text>
                 <View style={styles.chipRow}>
                   {[
                     { label: 'All Roles', value: 'ALL' },

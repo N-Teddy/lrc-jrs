@@ -3,6 +3,7 @@ import {
   ActivityType,
   AttendanceStatus,
   AttendeeType,
+  ErrorCode,
   type IActivity,
   type IActivityChangeLog,
   type IActivityReport,
@@ -16,14 +17,14 @@ import {
   type MemberEngagementLevel,
   UserRole,
 } from '@jrs/shared';
-import {
-  BadRequestException,
-  ForbiddenException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { type Model, Types } from 'mongoose';
+import {
+  BadRequestAppException,
+  ForbiddenAppException,
+  NotFoundAppException,
+} from '../../core/exceptions/app.exception';
 import {
   Activity,
   type ActivityDocument,
@@ -35,6 +36,7 @@ import {
   type UserDocument,
 } from '../../database/schemas';
 import { DriveService } from '../../services/drive.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import type {
   ActivityQueryDto,
   CreateActivityDto,
@@ -44,6 +46,8 @@ import type {
 
 @Injectable()
 export class ActivitiesService {
+  private readonly logger = new Logger(ActivitiesService.name);
+
   constructor(
     @InjectModel(Activity.name)
     private readonly activityModel: Model<ActivityDocument>,
@@ -53,6 +57,7 @@ export class ActivitiesService {
     private readonly townModel: Model<TownDocument>,
     @InjectModel(User.name) readonly _userModel: Model<UserDocument>,
     private readonly driveService: DriveService,
+    private readonly notificationsService: NotificationsService,
   ) {
     void InjectModel;
     void Activity;
@@ -105,7 +110,7 @@ export class ActivitiesService {
     activityId: string,
   ): Promise<ActivityDocument> {
     if (!Types.ObjectId.isValid(activityId)) {
-      throw new BadRequestException('Invalid activity ID');
+      throw new BadRequestAppException(ErrorCode.ACTIVITY_INVALID_ID);
     }
 
     const activity = await this.activityModel
@@ -113,7 +118,9 @@ export class ActivitiesService {
       .exec();
 
     if (!activity) {
-      throw new NotFoundException(`Activity with ID ${activityId} not found`);
+      throw new NotFoundAppException(ErrorCode.ACTIVITY_NOT_FOUND, {
+        id: activityId,
+      });
     }
 
     return activity;
@@ -497,7 +504,7 @@ export class ActivitiesService {
    */
   async findById(id: string): Promise<IActivity> {
     if (!Types.ObjectId.isValid(id)) {
-      throw new BadRequestException('Invalid activity ID');
+      throw new BadRequestAppException(ErrorCode.ACTIVITY_INVALID_ID);
     }
 
     const doc = await this.activityModel
@@ -507,7 +514,7 @@ export class ActivitiesService {
       .exec();
 
     if (!doc) {
-      throw new NotFoundException(`Activity with ID ${id} not found`);
+      throw new NotFoundAppException(ErrorCode.ACTIVITY_NOT_FOUND, { id });
     }
 
     const attendance = await this.attendanceModel
@@ -539,9 +546,9 @@ export class ActivitiesService {
   ): Promise<IActivity> {
     const startDate = new Date(dto.startDate);
     if (startDate.getUTCFullYear() < 2026) {
-      throw new BadRequestException(
-        'Activities can only be scheduled for the year 2026 or later.',
-      );
+      throw new BadRequestAppException(ErrorCode.ACTIVITY_MIN_YEAR, {
+        minYear: 2026,
+      });
     }
 
     const endDate = dto.endDate
@@ -549,14 +556,14 @@ export class ActivitiesService {
       : new Date(startDate.getTime() + 3 * 3600 * 1000); // default +3 hours
 
     if (endDate < startDate) {
-      throw new BadRequestException(
-        'End date and time cannot be earlier than start date and time.',
+      throw new BadRequestAppException(
+        ErrorCode.ACTIVITY_END_DATE_BEFORE_START,
       );
     }
 
     const townId = await this.resolveTownObjectId(dto.townId);
     if (!townId) {
-      throw new BadRequestException('Invalid location town ID');
+      throw new BadRequestAppException(ErrorCode.ACTIVITY_LOCATION_REQUIRED);
     }
 
     let hostTownId: Types.ObjectId | null = null;
@@ -586,7 +593,40 @@ export class ActivitiesService {
     });
 
     const saved = await newActivity.save();
-    return this.findById(saved._id.toString());
+    const result = await this.findById(saved._id.toString());
+
+    this.notificationsService
+      .createNotification(
+        {
+          target: {
+            townId: townId.toString(),
+            excludeUserIds: [currentUser.id],
+          },
+          level: 'INFO',
+          action: 'ACTIVITY_CREATED',
+          titleKey: 'notifications:activityCreatedTitle',
+          bodyKey: 'notifications:activityCreatedBody',
+          bodyParams: {
+            name: saved.title,
+            date: new Date(saved.startDate).toLocaleDateString(),
+          },
+          resource: {
+            entityType: 'ACTIVITY',
+            entityId: saved._id.toString(),
+            townId: townId.toString(),
+            subTab: 'upcoming',
+          },
+          sendPush: true,
+        },
+        currentUser.id,
+      )
+      .catch((err) =>
+        this.logger.warn(
+          `Failed to dispatch activity notification: ${err.message}`,
+        ),
+      );
+
+    return result;
   }
 
   /**
@@ -598,7 +638,7 @@ export class ActivitiesService {
     currentUser: IAuthUser,
   ): Promise<IActivity> {
     if (!Types.ObjectId.isValid(id)) {
-      throw new BadRequestException('Invalid activity ID');
+      throw new BadRequestAppException(ErrorCode.ACTIVITY_INVALID_ID, { id });
     }
 
     const activity = await this.activityModel
@@ -606,13 +646,11 @@ export class ActivitiesService {
       .exec();
 
     if (!activity) {
-      throw new NotFoundException(`Activity with ID ${id} not found`);
+      throw new NotFoundAppException(ErrorCode.ACTIVITY_NOT_FOUND, { id });
     }
 
     if (activity.status === ActivityStatus.COMPLETED) {
-      throw new BadRequestException(
-        'Cannot edit an activity that has already been completed.',
-      );
+      throw new BadRequestAppException(ErrorCode.ACTIVITY_ALREADY_COMPLETED);
     }
 
     // Detect critical changes for audit history
@@ -625,10 +663,10 @@ export class ActivitiesService {
 
     if (dto.startDate) {
       const newStart = new Date(dto.startDate);
-      if (newStart.getUTCFullYear() < 2026) {
-        throw new BadRequestException(
-          'Activities can only be scheduled for the year 2026 or later.',
-        );
+      if (newStart.getUTCFullYear() < new Date().getFullYear()) {
+        throw new BadRequestAppException(ErrorCode.ACTIVITY_MIN_YEAR, {
+          minYear: 2026,
+        });
       }
       if (activity.startDate.toISOString() !== newStart.toISOString()) {
         dateChanged = true;
@@ -649,15 +687,15 @@ export class ActivitiesService {
     }
 
     if (activity.endDate < activity.startDate) {
-      throw new BadRequestException(
-        'End date cannot be earlier than start date.',
+      throw new BadRequestAppException(
+        ErrorCode.ACTIVITY_END_DATE_BEFORE_START,
       );
     }
 
     if (dto.townId) {
       const newTownId = await this.resolveTownObjectId(dto.townId);
       if (!newTownId) {
-        throw new BadRequestException('Invalid location town ID');
+        throw new BadRequestAppException(ErrorCode.ACTIVITY_LOCATION_REQUIRED);
       }
       if (activity.townId.toString() !== newTownId.toString()) {
         locationChanged = true;
@@ -754,17 +792,13 @@ export class ActivitiesService {
 
     // STRICT LOCK GUARD: Attendance cannot be modified if finalized and locked
     if (activity.isAttendanceLocked) {
-      throw new BadRequestException(
-        'Attendance for this activity has been finalized and locked. Edits are disabled.',
-      );
+      throw new BadRequestAppException(ErrorCode.ACTIVITY_ALREADY_COMPLETED);
     }
 
     // STRICT TIMING GUARD: Attendance is forbidden before activity start date
     const now = new Date();
     if (now < activity.startDate) {
-      throw new BadRequestException(
-        'Attendance cannot be recorded before the activity has officially started.',
-      );
+      throw new BadRequestAppException(ErrorCode.BAD_REQUEST);
     }
 
     // Validate duplicate members in payload
@@ -772,9 +806,7 @@ export class ActivitiesService {
     for (const item of dto.attendees) {
       if (item.attendeeType === AttendeeType.MEMBER && item.memberId) {
         if (memberIdsSet.has(item.memberId)) {
-          throw new BadRequestException(
-            `Duplicate attendance entry for member ID ${item.memberId}`,
-          );
+          throw new BadRequestAppException(ErrorCode.BAD_REQUEST);
         }
         memberIdsSet.add(item.memberId);
       }
@@ -788,9 +820,7 @@ export class ActivitiesService {
     for (const item of dto.attendees) {
       if (item.attendeeType === AttendeeType.MEMBER) {
         if (!item.memberId || !Types.ObjectId.isValid(item.memberId)) {
-          throw new BadRequestException(
-            'Member ID is required and must be valid for member attendee',
-          );
+          throw new BadRequestAppException(ErrorCode.BAD_REQUEST);
         }
         if (item.status === AttendanceStatus.PRESENT) _membersPresent++;
 
@@ -804,9 +834,7 @@ export class ActivitiesService {
         });
       } else if (item.attendeeType === AttendeeType.GUEST) {
         if (!item.guestInfo?.fullName?.trim()) {
-          throw new BadRequestException(
-            'Guest full name is required for guest attendee',
-          );
+          throw new BadRequestAppException(ErrorCode.BAD_REQUEST);
         }
         if (item.status === AttendanceStatus.PRESENT) _guestsPresent++;
 
@@ -850,6 +878,39 @@ export class ActivitiesService {
       await activity.save();
     }
 
+    const townIdStr =
+      activity.townId?._id?.toString() || activity.townId?.toString() || '';
+    this.notificationsService
+      .createNotification(
+        {
+          target: {
+            townId: townIdStr,
+            roles: [UserRole.AP, UserRole.PC],
+            excludeUserIds: [currentUser.id],
+          },
+          level: 'SUCCESS',
+          action: 'ATTENDANCE_RECORDED',
+          titleKey: 'notifications:attendanceRecordedTitle',
+          bodyKey: 'notifications:attendanceRecordedBody',
+          bodyParams: {
+            name: activity.title,
+          },
+          resource: {
+            entityType: 'ATTENDANCE',
+            entityId: activityId,
+            townId: townIdStr,
+            subTab: 'history',
+          },
+          sendPush: true,
+        },
+        currentUser.id,
+      )
+      .catch((err) =>
+        this.logger.warn(
+          `Failed to dispatch attendance notification: ${err.message}`,
+        ),
+      );
+
     return this.getAttendance(activityId);
   }
 
@@ -858,7 +919,7 @@ export class ActivitiesService {
    */
   async getAttendance(activityId: string): Promise<IAttendance> {
     if (!Types.ObjectId.isValid(activityId)) {
-      throw new BadRequestException('Invalid activity ID');
+      throw new BadRequestAppException(ErrorCode.ACTIVITY_INVALID_ID);
     }
 
     const activity = await this.activityModel
@@ -868,7 +929,9 @@ export class ActivitiesService {
       .exec();
 
     if (!activity) {
-      throw new NotFoundException(`Activity with ID ${activityId} not found`);
+      throw new NotFoundAppException(ErrorCode.ACTIVITY_NOT_FOUND, {
+        id: activityId,
+      });
     }
 
     const attendanceDoc = await this.attendanceModel
@@ -974,7 +1037,7 @@ export class ActivitiesService {
     _currentUser: IAuthUser,
   ): Promise<{ success: boolean }> {
     if (!Types.ObjectId.isValid(id)) {
-      throw new BadRequestException('Invalid activity ID');
+      throw new BadRequestAppException(ErrorCode.ACTIVITY_INVALID_ID);
     }
 
     const activity = await this.activityModel
@@ -982,7 +1045,7 @@ export class ActivitiesService {
       .exec();
 
     if (!activity) {
-      throw new NotFoundException(`Activity with ID ${id} not found`);
+      throw new NotFoundAppException(ErrorCode.ACTIVITY_NOT_FOUND, { id });
     }
 
     activity.isDeleted = true;
@@ -998,7 +1061,7 @@ export class ActivitiesService {
     memberId: string,
   ): Promise<IMemberAttendanceHistoryResponse> {
     if (!Types.ObjectId.isValid(memberId)) {
-      throw new BadRequestException('Invalid member ID');
+      throw new BadRequestAppException(ErrorCode.MEMBER_INVALID_ID);
     }
 
     const memberObjectId = new Types.ObjectId(memberId);
@@ -1008,7 +1071,9 @@ export class ActivitiesService {
       .exec();
 
     if (!member) {
-      throw new NotFoundException(`Member with ID ${memberId} not found`);
+      throw new NotFoundAppException(ErrorCode.MEMBER_NOT_FOUND, {
+        id: memberId,
+      });
     }
 
     const memberHomeTownId =
@@ -1203,9 +1268,7 @@ export class ActivitiesService {
     const activity = await this.findValidActivityById(activityId);
 
     if (currentUser.role !== UserRole.AP && currentUser.role !== UserRole.PC) {
-      throw new ForbiddenException(
-        'Only coordinators or overseers can lock attendance.',
-      );
+      throw new ForbiddenAppException(ErrorCode.FORBIDDEN);
     }
 
     const now = new Date();
@@ -1242,9 +1305,7 @@ export class ActivitiesService {
 
     // Strict AP authority check
     if (currentUser.role !== UserRole.AP) {
-      throw new ForbiddenException(
-        'Only Apostolic Prefects (AP) have authority to unlock finalized attendance records.',
-      );
+      throw new ForbiddenAppException(ErrorCode.FORBIDDEN);
     }
 
     activity.isAttendanceLocked = false;
@@ -1413,20 +1474,16 @@ export class ActivitiesService {
     const isCompleted = activity.status === ActivityStatus.COMPLETED;
 
     if (!isCompleted || !isPastActivity) {
-      throw new BadRequestException(
-        'Activity reports can only be uploaded after the activity has taken place and is marked as COMPLETED.',
-      );
+      throw new BadRequestAppException(ErrorCode.ACTIVITY_ALREADY_COMPLETED);
     }
 
     if (currentUser.role !== UserRole.AP && currentUser.role !== UserRole.PC) {
-      throw new ForbiddenException(
-        'Only coordinators or overseers can upload activity reports.',
-      );
+      throw new ForbiddenAppException(ErrorCode.FORBIDDEN);
     }
 
     const validFiles = (files || []).filter((f) => f?.buffer);
     if (validFiles.length === 0) {
-      throw new BadRequestException('At least one report file is required.');
+      throw new BadRequestAppException(ErrorCode.ACTIVITY_REPORTS_REQUIRED);
     }
 
     if (!activity.reports) {
@@ -1480,10 +1537,8 @@ export class ActivitiesService {
   ): Promise<IActivity> {
     const activity = await this.findValidActivityById(activityId);
 
-    if (currentUser.role !== UserRole.AP && currentUser.role !== UserRole.PC) {
-      throw new ForbiddenException(
-        'Only coordinators or overseers can manage reports.',
-      );
+    if (currentUser.role !== UserRole.AP) {
+      throw new ForbiddenAppException(ErrorCode.FORBIDDEN);
     }
 
     if (fileId) {
@@ -1529,13 +1584,11 @@ export class ActivitiesService {
     currentUser: IAuthUser,
   ) {
     if (currentUser.role !== UserRole.AP && currentUser.role !== UserRole.PC) {
-      throw new ForbiddenException(
-        'Only coordinators or overseers can upload files to the drive.',
-      );
+      throw new ForbiddenAppException(ErrorCode.FORBIDDEN);
     }
 
     if (!files || files.length === 0) {
-      throw new BadRequestException('No files were provided for upload.');
+      throw new BadRequestAppException(ErrorCode.ACTIVITY_FILES_REQUIRED);
     }
 
     const uploadedResults = [];
@@ -1571,9 +1624,7 @@ export class ActivitiesService {
    */
   async deleteDriveFile(fileId: string, currentUser: IAuthUser) {
     if (currentUser.role !== UserRole.AP && currentUser.role !== UserRole.PC) {
-      throw new ForbiddenException(
-        'Only coordinators or overseers can delete files from the drive.',
-      );
+      throw new ForbiddenAppException(ErrorCode.FORBIDDEN);
     }
 
     // 1. Check if linked to any activity
@@ -1606,7 +1657,7 @@ export class ActivitiesService {
    */
   async createDriveFolder(name: string, parentId?: string) {
     if (!name || !name.trim()) {
-      throw new BadRequestException('Folder name cannot be empty.');
+      throw new BadRequestAppException(ErrorCode.ACTIVITY_FOLDER_NAME_EMPTY);
     }
     return this.driveService.createFolder(name.trim(), parentId);
   }
@@ -1616,7 +1667,7 @@ export class ActivitiesService {
    */
   async renameDriveFolder(folderId: string, name: string) {
     if (!name || !name.trim()) {
-      throw new BadRequestException('Folder name cannot be empty.');
+      throw new BadRequestAppException(ErrorCode.ACTIVITY_FOLDER_NAME_EMPTY);
     }
     return this.driveService.renameFolder(folderId, name.trim());
   }
