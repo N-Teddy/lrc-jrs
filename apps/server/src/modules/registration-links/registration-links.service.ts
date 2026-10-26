@@ -30,6 +30,7 @@ import {
   type UserDocument,
 } from '../../database/schemas';
 import { MediaService } from '../../services/media.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import {
   type CreateRegistrationLinkDto,
   IntakeReviewAction,
@@ -49,6 +50,7 @@ export class RegistrationLinksService {
     @InjectModel('Town')
     private readonly townModel: Model<TownDocument>,
     private readonly mediaService: MediaService,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   /**
@@ -401,6 +403,37 @@ export class RegistrationLinksService {
     const shortId = newMember._id.toString().slice(-6).toUpperCase();
     const referenceCode = `JRS-${shortId}`;
 
+    const town = await this.townModel.findById(link.homeTownId).exec();
+    const townName = town?.name || 'Town';
+
+    this.notificationsService
+      .createNotification({
+        target: {
+          townId: link.homeTownId.toString(),
+          roles: [UserRole.AP, UserRole.PC],
+        },
+        level: 'INFO',
+        action: 'MEMBER_INTAKE_SUBMITTED',
+        titleKey: 'notifications:memberIntakeSubmittedTitle',
+        bodyKey: 'notifications:memberIntakeSubmittedBody',
+        bodyParams: {
+          name: newMember.fullName,
+          town: townName,
+        },
+        resource: {
+          entityType: 'INTAKE',
+          entityId: newMember._id.toString(),
+          townId: link.homeTownId.toString(),
+          subTab: 'reviews',
+        },
+        sendPush: true,
+      })
+      .catch((err) =>
+        this.logger.warn(
+          `Failed to dispatch intake submission notification: ${err.message}`,
+        ),
+      );
+
     return {
       success: true,
       referenceCode,
@@ -494,6 +527,44 @@ export class RegistrationLinksService {
 
       await member.save();
 
+      const townName = (member.homeTownId as any)?.name || 'Town';
+      const townIdStr =
+        (member.homeTownId as any)?._id?.toString() ||
+        member.homeTownId?.toString() ||
+        '';
+
+      this.notificationsService
+        .createNotification(
+          {
+            target: {
+              userIds: [member._id.toString()],
+              roles: [UserRole.AP, UserRole.PC],
+              townId: townIdStr,
+              excludeUserIds: [currentUser.id],
+            },
+            level: 'SUCCESS',
+            action: 'MEMBER_INTAKE_APPROVED',
+            titleKey: 'notifications:memberIntakeApprovedTitle',
+            bodyKey: 'notifications:memberIntakeApprovedBody',
+            bodyParams: {
+              town: townName,
+            },
+            resource: {
+              entityType: 'INTAKE',
+              entityId: member._id.toString(),
+              townId: townIdStr,
+              subTab: 'reviews',
+            },
+            sendPush: true,
+          },
+          currentUser.id,
+        )
+        .catch((err) =>
+          this.logger.warn(
+            `Failed to dispatch intake approved notification: ${err.message}`,
+          ),
+        );
+
       return {
         success: true,
         message: `Member ${member.fullName} has been approved.`,
@@ -508,6 +579,43 @@ export class RegistrationLinksService {
       }
 
       await member.save();
+
+      const townName = (member.homeTownId as any)?.name || 'Town';
+      const townIdStr =
+        (member.homeTownId as any)?._id?.toString() ||
+        member.homeTownId?.toString() ||
+        '';
+
+      this.notificationsService
+        .createNotification(
+          {
+            target: {
+              roles: [UserRole.AP, UserRole.PC],
+              townId: townIdStr,
+              excludeUserIds: [currentUser.id],
+            },
+            level: 'WARNING',
+            action: 'MEMBER_INTAKE_REJECTED',
+            titleKey: 'notifications:memberIntakeRejectedTitle',
+            bodyKey: 'notifications:memberIntakeRejectedBody',
+            bodyParams: {
+              town: townName,
+            },
+            resource: {
+              entityType: 'INTAKE',
+              entityId: member._id.toString(),
+              townId: townIdStr,
+              subTab: 'reviews',
+            },
+            sendPush: true,
+          },
+          currentUser.id,
+        )
+        .catch((err) =>
+          this.logger.warn(
+            `Failed to dispatch intake rejected notification: ${err.message}`,
+          ),
+        );
 
       return {
         success: true,

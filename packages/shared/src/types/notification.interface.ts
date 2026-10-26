@@ -7,13 +7,18 @@ export type NotificationAction =
   | 'ACTIVITY_UPDATED'
   | 'ACTIVITY_CANCELLED'
   | 'ATTENDANCE_RECORDED'
+  | 'ATTENDANCE_LOCKED'
+  | 'ATTENDANCE_UNLOCKED'
+  | 'REPORT_UPLOADED'
   | 'MEMBER_REGISTERED'
   | 'MEMBER_INTAKE_SUBMITTED'
   | 'MEMBER_INTAKE_APPROVED'
+  | 'MEMBER_INTAKE_REJECTED'
   | 'TOWN_TRANSFER'
   | 'ACCESS_GRANTED'
   | 'ACCESS_REVOKED'
   | 'ROLE_CHANGED'
+  | 'PASSWORD_CHANGED'
   | 'SYSTEM_ANNOUNCEMENT';
 
 export type NotificationResourceType =
@@ -23,6 +28,7 @@ export type NotificationResourceType =
   | 'ATTENDANCE'
   | 'ACCESS'
   | 'INTAKE'
+  | 'REPORT'
   | 'SYSTEM';
 
 export type NotificationPlatform = 'ios' | 'android' | 'desktop';

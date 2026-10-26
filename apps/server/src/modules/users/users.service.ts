@@ -30,6 +30,7 @@ import {
 import { EmailService } from '../../services/email.service';
 import { MediaService } from '../../services/media.service';
 import { WhatsAppService } from '../../services/whatsapp.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import type {
   ChangeTownPcDto,
   CreateMemberDto,
@@ -49,6 +50,7 @@ export class UsersService {
     private readonly emailService: EmailService,
     private readonly whatsAppService: WhatsAppService,
     private readonly mediaService: MediaService,
+    private readonly notificationsService: NotificationsService,
   ) {
     void InjectModel;
     void Town;
@@ -461,6 +463,40 @@ export class UsersService {
     }
 
     const populated = await savedUser.populate('homeTownId');
+    const townName = (populated.homeTownId as any)?.name || 'Town';
+
+    this.notificationsService
+      .createNotification(
+        {
+          target: {
+            townId: townObjectId.toString(),
+            roles: [UserRole.AP, UserRole.PC],
+            excludeUserIds: [currentUser.id],
+          },
+          level: 'INFO',
+          action: 'MEMBER_REGISTERED',
+          titleKey: 'notifications:memberRegisteredTitle',
+          bodyKey: 'notifications:memberRegisteredBody',
+          bodyParams: {
+            name: savedUser.fullName,
+            town: townName,
+          },
+          resource: {
+            entityType: 'MEMBER',
+            entityId: savedUser._id.toString(),
+            townId: townObjectId.toString(),
+            subTab: 'directory',
+          },
+          sendPush: true,
+        },
+        currentUser.id,
+      )
+      .catch((err) =>
+        this.logger.warn(
+          `Failed to dispatch member registered notification: ${err.message}`,
+        ),
+      );
+
     return this.mapUser(populated);
   }
 
@@ -600,11 +636,15 @@ export class UsersService {
       throw new NotFoundAppException(ErrorCode.MEMBER_NOT_FOUND, { id });
     }
 
+    let accessGranted = false;
+    let accessRevoked = false;
+
     if (dto.hasAppAccess !== undefined) {
       const wasAppAccess = user.account.hasAppAccess;
       user.account.hasAppAccess = dto.hasAppAccess;
 
       if (dto.hasAppAccess && !wasAppAccess) {
+        accessGranted = true;
         // Invite to app
         const tempPassword = PasswordGeneratorUtil.generateTemporaryPassword();
         const hash = await bcrypt.hash(tempPassword, 10);
@@ -627,6 +667,7 @@ export class UsersService {
     if (dto.isAccessRevoked !== undefined) {
       user.account.isAccessRevoked = dto.isAccessRevoked;
       if (dto.isAccessRevoked) {
+        accessRevoked = true;
         user.account.status = AccountStatus.REVOKED;
       } else if (user.account.status === AccountStatus.REVOKED) {
         user.account.status = AccountStatus.ACTIVE;
@@ -662,6 +703,61 @@ export class UsersService {
 
     const saved = await user.save();
     const populated = await saved.populate('homeTownId');
+
+    if (accessGranted) {
+      this.notificationsService
+        .createNotification(
+          {
+            target: {
+              userIds: [user._id.toString()],
+            },
+            level: 'SUCCESS',
+            action: 'ACCESS_GRANTED',
+            titleKey: 'notifications:accessGrantedTitle',
+            bodyKey: 'notifications:accessGrantedBody',
+            resource: {
+              entityType: 'ACCESS',
+              entityId: user._id.toString(),
+              townId: user.homeTownId?.toString(),
+              subTab: 'access',
+            },
+            sendPush: true,
+          },
+          _currentUser.id,
+        )
+        .catch((err) =>
+          this.logger.warn(
+            `Failed to dispatch access granted notification: ${err.message}`,
+          ),
+        );
+    } else if (accessRevoked) {
+      this.notificationsService
+        .createNotification(
+          {
+            target: {
+              userIds: [user._id.toString()],
+            },
+            level: 'ERROR',
+            action: 'ACCESS_REVOKED',
+            titleKey: 'notifications:accessRevokedTitle',
+            bodyKey: 'notifications:accessRevokedBody',
+            resource: {
+              entityType: 'ACCESS',
+              entityId: user._id.toString(),
+              townId: user.homeTownId?.toString(),
+              subTab: 'access',
+            },
+            sendPush: true,
+          },
+          _currentUser.id,
+        )
+        .catch((err) =>
+          this.logger.warn(
+            `Failed to dispatch access revoked notification: ${err.message}`,
+          ),
+        );
+    }
+
     return this.mapUser(populated);
   }
 
@@ -764,6 +860,47 @@ export class UsersService {
     }
 
     await user.save();
+
+    const fromTown = currentTownIdStr
+      ? await this.townModel.findById(currentTownIdStr).exec()
+      : null;
+    const fromTownName = fromTown?.name || 'Former Town';
+    const toTownName = destTown.name;
+
+    this.notificationsService
+      .createNotification(
+        {
+          target: {
+            userIds: [user._id.toString()],
+            roles: [UserRole.AP, UserRole.PC],
+            townId: destTownIdStr,
+            excludeUserIds: [currentUser.id],
+          },
+          level: 'INFO',
+          action: 'TOWN_TRANSFER',
+          titleKey: 'notifications:townTransferTitle',
+          bodyKey: 'notifications:townTransferBody',
+          bodyParams: {
+            name: user.fullName,
+            fromTown: fromTownName,
+            toTown: toTownName,
+          },
+          resource: {
+            entityType: 'TOWN_TRANSFER',
+            entityId: user._id.toString(),
+            townId: destTownIdStr,
+            subTab: 'directory',
+          },
+          sendPush: true,
+        },
+        currentUser.id,
+      )
+      .catch((err) =>
+        this.logger.warn(
+          `Failed to dispatch town transfer notification: ${err.message}`,
+        ),
+      );
+
     user.homeTownId = destTown as any;
     return this.mapUser(user);
   }
@@ -909,6 +1046,71 @@ export class UsersService {
         newPc.email,
         generatedPassword,
       );
+    }
+
+    // Notify newly appointed PC
+    this.notificationsService
+      .createNotification(
+        {
+          target: {
+            userIds: [newPc._id.toString()],
+          },
+          level: 'SUCCESS',
+          action: 'ROLE_CHANGED',
+          titleKey: 'notifications:roleChangedTitle',
+          bodyKey: 'notifications:roleChangedBody',
+          bodyParams: {
+            role: 'PC',
+          },
+          resource: {
+            entityType: 'MEMBER',
+            entityId: newPc._id.toString(),
+            townId: dto.townId,
+            subTab: 'access',
+          },
+          sendPush: true,
+        },
+        currentUser.id,
+      )
+      .catch((err) =>
+        this.logger.warn(
+          `Failed to dispatch new PC role notification: ${err.message}`,
+        ),
+      );
+
+    // Notify outgoing PC if applicable
+    if (outgoingPc) {
+      const isRevoked = dto.outgoingPcDisposition === 'revoke_access';
+      this.notificationsService
+        .createNotification(
+          {
+            target: {
+              userIds: [outgoingPc._id.toString()],
+            },
+            level: isRevoked ? 'ERROR' : 'WARNING',
+            action: isRevoked ? 'ACCESS_REVOKED' : 'ROLE_CHANGED',
+            titleKey: isRevoked
+              ? 'notifications:accessRevokedTitle'
+              : 'notifications:roleChangedTitle',
+            bodyKey: isRevoked
+              ? 'notifications:accessRevokedBody'
+              : 'notifications:roleChangedBody',
+            bodyParams: isRevoked ? {} : { role: 'MEMBER' },
+            resource: {
+              entityType: 'MEMBER',
+              entityId: outgoingPc._id.toString(),
+              townId: dto.townId,
+              subTab: 'access',
+            },
+            sendPush: true,
+          },
+          currentUser.id,
+        )
+        .catch((err) =>
+          this.logger.warn(
+            `Failed to dispatch outgoing PC notification: ${err.message}`,
+          ),
+        );
     }
 
     return {

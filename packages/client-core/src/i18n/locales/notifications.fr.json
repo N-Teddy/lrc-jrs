@@ -44,6 +44,21 @@
   "roleChangedTitle": "Rôle modifié",
   "roleChangedBody": "Votre rôle a été mis à jour : {{role}}",
 
+  "attendanceLockedTitle": "Présences verrouillées",
+  "attendanceLockedBody": "La feuille de présence pour {{name}} a été validée et verrouillée",
+
+  "attendanceUnlockedTitle": "Présences déverrouillées",
+  "attendanceUnlockedBody": "La feuille de présence pour {{name}} a été déverrouillée pour révision",
+
+  "reportUploadedTitle": "Rapport téléversé",
+  "reportUploadedBody": "{{fileName}} a été ajouté pour {{name}}",
+
+  "memberIntakeRejectedTitle": "Mise à jour de votre candidature",
+  "memberIntakeRejectedBody": "Votre demande pour rejoindre {{town}} a été mise à jour",
+
+  "passwordChangedTitle": "Alerte de sécurité : Mot de passe modifié",
+  "passwordChangedBody": "Le mot de passe de votre compte a été récemment mis à jour",
+
   "systemAnnouncementTitle": "Communiqué de la coordination",
   "systemAnnouncementBody": "{{message}}"
 }

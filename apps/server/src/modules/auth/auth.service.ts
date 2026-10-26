@@ -22,6 +22,7 @@ import {
 } from '../../database/schemas';
 import { EmailService } from '../../services/email.service';
 import { WhatsAppService } from '../../services/whatsapp.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import { UsersService } from '../users/users.service';
 import type { ChangePasswordDto } from './dto/change-password.dto';
 import type { CompleteSetupDto } from './dto/complete-setup.dto';
@@ -42,6 +43,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly whatsAppService: WhatsAppService,
     private readonly emailService: EmailService,
+    private readonly notificationsService: NotificationsService,
     @InjectModel(RefreshToken.name)
     private readonly refreshTokenModel: Model<RefreshTokenDocument>,
     @InjectModel(PasswordResetToken.name)
@@ -200,6 +202,28 @@ export class AuthService {
     }
 
     await user.save();
+
+    this.notificationsService
+      .createNotification({
+        target: {
+          userIds: [user._id.toString()],
+        },
+        level: 'INFO',
+        action: 'PASSWORD_CHANGED',
+        titleKey: 'notifications:passwordChangedTitle',
+        bodyKey: 'notifications:passwordChangedBody',
+        resource: {
+          entityType: 'SYSTEM',
+          entityId: user._id.toString(),
+          townId: user.homeTownId?.toString(),
+        },
+        sendPush: true,
+      })
+      .catch((err) =>
+        this.logger.warn(
+          `Failed to dispatch setup complete notification: ${err.message}`,
+        ),
+      );
 
     const accessToken = this.generateAccessToken(user);
     const refreshToken = await this.generateRefreshToken(
@@ -485,6 +509,28 @@ export class AuthService {
       { isRevoked: true },
     );
 
+    this.notificationsService
+      .createNotification({
+        target: {
+          userIds: [user._id.toString()],
+        },
+        level: 'INFO',
+        action: 'PASSWORD_CHANGED',
+        titleKey: 'notifications:passwordChangedTitle',
+        bodyKey: 'notifications:passwordChangedBody',
+        resource: {
+          entityType: 'SYSTEM',
+          entityId: user._id.toString(),
+          townId: user.homeTownId?.toString(),
+        },
+        sendPush: true,
+      })
+      .catch((err) =>
+        this.logger.warn(
+          `Failed to dispatch reset password notification: ${err.message}`,
+        ),
+      );
+
     return {
       success: true,
       message: 'Your password has been successfully reset. You can now log in.',
@@ -515,6 +561,28 @@ export class AuthService {
       SALT_ROUNDS,
     );
     await user.save();
+
+    this.notificationsService
+      .createNotification({
+        target: {
+          userIds: [user._id.toString()],
+        },
+        level: 'INFO',
+        action: 'PASSWORD_CHANGED',
+        titleKey: 'notifications:passwordChangedTitle',
+        bodyKey: 'notifications:passwordChangedBody',
+        resource: {
+          entityType: 'SYSTEM',
+          entityId: user._id.toString(),
+          townId: user.homeTownId?.toString(),
+        },
+        sendPush: true,
+      })
+      .catch((err) =>
+        this.logger.warn(
+          `Failed to dispatch password changed notification: ${err.message}`,
+        ),
+      );
 
     return {
       success: true,

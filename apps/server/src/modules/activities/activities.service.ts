@@ -777,6 +777,73 @@ export class ActivitiesService {
     }
 
     await activity.save();
+
+    const townIdStr =
+      activity.townId?._id?.toString() || activity.townId?.toString() || '';
+
+    if (activity.status === ActivityStatus.CANCELLED) {
+      this.notificationsService
+        .createNotification(
+          {
+            target: {
+              townId: townIdStr,
+              excludeUserIds: [currentUser.id],
+            },
+            level: 'WARNING',
+            action: 'ACTIVITY_CANCELLED',
+            titleKey: 'notifications:activityCancelledTitle',
+            bodyKey: 'notifications:activityCancelledBody',
+            bodyParams: {
+              name: activity.title,
+              date: new Date(activity.startDate).toLocaleDateString(),
+            },
+            resource: {
+              entityType: 'ACTIVITY',
+              entityId: id,
+              townId: townIdStr,
+              subTab: 'overview',
+            },
+            sendPush: true,
+          },
+          currentUser.id,
+        )
+        .catch((err) =>
+          this.logger.warn(
+            `Failed to dispatch activity cancelled notification: ${err.message}`,
+          ),
+        );
+    } else {
+      this.notificationsService
+        .createNotification(
+          {
+            target: {
+              townId: townIdStr,
+              excludeUserIds: [currentUser.id],
+            },
+            level: 'INFO',
+            action: 'ACTIVITY_UPDATED',
+            titleKey: 'notifications:activityUpdatedTitle',
+            bodyKey: 'notifications:activityUpdatedBody',
+            bodyParams: {
+              name: activity.title,
+            },
+            resource: {
+              entityType: 'ACTIVITY',
+              entityId: id,
+              townId: townIdStr,
+              subTab: 'overview',
+            },
+            sendPush: true,
+          },
+          currentUser.id,
+        )
+        .catch((err) =>
+          this.logger.warn(
+            `Failed to dispatch activity updated notification: ${err.message}`,
+          ),
+        );
+    }
+
     return this.findById(id);
   }
 
@@ -1290,6 +1357,39 @@ export class ActivitiesService {
       },
     );
 
+    const lockTownIdStr =
+      activity.townId?._id?.toString() || activity.townId?.toString() || '';
+    this.notificationsService
+      .createNotification(
+        {
+          target: {
+            townId: lockTownIdStr,
+            roles: [UserRole.AP, UserRole.PC],
+            excludeUserIds: [currentUser.id],
+          },
+          level: 'INFO',
+          action: 'ATTENDANCE_LOCKED',
+          titleKey: 'notifications:attendanceLockedTitle',
+          bodyKey: 'notifications:attendanceLockedBody',
+          bodyParams: {
+            name: activity.title,
+          },
+          resource: {
+            entityType: 'ATTENDANCE',
+            entityId: activityId,
+            townId: lockTownIdStr,
+            subTab: 'attendance',
+          },
+          sendPush: true,
+        },
+        currentUser.id,
+      )
+      .catch((err) =>
+        this.logger.warn(
+          `Failed to dispatch attendance locked notification: ${err.message}`,
+        ),
+      );
+
     return this.mapActivity(activity);
   }
 
@@ -1336,6 +1436,39 @@ export class ActivitiesService {
         },
       },
     );
+
+    const unlockTownIdStr =
+      activity.townId?._id?.toString() || activity.townId?.toString() || '';
+    this.notificationsService
+      .createNotification(
+        {
+          target: {
+            townId: unlockTownIdStr,
+            roles: [UserRole.AP, UserRole.PC],
+            excludeUserIds: [currentUser.id],
+          },
+          level: 'WARNING',
+          action: 'ATTENDANCE_UNLOCKED',
+          titleKey: 'notifications:attendanceUnlockedTitle',
+          bodyKey: 'notifications:attendanceUnlockedBody',
+          bodyParams: {
+            name: activity.title,
+          },
+          resource: {
+            entityType: 'ATTENDANCE',
+            entityId: activityId,
+            townId: unlockTownIdStr,
+            subTab: 'attendance',
+          },
+          sendPush: true,
+        },
+        currentUser.id,
+      )
+      .catch((err) =>
+        this.logger.warn(
+          `Failed to dispatch attendance unlocked notification: ${err.message}`,
+        ),
+      );
 
     return this.mapActivity(activity);
   }
@@ -1524,6 +1657,41 @@ export class ActivitiesService {
     }
 
     await activity.save();
+
+    const reportTownIdStr =
+      activity.townId?._id?.toString() || activity.townId?.toString() || '';
+    this.notificationsService
+      .createNotification(
+        {
+          target: {
+            townId: reportTownIdStr,
+            roles: [UserRole.AP, UserRole.PC],
+            excludeUserIds: [currentUser.id],
+          },
+          level: 'SUCCESS',
+          action: 'REPORT_UPLOADED',
+          titleKey: 'notifications:reportUploadedTitle',
+          bodyKey: 'notifications:reportUploadedBody',
+          bodyParams: {
+            fileName: validFiles[0]?.originalname || 'Report',
+            name: activity.title,
+          },
+          resource: {
+            entityType: 'REPORT',
+            entityId: activityId,
+            townId: reportTownIdStr,
+            subTab: 'reports',
+          },
+          sendPush: true,
+        },
+        currentUser.id,
+      )
+      .catch((err) =>
+        this.logger.warn(
+          `Failed to dispatch report uploaded notification: ${err.message}`,
+        ),
+      );
+
     return this.mapActivity(activity);
   }
 

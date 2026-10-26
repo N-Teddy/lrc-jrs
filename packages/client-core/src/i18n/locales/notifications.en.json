@@ -44,6 +44,21 @@
   "roleChangedTitle": "Role Updated",
   "roleChangedBody": "Your role has been updated to {{role}}",
 
+  "attendanceLockedTitle": "Attendance Locked",
+  "attendanceLockedBody": "Attendance for {{name}} has been finalized and locked",
+
+  "attendanceUnlockedTitle": "Attendance Unlocked",
+  "attendanceUnlockedBody": "Attendance for {{name}} was unlocked for modification",
+
+  "reportUploadedTitle": "Report Uploaded",
+  "reportUploadedBody": "{{fileName}} uploaded for {{name}}",
+
+  "memberIntakeRejectedTitle": "Application Update",
+  "memberIntakeRejectedBody": "Your application to join {{town}} has been updated",
+
+  "passwordChangedTitle": "Security Alert: Password Changed",
+  "passwordChangedBody": "The password for your account was recently updated",
+
   "systemAnnouncementTitle": "Notice from Administration",
   "systemAnnouncementBody": "{{message}}"
 }
