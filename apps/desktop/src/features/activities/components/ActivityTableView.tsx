@@ -4,7 +4,7 @@ import {
   useUpdateActivityMutation,
 } from '@jrs/client-core';
 import { ActivityStatus, type IActivity } from '@jrs/shared';
-import { Buildings, CalendarBlank } from '@phosphor-icons/react';
+import { Bell, Buildings, CalendarBlank } from '@phosphor-icons/react';
 import type React from 'react';
 import { useState } from 'react';
 import { PaginationControl, TableSkeleton } from '../../../components';
@@ -23,6 +23,7 @@ interface ActivityTableViewProps {
   limit: number;
   onPageChange: (page: number) => void;
   onViewDetails: (activity: IActivity) => void;
+  onViewPreparation?: (activity: IActivity) => void;
   onEditActivity: (activity: IActivity) => void;
   onViewHistory: (activity: IActivity) => void;
   onDeleteActivity?: (activity: IActivity) => void;
@@ -37,6 +38,7 @@ export const ActivityTableView: React.FC<ActivityTableViewProps> = ({
   limit,
   onPageChange,
   onViewDetails,
+  onViewPreparation,
   onEditActivity,
   onViewHistory,
   onDeleteActivity,
@@ -245,18 +247,48 @@ export const ActivityTableView: React.FC<ActivityTableViewProps> = ({
                     </div>
                   </td>
 
-                  {/* Status */}
+                  {/* Status & Milestones */}
                   <td className="py-3.5 px-3">
-                    <span
-                      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold border ${statusConfig.badgeBg} ${statusConfig.badgeText} ${statusConfig.badgeBorder}`}
-                    >
+                    <div className="flex flex-col gap-1 items-start">
                       <span
-                        className={`w-1.5 h-1.5 rounded-full ${statusConfig.dotColor} ${
-                          statusConfig.isPulse ? 'animate-pulse' : ''
-                        }`}
-                      />
-                      {statusConfig.label}
-                    </span>
+                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold border ${statusConfig.badgeBg} ${statusConfig.badgeText} ${statusConfig.badgeBorder}`}
+                      >
+                        <span
+                          className={`w-1.5 h-1.5 rounded-full ${statusConfig.dotColor} ${
+                            statusConfig.isPulse ? 'animate-pulse' : ''
+                          }`}
+                        />
+                        {statusConfig.label}
+                      </span>
+
+                      {activity.remindersSent?.includes('1_WEEK') ? (
+                        <span
+                          title={t(
+                            'activities:reminders.d7Title',
+                            '7-Day Final Call (D-7)',
+                          )}
+                          className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold bg-[#edf3ee] text-[#486b52] border border-[#c2e9ca]"
+                        >
+                          <Bell size={10} weight="fill" />
+                          <span>
+                            {t('activities:reminders.d7Pill', 'D-7 Sent')}
+                          </span>
+                        </span>
+                      ) : activity.remindersSent?.includes('2_WEEKS') ? (
+                        <span
+                          title={t(
+                            'activities:reminders.d14Title',
+                            '14-Day Advance Notice (D-14)',
+                          )}
+                          className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold bg-[#fff0eb] text-[#b85028] border border-[#ffd8cb]"
+                        >
+                          <Bell size={10} weight="fill" />
+                          <span>
+                            {t('activities:reminders.d14Pill', 'D-14 Sent')}
+                          </span>
+                        </span>
+                      ) : null}
+                    </div>
                   </td>
 
                   {/* Actions */}
@@ -271,6 +303,7 @@ export const ActivityTableView: React.FC<ActivityTableViewProps> = ({
                       }
                       onClose={() => setOpenMenuId(null)}
                       onViewDetails={onViewDetails}
+                      onViewPreparation={onViewPreparation}
                       onEditActivity={onEditActivity}
                       onViewHistory={onViewHistory}
                       onCancelActivity={handleCancelActivity}

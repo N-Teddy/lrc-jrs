@@ -20,6 +20,8 @@
   "markRead": "Marquer lu",
   "markUnread": "Marquer non lu",
   "realtimeConnected": "En direct",
+  "realtimeConnecting": "Connexion...",
+  "realtimeDisconnected": "Hors ligne",
   "escToClose": "Échap pour fermer",
   "seeAll": "Voir tout",
   "seeAllNotifications": "Voir toutes les notifications",

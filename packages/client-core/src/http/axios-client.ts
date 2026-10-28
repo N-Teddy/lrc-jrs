@@ -193,6 +193,7 @@ export class HttpService {
     // Response Interceptor: Unwrap standardized ApiResponse and catch 401s
     this.instance.interceptors.response.use(
       (response) => {
+        ErrorService.resetNetworkErrorThrottle();
         const body = response.data as ApiResponse<unknown>;
         // If wrapped in our standard backend envelope, unwrap the data
         if (

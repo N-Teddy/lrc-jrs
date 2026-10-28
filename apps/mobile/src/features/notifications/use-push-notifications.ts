@@ -50,7 +50,6 @@ export function usePushNotifications() {
         if (finalStatus !== 'granted') {
           return;
         }
-        cd;
 
         const tokenData = await Notifications.getExpoPushTokenAsync();
         const expoPushToken = tokenData.data;

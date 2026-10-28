@@ -12,7 +12,7 @@ import {
   useUpdateActivityMutation,
 } from '@jrs/client-core';
 import { ActivityStatus, ActivityType, type IActivity } from '@jrs/shared';
-import { CircleNotch } from '@phosphor-icons/react';
+import { Bell, CalendarBlank, CircleNotch } from '@phosphor-icons/react';
 import type React from 'react';
 import { useEffect, useState } from 'react';
 import { ActivityAttendanceRoster } from './ActivityAttendanceRoster';
@@ -25,16 +25,23 @@ import {
   type ActivityViewMode,
 } from './ActivityFilterToolbar';
 import { ActivityFormModal } from './ActivityFormModal';
+import { ActivityRemindersTab } from './ActivityRemindersTab';
+import { ActivityReminderTemplatesModal } from './ActivityReminderTemplatesModal';
 import { ActivityStatsOverview } from './ActivityStatsOverview';
 import { ActivityTableView } from './ActivityTableView';
 import { DeleteActivityDialog } from './DeleteActivityDialog';
 
+export type ActivityMainTab = 'schedule' | 'reminders';
 type ActivitySubView = 'list' | 'details' | 'attendance' | 'audit-log';
 
 export interface ActivitiesFeatureProps {
   initialActivityId?: string | null;
   initialSubTab?:
+    | 'schedule'
+    | 'reminders'
     | 'overview'
+    | 'preparation'
+    | 'checklist'
     | 'attendance'
     | 'report'
     | 'history'
@@ -50,6 +57,9 @@ export const ActivitiesFeature: React.FC<ActivitiesFeatureProps> = ({
   const { activeTown, activeTownId } = useTownContext();
 
   // Navigation State
+  const [activeTab, setActiveTab] = useState<ActivityMainTab>(
+    initialSubTab === 'reminders' ? 'reminders' : 'schedule',
+  );
   const [subView, setSubView] = useState<ActivitySubView>('list');
   const [selectedActivity, setSelectedActivity] = useState<IActivity | null>(
     null,
@@ -71,6 +81,8 @@ export const ActivitiesFeature: React.FC<ActivitiesFeatureProps> = ({
 
   // Modals State
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
+  const [isReminderTemplatesModalOpen, setIsReminderTemplatesModalOpen] =
+    useState(false);
   const [editingActivity, setEditingActivity] = useState<IActivity | null>(
     null,
   );
@@ -111,6 +123,18 @@ export const ActivitiesFeature: React.FC<ActivitiesFeatureProps> = ({
     useActivityDetailQuery(initialActivityId || '');
 
   useEffect(() => {
+    if (initialSubTab === 'reminders' && !initialActivityId) {
+      setActiveTab('reminders');
+      setSubView('list');
+      setSelectedActivity(null);
+    } else if (initialSubTab === 'schedule' && !initialActivityId) {
+      setActiveTab('schedule');
+      setSubView('list');
+      setSelectedActivity(null);
+    }
+  }, [initialSubTab, initialActivityId]);
+
+  useEffect(() => {
     if (!initialActivityId) return;
 
     const targetActivity =
@@ -138,6 +162,11 @@ export const ActivitiesFeature: React.FC<ActivitiesFeatureProps> = ({
 
   // Navigation Handlers
   const handleViewDetails = (activity: IActivity) => {
+    setSelectedActivity(activity);
+    setSubView('details');
+  };
+
+  const handleViewPreparation = (activity: IActivity) => {
     setSelectedActivity(activity);
     setSubView('details');
   };
@@ -253,7 +282,10 @@ export const ActivitiesFeature: React.FC<ActivitiesFeatureProps> = ({
                 ? 'attendance'
                 : initialSubTab === 'report'
                   ? 'report'
-                  : 'overview'
+                  : initialSubTab === 'preparation' ||
+                      initialSubTab === 'checklist'
+                    ? 'preparation'
+                    : 'overview'
           }
         />
       ) : subView === 'attendance' && selectedActivity ? (
@@ -272,99 +304,173 @@ export const ActivitiesFeature: React.FC<ActivitiesFeatureProps> = ({
       ) : (
         /* 4. Main Activities Hub View */
         <>
-          {/* Page Header Strip matching mockups */}
-          <section className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
-            <div className="flex flex-col gap-1">
-              <h1 className="text-2xl font-extrabold text-[#1e1b19] tracking-tight">
-                {t('activities:title')}
+          {/* 1. Header & Subtab Bar */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-[#f4ece9]">
+            <div className="flex flex-col gap-0.5">
+              <h1 className="text-xl sm:text-2xl font-bold text-[#1e1b19] tracking-tight">
+                {activeTab === 'schedule'
+                  ? t('activities:title', 'Activities Management')
+                  : t(
+                      'activities:reminders.tabTitle',
+                      'Reminders & Guidelines',
+                    )}
               </h1>
+              <p className="text-xs text-[#8a726a]">
+                {activeTab === 'schedule'
+                  ? t(
+                      'activities:subtitle',
+                      'Schedule, track, and monitor church gatherings and reports',
+                    )
+                  : t(
+                      'activities:reminders.tabSubtitle',
+                      'Milestone broadcast automation, preparation checklists, and leadership directives per activity type',
+                    )}
+              </p>
             </div>
-          </section>
 
-          {/* KPI Overview Metrics */}
-          <ActivityStatsOverview
-            stats={statsData}
-            isLoading={isStatsLoading}
-            hubName={hubName}
-          />
+            {/* Subtab Switcher matching MembersFeature */}
+            <div className="flex items-center gap-1.5 p-1 rounded-lg bg-[#faf2ee] border border-[#e8e1dd] self-start sm:self-auto shadow-2xs flex-wrap">
+              <button
+                type="button"
+                onClick={() => setActiveTab('schedule')}
+                className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md text-xs font-bold transition-all cursor-pointer ${
+                  activeTab === 'schedule'
+                    ? 'bg-white text-[#b85028] shadow-xs border border-[#e8e1dd]'
+                    : 'text-[#8a726a] hover:text-[#57423b] hover:bg-[#f4ece9] border border-transparent'
+                }`}
+              >
+                <CalendarBlank
+                  size={16}
+                  weight={activeTab === 'schedule' ? 'fill' : 'regular'}
+                />
+                <span>
+                  {t('activities:views.schedule', 'Activities Schedule')}
+                </span>
+              </button>
 
-          {/* Filter & Navigation Toolbar */}
-          <ActivityFilterToolbar
-            search={search}
-            onSearchChange={(v) => {
-              setSearch(v);
-              setPage(1);
-            }}
-            year={year}
-            onYearChange={(v) => {
-              setYear(v);
-              setPage(1);
-            }}
-            month={month}
-            onMonthChange={(v) => {
-              setMonth(v);
-              setPage(1);
-            }}
-            activityType={activityTypeFilter}
-            onActivityTypeChange={(v) => {
-              setActivityTypeFilter(v);
-              setPage(1);
-            }}
-            status={statusFilter}
-            onStatusChange={(v) => {
-              setStatusFilter(v);
-              setPage(1);
-            }}
-            viewMode={viewMode}
-            onViewModeChange={(mode) => {
-              setViewMode(mode);
-              setPage(1);
-            }}
-            onOpenCreateModal={handleOpenCreateModal}
-            onClearFilters={handleClearFilters}
-          />
+              <button
+                type="button"
+                onClick={() => setActiveTab('reminders')}
+                className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md text-xs font-bold transition-all cursor-pointer ${
+                  activeTab === 'reminders'
+                    ? 'bg-white text-[#b85028] shadow-xs border border-[#e8e1dd]'
+                    : 'text-[#8a726a] hover:text-[#57423b] hover:bg-[#f4ece9] border border-transparent'
+                }`}
+              >
+                <Bell
+                  size={16}
+                  weight={activeTab === 'reminders' ? 'fill' : 'regular'}
+                />
+                <span>
+                  {t('activities:reminders.tabTitle', 'Reminders & Guidelines')}
+                </span>
+              </button>
+            </div>
+          </div>
 
-          {/* Multi-View Content */}
-          {viewMode === 'table' ? (
-            <ActivityTableView
-              activities={activities}
-              isLoading={isActivitiesLoading}
-              total={total}
-              page={page}
-              limit={limit}
-              onPageChange={setPage}
-              onViewDetails={handleViewDetails}
-              onEditActivity={handleEditActivity}
-              onViewHistory={handleViewHistory}
-              onDeleteActivity={(act) => setDeletingActivity(act)}
-              isPrivileged={isPrivileged}
-            />
-          ) : viewMode === 'grid' ? (
-            <ActivityCardGridView
-              activities={activities}
-              isLoading={isActivitiesLoading}
-              total={total}
-              page={page}
-              limit={limit}
-              onPageChange={setPage}
-              onViewDetails={handleViewDetails}
-              onEditActivity={handleEditActivity}
-              onViewHistory={handleViewHistory}
-              onDeleteActivity={(act) => setDeletingActivity(act)}
-              isPrivileged={isPrivileged}
-            />
+          {activeTab === 'schedule' ? (
+            <>
+              {/* KPI Overview Metrics */}
+              <ActivityStatsOverview
+                stats={statsData}
+                isLoading={isStatsLoading}
+                hubName={hubName}
+              />
+
+              {/* Filter & Navigation Toolbar */}
+              <ActivityFilterToolbar
+                search={search}
+                onSearchChange={(v) => {
+                  setSearch(v);
+                  setPage(1);
+                }}
+                year={year}
+                onYearChange={(v) => {
+                  setYear(v);
+                  setPage(1);
+                }}
+                month={month}
+                onMonthChange={(v) => {
+                  setMonth(v);
+                  setPage(1);
+                }}
+                activityType={activityTypeFilter}
+                onActivityTypeChange={(v) => {
+                  setActivityTypeFilter(v);
+                  setPage(1);
+                }}
+                status={statusFilter}
+                onStatusChange={(v) => {
+                  setStatusFilter(v);
+                  setPage(1);
+                }}
+                viewMode={viewMode}
+                onViewModeChange={(mode) => {
+                  setViewMode(mode);
+                  setPage(1);
+                }}
+                onOpenCreateModal={handleOpenCreateModal}
+                onOpenReminderGuidelines={() => setActiveTab('reminders')}
+                onClearFilters={handleClearFilters}
+              />
+
+              {/* Multi-View Content */}
+              {viewMode === 'table' ? (
+                <ActivityTableView
+                  activities={activities}
+                  isLoading={isActivitiesLoading}
+                  total={total}
+                  page={page}
+                  limit={limit}
+                  onPageChange={setPage}
+                  onViewDetails={handleViewDetails}
+                  onViewPreparation={handleViewPreparation}
+                  onEditActivity={handleEditActivity}
+                  onViewHistory={handleViewHistory}
+                  onDeleteActivity={(act) => setDeletingActivity(act)}
+                  isPrivileged={isPrivileged}
+                />
+              ) : viewMode === 'grid' ? (
+                <ActivityCardGridView
+                  activities={activities}
+                  isLoading={isActivitiesLoading}
+                  total={total}
+                  page={page}
+                  limit={limit}
+                  onPageChange={setPage}
+                  onViewDetails={handleViewDetails}
+                  onViewPreparation={handleViewPreparation}
+                  onEditActivity={handleEditActivity}
+                  onViewHistory={handleViewHistory}
+                  onDeleteActivity={(act) => setDeletingActivity(act)}
+                  isPrivileged={isPrivileged}
+                />
+              ) : (
+                <ActivityCalendarView
+                  activities={activities}
+                  isLoading={isActivitiesLoading}
+                  selectedYear={calendarActiveYear}
+                  selectedMonth={calendarActiveMonth}
+                  onMonthChange={(newYear, newMonth) => {
+                    setYear(newYear);
+                    setMonth(newMonth);
+                  }}
+                  onViewDetails={handleViewDetails}
+                  onEditActivity={handleEditActivity}
+                />
+              )}
+            </>
           ) : (
-            <ActivityCalendarView
-              activities={activities}
-              isLoading={isActivitiesLoading}
-              selectedYear={calendarActiveYear}
-              selectedMonth={calendarActiveMonth}
-              onMonthChange={(newYear, newMonth) => {
-                setYear(newYear);
-                setMonth(newMonth);
+            /* Reminders & Guidelines Full Tab View */
+            <ActivityRemindersTab
+              onNavigateToActivity={(activityId) => {
+                const targetAct = activities.find((a) => a.id === activityId);
+                if (targetAct) {
+                  setSelectedActivity(targetAct);
+                  setSubView('details');
+                }
               }}
-              onViewDetails={handleViewDetails}
-              onEditActivity={handleEditActivity}
+              isPrivileged={isPrivileged}
             />
           )}
         </>
@@ -389,6 +495,12 @@ export const ActivitiesFeature: React.FC<ActivitiesFeatureProps> = ({
         activity={deletingActivity}
         onConfirmDelete={handleConfirmDelete}
         isDeleting={deleteActivityMutation.isPending}
+      />
+
+      {/* Activity Reminder Guidelines & Templates Modal */}
+      <ActivityReminderTemplatesModal
+        isOpen={isReminderTemplatesModalOpen}
+        onClose={() => setIsReminderTemplatesModalOpen(false)}
       />
     </div>
   );

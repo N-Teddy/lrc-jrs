@@ -4,8 +4,9 @@ export function createQueryClient(): QueryClient {
   return new QueryClient({
     defaultOptions: {
       queries: {
-        staleTime: 1000 * 60 * 2, // 2 minutes cache validity
-        gcTime: 1000 * 60 * 10, // 10 minutes garbage collection
+        staleTime: 1000 * 60 * 5, // 5 minutes cache freshness
+        gcTime: 1000 * 60 * 60 * 24, // 24 hours garbage collection (persist in memory/offline)
+        networkMode: 'offlineFirst', // Return cached data even when offline or disconnected
         retry: (failureCount, error: unknown) => {
           // Do not retry 401 or 403 authorization errors
           const err = error as { statusCode?: number } | undefined;
@@ -17,6 +18,7 @@ export function createQueryClient(): QueryClient {
         refetchOnWindowFocus: false,
       },
       mutations: {
+        networkMode: 'offlineFirst',
         retry: false,
       },
     },

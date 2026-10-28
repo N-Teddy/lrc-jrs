@@ -5,6 +5,7 @@ import {
 } from '@jrs/client-core';
 import { ActivityStatus, type IActivity } from '@jrs/shared';
 import {
+  Bell,
   Buildings,
   CalendarBlank,
   Eye,
@@ -31,6 +32,7 @@ interface ActivityCardGridViewProps {
   limit: number;
   onPageChange: (page: number) => void;
   onViewDetails: (activity: IActivity) => void;
+  onViewPreparation?: (activity: IActivity) => void;
   onEditActivity: (activity: IActivity) => void;
   onViewHistory: (activity: IActivity) => void;
   onDeleteActivity?: (activity: IActivity) => void;
@@ -45,6 +47,7 @@ export const ActivityCardGridView: React.FC<ActivityCardGridViewProps> = ({
   limit,
   onPageChange,
   onViewDetails,
+  onViewPreparation,
   onEditActivity,
   onViewHistory,
   onDeleteActivity,
@@ -159,6 +162,35 @@ export const ActivityCardGridView: React.FC<ActivityCardGridViewProps> = ({
                     />
                     <span>{statusConfig.label}</span>
                   </span>
+
+                  {/* Reminder Milestone Status Pill */}
+                  {activity.remindersSent?.includes('1_WEEK') ? (
+                    <span
+                      title={t(
+                        'activities:reminders.d7Title',
+                        '7-Day Final Call (D-7)',
+                      )}
+                      className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] font-bold bg-[#edf3ee] text-[#486b52] border border-[#c2e9ca] shrink-0"
+                    >
+                      <Bell size={10} weight="fill" />
+                      <span>
+                        {t('activities:reminders.d7Pill', 'D-7 Sent')}
+                      </span>
+                    </span>
+                  ) : activity.remindersSent?.includes('2_WEEKS') ? (
+                    <span
+                      title={t(
+                        'activities:reminders.d14Title',
+                        '14-Day Advance Notice (D-14)',
+                      )}
+                      className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] font-bold bg-[#fff0eb] text-[#b85028] border border-[#ffd8cb] shrink-0"
+                    >
+                      <Bell size={10} weight="fill" />
+                      <span>
+                        {t('activities:reminders.d14Pill', 'D-14 Sent')}
+                      </span>
+                    </span>
+                  ) : null}
                 </div>
 
                 <ActivityActionMenu
@@ -171,6 +203,7 @@ export const ActivityCardGridView: React.FC<ActivityCardGridViewProps> = ({
                   }
                   onClose={() => setOpenMenuId(null)}
                   onViewDetails={onViewDetails}
+                  onViewPreparation={onViewPreparation}
                   onEditActivity={onEditActivity}
                   onViewHistory={onViewHistory}
                   onCancelActivity={handleCancelActivity}

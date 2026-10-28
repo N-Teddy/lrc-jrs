@@ -10,7 +10,7 @@ export type { AuthFlowScreenState as MobileAuthScreenState };
 
 export function useMobileAuthFlow() {
   const { user, isAuthenticated, isLoading, signOut } = useAuth();
-  const { availableTowns, isLoadingTowns } = useTownContext();
+  const { availableTowns, activeTownId, isLoadingTowns } = useTownContext();
 
   const flow = useAuthFlowState(isAuthenticated);
 
@@ -28,11 +28,14 @@ export function useMobileAuthFlow() {
     return false;
   }, [user, availableTowns]);
 
+  // Only show the region selector if user explicitly clicked "Switch Region",
+  // or if they have multi-town access but no active town has been selected/restored yet.
   const shouldShowRegionSelector = Boolean(
     isAuthenticated &&
       user &&
       hasMultiTownAccess &&
-      (!flow.hasExplicitlySelectedTown || flow.isSwitchingRegion),
+      (flow.isSwitchingRegion ||
+        (!activeTownId && !flow.hasExplicitlySelectedTown)),
   );
 
   const handleCancelSetup = () => {

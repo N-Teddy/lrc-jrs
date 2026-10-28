@@ -54,7 +54,7 @@ export function TownProvider({ children, storage }: TownProviderProps) {
 
   const [activeTownId, setActiveTownIdState] = useState<string | null>(null);
   const [availableTowns, setAvailableTowns] = useState<ITown[]>(FALLBACK_TOWNS);
-  const [isLoadingTowns, setIsLoadingTowns] = useState<boolean>(false);
+  const [isLoadingTowns, setIsLoadingTowns] = useState<boolean>(true);
 
   // Fetch list of towns
   const refreshTowns = useCallback(async () => {
@@ -63,13 +63,14 @@ export function TownProvider({ children, storage }: TownProviderProps) {
       const towns = await http.get<ITown[]>('/towns');
       if (Array.isArray(towns) && towns.length > 0) {
         setAvailableTowns(towns);
+        await storage.setItem('jrs_cached_towns', JSON.stringify(towns));
       }
     } catch {
       // keep fallback towns
     } finally {
       setIsLoadingTowns(false);
     }
-  }, [http]);
+  }, [http, storage]);
 
   // Initial load of towns and active town ID
   useEffect(() => {
@@ -81,45 +82,71 @@ export function TownProvider({ children, storage }: TownProviderProps) {
           if (isMounted) {
             setActiveTownIdState(null);
             http.setActiveTownId(null);
+            setIsLoadingTowns(false);
           }
           return;
         }
 
-        // Fetch towns
+        setIsLoadingTowns(true);
+
+        const savedTownId = await storage.getItem(STORAGE_ACTIVE_TOWN_KEY);
+
+        // Fetch towns from backend, or fallback to cached towns if offline
         const towns = await http
           .get<ITown[]>('/towns')
           .catch(() => [] as ITown[]);
+
         if (isMounted) {
-          setAvailableTowns(towns);
-          setIsLoadingTowns(false);
+          if (Array.isArray(towns) && towns.length > 0) {
+            setAvailableTowns(towns);
+            await storage.setItem('jrs_cached_towns', JSON.stringify(towns));
+          } else {
+            // Offline fallback: restore cached towns from persistent storage
+            const cachedTownsJson = await storage.getItem('jrs_cached_towns');
+            if (cachedTownsJson) {
+              try {
+                const parsed = JSON.parse(cachedTownsJson);
+                if (Array.isArray(parsed) && parsed.length > 0) {
+                  setAvailableTowns(parsed);
+                }
+              } catch {
+                // Keep fallback towns
+              }
+            }
+          }
         }
 
-        // Match user's assigned home town first, then fallback to stored town ID or first available
-        const homeMatch = towns.find(
-          (t) =>
-            t.id === user.homeTownId ||
-            (user.homeTownId &&
-              t.code?.toUpperCase() === user.homeTownId.toUpperCase()),
-        );
-        const savedTownId = await storage.getItem(STORAGE_ACTIVE_TOWN_KEY);
-        const match = towns.find(
+        // Prioritize previously saved active town ID from storage (user's chosen hub),
+        // then user's assigned home town, then first available
+        const currentTowns = towns.length > 0 ? towns : FALLBACK_TOWNS;
+        const savedMatch = currentTowns.find(
           (t) =>
             t.id === savedTownId ||
             (savedTownId &&
               t.code?.toUpperCase() === savedTownId.toUpperCase()),
         );
+        const homeMatch = currentTowns.find(
+          (t) =>
+            t.id === user.homeTownId ||
+            (user.homeTownId &&
+              t.code?.toUpperCase() === user.homeTownId.toUpperCase()),
+        );
+
         const resolvedTownId =
+          savedMatch?.id ||
+          savedTownId ||
           homeMatch?.id ||
           user.homeTownId ||
-          match?.id ||
-          savedTownId ||
-          (towns[0]?.id ?? null);
+          (currentTowns[0]?.id ?? null);
 
         if (isMounted && resolvedTownId) {
           setActiveTownIdState(resolvedTownId);
           http.setActiveTownId(resolvedTownId);
+          await storage.setItem(STORAGE_ACTIVE_TOWN_KEY, resolvedTownId);
         }
       } catch {
+        // Ignore initialization errors
+      } finally {
         if (isMounted) {
           setIsLoadingTowns(false);
         }

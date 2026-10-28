@@ -109,7 +109,7 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({
     [t],
   );
 
-  useNotificationsSubscription({
+  const { status: socketStatus } = useNotificationsSubscription({
     onNotificationReceived: handleIncomingNotification,
   });
 
@@ -632,10 +632,28 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({
             {/* Bottom Footer Bar: Live indicator + Creative "See all" redirect button */}
             <div className="p-3 bg-[#faf7f4] border-t border-[#f2eae5] flex items-center justify-between text-[11px] text-[#8a726a]">
               <div className="flex items-center gap-1.5 font-medium">
-                <span className="w-2 h-2 rounded-full bg-[#486b52] animate-pulse" />
-                <span>
-                  {t('notifications:realtimeConnected', 'Live updates active')}
-                </span>
+                {socketStatus === 'connected' ? (
+                  <>
+                    <span className="w-2 h-2 rounded-full bg-[#486b52] animate-pulse" />
+                    <span className="text-[#2c4e37] font-semibold">
+                      {t('notifications:realtimeConnected', 'Live')}
+                    </span>
+                  </>
+                ) : socketStatus === 'connecting' ? (
+                  <>
+                    <span className="w-2 h-2 rounded-full bg-[#d97706] animate-pulse" />
+                    <span className="text-[#8d6e19] font-medium">
+                      {t('notifications:realtimeConnecting', 'Connecting...')}
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <span className="w-2 h-2 rounded-full bg-[#8a726a]" />
+                    <span className="text-[#8a726a] font-medium">
+                      {t('notifications:realtimeDisconnected', 'Offline')}
+                    </span>
+                  </>
+                )}
               </div>
 
               {/* Dedicated "See all" redirect button */}

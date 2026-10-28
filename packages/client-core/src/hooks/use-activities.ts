@@ -1,7 +1,10 @@
 import type {
+  ActivityType,
   IActivity,
   IActivityQueryDto,
+  IActivityReminderTemplate,
   IActivityStats,
+  IChecklistItem,
   ICreateActivityDto,
   IPaginatedActivitiesResponse,
   IUpdateActivityDto,
@@ -82,6 +85,95 @@ export function useDeleteActivityMutation() {
     mutationFn: (id: string) => http.delete(`/activities/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.activities.all });
+    },
+  });
+}
+
+export function useActivityReminderTemplatesQuery() {
+  const http = useHttp();
+  return useQuery({
+    queryKey: queryKeys.activities.reminderTemplates,
+    queryFn: () =>
+      http.get<IActivityReminderTemplate[]>('/activities/reminder-templates'),
+  });
+}
+
+export function useActivityReminderTemplateQuery(
+  type?: ActivityType | string | null,
+) {
+  const http = useHttp();
+  return useQuery({
+    queryKey: type
+      ? queryKeys.activities.reminderTemplate(type)
+      : ['activities', 'reminder-templates', 'none'],
+    queryFn: () =>
+      http.get<IActivityReminderTemplate>(
+        `/activities/reminder-templates/${type}`,
+      ),
+    enabled: Boolean(type),
+  });
+}
+
+export function useUpdateActivityReminderTemplateMutation() {
+  const http = useHttp();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      type,
+      dto,
+    }: {
+      type: ActivityType | string;
+      dto: {
+        items: IChecklistItem[];
+        customInstructionsFr?: string;
+        customInstructionsEn?: string;
+      };
+    }) =>
+      http.put<IActivityReminderTemplate>(
+        `/activities/reminder-templates/${type}`,
+        dto,
+      ),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.activities.reminderTemplates,
+      });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.activities.reminderTemplate(variables.type),
+      });
+    },
+  });
+}
+
+export function useTriggerDailyMilestonesMutation() {
+  const http = useHttp();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () =>
+      http.post<{
+        reminders14d: number;
+        reminders7d: number;
+        reportWarnings: number;
+      }>('/activities/reminders/trigger-daily'),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.activities.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.notifications.all });
+    },
+  });
+}
+
+export function useTriggerMonthlyDigestMutation() {
+  const http = useHttp();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () =>
+      http.post<{ townsProcessed: number }>(
+        '/activities/reminders/trigger-monthly',
+      ),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.notifications.all });
     },
   });
 }

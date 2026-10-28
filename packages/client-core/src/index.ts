@@ -9,5 +9,6 @@ export * from './notifications';
 export * from './providers';
 export * from './query/query-client';
 export * from './query/query-keys';
+export * from './query/query-persister';
 export * from './storage/storage.interface';
 export * from './toast';

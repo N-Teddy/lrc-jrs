@@ -5,6 +5,7 @@ import {
   ClockCounterClockwise,
   DotsThreeVertical,
   Eye,
+  ListChecks,
   PencilSimple,
   Trash,
   XCircle,
@@ -17,6 +18,7 @@ export interface ActivityActionMenuProps {
   onToggle: () => void;
   onClose: () => void;
   onViewDetails: (activity: IActivity) => void;
+  onViewPreparation?: (activity: IActivity) => void;
   onEditActivity: (activity: IActivity) => void;
   onViewHistory: (activity: IActivity) => void;
   onCancelActivity?: (activity: IActivity) => void;
@@ -33,6 +35,7 @@ export const ActivityActionMenu: React.FC<ActivityActionMenuProps> = ({
   onToggle,
   onClose,
   onViewDetails,
+  onViewPreparation,
   onEditActivity,
   onViewHistory,
   onCancelActivity,
@@ -103,6 +106,26 @@ export const ActivityActionMenu: React.FC<ActivityActionMenuProps> = ({
             <Eye size={14} weight="bold" className="text-[#b85028]" />
             <span>{t('activities:card.details', 'Details')}</span>
           </button>
+
+          {/* Preparation & Reminders Action */}
+          {onViewPreparation && (
+            <button
+              type="button"
+              onClick={() => {
+                onClose();
+                onViewPreparation(activity);
+              }}
+              className="w-full px-3 py-1.5 text-left text-xs text-[#1e1b19] hover:bg-[#faf2ee] flex items-center gap-2 font-medium cursor-pointer"
+            >
+              <ListChecks size={14} weight="bold" className="text-[#486b52]" />
+              <span>
+                {t(
+                  'activities:reminders.menuChecklist',
+                  'Checklist & Reminders',
+                )}
+              </span>
+            </button>
+          )}
 
           {canManageActivity && !isCompleted && (
             <button

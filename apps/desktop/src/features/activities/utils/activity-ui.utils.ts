@@ -149,17 +149,17 @@ export function getActivityStatusConfig(
   }
 }
 
-export function formatActivityDate(dateString: string): string {
+export function formatActivityDate(dateInput: string | Date): string {
   try {
-    const d = new Date(dateString);
-    if (Number.isNaN(d.getTime())) return dateString;
+    const d = typeof dateInput === 'string' ? new Date(dateInput) : dateInput;
+    if (Number.isNaN(d.getTime())) return String(dateInput);
     return d.toLocaleDateString(undefined, {
       day: '2-digit',
       month: 'short',
       year: 'numeric',
     });
   } catch {
-    return dateString;
+    return String(dateInput);
   }
 }
 

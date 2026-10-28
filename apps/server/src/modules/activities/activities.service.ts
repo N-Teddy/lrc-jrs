@@ -276,6 +276,7 @@ export class ActivitiesService {
       attendanceLockedByName: doc.attendanceLockedByName,
       report: latestReport,
       reports,
+      remindersSent: doc.remindersSent || [],
       createdBy: doc.createdBy?.toString() || '',
       createdAt: (doc as any).createdAt
         ? (doc as any).createdAt.toISOString()
@@ -2093,7 +2094,7 @@ export class ActivitiesService {
    * Create a folder in Google Drive
    */
   async createDriveFolder(name: string, parentId?: string) {
-    if (!name || !name.trim()) {
+    if (!name?.trim()) {
       throw new BadRequestAppException(ErrorCode.ACTIVITY_FOLDER_NAME_EMPTY);
     }
     return this.driveService.createFolder(name.trim(), parentId);
@@ -2103,7 +2104,7 @@ export class ActivitiesService {
    * Rename a folder in Google Drive
    */
   async renameDriveFolder(folderId: string, name: string) {
-    if (!name || !name.trim()) {
+    if (!name?.trim()) {
       throw new BadRequestAppException(ErrorCode.ACTIVITY_FOLDER_NAME_EMPTY);
     }
     return this.driveService.renameFolder(folderId, name.trim());

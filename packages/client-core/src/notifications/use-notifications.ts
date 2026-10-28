@@ -5,14 +5,12 @@ import type {
   RegisterPushTokenDto,
 } from '@jrs/shared';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useEffect, useRef } from 'react';
-import { io, type Socket } from 'socket.io-client';
+import { useEffect } from 'react';
+import type { Socket } from 'socket.io-client';
 import { useAuth } from '../context/auth.context';
 import { useHttp } from '../context/http.context';
-import { i18n } from '../i18n/i18n';
 import { queryKeys } from '../query/query-keys';
-import { toast } from '../toast/toast.context';
-import type { ToastType } from '../toast/toast.types';
+import { type SocketStatus, useWebSocket } from './socket.context';
 
 export interface PaginatedNotifications {
   data: INotification[];
@@ -138,142 +136,33 @@ export function useRegisterPushTokenMutation() {
   });
 }
 
+export interface UseNotificationsSubscriptionResult {
+  isConnected: boolean;
+  isConnecting: boolean;
+  isDisconnected: boolean;
+  status: SocketStatus;
+  socket: Socket | null;
+}
+
 /**
  * Hook to manage real-time WebSocket connection and events
  */
 export function useNotificationsSubscription(options?: {
   onNotificationReceived?: (notification: INotification) => void;
-}): void {
-  const { user, isAuthenticated, token } = useAuth();
-  const http = useHttp();
-  const queryClient = useQueryClient();
-  const socketRef = useRef<Socket | null>(null);
-  const optionsRef = useRef(options);
+}): UseNotificationsSubscriptionResult {
+  const {
+    isConnected,
+    isConnecting,
+    isDisconnected,
+    status,
+    subscribeToNotifications,
+    socket,
+  } = useWebSocket();
 
   useEffect(() => {
-    optionsRef.current = options;
-  });
+    if (!options?.onNotificationReceived) return;
+    return subscribeToNotifications(options.onNotificationReceived);
+  }, [options?.onNotificationReceived, subscribeToNotifications]);
 
-  useEffect(() => {
-    if (!isAuthenticated || !token || !user) {
-      if (socketRef.current) {
-        socketRef.current.disconnect();
-        socketRef.current = null;
-      }
-      return;
-    }
-
-    const baseUrl =
-      (typeof http?.getBaseUrl === 'function' ? http.getBaseUrl() : '') ||
-      'http://localhost:3000/api';
-    const socketHost = baseUrl.replace(/\/api\/?$/, '');
-
-    try {
-      const socket = io(`${socketHost}/notifications`, {
-        auth: async (cb: (data: { token: string | null }) => void) => {
-          const storedToken =
-            (await http.getStorage().getItem('jrs_access_token')) || token;
-          cb({ token: storedToken });
-        },
-        transports: ['websocket', 'polling'],
-        reconnection: true,
-        reconnectionDelay: 2000,
-        reconnectionAttempts: 10,
-      });
-
-      socketRef.current = socket;
-
-      socket.on('connect', () => {
-        // Refresh notifications & unread count upon successful connection/reconnection
-        queryClient.invalidateQueries({
-          queryKey: queryKeys.notifications.all,
-        });
-        queryClient.invalidateQueries({
-          queryKey: queryKeys.notifications.unreadCount,
-        });
-      });
-
-      socket.on('notification:new', (notification: INotification) => {
-        // Localize title and body dynamically via i18n
-        const title = i18n.t(notification.titleKey, {
-          defaultValue: notification.titleKey,
-          ...(notification.titleParams || {}),
-        });
-
-        const body = i18n.t(notification.bodyKey, {
-          defaultValue: notification.bodyKey,
-          ...(notification.bodyParams || {}),
-        });
-
-        // 1. Pop non-persistent in-app toast
-        const toastType = (notification.level?.toLowerCase() ||
-          'info') as ToastType;
-        toast.show(toastType, body, {
-          title,
-          duration: 5000,
-        });
-
-        // 2. Invalidate queries to refresh inbox & badge count
-        queryClient.invalidateQueries({
-          queryKey: queryKeys.notifications.all,
-        });
-        queryClient.invalidateQueries({
-          queryKey: queryKeys.notifications.unreadCount,
-        });
-
-        optionsRef.current?.onNotificationReceived?.(notification);
-      });
-
-      socket.on(
-        'notification:unread_count',
-        ({ unreadCount }: { unreadCount: number }) => {
-          queryClient.setQueryData<number>(
-            queryKeys.notifications.unreadCount,
-            unreadCount,
-          );
-        },
-      );
-
-      socket.on('connect_error', async (err: Error) => {
-        const msg = err?.message || '';
-        if (
-          msg.includes('jwt') ||
-          msg.includes('expired') ||
-          msg.includes('unauthorized') ||
-          msg.includes('Authentication')
-        ) {
-          const newToken = await http.refreshToken();
-          if (newToken && socketRef.current) {
-            socketRef.current.auth = { token: newToken };
-            socketRef.current.connect();
-          }
-        }
-      });
-
-      return () => {
-        socket.off('connect');
-        socket.off('notification:new');
-        socket.off('notification:unread_count');
-        socket.off('connect_error');
-
-        if (socket.connected) {
-          socket.disconnect();
-        } else {
-          // If the socket is still in the middle of connecting (common during React StrictMode DEV unmount/remount),
-          // disconnecting immediately causes the browser to abort the raw WebSocket with:
-          // "WebSocket is closed before the connection is established".
-          // Defer the disconnection until after the handshake settles or fails.
-          socket.once('connect', () => {
-            socket.disconnect();
-          });
-          socket.once('connect_error', () => {
-            socket.disconnect();
-          });
-        }
-        socketRef.current = null;
-      };
-    } catch {
-      // Ignore socket connection failures in environments without network
-    }
-  }, [isAuthenticated, user, token, http, queryClient]);
+  return { isConnected, isConnecting, isDisconnected, status, socket };
 }

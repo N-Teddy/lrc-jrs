@@ -66,6 +66,7 @@ export interface IActivity {
   attendanceLockedByName?: string;
   report?: IActivityReport;
   reports?: IActivityReport[];
+  remindersSent?: string[];
   createdBy: string;
   createdAt: string;
   updatedAt: string;

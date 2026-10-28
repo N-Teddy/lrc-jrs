@@ -211,19 +211,21 @@ export const DatePeriodFilter: React.FC<DatePeriodFilterProps> = ({
 
   return (
     <div ref={containerRef} className={`relative inline-block ${className}`}>
-      {/* Trigger Button */}
-      <button
-        type="button"
-        onClick={handleToggle}
-        className={`flex items-center justify-between rounded-md border transition-all cursor-pointer select-none font-medium ${sizeClasses} ${
+      {/* Trigger Capsule */}
+      <div
+        className={`flex items-center justify-between rounded-md border transition-all select-none font-medium ${sizeClasses} ${
           isFiltered
             ? 'bg-[#fff5f2] border-[#b85028]/40 text-[#b85028] shadow-2xs font-semibold'
             : 'bg-[#faf2ee] hover:bg-[#f4ece9] border-[#e8e1dd] text-[#1e1b19]'
         }`}
-        aria-haspopup="dialog"
-        aria-expanded={isOpen}
       >
-        <div className="flex items-center gap-2 min-w-0">
+        <button
+          type="button"
+          onClick={handleToggle}
+          className="flex items-center gap-2 min-w-0 flex-1 h-full cursor-pointer focus:outline-hidden text-left"
+          aria-haspopup="dialog"
+          aria-expanded={isOpen}
+        >
           <CalendarBlank
             size={16}
             weight={isFiltered ? 'fill' : 'bold'}
@@ -234,7 +236,7 @@ export const DatePeriodFilter: React.FC<DatePeriodFilterProps> = ({
           <span className="truncate max-w-[125px] sm:max-w-[170px]">
             {label}
           </span>
-        </div>
+        </button>
 
         <div className="flex items-center gap-1 ml-1.5 shrink-0">
           {isFiltered && (
@@ -247,15 +249,23 @@ export const DatePeriodFilter: React.FC<DatePeriodFilterProps> = ({
               <X size={11} weight="bold" />
             </button>
           )}
-          <CaretDown
-            size={13}
-            weight="bold"
-            className={`text-[#8a726a] transition-transform duration-150 ${
-              isOpen ? 'rotate-180' : ''
-            }`}
-          />
+          <button
+            type="button"
+            onClick={handleToggle}
+            tabIndex={-1}
+            aria-hidden="true"
+            className="flex items-center justify-center cursor-pointer text-[#8a726a] focus:outline-hidden"
+          >
+            <CaretDown
+              size={13}
+              weight="bold"
+              className={`transition-transform duration-150 ${
+                isOpen ? 'rotate-180' : ''
+              }`}
+            />
+          </button>
         </div>
-      </button>
+      </div>
 
       {/* Popover Card */}
       {isOpen && (

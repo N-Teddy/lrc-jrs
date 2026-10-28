@@ -30,6 +30,7 @@ import {
   FileText,
   HardDrives,
   Info,
+  ListChecks,
   Lock,
   LockOpen,
   MagnifyingGlass,
@@ -56,6 +57,8 @@ import {
   getActivityStatusConfig,
   getActivityTypeConfig,
 } from '../utils/activity-ui.utils';
+import { ActivityPreparationTab } from './ActivityPreparationTab';
+import { ActivityReminderTemplatesModal } from './ActivityReminderTemplatesModal';
 import { ActivityReportUploadModal } from './ActivityReportUploadModal';
 import { DriveFilePreviewModal } from './DriveFilePreviewModal';
 
@@ -69,7 +72,12 @@ interface ActivityDetailPageProps {
   initialTab?: ActivityDetailTab;
 }
 
-type ActivityDetailTab = 'overview' | 'attendance' | 'report' | 'history';
+type ActivityDetailTab =
+  | 'overview'
+  | 'preparation'
+  | 'attendance'
+  | 'report'
+  | 'history';
 
 export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
   activity,
@@ -105,6 +113,7 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
     'ALL',
   );
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const [isTemplatesModalOpen, setIsTemplatesModalOpen] = useState(false);
   const [reportToDelete, setReportToDelete] = useState<IActivityReport | null>(
     null,
   );
@@ -636,6 +645,24 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
             <span>{t('activities:detail.tabs.overview', 'Overview')}</span>
           </button>
 
+          <button
+            type="button"
+            onClick={() => setActiveTab('preparation')}
+            className={`px-4 py-2 rounded-md text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+              activeTab === 'preparation'
+                ? 'bg-white text-[#1e1b19] shadow-2xs border border-[#e8e1dd]/60'
+                : 'text-[#8a726a] hover:text-[#1e1b19]'
+            }`}
+          >
+            <ListChecks size={15} weight="bold" />
+            <span>
+              {t('activities:detail.tabs.preparation', 'Checklist & Reminders')}
+            </span>
+            {(activity.remindersSent?.length ?? 0) > 0 && (
+              <span className="w-1.5 h-1.5 rounded-full bg-[#b85028]" />
+            )}
+          </button>
+
           {/* Attendance tab ONLY appears on or after the day of the activity */}
           {isDayOfActivityOrLater && (
             <button
@@ -956,6 +983,15 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
             )}
           </div>
         </div>
+      )}
+
+      {/* TAB: PREPARATION & REMINDERS */}
+      {activeTab === 'preparation' && (
+        <ActivityPreparationTab
+          activity={activity}
+          isPrivileged={isPrivileged}
+          onOpenTemplatesModal={() => setIsTemplatesModalOpen(true)}
+        />
       )}
 
       {/* TAB 2: ATTENDANCE */}
@@ -1584,6 +1620,13 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
         isOpen={Boolean(previewFile)}
         onClose={() => setPreviewFile(null)}
         file={previewFile}
+      />
+
+      {/* Reminder Templates Guidelines Modal */}
+      <ActivityReminderTemplatesModal
+        isOpen={isTemplatesModalOpen}
+        onClose={() => setIsTemplatesModalOpen(false)}
+        initialType={activity.activityType}
       />
     </div>
   );

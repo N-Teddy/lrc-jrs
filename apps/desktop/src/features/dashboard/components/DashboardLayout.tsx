@@ -1,4 +1,4 @@
-import { useTownContext, useTranslation } from '@jrs/client-core';
+import { useTownContext, useTranslation, useWebSocket } from '@jrs/client-core';
 import type { IAuthUser, NotificationResource } from '@jrs/shared';
 import {
   ArrowUUpLeft,
@@ -41,6 +41,8 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     canWrite,
   } = useTownContext();
 
+  const { status: socketStatus } = useWebSocket();
+
   const {
     isSidebarCollapsed,
     toggleSidebar,
@@ -58,7 +60,16 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   const [memberSubTab, setMemberSubTab] = useState<MemberSubTab>('directory');
   const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
   const [activitySubTab, setActivitySubTab] = useState<
-    'overview' | 'attendance' | 'report' | 'history' | 'audit-log' | undefined
+    | 'schedule'
+    | 'reminders'
+    | 'overview'
+    | 'preparation'
+    | 'checklist'
+    | 'attendance'
+    | 'report'
+    | 'history'
+    | 'audit-log'
+    | undefined
   >(undefined);
   const [selectedActivityId, setSelectedActivityId] = useState<string | null>(
     null,
@@ -95,6 +106,16 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           resource.entityType === 'ATTENDANCE'
         ) {
           setActivitySubTab('attendance');
+        } else if (
+          resource.subTab === 'reminders' ||
+          resource.subTab === 'guidelines'
+        ) {
+          setActivitySubTab('reminders');
+        } else if (
+          resource.subTab === 'preparation' ||
+          resource.subTab === 'checklist'
+        ) {
+          setActivitySubTab('preparation');
         } else if (
           resource.subTab === 'audit-log' ||
           resource.subTab === 'history'
@@ -369,19 +390,38 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         }`}
       >
         <div className="w-full max-w-[1536px] mx-auto flex items-center justify-between gap-4 text-xs text-[#8a726a]">
-          {/* Left: Operational status with pulsing beacon */}
+          {/* Left: Operational status with pulsing beacon connected to WebSocket */}
           <div className="flex items-center gap-2.5 shrink-0">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#486b52] opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-[#486b52]" />
-            </span>
-            <span className="font-semibold text-[#1e1b19]">
-              {t('dashboard:footer.operational')}
-            </span>
-            <span className="text-[#8a726a]/60">•</span>
-            <span className="text-[#57423b]">
-              {t('dashboard:footer.gateway')}
-            </span>
+            {socketStatus === 'connected' ? (
+              <>
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#486b52] opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-[#486b52]" />
+                </span>
+                <span className="font-semibold text-[#1e1b19]">
+                  {t('dashboard:footer.operational', 'All Systems Operational')}
+                </span>
+              </>
+            ) : socketStatus === 'connecting' ? (
+              <>
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#d97706] opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-[#d97706]" />
+                </span>
+                <span className="font-semibold text-[#8d6e19]">
+                  {t('dashboard:footer.connecting', 'Connecting Systems...')}
+                </span>
+              </>
+            ) : (
+              <>
+                <span className="relative flex h-2 w-2">
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-[#8a726a]" />
+                </span>
+                <span className="font-semibold text-[#8a726a]">
+                  {t('dashboard:footer.offline', 'Systems Offline')}
+                </span>
+              </>
+            )}
           </div>
 
           {/* Center: Legal Copyright */}

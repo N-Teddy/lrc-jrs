@@ -20,6 +20,8 @@
   "markRead": "Mark read",
   "markUnread": "Mark unread",
   "realtimeConnected": "Live",
+  "realtimeConnecting": "Connecting...",
+  "realtimeDisconnected": "Offline",
   "escToClose": "Esc to close",
   "seeAll": "See all",
   "seeAllNotifications": "See all notifications",

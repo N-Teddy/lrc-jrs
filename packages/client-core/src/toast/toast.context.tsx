@@ -68,12 +68,27 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const addToast = useCallback(
     (item: Omit<ToastItem, 'id'>) => {
-      const id = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
       const duration = item.duration ?? 4000;
-
+      const id = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
       const newToast: ToastItem = { ...item, id, duration };
 
-      setToasts((prev) => [...prev, newToast]);
+      let duplicateId: string | null = null;
+      setToasts((prev) => {
+        // Prevent stacking duplicate toasts with identical type and message
+        const duplicate = prev.find(
+          (t) =>
+            t.type === item.type && t.message.trim() === item.message.trim(),
+        );
+        if (duplicate) {
+          duplicateId = duplicate.id;
+          return prev;
+        }
+        return [...prev, newToast];
+      });
+
+      if (duplicateId) {
+        return duplicateId;
+      }
 
       if (duration > 0) {
         setTimeout(() => {

@@ -2,6 +2,7 @@ import { useTownContext, useTranslation } from '@jrs/client-core';
 import { ActivityStatus, ActivityType } from '@jrs/shared';
 import {
   ArrowCounterClockwise,
+  Bell,
   Calendar,
   CalendarPlus,
   GridFour,
@@ -33,6 +34,7 @@ interface ActivityFilterToolbarProps {
   viewMode: ActivityViewMode;
   onViewModeChange: (mode: ActivityViewMode) => void;
   onOpenCreateModal: () => void;
+  onOpenReminderGuidelines?: () => void;
   onClearFilters: () => void;
 }
 
@@ -50,6 +52,7 @@ export const ActivityFilterToolbar: React.FC<ActivityFilterToolbarProps> = ({
   viewMode,
   onViewModeChange,
   onOpenCreateModal,
+  onOpenReminderGuidelines,
   onClearFilters,
 }) => {
   const { t } = useTranslation();
@@ -228,6 +231,27 @@ export const ActivityFilterToolbar: React.FC<ActivityFilterToolbarProps> = ({
             />
           </button>
         </div>
+
+        {/* Reminder Guidelines Action (for leadership / authorized users) */}
+        {onOpenReminderGuidelines && (
+          <button
+            type="button"
+            onClick={onOpenReminderGuidelines}
+            title={t(
+              'activities:reminders.manageGuidelines',
+              'Reminder Guidelines',
+            )}
+            className="h-10 flex items-center gap-1.5 px-3 bg-[#faf2ee] hover:bg-white text-[#57423b] hover:text-[#b85028] border border-[#e8e1dd] hover:border-[#b85028]/40 rounded-md text-xs font-bold shadow-2xs transition-all cursor-pointer"
+          >
+            <Bell size={16} weight="bold" />
+            <span className="hidden sm:inline">
+              {t(
+                'activities:reminders.manageGuidelines',
+                'Reminder Guidelines',
+              )}
+            </span>
+          </button>
+        )}
 
         {/* Planifier une activité / Create Activity Button (Only when write access exists) */}
         {canWrite && (

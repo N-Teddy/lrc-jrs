@@ -20,6 +20,16 @@ export interface ExtractedErrorInfo {
 
 // biome-ignore lint/complexity/noStaticOnlyClass: Centralized static utility service
 export class ErrorService {
+  private static lastNetworkErrorTime = 0;
+  private static readonly NETWORK_ERROR_THROTTLE_MS = 6000;
+
+  /**
+   * Reset the network error throttle window (e.g. when network requests resume successfully)
+   */
+  static resetNetworkErrorThrottle(): void {
+    ErrorService.lastNetworkErrorTime = 0;
+  }
+
   /**
    * Determine if an error message or code represents an unhandled network or connectivity failure
    */
@@ -182,6 +192,23 @@ export class ErrorService {
           defaultValue: 'A server error occurred. Please try again later.',
         });
       }
+    }
+
+    const isNetwork =
+      errorCode === ErrorCode.NETWORK_ERROR ||
+      ErrorService.isRawNetworkError(message, errorCode) ||
+      ErrorService.isRawNetworkError(localizedMessage);
+
+    if (isNetwork) {
+      const now = Date.now();
+      if (
+        now - ErrorService.lastNetworkErrorTime <
+        ErrorService.NETWORK_ERROR_THROTTLE_MS
+      ) {
+        // A network error toast was already shown recently; suppress concurrent duplicates
+        return localizedMessage;
+      }
+      ErrorService.lastNetworkErrorTime = now;
     }
 
     if (!options?.silent) {

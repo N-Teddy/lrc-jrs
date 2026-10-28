@@ -52,7 +52,7 @@ export const resources = {
 
 export function isDevEnvironment(): boolean {
   try {
-    if (typeof process !== 'undefined' && process?.env?.NODE_ENV) {
+    if (process?.env?.NODE_ENV) {
       return process.env.NODE_ENV === 'development';
     }
   } catch {}
@@ -115,7 +115,7 @@ export function initI18n(
   initialLanguage = 'fr',
   options?: InitI18nOptions,
 ): typeof i18n {
-  const isDev = options?.isDev ?? isDevEnvironment();
+  const _isDev = options?.isDev ?? isDevEnvironment();
 
   if (!i18n.isInitialized) {
     i18n.use(initReactI18next).init({
@@ -144,22 +144,29 @@ export function initI18n(
       missingKeyHandler: (lngs, ns, key) => {
         const message = `[i18n ERROR] Missing translation key: "${ns}:${key}" for language(s): ${lngs.join(', ')}`;
         console.error(message);
-        if (isDev) {
-          throw new Error(message);
-        }
       },
       parseMissingKeyHandler: (key) => {
         const message = `[i18n ERROR] Missing translation key: "${key}"`;
         console.error(message);
-        if (isDev) {
-          throw new Error(message);
-        }
         return `[MISSING: ${key}]`;
       },
       interpolation: {
         escapeValue: false,
       },
     });
+  } else {
+    // In dev / HMR, sync any updated resource bundles into the active i18n instance
+    for (const [lng, namespaces] of Object.entries(resources)) {
+      for (const [ns, bundle] of Object.entries(namespaces)) {
+        i18n.addResourceBundle(
+          lng,
+          ns,
+          bundle as unknown as object,
+          true,
+          true,
+        );
+      }
+    }
   }
   return i18n;
 }

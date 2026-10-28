@@ -6,7 +6,9 @@ import { HttpProvider } from '../context/http.context';
 import { TownProvider } from '../context/town.context';
 import { HttpService } from '../http/axios-client';
 import { i18n, initI18n } from '../i18n/i18n';
+import { WebSocketProvider } from '../notifications/socket.context';
 import { createQueryClient } from '../query/query-client';
+import { setupQueryCachePersistence } from '../query/query-persister';
 import type { IStorageAdapter } from '../storage/storage.interface';
 import { ToastProvider } from '../toast/toast.context';
 
@@ -71,12 +73,23 @@ export function CoreProviders({
   );
   const activeQueryClient = customQueryClient || defaultQueryClient;
 
+  // Persist TanStack Query cache across reloads and offline periods
+  useEffect(() => {
+    const cleanup = setupQueryCachePersistence(
+      activeQueryClient,
+      activeStorage,
+    );
+    return cleanup;
+  }, [activeQueryClient, activeStorage]);
+
   return (
     <QueryClientProvider client={activeQueryClient}>
       <HttpProvider http={http}>
         <ToastProvider>
           <AuthProvider storage={activeStorage} http={http}>
-            <TownProvider storage={activeStorage}>{children}</TownProvider>
+            <TownProvider storage={activeStorage}>
+              <WebSocketProvider>{children}</WebSocketProvider>
+            </TownProvider>
           </AuthProvider>
         </ToastProvider>
       </HttpProvider>
