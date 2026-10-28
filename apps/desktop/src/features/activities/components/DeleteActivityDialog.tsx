@@ -41,7 +41,10 @@ export const DeleteActivityDialog: React.FC<DeleteActivityDialogProps> = ({
                 {t('activities:deleteConfirmTitle')}
               </h3>
               <p className="text-xs text-[#8a726a]">
-                Activity permanent removal
+                {t(
+                  'activities:deleteSubtext',
+                  'Permanent removal of activity record',
+                )}
               </p>
             </div>
           </div>
@@ -105,7 +108,7 @@ export const DeleteActivityDialog: React.FC<DeleteActivityDialogProps> = ({
             ) : (
               <Trash size={15} weight="bold" />
             )}
-            <span>Delete Activity</span>
+            <span>{t('activities:deleteActivity', 'Delete Activity')}</span>
           </button>
         </div>
       </div>

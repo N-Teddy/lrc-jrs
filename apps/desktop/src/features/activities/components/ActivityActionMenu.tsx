@@ -114,7 +114,9 @@ export const ActivityActionMenu: React.FC<ActivityActionMenuProps> = ({
               className="w-full px-3 py-1.5 text-left text-xs text-[#1e1b19] hover:bg-[#faf2ee] flex items-center gap-2 font-medium cursor-pointer"
             >
               <PencilSimple size={14} weight="bold" />
-              <span>{t('activities:card.edit')} / Reschedule</span>
+              <span>
+                {t('activities:editOrReschedule', 'Edit / Reschedule')}
+              </span>
             </button>
           )}
 
@@ -131,7 +133,9 @@ export const ActivityActionMenu: React.FC<ActivityActionMenuProps> = ({
                 className="w-full px-3 py-1.5 text-left text-xs text-[#ba1a1a] hover:bg-[#ffdad6] flex items-center gap-2 font-medium cursor-pointer"
               >
                 <XCircle size={14} weight="bold" />
-                <span>Cancel Gathering</span>
+                <span>
+                  {t('activities:detail.cancelActivity', 'Cancel Activity')}
+                </span>
               </button>
             )}
 
@@ -145,7 +149,9 @@ export const ActivityActionMenu: React.FC<ActivityActionMenuProps> = ({
               className="w-full px-3 py-1.5 text-left text-xs text-[#486b52] hover:bg-[#edf3ee] flex items-center gap-2 font-medium cursor-pointer"
             >
               <ArrowCounterClockwise size={14} weight="bold" />
-              <span>Restore Gathering</span>
+              <span>
+                {t('activities:detail.restoreActivity', 'Restore Activity')}
+              </span>
             </button>
           )}
 

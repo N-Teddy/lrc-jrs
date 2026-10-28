@@ -160,7 +160,10 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
   const handleCancelActivity = async () => {
     if (
       !window.confirm(
-        'Are you sure you want to cancel this gathering? You can undo this cancellation at any time.',
+        t(
+          'activities:detail.confirmCancel',
+          'Are you sure you want to cancel this activity? You can undo this cancellation at any time.',
+        ),
       )
     ) {
       return;
@@ -169,7 +172,10 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
       id: activity.id,
       dto: {
         status: ActivityStatus.CANCELLED,
-        changeReason: 'Gathering cancelled by coordinator',
+        changeReason: t(
+          'activities:detail.cancelReason',
+          'Activity cancelled by coordinator',
+        ),
       },
     });
   };
@@ -179,7 +185,10 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
       id: activity.id,
       dto: {
         status: ActivityStatus.SCHEDULED,
-        changeReason: 'Gathering cancellation reversed and restored',
+        changeReason: t(
+          'activities:detail.restoreReason',
+          'Activity cancellation reversed and restored',
+        ),
       },
     });
   };
@@ -261,12 +270,22 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
         if (!isCurrentUserAp) return;
         await unlockMutation.mutateAsync({
           activityId: activity.id,
-          reason: lockReason.trim() || 'AP Administrative Override',
+          reason:
+            lockReason.trim() ||
+            t(
+              'activities:detail.lockPrompt.apOverrideDefaultReason',
+              'AP Administrative Override',
+            ),
         });
       } else {
         await lockMutation.mutateAsync({
           activityId: activity.id,
-          reason: lockReason.trim() || 'Roll call finalized',
+          reason:
+            lockReason.trim() ||
+            t(
+              'activities:detail.lockPrompt.rollCallFinalizedReason',
+              'Roll call finalized',
+            ),
         });
       }
       setLockPromptOpen(false);
@@ -295,7 +314,9 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
           className="inline-flex items-center gap-2 text-xs font-bold text-[#8a726a] hover:text-[#1e1b19] transition-colors cursor-pointer self-start"
         >
           <ArrowLeft size={16} weight="bold" />
-          <span>Back to Activities</span>
+          <span>
+            {t('activities:detail.backToActivities', 'Back to Activities')}
+          </span>
         </button>
 
         <div className="flex items-center gap-2 self-end sm:self-auto">
@@ -306,7 +327,9 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
               className="px-3.5 py-1.5 rounded-md bg-white border border-[#e8e1dd] hover:bg-[#faf2ee] text-xs font-bold text-[#1e1b19] transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs"
             >
               <PencilSimple size={14} weight="bold" />
-              <span>Edit Activity</span>
+              <span>
+                {t('activities:detail.editActivity', 'Edit Activity')}
+              </span>
             </button>
           )}
 
@@ -317,7 +340,9 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
               className="px-3.5 py-1.5 rounded-md bg-white border border-[#ffdad6] hover:bg-[#ffdad6]/40 text-xs font-bold text-[#ba1a1a] transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs"
             >
               <XCircle size={14} weight="bold" />
-              <span>Cancel Activity</span>
+              <span>
+                {t('activities:detail.cancelActivity', 'Cancel Activity')}
+              </span>
             </button>
           )}
 
@@ -328,7 +353,9 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
               className="px-3.5 py-1.5 rounded-md bg-white border border-[#c2e9ca] hover:bg-[#edf3ee] text-xs font-bold text-[#486b52] transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs"
             >
               <ArrowCounterClockwise size={14} weight="bold" />
-              <span>Restore Gathering</span>
+              <span>
+                {t('activities:detail.restoreActivity', 'Restore Activity')}
+              </span>
             </button>
           )}
 
@@ -343,7 +370,7 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
                 className="px-3.5 py-1.5 rounded-md bg-white border border-[#ffdad6] hover:bg-[#ffdad6]/40 text-xs font-bold text-[#ba1a1a] transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs"
               >
                 <Trash size={14} weight="bold" />
-                <span>Delete</span>
+                <span>{t('common:delete', 'Delete')}</span>
               </button>
             )}
         </div>
@@ -355,7 +382,10 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
           <div className="flex items-center gap-2.5 text-[#ba1a1a]">
             <XCircle size={20} weight="fill" />
             <span className="font-bold">
-              This activity gathering has been cancelled.
+              {t(
+                'activities:detail.activityCancelledNotice',
+                'This activity has been cancelled.',
+              )}
             </span>
           </div>
           {canManageActivity && (
@@ -365,7 +395,12 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
               className="px-3.5 py-1.5 rounded-md bg-white border border-[#ffdad6] text-[#ba1a1a] font-bold hover:bg-[#ffdad6] transition-colors cursor-pointer self-start sm:self-auto flex items-center gap-1.5"
             >
               <ArrowCounterClockwise size={14} weight="bold" />
-              <span>Undo Cancel & Restore</span>
+              <span>
+                {t(
+                  'activities:detail.undoCancelAndRestore',
+                  'Undo Cancel & Restore',
+                )}
+              </span>
             </button>
           )}
         </div>
@@ -394,15 +429,21 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
             </span>
 
             <span className="px-2.5 py-1 rounded-md text-xs font-mono font-bold bg-[#faf2ee] text-[#57423b] border border-[#e8e1dd]">
-              {activity.town?.name || activity.town?.code} Hub
+              {activity.town?.name || activity.town?.code}{' '}
+              {t('activities:detail.hub', 'Hub')}
             </span>
 
             {isParticipating && (
               <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold bg-[#edf3ee] border border-[#c2e9ca] text-[#486b52]">
                 <Buildings size={13} weight="bold" />
                 <span>
-                  Inter-villes · Hôte:{' '}
-                  {activity.hostTown?.name || activity.town?.name || 'Autre'}
+                  {t('activities:detail.interTownHost', {
+                    host:
+                      activity.hostTown?.name ||
+                      activity.town?.name ||
+                      t('activities:detail.otherHost', 'Other'),
+                    defaultValue: 'Inter-Town · Host: {{host}}',
+                  })}
                 </span>
               </span>
             )}
@@ -410,7 +451,9 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
             {isLocked && (
               <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold bg-[#fff8e1] border border-[#ffe082] text-[#812901]">
                 <Lock size={13} weight="bold" />
-                <span>Attendance Sealed</span>
+                <span>
+                  {t('activities:detail.attendanceSealed', 'Attendance Sealed')}
+                </span>
               </span>
             )}
           </div>
@@ -439,7 +482,12 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
 
             {activity.town?.name && (
               <div className="flex items-center gap-1.5 text-[#8a726a]">
-                <span>Host: {activity.town.name}</span>
+                <span>
+                  {t('activities:detail.hostPrefix', {
+                    host: activity.town.name,
+                    defaultValue: 'Host: {{host}}',
+                  })}
+                </span>
               </div>
             )}
 
@@ -451,8 +499,10 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
                   className="text-[#b85028]"
                 />
                 <span>
-                  Participating:{' '}
-                  {activity.includedTowns.map((t) => t.name).join(', ')}
+                  {t('activities:detail.participatingPrefix', {
+                    towns: activity.includedTowns.map((t) => t.name).join(', '),
+                    defaultValue: 'Participating: {{towns}}',
+                  })}
                 </span>
               </div>
             )}
@@ -464,20 +514,33 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
           {isCancelled ? (
             <div className="h-11 px-5 rounded-md bg-[#ffdad6]/60 border border-[#ffdad6] text-[#ba1a1a] font-bold text-xs flex items-center justify-center gap-2 select-none shadow-2xs">
               <XCircle size={18} weight="bold" />
-              <span>Activity Cancelled</span>
+              <span>
+                {t('activities:detail.activityCancelled', 'Activity Cancelled')}
+              </span>
             </div>
           ) : !isDayOfActivityOrLater ? (
             <div
               className="h-11 px-5 rounded-md bg-[#faf2ee] border border-[#e8e1dd] text-[#8a726a] font-semibold text-xs flex items-center justify-center gap-2 select-none shadow-2xs"
-              title="Attendance roll-call opens on the day of the activity"
+              title={t(
+                'activities:detail.attendanceOpensOnDayTooltip',
+                'Attendance roll-call opens on the day of the activity',
+              )}
             >
               <Clock size={18} weight="bold" className="text-[#b85028]" />
-              <span>Attendance Opens on Activity Day</span>
+              <span>
+                {t(
+                  'activities:detail.attendanceOpensOnDay',
+                  'Attendance Opens on Activity Day',
+                )}
+              </span>
             </div>
           ) : !canManageActivity ? (
             <div
               className="h-11 px-5 rounded-md bg-[#faf2ee] border border-[#e8e1dd] text-[#8a726a] font-semibold text-xs flex items-center justify-center gap-2 select-none shadow-2xs"
-              title="Attendance is managed exclusively by the host town Contact Person"
+              title={t(
+                'activities:detail.hostTownEventTooltip',
+                'Attendance is managed exclusively by the host town Contact Person',
+              )}
             >
               <Buildings
                 size={18}
@@ -485,8 +548,13 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
                 className="text-[#b85028]"
               />
               <span>
-                Host Town Event (
-                {activity.hostTown?.name || activity.town?.name || 'Hôte'})
+                {t('activities:detail.hostTownEvent', {
+                  host:
+                    activity.hostTown?.name ||
+                    activity.town?.name ||
+                    t('activities:detail.hostFallback', 'Host'),
+                  defaultValue: 'Host Town Event ({{host}})',
+                })}
               </span>
             </div>
           ) : (
@@ -501,17 +569,29 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
               }`}
               title={
                 isLocked && !isCurrentUserAp
-                  ? 'Attendance roll-call is sealed. Only an AP can modify.'
-                  : 'Open live attendance roll-call roster'
+                  ? t(
+                      'activities:detail.attendanceSealedTooltip',
+                      'Attendance roll-call is sealed. Only an AP can modify.',
+                    )
+                  : t(
+                      'activities:detail.trackAttendanceTooltip',
+                      'Open live attendance roll-call roster',
+                    )
               }
             >
               <UserCheck size={18} weight="bold" />
               <span>
                 {isLocked
                   ? isCurrentUserAp
-                    ? 'Modify Attendance (AP Override)'
-                    : 'Attendance Sealed'
-                  : 'Track Attendance'}
+                    ? t(
+                        'activities:detail.modifyAttendanceAp',
+                        'Modify Attendance (AP Override)',
+                      )
+                    : t(
+                        'activities:detail.attendanceSealed',
+                        'Attendance Sealed',
+                      )
+                  : t('activities:detail.trackAttendance', 'Track Attendance')}
               </span>
             </button>
           )}
@@ -529,8 +609,11 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
               />
               <span>
                 {reports.length > 0
-                  ? `Manage Reports (${reports.length})`
-                  : 'Upload Report'}
+                  ? t('activities:detail.manageReportsCount', {
+                      count: reports.length,
+                      defaultValue: `Manage Reports (${reports.length})`,
+                    })
+                  : t('activities:detail.uploadReport', 'Upload Report')}
               </span>
             </button>
           )}
@@ -550,7 +633,7 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
             }`}
           >
             <Info size={15} weight="bold" />
-            <span>Overview</span>
+            <span>{t('activities:detail.tabs.overview', 'Overview')}</span>
           </button>
 
           {/* Attendance tab ONLY appears on or after the day of the activity */}
@@ -565,7 +648,12 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
               }`}
             >
               <UserCheck size={15} weight="bold" />
-              <span>Attendance ({summary.totalPresent})</span>
+              <span>
+                {t('activities:detail.tabs.attendance', {
+                  count: summary.totalPresent,
+                  defaultValue: `Attendance (${summary.totalPresent})`,
+                })}
+              </span>
             </button>
           )}
 
@@ -582,8 +670,12 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
             >
               <HardDrives size={15} weight="bold" />
               <span>
-                Activity Reports{' '}
-                {reports.length > 0 ? `(${reports.length})` : ''}
+                {reports.length > 0
+                  ? t('activities:detail.tabs.reportsCount', {
+                      count: reports.length,
+                      defaultValue: `Activity Reports (${reports.length})`,
+                    })
+                  : t('activities:detail.tabs.reports', 'Activity Reports')}
               </span>
             </button>
           )}
@@ -598,7 +690,12 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
             }`}
           >
             <ClockCounterClockwise size={15} weight="bold" />
-            <span>Audit History ({history.length})</span>
+            <span>
+              {t('activities:detail.tabs.history', {
+                count: history.length,
+                defaultValue: `Audit History (${history.length})`,
+              })}
+            </span>
           </button>
         </div>
       </div>
@@ -612,50 +709,59 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             <div className="bg-white rounded-xl p-5 border border-[#e8e1dd] shadow-2xs flex flex-col justify-between">
               <span className="text-[11px] font-bold text-[#8a726a] uppercase tracking-wider">
-                Turnout Rate
+                {t('activities:detail.kpis.turnoutRate', 'Turnout Rate')}
               </span>
               <div className="text-3xl font-black text-[#1e1b19] mt-2">
                 {turnoutPercent}%
               </div>
               <span className="text-[11px] text-[#8a726a] mt-1">
-                of registered hub youth
+                {t(
+                  'activities:detail.kpis.registeredYouth',
+                  'of registered hub youth',
+                )}
               </span>
             </div>
 
             <div className="bg-white rounded-xl p-5 border border-[#e8e1dd] shadow-2xs flex flex-col justify-between">
               <span className="text-[11px] font-bold text-[#8a726a] uppercase tracking-wider">
-                Total Present
+                {t('activities:detail.kpis.totalPresent', 'Total Present')}
               </span>
               <div className="text-3xl font-black text-[#2c4e37] mt-2">
                 {summary.totalPresent}
               </div>
               <span className="text-[11px] text-[#57423b] mt-1">
-                {summary.membersPresent} members + {summary.guestsPresent}{' '}
-                guests
+                {t('activities:detail.kpis.presentBreakdown', {
+                  members: summary.membersPresent,
+                  guests: summary.guestsPresent,
+                  defaultValue: `${summary.membersPresent} members + ${summary.guestsPresent} guests`,
+                })}
               </span>
             </div>
 
             <div className="bg-white rounded-xl p-5 border border-[#e8e1dd] shadow-2xs flex flex-col justify-between">
               <span className="text-[11px] font-bold text-[#8a726a] uppercase tracking-wider">
-                Members Absent
+                {t('activities:detail.kpis.membersAbsent', 'Members Absent')}
               </span>
               <div className="text-3xl font-black text-[#ba1a1a] mt-2">
                 {absentCount}
               </div>
               <span className="text-[11px] text-[#8a726a] mt-1">
-                home hub members
+                {t('activities:detail.kpis.homeMembers', 'home hub members')}
               </span>
             </div>
 
             <div className="bg-white rounded-xl p-5 border border-[#e8e1dd] shadow-2xs flex flex-col justify-between">
               <span className="text-[11px] font-bold text-[#8a726a] uppercase tracking-wider">
-                External Guests
+                {t('activities:detail.kpis.externalGuests', 'External Guests')}
               </span>
               <div className="text-3xl font-black text-[#b85028] mt-2">
                 {summary.guestsPresent}
               </div>
               <span className="text-[11px] text-[#8a726a] mt-1">
-                visitors welcomed
+                {t(
+                  'activities:detail.kpis.visitorsWelcomed',
+                  'visitors welcomed',
+                )}
               </span>
             </div>
           </div>
@@ -685,13 +791,27 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
               <div className="flex flex-col">
                 <span className="font-bold text-sm">
                   {isLocked
-                    ? 'Attendance Finalized & Sealed'
-                    : 'Attendance Open for Check-In'}
+                    ? t(
+                        'activities:detail.lockBanner.sealedTitle',
+                        'Attendance Finalized & Sealed',
+                      )
+                    : t(
+                        'activities:detail.lockBanner.openTitle',
+                        'Attendance Open for Check-In',
+                      )}
                 </span>
                 <span className="text-xs opacity-85">
                   {isLocked
-                    ? `Locked by ${activity.attendanceLockedByName || 'Administrator'} • Edits disabled without AP override`
-                    : 'Active check-in session • Changes are autosaved to hub record'}
+                    ? t('activities:detail.lockBanner.sealedSubtitle', {
+                        name:
+                          activity.attendanceLockedByName ||
+                          t('common:roles.administrator', 'Administrator'),
+                        defaultValue: `Locked by ${activity.attendanceLockedByName || 'Administrator'} • Edits disabled without AP override`,
+                      })
+                    : t(
+                        'activities:detail.lockBanner.openSubtitle',
+                        'Active check-in session • Changes are autosaved to hub record',
+                      )}
                 </span>
               </div>
             </div>
@@ -705,7 +825,12 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
                       className="px-3.5 py-1.5 rounded-md bg-white border border-[#ffe082] text-xs font-bold text-[#812901] hover:bg-[#fffbf0] transition-colors cursor-pointer flex items-center gap-1.5 shadow-2xs"
                     >
                       <LockOpen size={14} weight="bold" />
-                      <span>Unlock (AP Override)</span>
+                      <span>
+                        {t(
+                          'activities:detail.lockBanner.unlockAp',
+                          'Unlock (AP Override)',
+                        )}
+                      </span>
                     </button>
                   )
                 : isPrivileged && (
@@ -715,7 +840,12 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
                       className="px-4 py-2 rounded-md bg-[#2c4e37] hover:bg-[#233f2c] text-xs font-bold text-white transition-colors cursor-pointer flex items-center gap-1.5 shadow-2xs"
                     >
                       <Lock size={15} weight="bold" />
-                      <span>Finalize & Lock Attendance</span>
+                      <span>
+                        {t(
+                          'activities:detail.lockBanner.finalizeAndLock',
+                          'Finalize & Lock Attendance',
+                        )}
+                      </span>
                     </button>
                   )}
             </div>
@@ -733,8 +863,14 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
                   />
                   <span>
                     {isLocked
-                      ? 'Confirm AP Attendance Unlock'
-                      : 'Confirm Finalizing Attendance'}
+                      ? t(
+                          'activities:detail.lockPrompt.confirmUnlockTitle',
+                          'Confirm AP Attendance Unlock',
+                        )
+                      : t(
+                          'activities:detail.lockPrompt.confirmLockTitle',
+                          'Confirm Finalizing Attendance',
+                        )}
                   </span>
                 </h4>
                 <button
@@ -742,13 +878,19 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
                   onClick={() => setLockPromptOpen(false)}
                   className="text-[#8a726a] hover:text-[#1e1b19] text-xs cursor-pointer"
                 >
-                  Cancel
+                  {t('common:cancel', 'Cancel')}
                 </button>
               </div>
               <p className="text-xs text-[#57423b]">
                 {isLocked
-                  ? 'Unlocking this attendance will allow coordinators to alter member check-in states. An audit record will be logged with your administrator credentials.'
-                  : 'Once locked, attendance records cannot be modified without an AP administrative override. Ensure all member and guest attendance is accurate.'}
+                  ? t(
+                      'activities:detail.lockPrompt.unlockWarning',
+                      'Unlocking this attendance will allow coordinators to alter member check-in states. An audit record will be logged with your administrator credentials.',
+                    )
+                  : t(
+                      'activities:detail.lockPrompt.lockWarning',
+                      'Once locked, attendance records cannot be modified without an AP administrative override. Ensure all member and guest attendance is accurate.',
+                    )}
               </p>
               <div className="flex items-center gap-2">
                 <input
@@ -757,8 +899,14 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
                   onChange={(e) => setLockReason(e.target.value)}
                   placeholder={
                     isLocked
-                      ? 'Reason for AP override (e.g. Late check-in correction)...'
-                      : 'Notes (Optional)...'
+                      ? t(
+                          'activities:detail.lockPrompt.unlockPlaceholder',
+                          'Reason for AP override (e.g. Late check-in correction)...',
+                        )
+                      : t(
+                          'activities:detail.lockPrompt.lockPlaceholder',
+                          'Notes (Optional)...',
+                        )
                   }
                   className="flex-1 px-3.5 py-2 text-xs rounded-md bg-[#faf2ee] border border-[#e8e1dd] focus:outline-none focus:border-[#b85028]"
                 />
@@ -772,7 +920,15 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
                       : 'bg-[#2c4e37] hover:bg-[#233f2c]'
                   }`}
                 >
-                  {isLocked ? 'Confirm Unlock' : 'Confirm & Seal'}
+                  {isLocked
+                    ? t(
+                        'activities:detail.lockPrompt.confirmUnlock',
+                        'Confirm Unlock',
+                      )
+                    : t(
+                        'activities:detail.lockPrompt.confirmLock',
+                        'Confirm & Seal',
+                      )}
                 </button>
               </div>
             </div>
@@ -782,7 +938,9 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
           <div className="bg-white rounded-xl border border-[#e8e1dd] p-6 shadow-xs flex flex-col gap-3">
             <h3 className="text-sm font-bold text-[#1e1b19] flex items-center gap-2">
               <Info size={16} weight="bold" className="text-[#b85028]" />
-              <span>Activity Agenda & Notes</span>
+              <span>
+                {t('activities:detail.notes.title', 'Activity Agenda & Notes')}
+              </span>
             </h3>
             {activity.notes ? (
               <p className="text-xs text-[#57423b] leading-relaxed whitespace-pre-wrap bg-[#faf2ee]/40 p-4 rounded-lg border border-[#f4ece9]">
@@ -790,8 +948,10 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
               </p>
             ) : (
               <p className="text-xs text-[#8a726a] italic">
-                No supplementary notes or agenda items recorded for this
-                activity.
+                {t(
+                  'activities:detail.notes.empty',
+                  'No supplementary notes or agenda items recorded for this activity.',
+                )}
               </p>
             )}
           </div>
@@ -812,7 +972,10 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search attendees by name or phone..."
+                placeholder={t(
+                  'activities:detail.attendanceTab.searchPlaceholder',
+                  'Search attendees by name or phone...',
+                )}
                 className="w-full pl-10 pr-3.5 py-2 rounded-md bg-[#faf2ee]/60 border border-[#e8e1dd] text-xs text-[#1e1b19] focus:outline-none focus:border-[#b85028]"
               />
             </div>
@@ -822,10 +985,19 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
               <div className="inline-flex p-1 rounded-lg bg-[#faf2ee] border border-[#e8e1dd] gap-1">
                 {(
                   [
-                    { id: 'ALL', label: `All (${attendedAttendees.length})` },
+                    {
+                      id: 'ALL',
+                      label: t('activities:detail.attendanceTab.allCount', {
+                        count: attendedAttendees.length,
+                        defaultValue: `All (${attendedAttendees.length})`,
+                      }),
+                    },
                     {
                       id: 'GUESTS',
-                      label: `Guests (${attendedGuests.length})`,
+                      label: t('activities:detail.attendanceTab.guestsCount', {
+                        count: attendedGuests.length,
+                        defaultValue: `Guests (${attendedGuests.length})`,
+                      }),
                     },
                   ] as const
                 ).map((tab) => (
@@ -856,7 +1028,15 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
               >
                 <UserCheck size={14} weight="bold" />
                 <span>
-                  {isLocked ? 'Edit Attendance (AP)' : 'Track Attendance'}
+                  {isLocked
+                    ? t(
+                        'activities:detail.attendanceTab.editAttendanceAp',
+                        'Edit Attendance (AP)',
+                      )
+                    : t(
+                        'activities:detail.attendanceTab.trackAttendance',
+                        'Track Attendance',
+                      )}
                 </span>
               </button>
             </div>
@@ -888,12 +1068,21 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
               <div className="p-12 text-center flex flex-col items-center justify-center text-xs text-[#8a726a] border border-[#e8e1dd] rounded-xl bg-[#faf2ee]/30">
                 <Users size={32} className="text-[#b85028]/60 mb-2" />
                 <span className="font-bold text-[#1e1b19]">
-                  No Attendees Recorded
+                  {t(
+                    'activities:detail.attendanceTab.noAttendeesTitle',
+                    'No Attendees Recorded',
+                  )}
                 </span>
                 <span className="mt-1 text-[11px]">
                   {search
-                    ? 'No attendees match your search query.'
-                    : 'No members or guests have been recorded as present for this activity yet.'}
+                    ? t(
+                        'activities:detail.attendanceTab.noSearchMatches',
+                        'No attendees match your search query.',
+                      )
+                    : t(
+                        'activities:detail.attendanceTab.noAttendeesRecorded',
+                        'No members or guests have been recorded as present for this activity yet.',
+                      )}
                 </span>
               </div>
             ) : (
@@ -902,14 +1091,18 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
                   const name =
                     att.member?.fullName ||
                     att.guestInfo?.fullName ||
-                    'Anonymous';
+                    t('activities:detail.attendanceTab.anonymous', 'Anonymous');
                   const phone =
                     att.member?.phoneNumber || att.guestInfo?.phoneNumber || '';
                   const avatarUrl = att.member?.avatarUrl;
                   const role =
                     att.attendeeType === AttendeeType.GUEST
-                      ? 'Guest'
-                      : att.member?.role || 'Member';
+                      ? t('activities:detail.attendanceTab.guestBadge', 'Guest')
+                      : att.member?.role ||
+                        t(
+                          'activities:detail.attendanceTab.memberBadge',
+                          'Member',
+                        );
                   const checkIn = att.checkInTime
                     ? new Date(att.checkInTime).toLocaleTimeString([], {
                         hour: '2-digit',
@@ -939,7 +1132,10 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
                             </span>
                           ) : (
                             <span className="text-[10px] text-[#8a726a] italic mt-0.5">
-                              No phone
+                              {t(
+                                'activities:detail.attendanceTab.noPhone',
+                                'No phone',
+                              )}
                             </span>
                           )}
                         </div>
@@ -984,11 +1180,16 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
               </div>
               <div className="flex flex-col">
                 <h3 className="text-base font-bold text-[#1e1b19]">
-                  Google Drive Activity Reports ({reports.length})
+                  {t('activities:detail.reportsTab.title', {
+                    count: reports.length,
+                    defaultValue: `Google Drive Activity Reports (${reports.length})`,
+                  })}
                 </h3>
                 <p className="text-xs text-[#8a726a]">
-                  Archived activity minutes, attendance summaries, photos, and
-                  documents.
+                  {t(
+                    'activities:detail.reportsTab.subtitle',
+                    'Archived activity minutes, attendance summaries, photos, and documents.',
+                  )}
                 </p>
               </div>
             </div>
@@ -1002,8 +1203,14 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
                 <Plus size={15} weight="bold" />
                 <span>
                   {reports.length > 0
-                    ? 'Upload More Reports'
-                    : 'Upload Reports'}
+                    ? t(
+                        'activities:detail.reportsTab.uploadMore',
+                        'Upload More Reports',
+                      )
+                    : t(
+                        'activities:detail.reportsTab.uploadReports',
+                        'Upload Reports',
+                      )}
                 </span>
               </button>
             )}
@@ -1017,11 +1224,16 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
                 </div>
                 <div className="flex flex-col">
                   <span className="text-[10px] font-bold text-[#8a726a] uppercase tracking-wider">
-                    Total Documents
+                    {t(
+                      'activities:detail.reportsTab.totalDocuments',
+                      'Total Documents',
+                    )}
                   </span>
                   <span className="text-xs font-semibold text-[#1e1b19]">
-                    {reports.length} {reports.length === 1 ? 'file' : 'files'}{' '}
-                    archived
+                    {t('activities:detail.reportsTab.filesArchived', {
+                      count: reports.length,
+                      defaultValue: `${reports.length} files archived`,
+                    })}
                   </span>
                 </div>
               </div>
@@ -1031,14 +1243,16 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
                 </div>
                 <div className="flex flex-col">
                   <span className="text-[10px] font-bold text-[#8a726a] uppercase tracking-wider">
-                    Total Size
+                    {t('activities:detail.reportsTab.totalSize', 'Total Size')}
                   </span>
                   <span className="text-xs font-semibold text-[#1e1b19]">
-                    {(
-                      reports.reduce((acc, r) => acc + (r.fileSize || 0), 0) /
-                      (1024 * 1024)
-                    ).toFixed(2)}{' '}
-                    MB stored
+                    {t('activities:detail.reportsTab.mbStored', {
+                      size: (
+                        reports.reduce((acc, r) => acc + (r.fileSize || 0), 0) /
+                        (1024 * 1024)
+                      ).toFixed(2),
+                      defaultValue: `${(reports.reduce((acc, r) => acc + (r.fileSize || 0), 0) / (1024 * 1024)).toFixed(2)} MB stored`,
+                    })}
                   </span>
                 </div>
               </div>
@@ -1048,14 +1262,17 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
                 </div>
                 <div className="flex flex-col">
                   <span className="text-[10px] font-bold text-[#8a726a] uppercase tracking-wider">
-                    Latest Upload
+                    {t(
+                      'activities:detail.reportsTab.latestUpload',
+                      'Latest Upload',
+                    )}
                   </span>
                   <span className="text-xs font-semibold text-[#1e1b19]">
                     {reports[reports.length - 1]?.uploadedAt
                       ? new Date(
                           reports[reports.length - 1].uploadedAt,
                         ).toLocaleDateString()
-                      : 'Recently'}
+                      : t('activities:detail.reportsTab.recently', 'Recently')}
                   </span>
                 </div>
               </div>
@@ -1080,7 +1297,10 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
                             type="button"
                             onClick={() => setReportToDelete(rep)}
                             className="p-1.5 rounded-md text-[#ba1a1a]/70 hover:text-[#ba1a1a] hover:bg-[#ffdad6]/40 transition-colors cursor-pointer"
-                            title="Delete this report from Google Drive"
+                            title={t(
+                              'activities:detail.reportsTab.deleteTooltip',
+                              'Delete this report from Google Drive',
+                            )}
                           >
                             <Trash size={15} />
                           </button>
@@ -1096,12 +1316,21 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
                         {rep.filename}
                       </h4>
                       <div className="flex items-center gap-1.5 text-[11px] text-[#8a726a] flex-wrap mt-1">
-                        <span>{rep.uploadedByName || 'Coordinator'}</span>
+                        <span>
+                          {rep.uploadedByName ||
+                            t(
+                              'activities:detail.reportsTab.coordinatorFallback',
+                              'Coordinator',
+                            )}
+                        </span>
                         <span>•</span>
                         <span>
                           {rep.uploadedAt
                             ? new Date(rep.uploadedAt).toLocaleDateString()
-                            : 'Recently'}
+                            : t(
+                                'activities:detail.reportsTab.recently',
+                                'Recently',
+                              )}
                         </span>
                         {rep.fileSize && (
                           <>
@@ -1128,7 +1357,12 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
                       className="flex-1 py-2 px-3.5 rounded-md bg-[#b85028] hover:bg-[#9c421f] text-white text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer"
                     >
                       <Eye size={15} weight="bold" />
-                      <span>Preview File</span>
+                      <span>
+                        {t(
+                          'activities:detail.reportsTab.previewFile',
+                          'Preview File',
+                        )}
+                      </span>
                     </button>
                     {rep.webViewLink && (
                       <button
@@ -1145,7 +1379,10 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
                           });
                         }}
                         className="p-2 rounded-md bg-[#faf2ee] hover:bg-[#f4ece9] border border-[#e8e1dd] text-[#1e1b19] transition-all flex items-center justify-center shadow-2xs cursor-pointer"
-                        title="Open in Google Drive (External Browser)"
+                        title={t(
+                          'activities:detail.reportsTab.openInDriveTooltip',
+                          'Open in Google Drive (External Browser)',
+                        )}
                       >
                         <ArrowSquareOut size={16} />
                       </button>
@@ -1160,12 +1397,16 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
                 <CloudArrowUp size={24} weight="duotone" />
               </div>
               <h4 className="text-sm font-bold text-[#1e1b19]">
-                No Reports Attached Yet
+                {t(
+                  'activities:detail.reportsTab.noReportsTitle',
+                  'No Reports Attached Yet',
+                )}
               </h4>
               <p className="text-xs text-[#8a726a] max-w-sm">
-                This activity has concluded. Hub coordinators can upload session
-                minutes, attendance summaries, photos, or meeting notes directly
-                to Google Drive.
+                {t(
+                  'activities:detail.reportsTab.noReportsDesc',
+                  'This activity has concluded. Hub coordinators can upload session minutes, attendance summaries, photos, or meeting notes directly to Google Drive.',
+                )}
               </p>
               {isPrivileged && (
                 <button
@@ -1174,7 +1415,12 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
                   className="mt-2 px-5 py-2.5 rounded-md bg-[#b85028] hover:bg-[#a44520] text-xs font-bold text-white transition-all shadow-xs cursor-pointer flex items-center gap-2"
                 >
                   <Plus size={16} weight="bold" />
-                  <span>Upload Activity Reports</span>
+                  <span>
+                    {t(
+                      'activities:detail.reportsTab.uploadActivityReports',
+                      'Upload Activity Reports',
+                    )}
+                  </span>
                 </button>
               )}
             </div>
@@ -1191,13 +1437,20 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
               weight="bold"
               className="text-[#b85028]"
             />
-            <span>Activity Change & Audit History</span>
+            <span>
+              {t(
+                'activities:detail.historyTab.title',
+                'Activity Change & Audit History',
+              )}
+            </span>
           </h3>
 
           {history.length === 0 ? (
             <p className="text-xs text-[#8a726a] italic p-6 text-center">
-              No modifications recorded. This activity has remained in its
-              initial configuration.
+              {t(
+                'activities:detail.historyTab.empty',
+                'No modifications recorded. This activity has remained in its initial configuration.',
+              )}
             </p>
           ) : (
             <div className="divide-y divide-[#f4ece9] border border-[#e8e1dd] rounded-lg overflow-hidden">
@@ -1220,8 +1473,13 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
                     </p>
                   )}
                   <span className="text-[10px] text-[#8a726a]">
-                    Recorded by{' '}
-                    {log.changedByName || log.changedBy || 'Administrator'}
+                    {t('activities:detail.historyTab.recordedBy', {
+                      name:
+                        log.changedByName ||
+                        log.changedBy ||
+                        t('common:roles.administrator', 'Administrator'),
+                      defaultValue: `Recorded by ${log.changedByName || log.changedBy || 'Administrator'}`,
+                    })}
                   </span>
                 </div>
               ))}
@@ -1251,7 +1509,10 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
                 </div>
                 <div>
                   <h3 className="text-base font-bold text-[#1e1b19]">
-                    Delete Report File
+                    {t(
+                      'activities:detail.deleteReportModal.title',
+                      'Delete Report File',
+                    )}
                   </h3>
                   <p className="text-xs text-[#8a726a] truncate max-w-xs">
                     {reportToDelete.filename}
@@ -1269,8 +1530,10 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
 
             <div className="p-6 flex flex-col gap-4">
               <p className="text-xs text-[#57423b] leading-relaxed">
-                Are you sure you want to permanently delete this report file
-                from Google Drive and remove it from this activity record?
+                {t(
+                  'activities:detail.deleteReportModal.desc',
+                  'Are you sure you want to permanently delete this report file from Google Drive and remove it from this activity record?',
+                )}
               </p>
 
               <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-[#f4ece9]">
@@ -1279,7 +1542,7 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
                   onClick={() => setReportToDelete(null)}
                   className="px-4 py-2 rounded-md bg-white border border-[#e8e1dd] text-[#57423b] font-bold text-xs hover:bg-[#faf2ee] cursor-pointer"
                 >
-                  Cancel
+                  {t('common:cancel', 'Cancel')}
                 </button>
                 <button
                   type="button"
@@ -1300,8 +1563,14 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
                   <Trash size={14} weight="bold" />
                   <span>
                     {deleteReportMutation.isPending
-                      ? 'Deleting...'
-                      : 'Confirm Delete'}
+                      ? t(
+                          'activities:detail.deleteReportModal.deleting',
+                          'Deleting...',
+                        )
+                      : t(
+                          'activities:detail.deleteReportModal.confirm',
+                          'Confirm Delete',
+                        )}
                   </span>
                 </button>
               </div>

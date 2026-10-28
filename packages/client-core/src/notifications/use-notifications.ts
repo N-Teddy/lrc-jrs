@@ -251,7 +251,25 @@ export function useNotificationsSubscription(options?: {
       });
 
       return () => {
-        socket.disconnect();
+        socket.off('connect');
+        socket.off('notification:new');
+        socket.off('notification:unread_count');
+        socket.off('connect_error');
+
+        if (socket.connected) {
+          socket.disconnect();
+        } else {
+          // If the socket is still in the middle of connecting (common during React StrictMode DEV unmount/remount),
+          // disconnecting immediately causes the browser to abort the raw WebSocket with:
+          // "WebSocket is closed before the connection is established".
+          // Defer the disconnection until after the handshake settles or fails.
+          socket.once('connect', () => {
+            socket.disconnect();
+          });
+          socket.once('connect_error', () => {
+            socket.disconnect();
+          });
+        }
         socketRef.current = null;
       };
     } catch {

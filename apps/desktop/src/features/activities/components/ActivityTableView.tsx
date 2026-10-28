@@ -52,7 +52,10 @@ export const ActivityTableView: React.FC<ActivityTableViewProps> = ({
   const handleCancelActivity = async (activity: IActivity) => {
     if (
       !window.confirm(
-        'Are you sure you want to cancel this gathering? You can restore it at any time.',
+        t(
+          'activities:detail.confirmCancel',
+          'Are you sure you want to cancel this activity? You can undo this cancellation at any time.',
+        ),
       )
     ) {
       return;
@@ -61,7 +64,10 @@ export const ActivityTableView: React.FC<ActivityTableViewProps> = ({
       id: activity.id,
       dto: {
         status: ActivityStatus.CANCELLED,
-        changeReason: 'Gathering cancelled by coordinator',
+        changeReason: t(
+          'activities:detail.cancelReason',
+          'Activity cancelled by coordinator',
+        ),
       },
     });
   };
@@ -71,7 +77,10 @@ export const ActivityTableView: React.FC<ActivityTableViewProps> = ({
       id: activity.id,
       dto: {
         status: ActivityStatus.SCHEDULED,
-        changeReason: 'Gathering cancellation reversed and restored',
+        changeReason: t(
+          'activities:detail.restoreReason',
+          'Activity cancellation reversed and restored',
+        ),
       },
     });
   };

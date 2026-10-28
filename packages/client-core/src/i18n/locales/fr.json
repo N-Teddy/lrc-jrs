@@ -422,6 +422,122 @@
       "uploadSingle": "Téléverser sur Google Drive",
       "fileTooLarge": "« {{name}} » dépasse la taille maximale autorisée (25 Mo)",
       "selectAtLeastOne": "Veuillez sélectionner au moins un fichier à téléverser"
+    },
+    "editOrReschedule": "Modifier / Reporter",
+    "deleteSubtext": "Suppression définitive de la fiche d'activité",
+    "detail": {
+      "backToActivities": "Retour aux activités",
+      "editActivity": "Modifier l'activité",
+      "cancelActivity": "Annuler l'activité",
+      "restoreActivity": "Restaurer l'activité",
+      "confirmCancel": "Êtes-vous sûr de vouloir annuler cette activité ? Vous pouvez annuler cette opération à tout moment.",
+      "cancelReason": "Activité annulée par la coordination",
+      "restoreReason": "Annulation de l'activité révoquée et restaurée",
+      "activityCancelledNotice": "Cette activité a été annulée.",
+      "undoCancelAndRestore": "Restaurer l'activité",
+      "hub": "Centre",
+      "interTownHost": "Inter-villes · Hôte : {{host}}",
+      "otherHost": "Autre",
+      "attendanceSealed": "Présences clôturées",
+      "hostPrefix": "Hôte : {{host}}",
+      "participatingPrefix": "Participants : {{towns}}",
+      "activityCancelled": "Activité annulée",
+      "attendanceOpensOnDayTooltip": "L'appel des présences s'ouvre le jour de l'activité",
+      "attendanceOpensOnDay": "Présences ouvertes le jour de l'activité",
+      "hostTownEventTooltip": "Les présences sont gérées exclusivement par la personne de contact de la ville hôte",
+      "hostTownEvent": "Événement ville hôte ({{host}})",
+      "hostFallback": "Hôte",
+      "attendanceSealedTooltip": "L'appel des présences est clôturé. Seul un AP peut le modifier.",
+      "trackAttendanceTooltip": "Ouvrir la liste d'appel en direct",
+      "modifyAttendanceAp": "Modifier les présences (AP)",
+      "trackAttendance": "Pointer les présences",
+      "manageReportsCount": "Gérer les rapports ({{count}})",
+      "uploadReport": "Téléverser un rapport",
+      "tabs": {
+        "overview": "Aperçu",
+        "attendance": "Présences ({{count}})",
+        "reports": "Rapports d'activité",
+        "reportsCount": "Rapports d'activité ({{count}})",
+        "history": "Historique d'audit ({{count}})"
+      },
+      "kpis": {
+        "turnoutRate": "Taux de participation",
+        "registeredYouth": "des jeunes inscrits du centre",
+        "totalPresent": "Total présents",
+        "presentBreakdown": "{{members}} membres + {{guests}} invités",
+        "membersAbsent": "Membres absents",
+        "homeMembers": "membres de la ville",
+        "externalGuests": "Invités externes",
+        "visitorsWelcomed": "visiteurs accueillis"
+      },
+      "lockBanner": {
+        "sealedTitle": "Présences clôturées & verrouillées",
+        "openTitle": "Pointage des présences ouvert",
+        "sealedSubtitle": "Verrouillé par {{name}} • Modifications désactivées sauf dérogation AP",
+        "openSubtitle": "Session de pointage active • Enregistrement automatique",
+        "unlockAp": "Déverrouiller (Dérogation AP)",
+        "finalizeAndLock": "Clôturer & verrouiller les présences"
+      },
+      "lockPrompt": {
+        "confirmUnlockTitle": "Confirmer le déverrouillage AP",
+        "confirmLockTitle": "Confirmer la clôture des présences",
+        "unlockWarning": "Le déverrouillage permettra aux coordinateurs de modifier les présences. Un enregistrement d'audit sera consigné avec vos identifiants d'administrateur.",
+        "lockWarning": "Une fois verrouillées, les présences ne peuvent plus être modifiées sans dérogation AP. Assurez-vous de l'exactitude des données.",
+        "unlockPlaceholder": "Motif de dérogation AP (ex: Correction pointage tardif)...",
+        "lockPlaceholder": "Remarques (Optionnel)...",
+        "confirmUnlock": "Confirmer le déverrouillage",
+        "confirmLock": "Confirmer & verrouiller",
+        "apOverrideDefaultReason": "Dérogation administrative AP",
+        "rollCallFinalizedReason": "Appel des présences finalisé"
+      },
+      "notes": {
+        "title": "Ordre du jour & notes de l'activité",
+        "empty": "Aucune note complémentaire ou ordre du jour enregistré pour cette activité."
+      },
+      "attendanceTab": {
+        "searchPlaceholder": "Rechercher un participant par nom ou téléphone...",
+        "allCount": "Tous ({{count}})",
+        "guestsCount": "Invités ({{count}})",
+        "editAttendanceAp": "Modifier les présences (AP)",
+        "trackAttendance": "Pointer les présences",
+        "noAttendeesTitle": "Aucun participant enregistré",
+        "noSearchMatches": "Aucun participant ne correspond à votre recherche.",
+        "noAttendeesRecorded": "Aucun membre ou invité n'a encore été enregistré comme présent pour cette activité.",
+        "noPhone": "Pas de téléphone",
+        "anonymous": "Anonyme",
+        "guestBadge": "Invité",
+        "memberBadge": "Membre"
+      },
+      "reportsTab": {
+        "title": "Rapports d'activité Google Drive ({{count}})",
+        "subtitle": "Procès-verbaux, bilans de présence, photos et documents archivés.",
+        "uploadMore": "Téléverser d'autres rapports",
+        "uploadReports": "Téléverser des rapports",
+        "uploadActivityReports": "Téléverser les rapports d'activité",
+        "totalDocuments": "Documents totaux",
+        "filesArchived": "{{count}} fichiers archivés",
+        "totalSize": "Taille totale",
+        "mbStored": "{{size}} Mo stockés",
+        "latestUpload": "Dernier téléversement",
+        "recently": "Récemment",
+        "deleteTooltip": "Supprimer ce rapport de Google Drive",
+        "coordinatorFallback": "Coordinateur",
+        "previewFile": "Aperçu du fichier",
+        "openInDriveTooltip": "Ouvrir dans Google Drive (Navigateur externe)",
+        "noReportsTitle": "Aucun rapport joint pour le moment",
+        "noReportsDesc": "Cette activité est terminée. Les coordinateurs peuvent téléverser les procès-verbaux, synthèses de présence, photos ou notes directement sur Google Drive."
+      },
+      "historyTab": {
+        "title": "Historique des modifications & audit",
+        "empty": "Aucune modification enregistrée. Cette activité est restée dans sa configuration initiale.",
+        "recordedBy": "Enregistré par {{name}}"
+      },
+      "deleteReportModal": {
+        "title": "Supprimer le fichier rapport",
+        "desc": "Êtes-vous sûr de vouloir supprimer définitivement ce rapport de Google Drive et de l'activité ?",
+        "deleting": "Suppression en cours...",
+        "confirm": "Confirmer la suppression"
+      }
     }
   },
   "attendance": {

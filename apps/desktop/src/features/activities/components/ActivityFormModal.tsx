@@ -309,7 +309,7 @@ export const ActivityFormModal: React.FC<ActivityFormModalProps> = ({
                     : t('activities:createActivity')}
                 </h2>
                 {isEditing && (
-                  <span className="px-2 py-0.5 rounded-full bg-[#faf2ee] border border-[#e8e1dd] text-[10px] font-mono font-bold text-[#8a726a]">
+                  <span className="px-2 py-0.5 rounded-md bg-[#faf2ee] border border-[#e8e1dd] text-[10px] font-mono font-bold text-[#8a726a]">
                     #{initialActivity?.id.slice(-6).toUpperCase()}
                   </span>
                 )}
@@ -337,7 +337,7 @@ export const ActivityFormModal: React.FC<ActivityFormModalProps> = ({
           className="overflow-y-auto p-7 flex flex-col gap-6 text-xs text-[#1e1b19]"
         >
           {isCompleted && (
-            <div className="p-3.5 bg-[#ffdad6] border border-[#ffb4a8] rounded-xl text-[#ba1a1a] flex items-center gap-2.5 font-semibold">
+            <div className="p-3.5 bg-[#ffdad6] border border-[#ffb4a8] rounded-md text-[#ba1a1a] flex items-center gap-2.5 font-semibold">
               <WarningCircle size={20} weight="fill" className="shrink-0" />
               <span>
                 This activity has already taken place and is marked as
@@ -347,7 +347,7 @@ export const ActivityFormModal: React.FC<ActivityFormModalProps> = ({
           )}
 
           {error && (
-            <div className="p-3.5 bg-[#ffdad6] border border-[#ffb4a8] rounded-lg text-[#ba1a1a] flex items-center gap-2 font-semibold">
+            <div className="p-3.5 bg-[#ffdad6] border border-[#ffb4a8] rounded-md text-[#ba1a1a] flex items-center gap-2 font-semibold">
               <WarningCircle size={18} weight="fill" className="shrink-0" />
               <span>{error}</span>
             </div>
@@ -427,11 +427,11 @@ export const ActivityFormModal: React.FC<ActivityFormModalProps> = ({
               </div>
 
               {/* Associated Participating Towns (Inter-Town Coordination) */}
-              <div className="sm:col-span-2 rounded-xl border border-[#e8dfd8] bg-gradient-to-br from-[#faf8f6] via-[#fdfcfb] to-[#f7f2ef] p-4 sm:p-4.5 flex flex-col gap-3 shadow-2xs">
+              <div className="sm:col-span-2 rounded-lg border border-[#e8dfd8] bg-gradient-to-br from-[#faf8f6] via-[#fdfcfb] to-[#f7f2ef] p-4 sm:p-4.5 flex flex-col gap-3 shadow-2xs">
                 {/* Header Row */}
                 <div className="flex items-center justify-between gap-2 flex-wrap">
                   <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-lg bg-[#fff0eb] border border-[#ffdbcf] text-[#b85028] flex items-center justify-center shrink-0 shadow-2xs">
+                    <div className="w-8 h-8 rounded-md bg-[#fff0eb] border border-[#ffdbcf] text-[#b85028] flex items-center justify-center shrink-0 shadow-2xs">
                       <Buildings size={16} weight="duotone" />
                     </div>
                     <div className="flex flex-col">
@@ -440,7 +440,7 @@ export const ActivityFormModal: React.FC<ActivityFormModalProps> = ({
                           Associated Participating Towns
                         </span>
                         {includedTownIds.length > 0 ? (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#edf3ee] text-[#2c4e37] border border-[#c2e9ca] animate-in fade-in zoom-in-95 duration-150">
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-[#edf3ee] text-[#2c4e37] border border-[#c2e9ca] animate-in fade-in zoom-in-95 duration-150">
                             <span className="w-1.5 h-1.5 rounded-full bg-[#486b52]" />
                             <span>
                               {includedTownIds.length}{' '}
@@ -463,7 +463,7 @@ export const ActivityFormModal: React.FC<ActivityFormModalProps> = ({
                   </div>
 
                   {towns.filter((t) => t.id !== townId).length > 0 && (
-                    <div className="flex items-center gap-1.5 bg-white border border-[#e8e1dd] rounded-lg p-0.5 shadow-2xs">
+                    <div className="flex items-center gap-1.5 bg-white border border-[#e8e1dd] rounded-md p-0.5 shadow-2xs">
                       <button
                         type="button"
                         onClick={() =>
@@ -507,7 +507,7 @@ export const ActivityFormModal: React.FC<ActivityFormModalProps> = ({
                                 : [...prev, t.id],
                             );
                           }}
-                          className={`relative group rounded-xl p-3 text-left transition-all duration-200 cursor-pointer flex items-center justify-between gap-3 border ${
+                          className={`relative group rounded-md p-3 text-left transition-all duration-200 cursor-pointer flex items-center justify-between gap-3 border ${
                             isSelected
                               ? 'bg-white border-[#b85028] shadow-xs ring-2 ring-[#b85028]/15'
                               : 'bg-white/90 border-[#e8dfd8] hover:border-[#b85028]/40 hover:bg-white hover:shadow-2xs'
@@ -515,7 +515,7 @@ export const ActivityFormModal: React.FC<ActivityFormModalProps> = ({
                         >
                           <div className="flex items-center gap-2.5 min-w-0">
                             <span
-                              className={`w-4 h-4 rounded-md flex items-center justify-center shrink-0 border transition-all duration-150 ${
+                              className={`w-4 h-4 rounded flex items-center justify-center shrink-0 border transition-all duration-150 ${
                                 isSelected
                                   ? 'bg-[#b85028] border-[#b85028] text-white shadow-2xs'
                                   : 'border-[#cfc4be] bg-white group-hover:border-[#b85028]/60'
@@ -553,7 +553,7 @@ export const ActivityFormModal: React.FC<ActivityFormModalProps> = ({
                     })}
 
                   {towns.filter((t) => t.id !== townId).length === 0 && (
-                    <div className="col-span-full py-4 text-center text-xs text-[#8a726a] italic bg-white/60 rounded-xl border border-dashed border-[#e8dfd8]">
+                    <div className="col-span-full py-4 text-center text-xs text-[#8a726a] italic bg-white/60 rounded-md border border-dashed border-[#e8dfd8]">
                       No additional towns available to include.
                     </div>
                   )}
@@ -561,7 +561,7 @@ export const ActivityFormModal: React.FC<ActivityFormModalProps> = ({
 
                 {/* Multi-Town Scope Notice Banner */}
                 {includedTownIds.length > 0 && (
-                  <div className="mt-1 p-3 rounded-lg bg-white border border-[#c2e9ca] flex items-start gap-2.5 shadow-2xs animate-in fade-in slide-in-from-top-1 duration-150">
+                  <div className="mt-1 p-3 rounded-md bg-white border border-[#c2e9ca] flex items-start gap-2.5 shadow-2xs animate-in fade-in slide-in-from-top-1 duration-150">
                     <CheckCircle
                       size={18}
                       weight="fill"
@@ -644,7 +644,7 @@ export const ActivityFormModal: React.FC<ActivityFormModalProps> = ({
             </div>
 
             {/* Auto-Determined Status Badge */}
-            <div className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-[#faf2ee] border border-[#e8e1dd] text-xs">
+            <div className="flex items-center justify-between px-3.5 py-2.5 rounded-md bg-[#faf2ee] border border-[#e8e1dd] text-xs">
               <div className="flex items-center gap-2">
                 <Clock size={16} weight="bold" className="text-[#b85028]" />
                 <span className="text-[#57423b] font-medium">
@@ -652,7 +652,7 @@ export const ActivityFormModal: React.FC<ActivityFormModalProps> = ({
                 </span>
               </div>
               <span
-                className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${
+                className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[11px] font-bold border ${
                   computedStatus === ActivityStatus.SCHEDULED
                     ? 'bg-[#e2f0d9] text-[#276a3c] border-[#b6deb2]'
                     : computedStatus === ActivityStatus.IN_PROGRESS
@@ -704,7 +704,7 @@ export const ActivityFormModal: React.FC<ActivityFormModalProps> = ({
 
           {/* SECTION: Audit & Revision Reason (Required if Editing) */}
           {isEditing && (
-            <div className="flex flex-col gap-2 p-4 bg-[#faf2ee] rounded-xl border border-[#e8e1dd]">
+            <div className="flex flex-col gap-2 p-4 bg-[#faf2ee] rounded-md border border-[#e8e1dd]">
               <label
                 htmlFor="activity-change-reason-input"
                 className="flex items-center gap-1.5 text-xs font-bold text-[#b85028]"

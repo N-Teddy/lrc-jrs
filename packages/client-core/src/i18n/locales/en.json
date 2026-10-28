@@ -423,6 +423,122 @@
     },
     "actions": {
       "delete": "Delete activity"
+    },
+    "editOrReschedule": "Edit / Reschedule",
+    "deleteSubtext": "Permanent removal of activity record",
+    "detail": {
+      "backToActivities": "Back to Activities",
+      "editActivity": "Edit Activity",
+      "cancelActivity": "Cancel Activity",
+      "restoreActivity": "Restore Activity",
+      "confirmCancel": "Are you sure you want to cancel this activity? You can undo this cancellation at any time.",
+      "cancelReason": "Activity cancelled by coordinator",
+      "restoreReason": "Activity cancellation reversed and restored",
+      "activityCancelledNotice": "This activity has been cancelled.",
+      "undoCancelAndRestore": "Undo Cancel & Restore",
+      "hub": "Hub",
+      "interTownHost": "Inter-Town · Host: {{host}}",
+      "otherHost": "Other",
+      "attendanceSealed": "Attendance Sealed",
+      "hostPrefix": "Host: {{host}}",
+      "participatingPrefix": "Participating: {{towns}}",
+      "activityCancelled": "Activity Cancelled",
+      "attendanceOpensOnDayTooltip": "Attendance roll-call opens on the day of the activity",
+      "attendanceOpensOnDay": "Attendance Opens on Activity Day",
+      "hostTownEventTooltip": "Attendance is managed exclusively by the host town Contact Person",
+      "hostTownEvent": "Host Town Event ({{host}})",
+      "hostFallback": "Host",
+      "attendanceSealedTooltip": "Attendance roll-call is sealed. Only an AP can modify.",
+      "trackAttendanceTooltip": "Open live attendance roll-call roster",
+      "modifyAttendanceAp": "Modify Attendance (AP Override)",
+      "trackAttendance": "Track Attendance",
+      "manageReportsCount": "Manage Reports ({{count}})",
+      "uploadReport": "Upload Report",
+      "tabs": {
+        "overview": "Overview",
+        "attendance": "Attendance ({{count}})",
+        "reports": "Activity Reports",
+        "reportsCount": "Activity Reports ({{count}})",
+        "history": "Audit History ({{count}})"
+      },
+      "kpis": {
+        "turnoutRate": "Turnout Rate",
+        "registeredYouth": "of registered hub youth",
+        "totalPresent": "Total Present",
+        "presentBreakdown": "{{members}} members + {{guests}} guests",
+        "membersAbsent": "Members Absent",
+        "homeMembers": "home hub members",
+        "externalGuests": "External Guests",
+        "visitorsWelcomed": "visitors welcomed"
+      },
+      "lockBanner": {
+        "sealedTitle": "Attendance Finalized & Sealed",
+        "openTitle": "Attendance Open for Check-In",
+        "sealedSubtitle": "Locked by {{name}} • Edits disabled without AP override",
+        "openSubtitle": "Active check-in session • Changes are autosaved to hub record",
+        "unlockAp": "Unlock (AP Override)",
+        "finalizeAndLock": "Finalize & Lock Attendance"
+      },
+      "lockPrompt": {
+        "confirmUnlockTitle": "Confirm AP Attendance Unlock",
+        "confirmLockTitle": "Confirm Finalizing Attendance",
+        "unlockWarning": "Unlocking this attendance will allow coordinators to alter member check-in states. An audit record will be logged with your administrator credentials.",
+        "lockWarning": "Once locked, attendance records cannot be modified without an AP administrative override. Ensure all member and guest attendance is accurate.",
+        "unlockPlaceholder": "Reason for AP override (e.g. Late check-in correction)...",
+        "lockPlaceholder": "Notes (Optional)...",
+        "confirmUnlock": "Confirm Unlock",
+        "confirmLock": "Confirm & Seal",
+        "apOverrideDefaultReason": "AP Administrative Override",
+        "rollCallFinalizedReason": "Roll call finalized"
+      },
+      "notes": {
+        "title": "Activity Agenda & Notes",
+        "empty": "No supplementary notes or agenda items recorded for this activity."
+      },
+      "attendanceTab": {
+        "searchPlaceholder": "Search attendees by name or phone...",
+        "allCount": "All ({{count}})",
+        "guestsCount": "Guests ({{count}})",
+        "editAttendanceAp": "Edit Attendance (AP)",
+        "trackAttendance": "Track Attendance",
+        "noAttendeesTitle": "No Attendees Recorded",
+        "noSearchMatches": "No attendees match your search query.",
+        "noAttendeesRecorded": "No members or guests have been recorded as present for this activity yet.",
+        "noPhone": "No phone",
+        "anonymous": "Anonymous",
+        "guestBadge": "Guest",
+        "memberBadge": "Member"
+      },
+      "reportsTab": {
+        "title": "Google Drive Activity Reports ({{count}})",
+        "subtitle": "Archived activity minutes, attendance summaries, photos, and documents.",
+        "uploadMore": "Upload More Reports",
+        "uploadReports": "Upload Reports",
+        "uploadActivityReports": "Upload Activity Reports",
+        "totalDocuments": "Total Documents",
+        "filesArchived": "{{count}} files archived",
+        "totalSize": "Total Size",
+        "mbStored": "{{size}} MB stored",
+        "latestUpload": "Latest Upload",
+        "recently": "Recently",
+        "deleteTooltip": "Delete this report from Google Drive",
+        "coordinatorFallback": "Coordinator",
+        "previewFile": "Preview File",
+        "openInDriveTooltip": "Open in Google Drive (External Browser)",
+        "noReportsTitle": "No Reports Attached Yet",
+        "noReportsDesc": "This activity has concluded. Hub coordinators can upload session minutes, attendance summaries, photos, or meeting notes directly to Google Drive."
+      },
+      "historyTab": {
+        "title": "Activity Change & Audit History",
+        "empty": "No modifications recorded. This activity has remained in its initial configuration.",
+        "recordedBy": "Recorded by {{name}}"
+      },
+      "deleteReportModal": {
+        "title": "Delete Report File",
+        "desc": "Are you sure you want to permanently delete this report file from Google Drive and remove it from this activity record?",
+        "deleting": "Deleting...",
+        "confirm": "Confirm Delete"
+      }
     }
   },
   "attendance": {
