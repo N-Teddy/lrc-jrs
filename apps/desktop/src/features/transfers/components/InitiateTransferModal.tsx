@@ -175,7 +175,7 @@ export const InitiateTransferModal: React.FC<InitiateTransferModalProps> = ({
           {/* Member Selector */}
           <div className="flex flex-col gap-1.5">
             <span className="text-xs font-bold text-[#1e1b19]">
-              {t('transfers:modal.selectMember', 'Select Fellowship Member')}{' '}
+              {t('transfers:modal.selectMember', 'Select Community Member')}{' '}
               <span className="text-[#ba1a1a]">*</span>
             </span>
             <CustomSelect

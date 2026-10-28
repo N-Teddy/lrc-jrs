@@ -2,6 +2,8 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import {
   Activity,
+  ActivityReminderTemplate,
+  ActivityReminderTemplateSchema,
   ActivitySchema,
   Attendance,
   AttendanceSchema,
@@ -12,18 +14,23 @@ import {
 } from '../../database/schemas';
 import { ActivitiesController } from './activities.controller';
 import { ActivitiesService } from './activities.service';
+import { ActivityReminderService } from './activity-reminder.service';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: Activity.name, schema: ActivitySchema },
+      {
+        name: ActivityReminderTemplate.name,
+        schema: ActivityReminderTemplateSchema,
+      },
       { name: Attendance.name, schema: AttendanceSchema },
       { name: Town.name, schema: TownSchema },
       { name: User.name, schema: UserSchema },
     ]),
   ],
   controllers: [ActivitiesController],
-  providers: [ActivitiesService],
-  exports: [ActivitiesService],
+  providers: [ActivitiesService, ActivityReminderService],
+  exports: [ActivitiesService, ActivityReminderService],
 })
 export class ActivitiesModule {}

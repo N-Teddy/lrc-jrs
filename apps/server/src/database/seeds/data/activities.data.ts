@@ -14,10 +14,10 @@ export interface SeedActivityData {
 
 const VENUES: Record<string, string[]> = {
   DLA: [
-    'Foyer Paroissial Bonabéri, Douala',
+    'Foyer des Jeunes Bonabéri, Douala',
     'Salle Polyvalente Akwa, Douala',
     'Complexe Sportif Bepanda, Douala',
-    'Centre Chrétien Deido, Douala',
+    'Centre Polyvalent Deido, Douala',
   ],
   YDE: [
     'Foyer des Jeunes Mvolyé, Yaoundé',
@@ -26,16 +26,16 @@ const VENUES: Record<string, string[]> = {
     'Complexe Omnisports Ngoa-Ekélé, Yaoundé',
   ],
   BAF: [
-    'Centre Pastoral Saint Joseph, Bafoussam',
+    'Centre Communautaire Saint Joseph, Bafoussam',
     'Foyer Polyvalent Djeleng, Bafoussam',
-    'Salle Paroissiale Banengo, Bafoussam',
+    'Salle Municipale Banengo, Bafoussam',
     'Stade Municipal de Bafoussam',
   ],
   EDA: [
-    'Paroisse Notre-Dame d’Edéa',
+    'Complexe Municipal d’Edéa',
     'Foyer Polyvalent Sanaga, Edéa',
     'Centre des Jeunes d’Edéa',
-    'Salle Paroissiale Saint-Jean, Edéa',
+    'Salle Polyvalente Saint-Jean, Edéa',
   ],
 };
 

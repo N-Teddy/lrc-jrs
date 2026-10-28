@@ -68,7 +68,7 @@ async function bootstrap() {
           'Resident Hub': s.currentTownCode,
           Transfers: s.totalTransfers,
           Initiator: s.transferredBy,
-          'Pastoral Reason':
+          'Transfer Reason':
             s.lastReason.length > 55
               ? `${s.lastReason.substring(0, 52)}...`
               : s.lastReason,

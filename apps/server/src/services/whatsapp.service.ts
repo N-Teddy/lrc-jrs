@@ -65,7 +65,7 @@ export class WhatsAppService implements NotificationStrategy {
   async send(
     recipient: string,
     message: string,
-    metadata?: Record<string, unknown>,
+    _metadata?: Record<string, unknown>,
   ): Promise<boolean> {
     return this.sendTextMessage(recipient, message);
   }
@@ -81,6 +81,15 @@ export class WhatsAppService implements NotificationStrategy {
         'Cannot send WhatsApp message: empty destination number',
       );
       return false;
+    }
+
+    const isProduction =
+      this.configService.get<string>('NODE_ENV') === 'production';
+    if (!isProduction) {
+      this.logger.log(
+        `[DEV MODE] WhatsApp message suppressed for ${PhoneSanitizer.maskPhoneNumber(sanitized)}:\n${text}`,
+      );
+      return true;
     }
 
     try {
@@ -142,8 +151,7 @@ export class WhatsAppService implements NotificationStrategy {
   async sendPasswordResetMessage(
     to: string,
     data: { fullName: string; code: string; expiresInMinutes: number },
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    metadata?: Record<string, unknown>,
+    _metadata?: Record<string, unknown>,
   ): Promise<boolean> {
     const message = TemplateLoaderUtil.render(
       'whatsapp/password-reset.txt',

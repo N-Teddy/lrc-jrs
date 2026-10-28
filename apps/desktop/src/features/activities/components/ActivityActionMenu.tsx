@@ -43,7 +43,10 @@ export const ActivityActionMenu: React.FC<ActivityActionMenuProps> = ({
   openUpwards = false,
 }) => {
   const { t } = useTranslation();
-  const { canWrite } = useTownContext();
+  const { canWrite, activeTownId } = useTownContext();
+  const isHostTown =
+    !activeTownId || activeTownId === (activity.hostTownId || activity.townId);
+  const canManageActivity = canWrite && (isHostTown || isPrivileged);
   const historyCount = activity.changeHistory?.length || 0;
   const isCompleted = activity.status === ActivityStatus.COMPLETED;
   const isCancelled = activity.status === ActivityStatus.CANCELLED;
@@ -101,7 +104,7 @@ export const ActivityActionMenu: React.FC<ActivityActionMenuProps> = ({
             <span>{t('activities:card.details', 'Details')}</span>
           </button>
 
-          {canWrite && !isCompleted && (
+          {canManageActivity && !isCompleted && (
             <button
               type="button"
               onClick={() => {
@@ -115,21 +118,24 @@ export const ActivityActionMenu: React.FC<ActivityActionMenuProps> = ({
             </button>
           )}
 
-          {canWrite && !isCompleted && !isCancelled && onCancelActivity && (
-            <button
-              type="button"
-              onClick={() => {
-                onClose();
-                onCancelActivity(activity);
-              }}
-              className="w-full px-3 py-1.5 text-left text-xs text-[#ba1a1a] hover:bg-[#ffdad6] flex items-center gap-2 font-medium cursor-pointer"
-            >
-              <XCircle size={14} weight="bold" />
-              <span>Cancel Gathering</span>
-            </button>
-          )}
+          {canManageActivity &&
+            !isCompleted &&
+            !isCancelled &&
+            onCancelActivity && (
+              <button
+                type="button"
+                onClick={() => {
+                  onClose();
+                  onCancelActivity(activity);
+                }}
+                className="w-full px-3 py-1.5 text-left text-xs text-[#ba1a1a] hover:bg-[#ffdad6] flex items-center gap-2 font-medium cursor-pointer"
+              >
+                <XCircle size={14} weight="bold" />
+                <span>Cancel Gathering</span>
+              </button>
+            )}
 
-          {canWrite && isCancelled && onUndoCancelActivity && (
+          {canManageActivity && isCancelled && onUndoCancelActivity && (
             <button
               type="button"
               onClick={() => {
@@ -160,7 +166,7 @@ export const ActivityActionMenu: React.FC<ActivityActionMenuProps> = ({
           </button>
 
           {/* Delete action is forbidden before start date per item 3 */}
-          {canWrite &&
+          {canManageActivity &&
             isPrivileged &&
             isDayOfActivityOrLater &&
             onDeleteActivity && (

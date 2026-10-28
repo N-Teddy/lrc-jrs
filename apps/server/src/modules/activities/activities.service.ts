@@ -153,6 +153,29 @@ export class ActivitiesService {
       ? (rawHostTown as { _id: Types.ObjectId; name: string; code: string })
       : undefined;
 
+    const rawIncludedTowns = ((doc as any).includedTownIds || []) as unknown[];
+    const includedTownIds: string[] = [];
+    const includedTowns: any[] = [];
+
+    for (const item of rawIncludedTowns) {
+      if (
+        item &&
+        typeof item === 'object' &&
+        'name' in (item as Record<string, unknown>)
+      ) {
+        const t = item as { _id: Types.ObjectId; name: string; code: string };
+        includedTownIds.push(t._id.toString());
+        includedTowns.push({
+          id: t._id.toString(),
+          name: t.name,
+          code: t.code,
+          activePcCount: 0,
+        });
+      } else if (item) {
+        includedTownIds.push(item.toString());
+      }
+    }
+
     const changeHistory: IActivityChangeLog[] = (doc.changeHistory || []).map(
       (log, index) => ({
         id: `log-${index}`,
@@ -237,6 +260,8 @@ export class ActivitiesService {
             activePcCount: 0,
           }
         : undefined,
+      includedTownIds,
+      includedTowns: includedTowns.length > 0 ? includedTowns : undefined,
       status:
         doc.status === ActivityStatus.CANCELLED
           ? ActivityStatus.CANCELLED
@@ -290,6 +315,7 @@ export class ActivitiesService {
       filter.$or = [
         { hostTownId: effectiveTownId },
         { townId: effectiveTownId },
+        { includedTownIds: effectiveTownId },
       ];
     } else if (query.townId) {
       const townObjId = await this.resolveTownObjectId(query.townId);
@@ -347,6 +373,7 @@ export class ActivitiesService {
         .limit(limit)
         .populate('townId', 'name code')
         .populate('hostTownId', 'name code')
+        .populate('includedTownIds', 'name code')
         .exec(),
     ]);
 
@@ -418,6 +445,7 @@ export class ActivitiesService {
       filter.$or = [
         { hostTownId: effectiveTownId },
         { townId: effectiveTownId },
+        { includedTownIds: effectiveTownId },
       ];
     }
 
@@ -512,6 +540,7 @@ export class ActivitiesService {
       .findOne({ _id: new Types.ObjectId(id), isDeleted: false })
       .populate('townId', 'name code')
       .populate('hostTownId', 'name code')
+      .populate('includedTownIds', 'name code')
       .exec();
 
     if (!doc) {
@@ -539,18 +568,52 @@ export class ActivitiesService {
   }
 
   /**
-   * Create a new fellowship activity
+   * Validate that activity startDate complies with date boundaries:
+   * - Cannot be for a month that has passed.
+   * - If it is a new month, it cannot be for more than two weeks back into the previous month.
+   */
+  public validateActivityDate(startDate: Date): void {
+    const now = new Date();
+    if (startDate.getUTCFullYear() < 2026) {
+      throw new BadRequestAppException(ErrorCode.ACTIVITY_MIN_YEAR, {
+        minYear: 2026,
+      });
+    }
+
+    const currentMonthStart = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      1,
+      0,
+      0,
+      0,
+      0,
+    );
+
+    if (startDate < currentMonthStart) {
+      const twoWeeksAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
+      const monthsDiff =
+        (now.getFullYear() - startDate.getFullYear()) * 12 +
+        (now.getMonth() - startDate.getMonth());
+
+      if (monthsDiff !== 1 || startDate < twoWeeksAgo) {
+        throw new BadRequestAppException(ErrorCode.ACTIVITY_INVALID_DATE, {
+          message:
+            'Activities cannot be scheduled for past months, except within the 14-day grace window into the previous month.',
+        });
+      }
+    }
+  }
+
+  /**
+   * Create a new community activity
    */
   async create(
     dto: CreateActivityDto,
     currentUser: IAuthUser,
   ): Promise<IActivity> {
     const startDate = new Date(dto.startDate);
-    if (startDate.getUTCFullYear() < 2026) {
-      throw new BadRequestAppException(ErrorCode.ACTIVITY_MIN_YEAR, {
-        minYear: 2026,
-      });
-    }
+    this.validateActivityDate(startDate);
 
     const endDate = dto.endDate
       ? new Date(dto.endDate)
@@ -578,6 +641,20 @@ export class ActivitiesService {
 
     const status = this.determineStatus(startDate, endDate);
 
+    const includedTownIds: Types.ObjectId[] = [];
+    if (dto.includedTownIds && Array.isArray(dto.includedTownIds)) {
+      for (const rawId of dto.includedTownIds) {
+        const resolved = await this.resolveTownObjectId(rawId);
+        if (
+          resolved &&
+          !resolved.equals(hostTownId) &&
+          !includedTownIds.some((id) => id.equals(resolved))
+        ) {
+          includedTownIds.push(resolved);
+        }
+      }
+    }
+
     const newActivity = new this.activityModel({
       title: dto.title.trim(),
       activityType: dto.activityType,
@@ -587,6 +664,7 @@ export class ActivitiesService {
       locationVenue: dto.locationVenue.trim(),
       notes: dto.notes?.trim(),
       hostTownId,
+      includedTownIds,
       status,
       changeHistory: [],
       createdBy: new Types.ObjectId(currentUser.id),
@@ -601,7 +679,6 @@ export class ActivitiesService {
         {
           target: {
             townId: townId.toString(),
-            excludeUserIds: [currentUser.id],
           },
           level: 'INFO',
           action: 'ACTIVITY_CREATED',
@@ -664,12 +741,8 @@ export class ActivitiesService {
 
     if (dto.startDate) {
       const newStart = new Date(dto.startDate);
-      if (newStart.getUTCFullYear() < new Date().getFullYear()) {
-        throw new BadRequestAppException(ErrorCode.ACTIVITY_MIN_YEAR, {
-          minYear: 2026,
-        });
-      }
       if (activity.startDate.toISOString() !== newStart.toISOString()) {
+        this.validateActivityDate(newStart);
         dateChanged = true;
         previousValues.startDate = activity.startDate.toISOString();
         newValues.startDate = newStart.toISOString();
@@ -750,6 +823,23 @@ export class ActivitiesService {
     if (dto.title) activity.title = dto.title.trim();
     if (dto.activityType) activity.activityType = dto.activityType;
     if (dto.notes !== undefined) activity.notes = dto.notes?.trim();
+
+    if (dto.includedTownIds !== undefined) {
+      const updatedIncludedTownIds: Types.ObjectId[] = [];
+      if (Array.isArray(dto.includedTownIds)) {
+        for (const rawId of dto.includedTownIds) {
+          const resolved = await this.resolveTownObjectId(rawId);
+          if (
+            resolved &&
+            !resolved.equals(activity.hostTownId) &&
+            !updatedIncludedTownIds.some((id) => id.equals(resolved))
+          ) {
+            updatedIncludedTownIds.push(resolved);
+          }
+        }
+      }
+      activity.includedTownIds = updatedIncludedTownIds;
+    }
 
     // Push to change history if audited field changed
     if (dateChanged || locationChanged || statusChanged) {

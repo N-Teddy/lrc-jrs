@@ -423,15 +423,15 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
                 </div>
               </div>
 
-              {/* Transfer & Fellowship Notes */}
+              {/* Transfer & Community Notes */}
               <div className="p-4 rounded-lg bg-[#faf2ee] border border-[#e8e1dd] flex flex-col gap-2">
                 <span className="text-xs font-bold text-[#1e1b19]">
                   Official Community Standing
                 </span>
                 <p className="text-xs text-[#57423b] leading-relaxed">
                   Member registered in good standing under Inter-Hub Youth
-                  Fellowship statutes. Eligible for fellowship circles, regional
-                  gatherings, and sacramental retreat cohorts.
+                  Community guidelines. Eligible for community circles, regional
+                  gatherings, and program cohorts.
                 </p>
               </div>
             </div>
@@ -537,7 +537,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
                     </span>
                   </div>
                   <p className="text-xs text-[#8a726a] mt-0.5">
-                    Official ecclesiastical jurisdiction and inter-city pastoral
+                    Official administrative jurisdiction and inter-city
                     relocation ledger across Cameroon.
                   </p>
                 </div>
@@ -633,7 +633,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
                   </h4>
                   <div className="flex items-center gap-1.5 text-xs text-[#8a726a] mt-1">
                     <ShieldCheck size={14} className="text-[#b85028]" />
-                    <span>Original Fellowship Inception</span>
+                    <span>Original Community Inception</span>
                   </div>
                 </div>
 
@@ -657,8 +657,8 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
                   Transfer Ledger & Hub Endorsements
                 </h3>
                 <p className="text-xs text-[#8a726a] mt-0.5">
-                  Complete chronological audit record of fellowship transfers,
-                  inter-city relocations, and pastoral authorizations.
+                  Complete chronological audit record of community transfers,
+                  inter-city relocations, and administrative authorizations.
                 </p>
               </div>
 
@@ -754,8 +754,8 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
                     </span>
                     <p className="text-xs text-[#57423b]">
                       This member has remained in continuous, uninterrupted
-                      fellowship with their mother sanctuary since enrollment.
-                      No inter-hub relocations have taken place.
+                      engagement with their primary hub since enrollment. No
+                      inter-hub relocations have taken place.
                     </p>
                   </div>
                 </div>
@@ -783,8 +783,8 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
                     </span>
                   </div>
                   <p className="text-xs text-[#57423b] leading-relaxed">
-                    Formally registered into the Cameroon Youth Fellowship roll
-                    under active pastoral care and episcopal oversight.
+                    Formally registered into the Cameroon Youth Community roll
+                    under active coordination and administrative supervision.
                   </p>
                 </div>
               </div>
@@ -922,7 +922,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
                       </div>
                       <div>
                         <h4 className="text-sm font-bold text-[#1e1b19]">
-                          Parish Coordinator (PC) Leadership
+                          Program Coordinator (PC) Leadership
                         </h4>
                         <p className="text-xs text-[#8a726a]">
                           {member.fullName} currently serves as Contact Person
@@ -955,7 +955,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
                   </h4>
                 </div>
                 <p className="text-xs text-[#8a726a] leading-relaxed">
-                  External parish hubs this member is permitted to inspect in
+                  External community hubs this member is permitted to inspect in
                   read-only mode.
                 </p>
 

@@ -32,7 +32,7 @@ export class ReviewMemberDto {
   grantAppAccess?: boolean;
 
   @ApiPropertyOptional({
-    example: 'Verified with local fellowship choir and welcomed.',
+    example: 'Verified with local community group and welcomed.',
     description: 'Review notes or reason for decision',
   })
   @IsOptional()

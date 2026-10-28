@@ -1,6 +1,7 @@
 import {
   usePendingReviewsQuery,
   useReviewMemberMutation,
+  useTranslation,
 } from '@jrs/client-core';
 import { calculateAge, type IUser } from '@jrs/shared';
 import {
@@ -29,6 +30,7 @@ interface PendingIntakeReviewsModalProps {
 export const PendingIntakeReviewsModal: React.FC<
   PendingIntakeReviewsModalProps
 > = ({ isOpen, onClose, activeTownId, activeTownName }) => {
+  const { t } = useTranslation();
   // Selected member for approve / reject confirmation
   const [approvingMember, setApprovingMember] = useState<IUser | null>(null);
   const [rejectingMember, setRejectingMember] = useState<IUser | null>(null);
@@ -63,7 +65,10 @@ export const PendingIntakeReviewsModal: React.FC<
       setGrantAppAccess(false);
       setReviewNotes('');
     } catch (err: any) {
-      setActionError(err?.message || 'Failed to approve member.');
+      setActionError(
+        err?.message ||
+          t('members:intake.approveError', 'Failed to approve member.'),
+      );
     }
   };
 
@@ -83,7 +88,10 @@ export const PendingIntakeReviewsModal: React.FC<
       setRejectingMember(null);
       setReviewNotes('');
     } catch (err: any) {
-      setActionError(err?.message || 'Failed to reject submission.');
+      setActionError(
+        err?.message ||
+          t('members:intake.rejectError', 'Failed to reject submission.'),
+      );
     }
   };
 
@@ -99,16 +107,20 @@ export const PendingIntakeReviewsModal: React.FC<
             <div className="flex flex-col">
               <div className="flex items-center gap-2">
                 <h2 className="text-lg font-bold text-[#1e1b19]">
-                  Review Intake Submissions
+                  {t('members:intake.modalTitle', 'Review Intake Submissions')}
                 </h2>
                 <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-[#faf2ee] text-[#b85028] border border-[#e8e1dd]">
-                  {pendingMembers.length} Pending
+                  {t('members:intake.pendingCount', {
+                    count: pendingMembers.length,
+                    defaultValue: `${pendingMembers.length} Pending`,
+                  })}
                 </span>
               </div>
               <p className="text-xs text-[#8a726a]">
-                Applicants who entered their details via invitation link for{' '}
-                {activeTownName}. Review & approve before accepting into the
-                directory.
+                {t('members:intake.modalSubtitle', {
+                  town: activeTownName,
+                  defaultValue: `Applicants who entered their details via invitation link for ${activeTownName}. Review & approve before accepting into the directory.`,
+                })}
               </p>
             </div>
           </div>
@@ -133,7 +145,12 @@ export const PendingIntakeReviewsModal: React.FC<
           {isLoading ? (
             <div className="py-12 text-center text-xs text-[#8a726a] flex flex-col items-center gap-2">
               <div className="w-6 h-6 border-2 border-[#b85028]/30 border-t-[#b85028] rounded-full animate-spin" />
-              <span>Checking pending submissions...</span>
+              <span>
+                {t(
+                  'members:intake.checking',
+                  'Checking pending submissions...',
+                )}
+              </span>
             </div>
           ) : pendingMembers.length === 0 ? (
             <div className="py-14 text-center text-xs text-[#8a726a] flex flex-col items-center gap-3 border border-dashed border-[#e8e1dd] rounded-xl p-8 bg-[#fdfcfb]">
@@ -142,11 +159,16 @@ export const PendingIntakeReviewsModal: React.FC<
               </div>
               <div className="space-y-1">
                 <p className="text-sm font-bold text-[#1e1b19]">
-                  No Submissions Pending Review
+                  {t(
+                    'members:intake.allCaughtUpTitle',
+                    'No Submissions Pending Review',
+                  )}
                 </p>
                 <p className="text-[#8a726a] max-w-sm">
-                  All prospective members who submitted through your intake
-                  links have been processed.
+                  {t('members:intake.allCaughtUpDesc', {
+                    town: activeTownName,
+                    defaultValue: `All prospective members who registered through your intake invitation links for ${activeTownName} have been processed and admitted into the community directory.`,
+                  })}
                 </p>
               </div>
             </div>
@@ -174,11 +196,16 @@ export const PendingIntakeReviewsModal: React.FC<
                             {member.fullName}
                           </span>
                           <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#fff2ee] text-[#b85028] border border-[#ffdbcf]">
-                            Pending Review
+                            {t(
+                              'members:intake.pendingReview',
+                              'Pending Review',
+                            )}
                           </span>
                           <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-[#faf2ee] text-[#57423b]">
-                            {member.gender === 'FEMALE' ? 'Female' : 'Male'} •{' '}
-                            {age} yrs
+                            {member.gender === 'FEMALE'
+                              ? t('members:intake.filterFemale', 'Female')
+                              : t('members:intake.filterMale', 'Male')}{' '}
+                            • {age} {t('members:intake.yearsOld', 'yrs')}
                           </span>
                         </div>
 
@@ -189,13 +216,13 @@ export const PendingIntakeReviewsModal: React.FC<
                           </span>
                           <span className="flex items-center gap-1">
                             <Calendar size={13} />
-                            DOB:{' '}
+                            {t('members:intake.dob', 'DOB:')}{' '}
                             {new Date(member.dateOfBirth).toLocaleDateString()}
                           </span>
                           {member.createdAt && (
                             <span className="flex items-center gap-1 text-[11px] text-[#8a726a]/80">
                               <Clock size={12} />
-                              Submitted:{' '}
+                              {t('members:intake.submitted', 'Submitted:')}{' '}
                               {new Date(member.createdAt).toLocaleDateString()}
                             </span>
                           )}
@@ -203,7 +230,10 @@ export const PendingIntakeReviewsModal: React.FC<
 
                         {member.intakeNote && (
                           <div className="mt-1 px-2.5 py-1 rounded bg-[#faf2ee] border border-[#e8e1dd] text-[11px] text-[#57423b]">
-                            <strong>Note:</strong> {member.intakeNote}
+                            <strong>
+                              {t('members:intake.applicantNote', 'Note:')}
+                            </strong>{' '}
+                            {member.intakeNote}
                           </div>
                         )}
                       </div>
@@ -221,7 +251,7 @@ export const PendingIntakeReviewsModal: React.FC<
                         className="px-3 py-1.5 rounded-md border border-[#ffb4a8] bg-white hover:bg-[#ffdad6] text-[#ba1a1a] text-xs font-bold transition-all cursor-pointer flex items-center gap-1"
                       >
                         <X size={14} weight="bold" />
-                        <span>Reject</span>
+                        <span>{t('members:intake.reject', 'Reject')}</span>
                       </button>
 
                       <button
@@ -235,7 +265,7 @@ export const PendingIntakeReviewsModal: React.FC<
                         className="px-3.5 py-1.5 rounded-md bg-[#2c4e37] hover:bg-[#223d2b] text-white text-xs font-bold shadow-2xs transition-all cursor-pointer flex items-center gap-1.5"
                       >
                         <Check size={14} weight="bold" />
-                        <span>Approve</span>
+                        <span>{t('members:intake.approve', 'Approve')}</span>
                       </button>
                     </div>
                   </div>
@@ -250,7 +280,10 @@ export const PendingIntakeReviewsModal: React.FC<
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-[#2c4e37] flex items-center gap-1.5">
                   <CheckCircle size={16} weight="fill" />
-                  Approve "{approvingMember.fullName}" for Fellowship Directory
+                  {t('members:intake.approveHeader', {
+                    name: approvingMember.fullName,
+                    defaultValue: `Approve "${approvingMember.fullName}" for Community Directory`,
+                  })}
                 </span>
                 <button
                   type="button"
@@ -272,12 +305,18 @@ export const PendingIntakeReviewsModal: React.FC<
                       onChange={(e) => setGrantAppAccess(e.target.checked)}
                       className="w-4 h-4 rounded text-[#b85028] accent-[#b85028]"
                     />
-                    <span>Grant application access (Default: Unchecked)</span>
+                    <span>
+                      {t(
+                        'members:intake.grantAccessLabel',
+                        'Grant application access (Default: Unchecked)',
+                      )}
+                    </span>
                   </label>
                   <p className="text-[11px] text-[#8a726a] leading-tight">
-                    By default, members who register through intake links are
-                    recorded in the directory only and cannot log into the JRS
-                    app.
+                    {t(
+                      'members:intake.grantAccessDesc',
+                      'By default, members who register through intake links are recorded in the directory only and cannot log into the JRS app.',
+                    )}
                   </p>
                 </div>
               </div>
@@ -286,7 +325,10 @@ export const PendingIntakeReviewsModal: React.FC<
                 type="text"
                 value={reviewNotes}
                 onChange={(e) => setReviewNotes(e.target.value)}
-                placeholder="Optional verification note (e.g. Verified via WhatsApp)"
+                placeholder={t(
+                  'members:intake.notesPlaceholder',
+                  'Optional verification note (e.g. Verified via WhatsApp)',
+                )}
                 className="h-9 px-3 rounded-md bg-white border border-[#a9d0b2] text-xs text-[#1e1b19] outline-none"
               />
 
@@ -296,7 +338,7 @@ export const PendingIntakeReviewsModal: React.FC<
                   onClick={() => setApprovingMember(null)}
                   className="px-3 py-1.5 rounded text-xs font-semibold text-[#8a726a] hover:bg-black/5 cursor-pointer"
                 >
-                  Cancel
+                  {t('members:intake.cancel', 'Cancel')}
                 </button>
                 <button
                   type="button"
@@ -305,8 +347,8 @@ export const PendingIntakeReviewsModal: React.FC<
                   className="px-4 py-1.5 rounded bg-[#2c4e37] hover:bg-[#223d2b] text-white text-xs font-bold transition-colors cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
                 >
                   {reviewMutation.isPending
-                    ? 'Approving...'
-                    : 'Confirm Approval'}
+                    ? t('members:intake.approving', 'Approving...')
+                    : t('members:intake.confirmApproval', 'Confirm Approval')}
                 </button>
               </div>
             </div>
@@ -318,7 +360,10 @@ export const PendingIntakeReviewsModal: React.FC<
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-[#ba1a1a] flex items-center gap-1.5">
                   <XCircle size={16} weight="fill" />
-                  Reject Submission for "{rejectingMember.fullName}"
+                  {t('members:intake.rejectHeader', {
+                    name: rejectingMember.fullName,
+                    defaultValue: `Reject Submission for "${rejectingMember.fullName}"`,
+                  })}
                 </span>
                 <button
                   type="button"
@@ -333,7 +378,10 @@ export const PendingIntakeReviewsModal: React.FC<
                 type="text"
                 value={reviewNotes}
                 onChange={(e) => setReviewNotes(e.target.value)}
-                placeholder="Reason for rejection (e.g. Invalid phone number, duplicate)"
+                placeholder={t(
+                  'members:intake.rejectNotesPlaceholder',
+                  'Reason for rejection (e.g. Invalid phone number, duplicate)',
+                )}
                 className="h-9 px-3 rounded-md bg-white border border-[#ffb4a8] text-xs text-[#1e1b19] outline-none"
               />
 
@@ -343,7 +391,7 @@ export const PendingIntakeReviewsModal: React.FC<
                   onClick={() => setRejectingMember(null)}
                   className="px-3 py-1.5 rounded text-xs font-semibold text-[#8a726a] hover:bg-black/5 cursor-pointer"
                 >
-                  Cancel
+                  {t('members:intake.cancel', 'Cancel')}
                 </button>
                 <button
                   type="button"
@@ -352,8 +400,8 @@ export const PendingIntakeReviewsModal: React.FC<
                   className="px-4 py-1.5 rounded bg-[#ba1a1a] hover:bg-[#93000a] text-white text-xs font-bold transition-colors cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
                 >
                   {reviewMutation.isPending
-                    ? 'Rejecting...'
-                    : 'Confirm Rejection'}
+                    ? t('members:intake.rejecting', 'Rejecting...')
+                    : t('members:intake.confirmRejection', 'Confirm Rejection')}
                 </button>
               </div>
             </div>

@@ -1,4 +1,4 @@
-import { useAuth } from '@jrs/client-core';
+import { toast, useAuth, useTranslation } from '@jrs/client-core';
 import type { IAuthUser, ILoginResponse } from '@jrs/shared';
 import type React from 'react';
 import { useState } from 'react';
@@ -21,6 +21,7 @@ interface UseLoginOptions {
 
 export function useLogin({ onRequiresPasswordChange }: UseLoginOptions) {
   const { signIn } = useAuth();
+  const { t } = useTranslation();
 
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
@@ -56,6 +57,24 @@ export function useLogin({ onRequiresPasswordChange }: UseLoginOptions) {
           setupToken: response.setupToken,
           user: response.user,
         });
+      } else if (response.user) {
+        const displayName = response.user.fullName || '';
+        toast.success(
+          displayName
+            ? t('common:toast.welcomeMessage', {
+                defaultValue: `Connexion réussie. Ravi de vous revoir, ${displayName} !`,
+                name: displayName,
+              })
+            : t('common:toast.welcomeGeneric', {
+                defaultValue: 'Connexion réussie. Bienvenue !',
+              }),
+          {
+            title: t('common:toast.welcomeTitle', {
+              defaultValue: 'Bon retour !',
+            }),
+            duration: 4500,
+          },
+        );
       }
     } catch (err: unknown) {
       if (isAuthRevokedError(err)) {

@@ -168,8 +168,20 @@ export const TownSwitcherSubPanel: React.FC<TownSwitcherSubPanelProps> = ({
 
           <View style={styles.townsStack}>
             {filteredTowns.map((town) => {
-              const isActive = activeTown?.id === town.id;
-              const isHomeTown = user?.homeTownId === town.id;
+              const isMatch = (targetIdOrCode?: string | null) => {
+                if (!targetIdOrCode) return false;
+                const normalized = targetIdOrCode.toUpperCase();
+                return (
+                  town.id === targetIdOrCode ||
+                  (town.code && town.code.toUpperCase() === normalized)
+                );
+              };
+
+              const isHomeTown = isMatch(user?.homeTownId);
+              // Active if matches activeTown OR on initial login fallback to user's homeTown
+              const isActive = activeTown
+                ? isMatch(activeTown.id) || isMatch(activeTown.code)
+                : isHomeTown;
               const isAP = user?.role === 'AP';
               const canWrite = isAP || isHomeTown;
 

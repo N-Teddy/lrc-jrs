@@ -75,8 +75,10 @@ export const BatchInviteModal: React.FC<BatchInviteModalProps> = ({
             </div>
             <div>
               <h2 className="text-base font-bold text-[#1e1b19]">
-                {t('access:modals.batchInviteTitle') ||
-                  'Batch Onboard Fellowship Members'}
+                {t(
+                  'access:modals.batchInviteTitle',
+                  'Batch Onboard Community Members',
+                )}
               </h2>
               <p className="text-xs text-[#8a726a] mt-0.5">
                 {t('access:modals.batchInviteSubtitle') ||

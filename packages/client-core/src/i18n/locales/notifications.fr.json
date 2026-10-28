@@ -11,6 +11,42 @@
   "hoursAgo": "Il y a {{count}} h",
   "daysAgo": "Il y a {{count}} j",
 
+  "centerSubtitle": "Flux en direct des activités et mises à jour",
+  "allCaughtUp": "Vous êtes à jour !",
+  "noNotifications": "Aucune notification",
+  "emptyUnreadSubtitle": "Toutes vos alertes ont été consultées.",
+  "emptySubtitle": "Les nouvelles notifications apparaîtront ici.",
+  "viewDetails": "Détails",
+  "markRead": "Marquer lu",
+  "markUnread": "Marquer non lu",
+  "realtimeConnected": "En direct",
+  "escToClose": "Échap pour fermer",
+  "seeAll": "Voir tout",
+  "seeAllNotifications": "Voir toutes les notifications",
+  "pageTitle": "Notifications & Alertes",
+  "pageSubtitle": "Archive en direct et alertes d'activités dans toutes les villes",
+  "filterByHub": "Filtrer par centre",
+  "allHubs": "Tous les centres",
+  "searchPlaceholder": "Rechercher par titre ou détails...",
+  "noResultsTitle": "Aucune notification trouvée",
+  "noResultsSubtitle": "Essayez de modifier votre recherche ou vos filtres de catégorie.",
+  "clearFilters": "Effacer les filtres",
+  "today": "Aujourd'hui",
+  "yesterday": "Hier",
+  "earlierThisWeek": "Plus tôt cette semaine",
+  "older": "Plus ancien",
+
+  "categories": {
+    "activity": "Activités",
+    "attendance": "Présences",
+    "member": "Membres",
+    "transfer": "Transferts",
+    "security": "Sécurité",
+    "notice": "Avis",
+    "alert": "Alertes",
+    "system": "Système"
+  },
+
   "activityCreatedTitle": "Nouvelle activité programmée",
   "activityCreatedBody": "{{name}} programmée pour le {{date}}",
 
@@ -60,5 +96,20 @@
   "passwordChangedBody": "Le mot de passe de votre compte a été récemment mis à jour",
 
   "systemAnnouncementTitle": "Communiqué de la coordination",
-  "systemAnnouncementBody": "{{message}}"
+  "systemAnnouncementBody": "{{message}}",
+
+  "activity": {
+    "monthlyDigest": {
+      "title": "Planning mensuel des activités",
+      "body": "Découvrez les prochaines activités programmées ce mois-ci"
+    },
+    "reminderParticipating": {
+      "title": "Rappel d'activité",
+      "body": "L'activité {{name}} commence bientôt ({{date}})"
+    },
+    "reportWarning": {
+      "title": "Rapport d'activité attendu",
+      "body": "Le rapport d'activité pour {{name}} n'a pas encore été finalisé"
+    }
+  }
 }

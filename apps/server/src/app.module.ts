@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
+import { ScheduleModule } from '@nestjs/schedule';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { appConfig } from './config/app.config';
@@ -20,6 +21,7 @@ import { TownsSeeder } from './database/seeds/seeders/towns.seeder';
 import { UsersSeeder } from './database/seeds/seeders/users.seeder';
 import { ActivitiesModule } from './modules/activities/activities.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { HealthModule } from './modules/health/health.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { RegistrationLinksModule } from './modules/registration-links/registration-links.module';
 import { TownsModule } from './modules/towns/towns.module';
@@ -34,6 +36,7 @@ import { ServicesModule } from './services/services.module';
       validate: validateEnvironment,
       envFilePath: ['.env', 'apps/server/.env'],
     }),
+    ScheduleModule.forRoot(),
     DatabaseModule,
     ServicesModule,
     TownsModule,
@@ -42,6 +45,7 @@ import { ServicesModule } from './services/services.module';
     AuthModule,
     RegistrationLinksModule,
     NotificationsModule,
+    HealthModule,
   ],
   controllers: [AppController],
   providers: [

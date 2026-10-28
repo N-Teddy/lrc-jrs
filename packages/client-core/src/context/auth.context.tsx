@@ -89,13 +89,21 @@ export function AuthProvider({ children, storage, http }: AuthProviderProps) {
 
   // Synchronize state when session is terminated by http service
   useEffect(() => {
-    const unsubscribe = http.onUnauthorizedEvent(() => {
+    const unsubscribeUnauthorized = http.onUnauthorizedEvent(() => {
       setUser(null);
       setToken(null);
       setIsAuthenticated(false);
       queryClient.clear();
     });
-    return unsubscribe;
+
+    const unsubscribeRefreshed = http.onTokenRefreshed((newToken) => {
+      setToken(newToken);
+    });
+
+    return () => {
+      unsubscribeUnauthorized();
+      unsubscribeRefreshed();
+    };
   }, [http, queryClient]);
 
   const signIn = useCallback(
@@ -114,6 +122,9 @@ export function AuthProvider({ children, storage, http }: AuthProviderProps) {
       }
       if (res.user && !res.requiresPasswordChange) {
         await storage.setItem('jrs_user', JSON.stringify(res.user));
+        if (res.user.homeTownId) {
+          await storage.setItem('jrs_active_town_id', res.user.homeTownId);
+        }
         setUser(res.user);
         setIsAuthenticated(true);
         queryClient.clear();
@@ -134,6 +145,7 @@ export function AuthProvider({ children, storage, http }: AuthProviderProps) {
       await storage.removeItem('jrs_access_token');
       await storage.removeItem('jrs_refresh_token');
       await storage.removeItem('jrs_user');
+      await storage.removeItem('jrs_active_town_id');
       setUser(null);
       setToken(null);
       setIsAuthenticated(false);

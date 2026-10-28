@@ -1,6 +1,10 @@
-import { useTranslation, useUpdateActivityMutation } from '@jrs/client-core';
+import {
+  useTownContext,
+  useTranslation,
+  useUpdateActivityMutation,
+} from '@jrs/client-core';
 import { ActivityStatus, type IActivity } from '@jrs/shared';
-import { CalendarBlank } from '@phosphor-icons/react';
+import { Buildings, CalendarBlank } from '@phosphor-icons/react';
 import type React from 'react';
 import { useState } from 'react';
 import { PaginationControl, TableSkeleton } from '../../../components';
@@ -39,6 +43,7 @@ export const ActivityTableView: React.FC<ActivityTableViewProps> = ({
   isPrivileged,
 }) => {
   const { t } = useTranslation();
+  const { activeTownId } = useTownContext();
   const updateActivityMutation = useUpdateActivityMutation();
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
 
@@ -136,6 +141,14 @@ export const ActivityTableView: React.FC<ActivityTableViewProps> = ({
                 activity.endDate,
               );
               const TypeIcon = typeConfig.icon;
+              const isHostTown =
+                !activeTownId ||
+                activeTownId === (activity.hostTownId || activity.townId);
+              const isParticipating = Boolean(
+                activeTownId &&
+                  !isHostTown &&
+                  activity.includedTownIds?.includes(activeTownId),
+              );
 
               return (
                 <tr
@@ -161,6 +174,33 @@ export const ActivityTableView: React.FC<ActivityTableViewProps> = ({
                             {activity.notes}
                           </span>
                         )}
+                        {isParticipating && (
+                          <div className="flex items-center mt-1">
+                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold border bg-[#edf3ee] text-[#486b52] border-[#c2e9ca]">
+                              <Buildings size={11} weight="bold" />
+                              <span>
+                                Inter-villes · Hôte:{' '}
+                                {activity.hostTown?.name ||
+                                  activity.town?.name ||
+                                  'Autre'}
+                              </span>
+                            </span>
+                          </div>
+                        )}
+                        {!isParticipating &&
+                          (activity.includedTownIds?.length ?? 0) > 0 && (
+                            <div className="flex items-center mt-1">
+                              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium border bg-[#faf2ee] text-[#b85028] border-[#e8e1dd]">
+                                <Buildings size={11} weight="duotone" />
+                                <span>
+                                  +{activity.includedTownIds?.length}{' '}
+                                  {activity.includedTownIds?.length === 1
+                                    ? 'ville participante'
+                                    : 'villes participantes'}
+                                </span>
+                              </span>
+                            </div>
+                          )}
                       </div>
                     </div>
                   </td>

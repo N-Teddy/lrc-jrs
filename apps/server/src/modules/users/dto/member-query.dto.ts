@@ -11,7 +11,7 @@ export class MemberQueryDto extends IntersectionType(
 ) {
   @ApiPropertyOptional({
     enum: UserRole,
-    description: 'Filter by fellowship role',
+    description: 'Filter by community role',
   })
   @IsOptional()
   @IsEnum(UserRole)

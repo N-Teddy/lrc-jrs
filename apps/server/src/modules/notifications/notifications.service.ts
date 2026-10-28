@@ -5,6 +5,7 @@ import {
   type NotificationQueryDto,
   type NotificationResource,
   type RegisterPushTokenDto,
+  UserRole,
 } from '@jrs/shared';
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
@@ -14,14 +15,16 @@ import {
   NotFoundAppException,
 } from '../../core/exceptions/app.exception';
 import {
+  AccountStatus,
+  Town,
+  type TownDocument,
+  User,
+  type UserDocument,
+} from '../../database/schemas';
+import {
   Notification,
   type NotificationDocument,
 } from '../../database/schemas/notification.schema';
-import {
-  AccountStatus,
-  User,
-  type UserDocument,
-} from '../../database/schemas/user.schema';
 import { NotificationsGateway } from './notifications.gateway';
 import { PushNotificationService } from './push-notification.service';
 
@@ -34,13 +37,14 @@ export class NotificationsService {
     private readonly notificationModel: Model<NotificationDocument>,
     @InjectModel(User.name)
     private readonly userModel: Model<UserDocument>,
+    @InjectModel(Town.name)
+    private readonly townModel: Model<TownDocument>,
     private readonly notificationsGateway: NotificationsGateway,
     private readonly pushNotificationService: PushNotificationService,
   ) {}
 
   /**
    * Dispatch a notification to targeted users who have active app access.
-   * Excludes the actor so their own inbox is not cluttered.
    */
   async createNotification(
     dto: CreateNotificationDto,
@@ -49,7 +53,7 @@ export class NotificationsService {
     const query: FilterQuery<UserDocument> = {
       'account.hasAppAccess': true,
       'account.isAccessRevoked': { $ne: true },
-      'account.status': AccountStatus.ACTIVE,
+      'account.status': { $ne: AccountStatus.REVOKED },
     };
 
     if (dto.target.userIds && dto.target.userIds.length > 0) {
@@ -64,32 +68,58 @@ export class NotificationsService {
       query.role = { $in: dto.target.roles };
     }
 
+    let townObjectId: Types.ObjectId | null = null;
     if (dto.target.townId) {
-      query.homeTownId = dto.target.townId;
+      const tid = String(dto.target.townId).trim();
+      if (Types.ObjectId.isValid(tid) && tid.length === 24) {
+        townObjectId = new Types.ObjectId(tid);
+      } else {
+        const foundTown = await this.townModel.findOne({
+          code: new RegExp(`^${tid}$`, 'i'),
+        });
+        if (foundTown) {
+          townObjectId = foundTown._id as Types.ObjectId;
+        }
+      }
     }
 
-    // Exclude actor and any explicitly excluded users
+    if (townObjectId) {
+      // APs oversee all hubs across Cameroon, so include APs even when filtered by town
+      if (dto.target.roles && dto.target.roles.includes(UserRole.AP)) {
+        query.$or = [{ homeTownId: townObjectId }, { role: UserRole.AP }];
+      } else {
+        query.homeTownId = townObjectId;
+      }
+    }
+
+    // Explicitly excluded users (e.g. specific targets)
     const excludeIds = new Set<string>();
-    if (actorId) excludeIds.add(actorId);
     if (dto.target.excludeUserIds) {
       for (const id of dto.target.excludeUserIds) {
+        // Only exclude if not the sole target
         excludeIds.add(id);
       }
     }
 
-    if (excludeIds.size > 0) {
-      const validExcluded = Array.from(excludeIds)
-        .filter((id) => Types.ObjectId.isValid(id))
-        .map((id) => new Types.ObjectId(id));
+    let recipients = await this.userModel.find(query).exec();
 
-      if (query._id) {
-        query._id = { ...query._id, $nin: validExcluded };
-      } else {
-        query._id = { $nin: validExcluded };
+    // If excluding users resulted in 0 recipients, retain the actor so notifications are still recorded
+    if (recipients.length === 0 && actorId && Types.ObjectId.isValid(actorId)) {
+      const fallbackUser = await this.userModel
+        .findById(new Types.ObjectId(actorId))
+        .exec();
+      if (fallbackUser) {
+        recipients = [fallbackUser];
+      }
+    } else if (excludeIds.size > 0) {
+      const filtered = recipients.filter(
+        (r) => !excludeIds.has(r.id || r._id.toString()),
+      );
+      if (filtered.length > 0) {
+        recipients = filtered;
       }
     }
 
-    const recipients = await this.userModel.find(query).exec();
     if (recipients.length === 0) {
       return { deliveredCount: 0 };
     }

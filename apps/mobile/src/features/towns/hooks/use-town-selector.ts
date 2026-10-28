@@ -36,18 +36,27 @@ export function useTownSelector({
     return filtered.length > 0 ? filtered : availableTowns;
   }, [user, availableTowns]);
 
-  // Initial selected town (activeTownId -> homeTown -> first accessible)
+  // Initial selected town: Prioritize user's assigned home town on login
   const initialTown = useMemo(() => {
-    if (activeTownId) {
-      const found = accessibleTowns.find((t) => t.id === activeTownId);
-      if (found) return found;
-    }
     if (user.homeTownId) {
-      const home = accessibleTowns.find((t) => t.id === user.homeTownId);
+      const home = accessibleTowns.find(
+        (t) =>
+          t.id === user.homeTownId ||
+          (user.homeTownId &&
+            t.code?.toUpperCase() === user.homeTownId.toUpperCase()),
+      );
       if (home) return home;
     }
+    if (activeTownId) {
+      const found = accessibleTowns.find(
+        (t) =>
+          t.id === activeTownId ||
+          (t.code && t.code.toUpperCase() === activeTownId.toUpperCase()),
+      );
+      if (found) return found;
+    }
     return accessibleTowns[0] || null;
-  }, [activeTownId, accessibleTowns, user.homeTownId]);
+  }, [user.homeTownId, activeTownId, accessibleTowns]);
 
   const [selectedTown, setSelectedTown] = useState<ITown | null>(initialTown);
   const [isEntering, setIsEntering] = useState(false);

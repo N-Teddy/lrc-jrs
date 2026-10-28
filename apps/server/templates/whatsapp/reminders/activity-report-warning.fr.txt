@@ -1,0 +1,19 @@
+⚠️ *AVIS IMPORTANT : RAPPORT D'ACTIVITÉ EN ATTENTE*
+
+Bonjour {{userName}},
+
+L'activité suivante est désormais terminée :
+
+📌 *Activité :* {{activityName}}
+📅 *Date de fin :* {{endDateFormatted}}
+📍 *Lieu :* {{locationVenue}}
+
+📄 *Action requise :*
+Le rapport officiel de cette activité n'a pas encore été téléversé sur la plateforme JRS.
+
+Merci de bien vouloir préparer et téléverser le compte-rendu d'activité ainsi que la feuille de présence dès que possible.
+
+Lien direct vers l'activité pour déposer le rapport :
+{{appUrl}}
+
+_— Système de gestion LRC-JRS_

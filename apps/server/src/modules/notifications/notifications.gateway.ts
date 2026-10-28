@@ -113,6 +113,7 @@ export class NotificationsGateway
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
       this.logger.warn(`Socket authentication error: ${msg}`);
+      client.emit('connect_error', { message: msg });
       client.disconnect(true);
     }
   }

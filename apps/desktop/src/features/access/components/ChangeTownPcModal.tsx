@@ -160,7 +160,7 @@ export const ChangeTownPcModal: React.FC<ChangeTownPcModalProps> = ({
     }
     if (!newPcId) {
       setErrorMsg(
-        'Please select a member to promote to Parish Coordinator (PC).',
+        'Please select a member to promote to Program Coordinator (PC).',
       );
       return;
     }
@@ -204,7 +204,7 @@ export const ChangeTownPcModal: React.FC<ChangeTownPcModalProps> = ({
                 Transition Town PC Leadership
               </h2>
               <p className="text-xs text-[#8a726a] mt-0.5">
-                Appoint a new Parish Coordinator and adjust the outgoing
+                Appoint a new Program Coordinator and adjust the outgoing
                 coordinator's permissions.
               </p>
             </div>
@@ -240,7 +240,7 @@ export const ChangeTownPcModal: React.FC<ChangeTownPcModalProps> = ({
               htmlFor="target-town-select"
               className="text-xs font-bold text-[#57423b]"
             >
-              Parish Hub / Town
+              Community Hub / Town
             </label>
             {isAP ? (
               <CustomSelect
@@ -252,7 +252,7 @@ export const ChangeTownPcModal: React.FC<ChangeTownPcModalProps> = ({
                   setNewPcId('');
                 }}
                 options={townOptions}
-                placeholder="Select parish hub..."
+                placeholder="Select community hub..."
                 variant="form"
                 size="sm"
                 className="w-full"
@@ -353,7 +353,7 @@ export const ChangeTownPcModal: React.FC<ChangeTownPcModalProps> = ({
           <div className="p-4 rounded-xl bg-white border border-[#e8e1dd] shadow-2xs flex flex-col gap-3">
             <span className="text-[11px] font-bold text-[#8a726a] uppercase tracking-wider flex items-center gap-1.5">
               <Crown size={14} className="text-[#b85028]" />
-              New Parish Coordinator (To Appoint)
+              New Program Coordinator (To Appoint)
             </span>
 
             <CustomSelect

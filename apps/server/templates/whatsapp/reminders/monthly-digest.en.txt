@@ -1,0 +1,20 @@
+📅 *MONTHLY ACTIVITIES CALENDAR - {{monthName}} {{year}}*
+
+Hello {{userName}},
+
+Here is the schedule of upcoming activities this month:
+
+{{#if activities.length}}
+{{#each activities}}
+*{{index}}.* *{{name}}*
+   📅 {{dateFormatted}} | 📍 {{locationVenue}} ({{typeLabel}})
+{{/each}}
+
+💡 Be sure to prepare your meeting agendas, speakers, and logistics well in advance.
+{{else}}
+No activities are currently scheduled for this month. Remember to plan and register your upcoming activities in the app.
+{{/if}}
+
+Access full calendar: {{appUrl}}
+
+_— LRC-JRS Management System_

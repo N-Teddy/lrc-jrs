@@ -165,6 +165,9 @@ export class User extends BaseDocument {
   @Prop({ type: String, trim: true })
   intakeNote?: string;
 
+  @Prop({ type: String, enum: ['fr', 'en'], default: 'fr' })
+  preferredLanguage: 'fr' | 'en';
+
   @Prop({ type: [UserPushToken], default: [] })
   pushTokens: UserPushToken[];
 }

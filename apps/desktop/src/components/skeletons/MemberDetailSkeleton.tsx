@@ -76,7 +76,7 @@ export const MemberDetailSkeleton: React.FC = () => {
             </div>
           </div>
 
-          {/* Fellowship & System Card */}
+          {/* Community & System Card */}
           <div className="bg-white rounded-xl border border-[#e8e1dd] p-6 shadow-xs flex flex-col gap-5">
             <div className="flex items-center justify-between pb-3 border-b border-[#f4ece9]">
               <Skeleton width={150} height={18} />

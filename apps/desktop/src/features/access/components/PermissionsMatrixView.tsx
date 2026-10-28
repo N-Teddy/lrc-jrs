@@ -225,7 +225,7 @@ export const PermissionsMatrixView: React.FC<PermissionsMatrixViewProps> = ({
             <p className="text-xs text-[#8a726a] mt-0.5">
               {t(
                 'access:permissions.interHubSubtitle',
-                'Hub coordinators and officers granted read-only visibility into other parish gatherings',
+                'Hub coordinators and officers granted read-only visibility into other community gatherings',
               )}
             </p>
           </div>

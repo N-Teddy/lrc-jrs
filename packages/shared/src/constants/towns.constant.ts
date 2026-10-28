@@ -10,7 +10,7 @@ export const DEFAULT_TOWNS = [
 export const MAX_ACTIVE_PCS_PER_TOWN = 2;
 
 /**
- * Mapping between fellowship town codes and Cameroon administrative region ISO codes.
+ * Mapping between community town codes and Cameroon administrative region ISO codes.
  */
 export const TOWN_TO_ISO_MAP: Record<string, string> = {
   DLA: 'CM-LT',

@@ -361,7 +361,9 @@ export const DatePeriodFilter: React.FC<DatePeriodFilterProps> = ({
           {activeTab === 'year' && (
             <div className="flex flex-col gap-2">
               <span className="text-[11px] font-semibold text-[#8a726a] px-1">
-                Select an entire pastoral year:
+                {t('activities:filters.selectProgramYear', {
+                  defaultValue: 'Select an entire program year:',
+                })}
               </span>
               <div className="grid grid-cols-2 gap-2">
                 {availableYears.map((y) => {

@@ -1,4 +1,4 @@
-import type { IAuthUser } from '@jrs/shared';
+import { ActivityType, type IAuthUser, type IChecklistItem } from '@jrs/shared';
 import {
   Body,
   Controller,
@@ -10,6 +10,7 @@ import {
   Param,
   Patch,
   Post,
+  Put,
   Query,
   Res,
   UploadedFiles,
@@ -31,6 +32,7 @@ import { TownScope } from '../../core/decorators/town-scope.decorator';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
 import { TownScopeGuard } from '../../core/guards/town-scope.guard';
 import { ActivitiesService } from './activities.service';
+import { ActivityReminderService } from './activity-reminder.service';
 import {
   ActivityQueryDto,
   CreateActivityDto,
@@ -43,12 +45,15 @@ import {
 @UseGuards(JwtAuthGuard, TownScopeGuard)
 @Controller('activities')
 export class ActivitiesController {
-  constructor(private readonly activitiesService: ActivitiesService) {}
+  constructor(
+    private readonly activitiesService: ActivitiesService,
+    private readonly reminderService: ActivityReminderService,
+  ) {}
 
   @Get()
   @TownScope('townId')
   @ApiOperation({
-    summary: 'List fellowship activities with filters, year/month & pagination',
+    summary: 'List community activities with filters, year/month & pagination',
   })
   @ApiResponse({ status: 200, description: 'Paginated activities' })
   async findAll(
@@ -221,6 +226,64 @@ export class ActivitiesController {
     fileData.stream.pipe(res);
   }
 
+  // --------------------------------------------------------------------------
+  // Dynamic Reminder Templates & Admin Checklists
+  // --------------------------------------------------------------------------
+
+  @Get('reminder-templates')
+  @ApiOperation({ summary: 'List all activity reminder checklist templates' })
+  @ApiResponse({ status: 200, description: 'List of reminder templates' })
+  async getReminderTemplates() {
+    return this.reminderService.getTemplates();
+  }
+
+  @Get('reminder-templates/:type')
+  @ApiOperation({
+    summary: 'Get reminder checklist template for specific activity type',
+  })
+  @ApiResponse({ status: 200, description: 'Reminder template' })
+  async getReminderTemplate(@Param('type') type: ActivityType) {
+    return this.reminderService.getTemplateByType(type);
+  }
+
+  @Put('reminder-templates/:type')
+  @ApiOperation({
+    summary: 'Update reminder checklist template for specific activity type',
+  })
+  @ApiResponse({ status: 200, description: 'Template updated' })
+  async updateReminderTemplate(
+    @Param('type') type: ActivityType,
+    @Body()
+    dto: {
+      items: IChecklistItem[];
+      customInstructionsFr?: string;
+      customInstructionsEn?: string;
+    },
+  ) {
+    return this.reminderService.updateTemplate(type, dto);
+  }
+
+  @Post('reminders/trigger-daily')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary:
+      'Manually trigger daily activity milestones and report follow-up check',
+  })
+  @ApiResponse({ status: 200, description: 'Daily milestones processed' })
+  async triggerDailyMilestones() {
+    return this.reminderService.processDailyMilestones();
+  }
+
+  @Post('reminders/trigger-monthly')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Manually trigger monthly activities digest dispatch',
+  })
+  @ApiResponse({ status: 200, description: 'Monthly digest processed' })
+  async triggerMonthlyDigest() {
+    return this.reminderService.processMonthlyDigest();
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Get single activity details' })
   @ApiResponse({ status: 200, description: 'Activity details' })
@@ -230,7 +293,7 @@ export class ActivitiesController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Create a new fellowship activity' })
+  @ApiOperation({ summary: 'Create a new community activity' })
   @ApiResponse({ status: 201, description: 'Activity successfully created' })
   async create(
     @Body() dto: CreateActivityDto,

@@ -1,0 +1,20 @@
+🔔 *INTER-TOWN ACTIVITY REMINDER (D-{{daysAhead}})*
+
+Hello {{userName}},
+
+Your town is participating in the following activity{{#if hostTownName}} organized by {{hostTownName}}{{/if}}:
+
+📌 *Activity:* {{activityName}}
+📅 *Date:* {{startDateFormatted}}
+📍 *Venue:* {{locationVenue}}
+🏷️ *Type:* {{activityTypeLabel}}
+{{#if notes}}
+
+📝 *Notes & details:*
+{{notes}}
+{{/if}}
+
+Please inform and mobilize your participating members.
+Portal link: {{appUrl}}
+
+_— LRC-JRS Management System_

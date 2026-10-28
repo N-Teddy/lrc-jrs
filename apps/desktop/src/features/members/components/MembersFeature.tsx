@@ -1,4 +1,5 @@
 import {
+  toast,
   useAuth,
   useCreateMemberMutation,
   useDeleteMemberMutation,
@@ -132,6 +133,11 @@ export const MembersFeature: React.FC<MembersFeatureProps> = ({
         homeTownId: activeTownId || undefined,
       });
     }
+    toast.success(
+      t('members:memberCreatedSuccess', {
+        defaultValue: 'Member profile registered successfully',
+      }),
+    );
   };
 
   const handleUpdateMember = async (
@@ -139,10 +145,20 @@ export const MembersFeature: React.FC<MembersFeatureProps> = ({
     dto: IUpdateMemberDto | FormData,
   ) => {
     await updateMemberMutation.mutateAsync({ id, dto });
+    toast.success(
+      t('members:memberUpdatedSuccess', {
+        defaultValue: 'Member profile updated successfully',
+      }),
+    );
   };
 
   const handleConfirmDelete = async (id: string) => {
     await deleteMemberMutation.mutateAsync(id);
+    toast.success(
+      t('members:memberDeletedSuccess', {
+        defaultValue: 'Member profile deleted successfully',
+      }),
+    );
     if (selectedMemberId === id) {
       setSelectedMemberId(null);
     }
@@ -171,19 +187,28 @@ export const MembersFeature: React.FC<MembersFeatureProps> = ({
                 {activeSubTab === 'directory'
                   ? t('members:title')
                   : activeSubTab === 'access'
-                    ? t('access:title') || 'Access & Accounts Command Center'
-                    : t('members:intakeReviewsTitle') ||
-                      'Intake Registration Reviews'}
+                    ? t('access:title', 'Access & Accounts Command Center')
+                    : t(
+                        'members:intakeReviewsTitle',
+                        'Intake Registration Reviews',
+                      )}
               </h1>
               <p className="text-xs text-[#8a726a]">
                 {activeSubTab === 'directory'
-                  ? 'Directory roster, demographic profiles, and status records'
+                  ? t(
+                      'members:directorySubtitle',
+                      'Directory roster, demographic profiles, and status records',
+                    )
                   : activeSubTab === 'access'
-                    ? t('access:subtitle') ||
-                      'Manage member platform onboarding, temporary passwords, security freezes, and hub jurisdictions'
-                    : `Review and approve prospective members registered through invitation links for ${
-                        activeTown ? activeTown.name : 'this Hub'
-                      }`}
+                    ? t(
+                        'access:subtitle',
+                        'Manage member platform onboarding, temporary passwords, security freezes, and hub jurisdictions',
+                      )
+                    : t('members:intakeReviewsSubtitle', {
+                        town: activeTown ? activeTown.name : 'this Hub',
+                        defaultValue:
+                          'Review and approve prospective members registered through invitation links for this Hub',
+                      })}
               </p>
             </div>
 
@@ -202,7 +227,7 @@ export const MembersFeature: React.FC<MembersFeatureProps> = ({
                   size={16}
                   weight={activeSubTab === 'directory' ? 'fill' : 'regular'}
                 />
-                <span>Fellowship Directory</span>
+                <span>{t('members:directory', 'Community Directory')}</span>
               </button>
 
               <button
@@ -218,7 +243,9 @@ export const MembersFeature: React.FC<MembersFeatureProps> = ({
                   size={16}
                   weight={activeSubTab === 'access' ? 'fill' : 'regular'}
                 />
-                <span>Access & Accounts</span>
+                <span>
+                  {t('members:accessAndAccounts', 'Access & Accounts')}
+                </span>
               </button>
 
               <button
@@ -234,7 +261,12 @@ export const MembersFeature: React.FC<MembersFeatureProps> = ({
                   size={16}
                   weight={activeSubTab === 'reviews' ? 'fill' : 'regular'}
                 />
-                <span>Intake Registration Review</span>
+                <span>
+                  {t(
+                    'members:intakeRegistrationReview',
+                    'Intake Registration Review',
+                  )}
+                </span>
                 {pendingReviews.length > 0 && (
                   <span
                     className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${

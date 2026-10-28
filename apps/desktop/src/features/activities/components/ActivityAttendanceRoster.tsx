@@ -19,6 +19,7 @@ import {
 } from '@jrs/shared';
 import {
   ArrowLeft,
+  Buildings,
   CalendarBlank,
   Check,
   CheckCircle,
@@ -82,10 +83,13 @@ export const ActivityAttendanceRoster: React.FC<
 > = ({ activity, onBack }) => {
   const { t, i18n } = useTranslation(['attendance', 'towns', 'common']);
   const isFrench = i18n.language?.startsWith('fr');
-  const { canWrite } = useTownContext();
+  const { canWrite, activeTownId } = useTownContext();
   const { user } = useAuth();
   const isCurrentUserAp = user?.role === 'AP';
-  const isPrivileged = user?.role === 'AP' || user?.role === 'PC';
+  const isHostTown =
+    !activeTownId || activeTownId === (activity.hostTownId || activity.townId);
+  const canManageAttendance = isCurrentUserAp || (canWrite && isHostTown);
+  const isPrivileged = canManageAttendance;
 
   // Active sub-tab: 'members' | 'guests'
   const [activeTab, setActiveTab] = useState<'members' | 'guests'>('members');
@@ -106,7 +110,10 @@ export const ActivityAttendanceRoster: React.FC<
   const isAttendanceLocked = Boolean(
     activity.isAttendanceLocked || attendanceData?.isLocked,
   );
-  const isEditable = isUnlocked && (!isAttendanceLocked || isCurrentUserAp);
+  const isEditable =
+    canManageAttendance &&
+    isUnlocked &&
+    (!isAttendanceLocked || isCurrentUserAp);
 
   const lockMutation = useLockAttendanceMutation();
   const unlockMutation = useUnlockAttendanceMutation();
@@ -603,6 +610,22 @@ export const ActivityAttendanceRoster: React.FC<
         <div className="p-3.5 bg-[#ffdad6]/50 border border-[#ffb4a8] rounded-xl text-[#ba1a1a] flex items-center gap-2 text-xs font-bold">
           <WarningCircle size={18} weight="fill" />
           <span>{saveErrorMsg}</span>
+        </div>
+      )}
+
+      {/* Read-only Participating Town Notice */}
+      {!canManageAttendance && (
+        <div className="p-3.5 bg-[#edf3ee] border border-[#c2e9ca] rounded-xl text-[#2c4e37] flex items-center gap-2.5 text-xs">
+          <Buildings
+            size={18}
+            weight="duotone"
+            className="text-[#486b52] shrink-0"
+          />
+          <span>
+            {isFrench
+              ? `Activité inter-villes hébergée par ${activity.hostTown?.name || activity.town?.name || 'la ville hôte'}. La saisie et le verrouillage des présences sont réservés à la Personne Contact (PC) hôte ou à un AP.`
+              : `Inter-town activity hosted by ${activity.hostTown?.name || activity.town?.name || 'host town'}. Attendance marking and finalization are reserved for the host Contact Person (PC) or an AP.`}
+          </span>
         </div>
       )}
 

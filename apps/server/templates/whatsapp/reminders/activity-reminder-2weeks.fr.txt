@@ -1,0 +1,26 @@
+🔔 *RAPPEL ACTIVITÉ JRS (J-14)*
+
+Bonjour {{userName}},
+
+Une activité est prévue dans *2 semaines* :
+
+📌 *Activité :* {{activityName}}
+📅 *Date :* {{startDateFormatted}}
+📍 *Lieu :* {{locationVenue}}
+🏷️ *Type :* {{activityTypeLabel}}
+
+---
+📋 *POINTS DE PRÉPARATION RECOMMANDÉS :*
+{{#each checklistItems}}
+- [ ] {{this}}
+{{/each}}
+{{#if customInstructions}}
+
+💡 *Consignes spécifiques :*
+{{customInstructions}}
+{{/if}}
+
+Merci de bien vouloir vous coordonner avec votre équipe pour finaliser les préparatifs.
+Lien vers l'application : {{appUrl}}
+
+_— Système de gestion LRC-JRS_

@@ -12,6 +12,7 @@ export interface ToastItem {
   message: string;
   duration?: number; // duration in ms, 0 means persistent until closed
   action?: ToastAction;
+  params?: Record<string, string | number>;
 }
 
 export interface ToastContextValue {

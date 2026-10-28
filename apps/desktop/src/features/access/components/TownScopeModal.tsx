@@ -68,7 +68,7 @@ export const TownScopeModal: React.FC<TownScopeModalProps> = ({
               </h2>
               <p className="text-xs text-[#8a726a] mt-0.5">
                 {t('access:modals.scopesSubtitle', { name: member.fullName }) ||
-                  `Grant ${member.fullName} read-only access to browse external parish gathering rosters`}
+                  `Grant ${member.fullName} read-only access to browse external community gathering rosters`}
               </p>
             </div>
           </div>

@@ -46,7 +46,7 @@ export class UsersController {
 
   @Get()
   @TownScope('townId')
-  @ApiOperation({ summary: 'List fellowship members with pagination & search' })
+  @ApiOperation({ summary: 'List community members with pagination & search' })
   @ApiResponse({ status: 200, description: 'Paginated list of members' })
   async findAll(
     @Query() query: MemberQueryDto,
@@ -58,7 +58,7 @@ export class UsersController {
 
   @Get('stats')
   @TownScope('townId')
-  @ApiOperation({ summary: 'Get aggregate fellowship metrics for town hub' })
+  @ApiOperation({ summary: 'Get aggregate community metrics for town hub' })
   @ApiResponse({ status: 200, description: 'Member statistics for the hub' })
   async getStats(
     @Query('townId') townId?: string,
@@ -87,7 +87,7 @@ export class UsersController {
   )
   @ApiConsumes('multipart/form-data', 'application/json')
   @ApiOperation({
-    summary: 'Register a new fellowship member with optional avatar upload',
+    summary: 'Register a new community member with optional avatar upload',
   })
   @ApiResponse({ status: 201, description: 'Member registered successfully' })
   @ApiResponse({ status: 400, description: 'Age rule or quota violation' })
@@ -104,6 +104,18 @@ export class UsersController {
   ) {
     const file = files?.avatar?.[0] || files?.image?.[0];
     return this.usersService.createMember(dto, currentUser, xTownId, file);
+  }
+
+  @Patch('preferences/language')
+  @ApiOperation({
+    summary: 'Update preferred language (fr or en) for current user',
+  })
+  @ApiResponse({ status: 200, description: 'Language preference updated' })
+  async updateLanguagePreference(
+    @Body('language') language: 'fr' | 'en',
+    @CurrentUser() currentUser: IAuthUser,
+  ) {
+    return this.usersService.updateLanguagePreference(currentUser.id, language);
   }
 
   @Patch(':id')
@@ -166,7 +178,7 @@ export class UsersController {
   }
 
   @Post(':id/transfer')
-  @ApiOperation({ summary: 'Transfer a fellowship member to another town hub' })
+  @ApiOperation({ summary: 'Transfer a community member to another town hub' })
   @ApiResponse({ status: 200, description: 'Member transferred successfully' })
   @ApiResponse({ status: 400, description: 'Invalid transfer parameters' })
   @ApiResponse({ status: 403, description: 'Forbidden transfer' })

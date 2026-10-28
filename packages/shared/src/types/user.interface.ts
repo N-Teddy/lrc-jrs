@@ -40,6 +40,7 @@ export interface IUser {
   intakeStatus?: 'PENDING_REVIEW' | 'APPROVED' | 'REJECTED';
   registrationLinkId?: string;
   intakeNote?: string;
+  preferredLanguage?: 'fr' | 'en';
   createdAt?: string;
   updatedAt?: string;
 }
@@ -52,6 +53,7 @@ export interface IAuthUser {
   homeTownId: string;
   isActivePC: boolean;
   account: IUserAccount;
+  preferredLanguage?: 'fr' | 'en';
   email?: string;
   avatarUrl?: string;
   gender?: Gender;

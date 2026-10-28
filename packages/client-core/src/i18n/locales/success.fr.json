@@ -24,5 +24,11 @@
 
   "SUCCESS_NOTIFICATION_MARKED_READ": "Notification marquée comme lue.",
   "SUCCESS_NOTIFICATIONS_ALL_MARKED_READ": "Toutes les notifications ont été marquées comme lues.",
-  "SUCCESS_PUSH_TOKEN_REGISTERED": "Appareil configuré pour les notifications push."
+  "SUCCESS_PUSH_TOKEN_REGISTERED": "Appareil configuré pour les notifications push.",
+  "activityCreatedSuccess": "Nouvelle activité programmée avec succès.",
+  "activityUpdatedSuccess": "Activité modifiée avec succès.",
+  "activityDeletedSuccess": "Activité supprimée avec succès.",
+  "memberCreatedSuccess": "Profil du membre enregistré avec succès.",
+  "memberUpdatedSuccess": "Profil du membre mis à jour avec succès.",
+  "memberDeletedSuccess": "Profil du membre supprimé avec succès."
 }

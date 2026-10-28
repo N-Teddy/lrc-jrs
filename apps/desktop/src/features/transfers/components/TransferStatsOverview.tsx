@@ -129,7 +129,7 @@ export const TransferStatsOverview: React.FC<TransferStatsOverviewProps> = ({
           <span>
             {t(
               'transfers:stats.transitioned',
-              'Transitioned to other fellowship hubs',
+              'Transitioned to other community hubs',
             )}
           </span>
         </div>

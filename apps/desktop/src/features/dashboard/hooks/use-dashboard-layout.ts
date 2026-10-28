@@ -6,7 +6,8 @@ export type DashboardTabId =
   | 'activities'
   | 'transfers'
   | 'access'
-  | 'reports';
+  | 'reports'
+  | 'notifications';
 
 const TAB_TITLES: Record<DashboardTabId, string> = {
   dashboard: 'Dashboard Overview',
@@ -15,6 +16,7 @@ const TAB_TITLES: Record<DashboardTabId, string> = {
   transfers: 'Town Transfers',
   access: 'Access & Accounts',
   reports: 'Reports & Analytics',
+  notifications: 'Notifications & Alerts',
 };
 
 export function useDashboardLayout() {

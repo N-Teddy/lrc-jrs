@@ -105,7 +105,7 @@ export class SeedService {
         'Resident Hub': t.currentTownCode,
         Transfers: t.totalTransfers,
         Initiator: t.transferredBy,
-        'Pastoral Reason':
+        'Transfer Reason':
           t.lastReason.length > 55
             ? `${t.lastReason.substring(0, 52)}...`
             : t.lastReason,

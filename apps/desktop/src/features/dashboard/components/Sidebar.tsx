@@ -108,6 +108,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
         height: btnRect.height,
         opacity: 1,
       });
+    } else {
+      setIndicatorStyle((prev) => ({ ...prev, opacity: 0 }));
     }
   }, [activeTab]);
 

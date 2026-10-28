@@ -1,4 +1,5 @@
 export * from './activity.interface.js';
+export * from './activity-reminder-template.interface.js';
 export * from './api-response.interface.js';
 export * from './attendance.interface.js';
 export * from './notification.interface.js';

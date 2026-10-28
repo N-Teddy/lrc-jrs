@@ -688,6 +688,8 @@ export interface DateTimePickerProps {
   id?: string;
   className?: string;
   ariaLabel?: string;
+  minDate?: string;
+  maxDate?: string;
 }
 
 export const DateTimePicker: React.FC<DateTimePickerProps> = ({
@@ -698,6 +700,8 @@ export const DateTimePicker: React.FC<DateTimePickerProps> = ({
   id,
   className = '',
   ariaLabel,
+  minDate,
+  maxDate,
 }) => {
   const generatedId = useId();
   const inputId = id || generatedId;
@@ -776,6 +780,8 @@ export const DateTimePicker: React.FC<DateTimePickerProps> = ({
             onChange={handleDateChange}
             placeholder="Select date"
             className="mb-3"
+            minDate={minDate}
+            maxDate={maxDate}
           />
 
           {/* Time Picker Bar */}

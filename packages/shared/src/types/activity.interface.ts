@@ -51,6 +51,8 @@ export interface IActivity {
   notes?: string;
   hostTownId: string;
   hostTown?: ITown;
+  includedTownIds?: string[];
+  includedTowns?: ITown[];
   status: ActivityStatus;
   changeHistory: IActivityChangeLog[];
   attendanceCount?: {
@@ -78,6 +80,7 @@ export interface ICreateActivityDto {
   locationVenue: string;
   notes?: string;
   hostTownId?: string;
+  includedTownIds?: string[];
 }
 
 export interface IUpdateActivityDto {
@@ -90,6 +93,7 @@ export interface IUpdateActivityDto {
   notes?: string;
   status?: ActivityStatus;
   changeReason?: string;
+  includedTownIds?: string[];
 }
 
 export interface IActivityQueryDto {

@@ -44,7 +44,7 @@ export const SEED_NAMED_MEMBER_TRANSFERS: SeedMemberTransferPlan[] = [
         transferredAt: '2026-01-20T14:15:00.000Z',
         transferredBy: 'PC Yaoundé 1 (Emmanuel Nguema)',
         reason:
-          'Family relocation to Western region; coordinated fellowship handover to Bafoussam hub',
+          'Family relocation to Western region; coordinated community handover to Bafoussam hub',
       },
     ],
   },
@@ -84,7 +84,7 @@ export const SEED_NAMED_MEMBER_TRANSFERS: SeedMemberTransferPlan[] = [
         transferredAt: '2025-11-25T11:45:00.000Z',
         transferredBy: 'Animateur Principal LRC',
         reason:
-          'Pastoral deployment and community fellowship support in the Edéa mission territory',
+          'Community coordination and youth program support in the Edéa sector',
       },
     ],
   },
@@ -138,8 +138,7 @@ export const SEED_UNNAMED_MEMBER_TRANSFERS: SeedMemberTransferPlan[] = [
         toTownCode: 'BAF',
         transferredAt: '2025-10-12T10:20:00.000Z',
         transferredBy: 'Animateur Principal LRC',
-        reason:
-          'Pastoral family reunification in the Western highlands of Bafoussam',
+        reason: 'Family reunification in the Western highlands of Bafoussam',
       },
     ],
   },
@@ -187,7 +186,7 @@ export const SEED_UNNAMED_MEMBER_TRANSFERS: SeedMemberTransferPlan[] = [
         transferredAt: '2025-12-14T11:30:00.000Z',
         transferredBy: 'PC Douala 1 (Jean Dupont)',
         reason:
-          'Agricultural entrepreneurship and agribusiness fellowship deployment in Western Region',
+          'Agricultural entrepreneurship and agribusiness community initiative in Western Region',
       },
     ],
   },
@@ -266,16 +265,16 @@ export const SEED_UNNAMED_MEMBER_TRANSFERS: SeedMemberTransferPlan[] = [
 ];
 
 /**
- * Realistic pastoral reasons and initiators for dynamic transfers fallback.
+ * Realistic transfer reasons and initiators for dynamic transfers fallback.
  */
 export const SAMPLE_TRANSFER_REASONS = [
   'Relocated for higher academic studies and university coursework',
   'Professional employment transfer in the regional economic hub',
-  'Pastoral recommendation following family residence relocation',
-  'Transitioned to regional fellowship due to vocational internship',
-  'Approved deanery reassignment and fellowship community integration',
+  'Administrative recommendation following family residence relocation',
+  'Transitioned to regional community due to vocational internship',
+  'Approved regional reassignment and community integration',
   'Medical residency and health services regional rotation',
-  'Youth fellowship leadership assistance and mission territory support',
+  'Youth community leadership assistance and regional program support',
 ];
 
 export const SAMPLE_TRANSFER_INITIATORS = [

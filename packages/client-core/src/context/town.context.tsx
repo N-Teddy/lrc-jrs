@@ -94,10 +94,26 @@ export function TownProvider({ children, storage }: TownProviderProps) {
           setIsLoadingTowns(false);
         }
 
-        // Try reading stored town ID, fallback to user's home town
+        // Match user's assigned home town first, then fallback to stored town ID or first available
+        const homeMatch = towns.find(
+          (t) =>
+            t.id === user.homeTownId ||
+            (user.homeTownId &&
+              t.code?.toUpperCase() === user.homeTownId.toUpperCase()),
+        );
         const savedTownId = await storage.getItem(STORAGE_ACTIVE_TOWN_KEY);
+        const match = towns.find(
+          (t) =>
+            t.id === savedTownId ||
+            (savedTownId &&
+              t.code?.toUpperCase() === savedTownId.toUpperCase()),
+        );
         const resolvedTownId =
-          savedTownId || user.homeTownId || (towns[0]?.id ?? null);
+          homeMatch?.id ||
+          user.homeTownId ||
+          match?.id ||
+          savedTownId ||
+          (towns[0]?.id ?? null);
 
         if (isMounted && resolvedTownId) {
           setActiveTownIdState(resolvedTownId);
@@ -120,20 +136,32 @@ export function TownProvider({ children, storage }: TownProviderProps) {
   // Handle town switch
   const setActiveTownId = useCallback(
     async (newTownId: string) => {
-      setActiveTownIdState(newTownId);
-      http.setActiveTownId(newTownId);
-      await storage.setItem(STORAGE_ACTIVE_TOWN_KEY, newTownId);
+      const match = availableTowns.find(
+        (t) =>
+          t.id === newTownId ||
+          t.code?.toUpperCase() === newTownId.toUpperCase(),
+      );
+      const canonicalId = match?.id || newTownId;
+      setActiveTownIdState(canonicalId);
+      http.setActiveTownId(canonicalId);
+      await storage.setItem(STORAGE_ACTIVE_TOWN_KEY, canonicalId);
 
       // Invalidate town-specific queries so views update instantly
       queryClient.invalidateQueries({ queryKey: queryKeys.activities.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.users.all });
     },
-    [http, storage, queryClient],
+    [http, storage, queryClient, availableTowns],
   );
 
   const activeTown = useMemo(() => {
     if (!activeTownId) return null;
-    return availableTowns.find((t) => t.id === activeTownId) || null;
+    return (
+      availableTowns.find(
+        (t) =>
+          t.id === activeTownId ||
+          t.code?.toUpperCase() === activeTownId.toUpperCase(),
+      ) || null
+    );
   }, [activeTownId, availableTowns]);
 
   const permissions = useMemo(() => {

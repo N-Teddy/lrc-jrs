@@ -132,7 +132,7 @@ export const ActivityAuditLogView: React.FC<ActivityAuditLogViewProps> = ({
         : '—';
       fields.push({
         id: 'townId',
-        label: t('activities:audit.fields.town', 'Fellowship Hub'),
+        label: t('activities:audit.fields.town', 'Community Hub'),
         prev: prevTownName,
         current: nextTownName,
         icon: MapPin,
@@ -197,8 +197,8 @@ export const ActivityAuditLogView: React.FC<ActivityAuditLogViewProps> = ({
             <ArrowLeft size={14} weight="bold" />
             <span>
               {t(
-                'activities:audit.fellowshipActivities',
-                'Fellowship Activities',
+                'activities:audit.communityActivities',
+                'Community Activities',
               )}
             </span>
           </button>

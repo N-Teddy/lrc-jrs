@@ -59,7 +59,7 @@ export class PublicSubmitMemberDto {
   integrationDate?: string;
 
   @ApiPropertyOptional({
-    example: 'I joined through the youth choir fellowship.',
+    example: 'I joined through the youth community program.',
     description: 'Optional note or testimony from the registrant',
   })
   @IsOptional()

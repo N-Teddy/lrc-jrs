@@ -1,4 +1,8 @@
-import { useTownsQuery, useTransferTownMutation } from '@jrs/client-core';
+import {
+  useTownsQuery,
+  useTransferTownMutation,
+  useTranslation,
+} from '@jrs/client-core';
 import type { IUser } from '@jrs/shared';
 import {
   ArrowRight,
@@ -26,6 +30,7 @@ export const TransferTownModal: React.FC<TransferTownModalProps> = ({
   onClose,
   member,
 }) => {
+  const { t } = useTranslation();
   const { data: towns = [], isLoading: isTownsLoading } = useTownsQuery();
   const transferMutation = useTransferTownMutation();
 
@@ -78,7 +83,12 @@ export const TransferTownModal: React.FC<TransferTownModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!toTownId) {
-      setErrorMessage('Please select a destination town hub.');
+      setErrorMessage(
+        t(
+          'members:transferModal.selectDestError',
+          'Please select a destination town hub.',
+        ),
+      );
       return;
     }
 
@@ -96,7 +106,10 @@ export const TransferTownModal: React.FC<TransferTownModalProps> = ({
       setErrorMessage(
         err?.response?.data?.message ||
           err?.message ||
-          'Failed to transfer member. Please check permissions and try again.',
+          t(
+            'members:transferModal.transferFailedError',
+            'Failed to transfer member. Please check permissions and try again.',
+          ),
       );
     }
   };
@@ -112,10 +125,13 @@ export const TransferTownModal: React.FC<TransferTownModalProps> = ({
             </div>
             <div className="flex flex-col">
               <h2 className="text-lg font-bold text-[#1e1b19]">
-                Transfer Member Hub
+                {t('members:transferModal.title', 'Transfer Member Hub')}
               </h2>
               <p className="text-xs text-[#8a726a]">
-                Relocate member to a new Cameroon canonical fellowship hub.
+                {t(
+                  'members:transferModal.subtitle',
+                  'Relocate member to a new Cameroon regional community hub.',
+                )}
               </p>
             </div>
           </div>
@@ -157,14 +173,14 @@ export const TransferTownModal: React.FC<TransferTownModalProps> = ({
           {/* Transfer Visual Direction: Current Hub -> Destination Hub */}
           <div className="flex flex-col gap-3">
             <span className="text-xs font-bold text-[#1e1b19]">
-              Relocation Journey
+              {t('members:transferModal.journey', 'Relocation Journey')}
             </span>
 
             <div className="grid grid-cols-1 sm:grid-cols-5 gap-3 items-center">
               {/* Origin Card */}
               <div className="sm:col-span-2 p-3.5 rounded-lg bg-[#fff8e1] border border-[#ffe082] flex flex-col gap-1">
                 <span className="text-[10px] font-bold text-[#812901] uppercase tracking-wider">
-                  Origin Hub
+                  {t('members:transferModal.originHub', 'Origin Hub')}
                 </span>
                 <span className="text-xs font-black text-[#1e1b19] truncate">
                   {currentTownName}
@@ -184,10 +200,11 @@ export const TransferTownModal: React.FC<TransferTownModalProps> = ({
               {/* Destination Card Preview */}
               <div className="sm:col-span-2 p-3.5 rounded-lg bg-[#eef7f0] border border-[#c2e9ca] flex flex-col gap-1">
                 <span className="text-[10px] font-bold text-[#2c4e37] uppercase tracking-wider">
-                  Destination Hub
+                  {t('members:transferModal.destinationHub', 'Destination Hub')}
                 </span>
                 <span className="text-xs font-black text-[#1e1b19] truncate">
-                  {selectedTown?.name || 'Select Hub'}
+                  {selectedTown?.name ||
+                    t('members:transferModal.selectHub', 'Select Hub')}
                 </span>
                 <span className="text-[11px] font-mono text-[#8a726a]">
                   ({selectedTown?.code || '—'})
@@ -199,20 +216,30 @@ export const TransferTownModal: React.FC<TransferTownModalProps> = ({
           {/* Destination Hub Select */}
           <div className="flex flex-col gap-1.5">
             <span className="text-xs font-bold text-[#1e1b19]">
-              Destination Town Hub <span className="text-[#ba1a1a]">*</span>
+              {t(
+                'members:transferModal.destinationLabel',
+                'Destination Town Hub',
+              )}{' '}
+              <span className="text-[#ba1a1a]">*</span>
             </span>
             {isTownsLoading ? (
               <div className="h-10 bg-[#faf2ee] rounded-md animate-pulse" />
             ) : availableTowns.length === 0 ? (
               <div className="p-3 text-xs text-[#8a726a] bg-[#faf2ee] rounded-md border border-[#e8e1dd]">
-                No other town hubs available for transfer.
+                {t(
+                  'members:transferModal.noTowns',
+                  'No other town hubs available for transfer.',
+                )}
               </div>
             ) : (
               <CustomSelect
                 options={townOptions}
                 value={toTownId}
                 onChange={(val) => setToTownId(val)}
-                placeholder="Choose target hub..."
+                placeholder={t(
+                  'members:transferModal.choosePlaceholder',
+                  'Choose target hub...',
+                )}
               />
             )}
           </div>
@@ -223,14 +250,22 @@ export const TransferTownModal: React.FC<TransferTownModalProps> = ({
               htmlFor="transfer-reason"
               className="text-xs font-bold text-[#1e1b19]"
             >
-              Relocation Reason / Transfer Notes{' '}
-              <span className="text-[#8a726a] font-normal">(Optional)</span>
+              {t(
+                'members:transferModal.reasonLabel',
+                'Relocation Reason / Transfer Notes',
+              )}{' '}
+              <span className="text-[#8a726a] font-normal">
+                {t('members:transferModal.optional', '(Optional)')}
+              </span>
             </label>
             <textarea
               id="transfer-reason"
               value={reason}
               onChange={(e) => setReason(e.target.value)}
-              placeholder="e.g. Relocated to Douala for university studies, professional employment, or family relocation..."
+              placeholder={t(
+                'members:transferModal.reasonPlaceholder',
+                'e.g. Relocated to Douala for university studies, professional employment, or family relocation...',
+              )}
               rows={3}
               className="w-full p-3 rounded-md bg-[#faf2ee]/40 border border-[#e8e1dd] text-xs text-[#1e1b19] placeholder:text-[#8a726a] focus:outline-none focus:border-[#b85028] focus:bg-white transition-all shadow-2xs resize-none"
             />
@@ -244,9 +279,10 @@ export const TransferTownModal: React.FC<TransferTownModalProps> = ({
               className="text-[#8a726a] shrink-0 mt-0.5"
             />
             <p className="text-[11px] text-[#57423b] leading-relaxed">
-              Transferring a member permanently associates them with the new
-              regional hub, adjusts administrative visibility, and preserves an
-              immutable audit record in their relocation registry.
+              {t(
+                'members:transferModal.notice',
+                'Transferring a member permanently associates them with the new regional hub, adjusts administrative visibility, and preserves an immutable audit record in their relocation registry.',
+              )}
             </p>
           </div>
 
@@ -258,7 +294,7 @@ export const TransferTownModal: React.FC<TransferTownModalProps> = ({
               disabled={transferMutation.isPending}
               className="px-4 py-2.5 rounded-md bg-white border border-[#e8e1dd] text-xs font-bold text-[#57423b] hover:bg-[#faf2ee] transition-all cursor-pointer disabled:opacity-50"
             >
-              Cancel
+              {t('members:intake.cancel', 'Cancel')}
             </button>
             <button
               type="submit"
@@ -268,12 +304,22 @@ export const TransferTownModal: React.FC<TransferTownModalProps> = ({
               {transferMutation.isPending ? (
                 <>
                   <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  <span>Transferring Member...</span>
+                  <span>
+                    {t(
+                      'members:transferModal.transferringMember',
+                      'Transferring Member...',
+                    )}
+                  </span>
                 </>
               ) : (
                 <>
                   <ArrowsLeftRight size={15} weight="bold" />
-                  <span>Confirm Hub Transfer</span>
+                  <span>
+                    {t(
+                      'members:transferModal.confirmTransfer',
+                      'Confirm Hub Transfer',
+                    )}
+                  </span>
                 </>
               )}
             </button>

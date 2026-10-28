@@ -61,7 +61,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
       <div className="relative hidden h-full w-1/2 overflow-hidden lg:block">
         <img
           src={fellowshipHero}
-          alt="Youth Fellowship community"
+          alt="Youth Community gathering"
           className="h-full w-full object-cover object-center"
         />
       </div>

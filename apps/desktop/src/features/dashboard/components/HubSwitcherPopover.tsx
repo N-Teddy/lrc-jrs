@@ -1,4 +1,4 @@
-import { useTranslation } from '@jrs/client-core';
+import { useAuth, useTranslation } from '@jrs/client-core';
 import {
   CaretRight,
   Check,
@@ -28,6 +28,7 @@ export const HubSwitcherPopover: React.FC<HubSwitcherPopoverProps> = ({
   const { t, i18n } = useTranslation();
   const isFrench = i18n.language?.startsWith('fr');
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const { user } = useAuth();
   const {
     availableTowns,
     activeTownId,
@@ -59,7 +60,16 @@ export const HubSwitcherPopover: React.FC<HubSwitcherPopoverProps> = ({
 
   if (!isOpen) return null;
 
-  const currentTown = availableTowns.find((t) => t.id === activeTownId);
+  const isTownActive = (t: { id: string; code?: string }) => {
+    const targetIdOrCode = activeTownId || user?.homeTownId;
+    if (!targetIdOrCode) return false;
+    const normalized = targetIdOrCode.toUpperCase();
+    return (
+      t.id === targetIdOrCode || (t.code && t.code.toUpperCase() === normalized)
+    );
+  };
+
+  const currentTown = availableTowns.find(isTownActive);
 
   return (
     <div className="fixed inset-0 z-50 bg-[#1e1b19]/40 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-200">
@@ -150,7 +160,7 @@ export const HubSwitcherPopover: React.FC<HubSwitcherPopoverProps> = ({
         {/* Hub List */}
         <div className="p-4 overflow-y-auto space-y-2 max-h-[340px]">
           {filteredTowns.map((town) => {
-            const isCurrent = activeTownId === town.id;
+            const isCurrent = isTownActive(town);
             const regionName = getRegionName(town.code, isFrench ? 'fr' : 'en');
 
             return (

@@ -10,7 +10,7 @@ export class TownsController {
 
   @Public()
   @Get()
-  @ApiOperation({ summary: 'Get all active fellowship towns' })
+  @ApiOperation({ summary: 'Get all active community towns' })
   @ApiResponse({ status: 200, description: 'List of all towns' })
   async findAll() {
     return this.townsService.findAll();

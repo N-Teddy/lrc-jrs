@@ -57,6 +57,7 @@ export class UserMapperUtil {
       intakeStatus: (doc as any).intakeStatus,
       registrationLinkId: (doc as any).registrationLinkId?.toString(),
       intakeNote: (doc as any).intakeNote,
+      preferredLanguage: doc.preferredLanguage || 'fr',
       createdAt: (doc as any).createdAt?.toISOString(),
       updatedAt: (doc as any).updatedAt?.toISOString(),
     };

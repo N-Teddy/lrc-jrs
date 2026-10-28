@@ -112,6 +112,13 @@ export class Activity extends BaseDocument {
   hostTownId: Types.ObjectId;
 
   @Prop({
+    type: [{ type: MongooseSchema.Types.ObjectId, ref: 'Town' }],
+    default: [],
+    index: true,
+  })
+  includedTownIds: Types.ObjectId[];
+
+  @Prop({
     type: String,
     required: true,
     enum: Object.values(ActivityStatus),
@@ -141,6 +148,9 @@ export class Activity extends BaseDocument {
   @Prop({ type: [ActivityReportSchema], default: [] })
   reports: ActivityReport[];
 
+  @Prop({ type: [String], default: [] })
+  remindersSent: string[];
+
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User', required: true })
   createdBy: Types.ObjectId;
 
@@ -150,6 +160,9 @@ export class Activity extends BaseDocument {
 
 export const ActivitySchema = SchemaFactory.createForClass(Activity);
 
-// Compound indexes for performant monthly & yearly queries per town
+// Compound indexes for performant monthly, reminder, and report queries per town
 ActivitySchema.index({ hostTownId: 1, startDate: 1, isDeleted: 1 });
 ActivitySchema.index({ townId: 1, startDate: 1, isDeleted: 1 });
+ActivitySchema.index({ includedTownIds: 1, startDate: 1, isDeleted: 1 });
+ActivitySchema.index({ isDeleted: 1, status: 1, startDate: 1 });
+ActivitySchema.index({ isDeleted: 1, endDate: 1, 'report.fileId': 1 });

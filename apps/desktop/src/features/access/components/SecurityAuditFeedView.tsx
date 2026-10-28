@@ -113,7 +113,7 @@ export const SecurityAuditFeedView: React.FC<SecurityAuditFeedViewProps> = ({
             description: t('access:auditFeed.scopeDesc', {
               count: m.account.allowedReadTownIds.length,
               name: m.fullName,
-              defaultValue: `${m.account.allowedReadTownIds.length} external parish hubs granted to ${m.fullName} for read-only roster auditing.`,
+              defaultValue: `${m.account.allowedReadTownIds.length} external community hubs granted to ${m.fullName} for read-only roster auditing.`,
             }),
             icon: Globe,
             iconColor: 'text-[#b85028]',

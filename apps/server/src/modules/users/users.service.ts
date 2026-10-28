@@ -312,7 +312,7 @@ export class UsersService {
   }
 
   /**
-   * Registers a new member in the fellowship hub
+   * Registers a new member in the community hub
    */
   async createMember(
     dto: CreateMemberDto,
@@ -942,7 +942,7 @@ export class UsersService {
   }
 
   /**
-   * Transitions PC (Parish Coordinator) leadership in a town.
+   * Transitions PC (Program Coordinator) leadership in a town.
    * Can replace an outgoing PC by either:
    * 1. Demoting them to a regular member (keeping member app access)
    * 2. Revoking their account access completely
@@ -1120,5 +1120,27 @@ export class UsersService {
       newPc,
       outgoingPc: outgoingPc || undefined,
     };
+  }
+
+  async updateLanguagePreference(
+    userId: string,
+    language: 'fr' | 'en',
+  ): Promise<{ preferredLanguage: 'fr' | 'en' }> {
+    if (!['fr', 'en'].includes(language)) {
+      throw new BadRequestAppException(ErrorCode.BAD_REQUEST, {
+        message: 'Invalid language. Allowed values are "fr" and "en".',
+      });
+    }
+    const user = await this.userModel.findByIdAndUpdate(
+      userId,
+      { $set: { preferredLanguage: language } },
+      { new: true },
+    );
+    if (!user) {
+      throw new NotFoundAppException(ErrorCode.MEMBER_NOT_FOUND, {
+        id: userId,
+      });
+    }
+    return { preferredLanguage: user.preferredLanguage };
   }
 }

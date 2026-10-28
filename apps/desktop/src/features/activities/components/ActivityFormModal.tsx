@@ -6,8 +6,11 @@ import {
   type ITown,
 } from '@jrs/shared';
 import {
+  Buildings,
   CalendarBlank,
   CalendarPlus,
+  Check,
+  CheckCircle,
   Clock,
   Info,
   MapPin,
@@ -34,6 +37,7 @@ interface ActivityFormModalProps {
     startDate: string;
     endDate?: string;
     townId: string;
+    includedTownIds?: string[];
     notes?: string;
     status?: ActivityStatus;
     changeReason?: string;
@@ -72,6 +76,7 @@ export const ActivityFormModal: React.FC<ActivityFormModalProps> = ({
     ActivityType.MONTHLY_MEETING,
   );
   const [townId, setTownId] = useState('');
+  const [includedTownIds, setIncludedTownIds] = useState<string[]>([]);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [notes, setNotes] = useState('');
@@ -89,6 +94,20 @@ export const ActivityFormModal: React.FC<ActivityFormModalProps> = ({
     return ActivityStatus.COMPLETED;
   }, [startDate, endDate]);
 
+  // Backlog rule: Grace window for scheduling activities in past months
+  // Day 1-14: allow from 1st of previous month; Day > 14: allow only from 1st of current month
+  const minAllowedScheduleDate = useMemo(() => {
+    const now = new Date();
+    const currentDay = now.getDate();
+    const minDateObj =
+      currentDay <= 14
+        ? new Date(now.getFullYear(), now.getMonth() - 1, 1)
+        : new Date(now.getFullYear(), now.getMonth(), 1);
+
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    return `${minDateObj.getFullYear()}-${pad(minDateObj.getMonth() + 1)}-${pad(minDateObj.getDate())}`;
+  }, []);
+
   // Populate or reset form fields
   useEffect(() => {
     if (initialActivity) {
@@ -97,6 +116,7 @@ export const ActivityFormModal: React.FC<ActivityFormModalProps> = ({
         initialActivity.activityType || ActivityType.MONTHLY_MEETING,
       );
       setTownId(initialActivity.townId || activeTownId || '');
+      setIncludedTownIds(initialActivity.includedTownIds || []);
       setStartDate(toDateTimeLocalString(initialActivity.startDate));
       setEndDate(toDateTimeLocalString(initialActivity.endDate));
       setNotes(initialActivity.notes || '');
@@ -104,7 +124,9 @@ export const ActivityFormModal: React.FC<ActivityFormModalProps> = ({
     } else {
       setTitle('');
       setActivityType(ActivityType.MONTHLY_MEETING);
-      setTownId(activeTownId || (towns[0]?.id ?? ''));
+      const defaultTown = activeTownId || (towns[0]?.id ?? '');
+      setTownId(defaultTown);
+      setIncludedTownIds([]);
       // Default to today at 09:00
       const now = new Date();
       now.setHours(9, 0, 0, 0);
@@ -123,6 +145,13 @@ export const ActivityFormModal: React.FC<ActivityFormModalProps> = ({
     if (title.trim() !== (initialActivity.title || '')) return true;
     if (activityType !== initialActivity.activityType) return true;
     if (townId !== (initialActivity.townId || '')) return true;
+    const initialIncluded = initialActivity.includedTownIds || [];
+    if (
+      initialIncluded.length !== includedTownIds.length ||
+      !initialIncluded.every((id) => includedTownIds.includes(id))
+    ) {
+      return true;
+    }
     if (startDate !== toDateTimeLocalString(initialActivity.startDate))
       return true;
     if (endDate !== toDateTimeLocalString(initialActivity.endDate)) return true;
@@ -135,6 +164,7 @@ export const ActivityFormModal: React.FC<ActivityFormModalProps> = ({
     title,
     activityType,
     townId,
+    includedTownIds,
     startDate,
     endDate,
     notes,
@@ -194,7 +224,7 @@ export const ActivityFormModal: React.FC<ActivityFormModalProps> = ({
     }
 
     if (!townId) {
-      setError('Please select a fellowship town.');
+      setError('Please select a host town.');
       return;
     }
 
@@ -203,7 +233,33 @@ export const ActivityFormModal: React.FC<ActivityFormModalProps> = ({
       return;
     }
 
-    const startIso = new Date(startDate).toISOString();
+    const parsedStart = new Date(startDate);
+    const now = new Date();
+    const currentMonthStart = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      1,
+      0,
+      0,
+      0,
+      0,
+    );
+
+    if (parsedStart < currentMonthStart) {
+      const twoWeeksAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
+      const monthsDiff =
+        (now.getFullYear() - parsedStart.getFullYear()) * 12 +
+        (now.getMonth() - parsedStart.getMonth());
+
+      if (monthsDiff !== 1 || parsedStart < twoWeeksAgo) {
+        setError(
+          'Activities cannot be scheduled for past months, except within the 14-day grace window into the previous month.',
+        );
+        return;
+      }
+    }
+
+    const startIso = parsedStart.toISOString();
     const endIso = endDate ? new Date(endDate).toISOString() : undefined;
 
     if (endIso && new Date(endIso) < new Date(startIso)) {
@@ -223,6 +279,7 @@ export const ActivityFormModal: React.FC<ActivityFormModalProps> = ({
         title: title.trim(),
         activityType,
         townId,
+        includedTownIds: includedTownIds.filter((id) => id !== townId),
         startDate: startIso,
         endDate: endIso,
         notes: notes.trim() || undefined,
@@ -260,7 +317,7 @@ export const ActivityFormModal: React.FC<ActivityFormModalProps> = ({
               <p className="text-xs text-[#8a726a]">
                 {isEditing
                   ? 'Update gathering details, schedule, or notes'
-                  : 'Define meeting details, hub, and schedule for fellowship members'}
+                  : 'Define meeting details, hub, and schedule for community members'}
               </p>
             </div>
           </div>
@@ -318,7 +375,7 @@ export const ActivityFormModal: React.FC<ActivityFormModalProps> = ({
                 required
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="e.g. Monthly Fellowship & Youth Choir Rehearsal"
+                placeholder="e.g. Monthly Coordination Meeting & Workshop"
                 className="w-full h-10 px-3.5 bg-[#faf2ee] focus:bg-white text-xs text-[#1e1b19] rounded-md border border-[#e8e1dd] focus:border-[#b85028] outline-none transition-all font-medium"
               />
             </div>
@@ -350,18 +407,185 @@ export const ActivityFormModal: React.FC<ActivityFormModalProps> = ({
                   className="font-bold text-[#1e1b19] flex items-center gap-1.5"
                 >
                   <MapPin size={14} weight="fill" className="text-[#486b52]" />
-                  <span>Fellowship Town Hub</span>
+                  <span>Host Town Hub</span>
                   <span className="text-[#b85028]">*</span>
                 </label>
                 <CustomSelect<string>
                   id="activity-town"
                   value={townId}
-                  onChange={setTownId}
+                  onChange={(val) => {
+                    setTownId(val);
+                    setIncludedTownIds((prev) =>
+                      prev.filter((id) => id !== val),
+                    );
+                  }}
                   options={townOptions}
                   variant="form"
                   size="md"
                   className="w-full"
                 />
+              </div>
+
+              {/* Associated Participating Towns (Inter-Town Coordination) */}
+              <div className="sm:col-span-2 rounded-xl border border-[#e8dfd8] bg-gradient-to-br from-[#faf8f6] via-[#fdfcfb] to-[#f7f2ef] p-4 sm:p-4.5 flex flex-col gap-3 shadow-2xs">
+                {/* Header Row */}
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-lg bg-[#fff0eb] border border-[#ffdbcf] text-[#b85028] flex items-center justify-center shrink-0 shadow-2xs">
+                      <Buildings size={16} weight="duotone" />
+                    </div>
+                    <div className="flex flex-col">
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-xs text-[#1e1b19]">
+                          Associated Participating Towns
+                        </span>
+                        {includedTownIds.length > 0 ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#edf3ee] text-[#2c4e37] border border-[#c2e9ca] animate-in fade-in zoom-in-95 duration-150">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#486b52]" />
+                            <span>
+                              {includedTownIds.length}{' '}
+                              {includedTownIds.length === 1
+                                ? 'ville sélectionnée'
+                                : 'villes sélectionnées'}
+                            </span>
+                          </span>
+                        ) : (
+                          <span className="text-[10px] font-semibold text-[#8a726a] bg-white border border-[#e8e1dd] px-1.5 py-0.5 rounded-md">
+                            Optional
+                          </span>
+                        )}
+                      </div>
+                      <span className="text-[11px] text-[#8a726a]">
+                        Allow other town chapters to view and participate in
+                        this event
+                      </span>
+                    </div>
+                  </div>
+
+                  {towns.filter((t) => t.id !== townId).length > 0 && (
+                    <div className="flex items-center gap-1.5 bg-white border border-[#e8e1dd] rounded-lg p-0.5 shadow-2xs">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setIncludedTownIds(
+                            towns
+                              .filter((t) => t.id !== townId)
+                              .map((t) => t.id),
+                          )
+                        }
+                        className="px-2 py-1 rounded text-[11px] font-bold text-[#b85028] hover:bg-[#fff2ee] transition-colors cursor-pointer"
+                      >
+                        Select all
+                      </button>
+                      <span className="text-[#e8e1dd]">·</span>
+                      <button
+                        type="button"
+                        onClick={() => setIncludedTownIds([])}
+                        disabled={includedTownIds.length === 0}
+                        className="px-2 py-1 rounded text-[11px] font-medium text-[#8a726a] hover:bg-[#faf2ee] disabled:opacity-40 disabled:hover:bg-transparent transition-colors cursor-pointer"
+                      >
+                        Clear
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Grid of Interactive Town Tiles */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5 pt-1">
+                  {towns
+                    .filter((t) => t.id !== townId)
+                    .map((t) => {
+                      const isSelected = includedTownIds.includes(t.id);
+                      return (
+                        <button
+                          key={t.id}
+                          type="button"
+                          onClick={() => {
+                            setIncludedTownIds((prev) =>
+                              isSelected
+                                ? prev.filter((id) => id !== t.id)
+                                : [...prev, t.id],
+                            );
+                          }}
+                          className={`relative group rounded-xl p-3 text-left transition-all duration-200 cursor-pointer flex items-center justify-between gap-3 border ${
+                            isSelected
+                              ? 'bg-white border-[#b85028] shadow-xs ring-2 ring-[#b85028]/15'
+                              : 'bg-white/90 border-[#e8dfd8] hover:border-[#b85028]/40 hover:bg-white hover:shadow-2xs'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <span
+                              className={`w-4 h-4 rounded-md flex items-center justify-center shrink-0 border transition-all duration-150 ${
+                                isSelected
+                                  ? 'bg-[#b85028] border-[#b85028] text-white shadow-2xs'
+                                  : 'border-[#cfc4be] bg-white group-hover:border-[#b85028]/60'
+                              }`}
+                            >
+                              {isSelected && <Check size={11} weight="bold" />}
+                            </span>
+                            <div className="flex flex-col min-w-0">
+                              <span
+                                className={`text-xs font-bold truncate leading-tight transition-colors ${
+                                  isSelected
+                                    ? 'text-[#1e1b19]'
+                                    : 'text-[#3d322e]'
+                                }`}
+                              >
+                                {t.name}
+                              </span>
+                              <span className="text-[10px] text-[#8a726a] font-mono mt-0.5">
+                                HUB · {t.code}
+                              </span>
+                            </div>
+                          </div>
+
+                          <span
+                            className={`px-1.5 py-0.5 rounded text-[10px] font-mono font-bold shrink-0 border transition-colors ${
+                              isSelected
+                                ? 'bg-[#fff0eb] border-[#ffdbcf] text-[#b85028]'
+                                : 'bg-[#faf2ee] border-[#e8e1dd] text-[#8a726a]'
+                            }`}
+                          >
+                            {t.code}
+                          </span>
+                        </button>
+                      );
+                    })}
+
+                  {towns.filter((t) => t.id !== townId).length === 0 && (
+                    <div className="col-span-full py-4 text-center text-xs text-[#8a726a] italic bg-white/60 rounded-xl border border-dashed border-[#e8dfd8]">
+                      No additional towns available to include.
+                    </div>
+                  )}
+                </div>
+
+                {/* Multi-Town Scope Notice Banner */}
+                {includedTownIds.length > 0 && (
+                  <div className="mt-1 p-3 rounded-lg bg-white border border-[#c2e9ca] flex items-start gap-2.5 shadow-2xs animate-in fade-in slide-in-from-top-1 duration-150">
+                    <CheckCircle
+                      size={18}
+                      weight="fill"
+                      className="text-[#486b52] shrink-0 mt-0.5"
+                    />
+                    <div className="flex flex-col text-xs text-[#2c4e37] leading-relaxed">
+                      <span className="font-bold">
+                        Inter-Town Visibility Activated
+                      </span>
+                      <span className="text-[#486b52] text-[11px]">
+                        Members in{' '}
+                        <strong>
+                          {towns
+                            .filter((t) => includedTownIds.includes(t.id))
+                            .map((t) => t.name)
+                            .join(', ')}
+                        </strong>{' '}
+                        will see this event directly within their local town
+                        calendar. Their Contact Persons (PC) will receive
+                        inter-town reminders.
+                      </span>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -394,6 +618,7 @@ export const ActivityFormModal: React.FC<ActivityFormModalProps> = ({
                   value={startDate}
                   onChange={setStartDate}
                   placeholder="Select start date & time"
+                  minDate={minAllowedScheduleDate}
                 />
               </div>
 
@@ -411,6 +636,9 @@ export const ActivityFormModal: React.FC<ActivityFormModalProps> = ({
                   value={endDate}
                   onChange={setEndDate}
                   placeholder="Select end date & time"
+                  minDate={
+                    startDate ? startDate.split('T')[0] : minAllowedScheduleDate
+                  }
                 />
               </div>
             </div>

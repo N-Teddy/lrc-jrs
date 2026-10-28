@@ -19,6 +19,7 @@ import {
   ArrowCounterClockwise,
   ArrowLeft,
   ArrowSquareOut,
+  Buildings,
   CalendarBlank,
   Clock,
   ClockCounterClockwise,
@@ -81,7 +82,15 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
 }) => {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const { canWrite } = useTownContext();
+  const { canWrite, activeTownId } = useTownContext();
+  const isHostTown =
+    !activeTownId || activeTownId === (activity.hostTownId || activity.townId);
+  const isParticipating = Boolean(
+    activeTownId &&
+      !isHostTown &&
+      activity.includedTownIds?.includes(activeTownId),
+  );
+  const canManageActivity = canWrite && (isHostTown || isPrivileged);
 
   const [activeTabState, setActiveTab] =
     useState<ActivityDetailTab>(initialTab);
@@ -290,7 +299,7 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
         </button>
 
         <div className="flex items-center gap-2 self-end sm:self-auto">
-          {canWrite && !isCompleted && (
+          {canManageActivity && !isCompleted && (
             <button
               type="button"
               onClick={() => onEditActivity(activity)}
@@ -301,7 +310,7 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
             </button>
           )}
 
-          {canWrite && !isCompleted && !isCancelled && (
+          {canManageActivity && !isCompleted && !isCancelled && (
             <button
               type="button"
               onClick={handleCancelActivity}
@@ -312,7 +321,7 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
             </button>
           )}
 
-          {canWrite && isCancelled && (
+          {canManageActivity && isCancelled && (
             <button
               type="button"
               onClick={handleUndoCancel}
@@ -324,7 +333,7 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
           )}
 
           {/* Delete action is forbidden before activity start date per item 3 */}
-          {canWrite &&
+          {canManageActivity &&
             isPrivileged &&
             isDayOfActivityOrLater &&
             onDeleteActivity && (
@@ -349,7 +358,7 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
               This activity gathering has been cancelled.
             </span>
           </div>
-          {canWrite && (
+          {canManageActivity && (
             <button
               type="button"
               onClick={handleUndoCancel}
@@ -388,6 +397,16 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
               {activity.town?.name || activity.town?.code} Hub
             </span>
 
+            {isParticipating && (
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold bg-[#edf3ee] border border-[#c2e9ca] text-[#486b52]">
+                <Buildings size={13} weight="bold" />
+                <span>
+                  Inter-villes · Hôte:{' '}
+                  {activity.hostTown?.name || activity.town?.name || 'Autre'}
+                </span>
+              </span>
+            )}
+
             {isLocked && (
               <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold bg-[#fff8e1] border border-[#ffe082] text-[#812901]">
                 <Lock size={13} weight="bold" />
@@ -423,6 +442,20 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
                 <span>Host: {activity.town.name}</span>
               </div>
             )}
+
+            {activity.includedTowns && activity.includedTowns.length > 0 && (
+              <div className="flex items-center gap-1.5 text-xs text-[#57423b]">
+                <Buildings
+                  size={14}
+                  weight="duotone"
+                  className="text-[#b85028]"
+                />
+                <span>
+                  Participating:{' '}
+                  {activity.includedTowns.map((t) => t.name).join(', ')}
+                </span>
+              </div>
+            )}
           </div>
         </div>
 
@@ -440,6 +473,21 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
             >
               <Clock size={18} weight="bold" className="text-[#b85028]" />
               <span>Attendance Opens on Activity Day</span>
+            </div>
+          ) : !canManageActivity ? (
+            <div
+              className="h-11 px-5 rounded-md bg-[#faf2ee] border border-[#e8e1dd] text-[#8a726a] font-semibold text-xs flex items-center justify-center gap-2 select-none shadow-2xs"
+              title="Attendance is managed exclusively by the host town Contact Person"
+            >
+              <Buildings
+                size={18}
+                weight="duotone"
+                className="text-[#b85028]"
+              />
+              <span>
+                Host Town Event (
+                {activity.hostTown?.name || activity.town?.name || 'Hôte'})
+              </span>
             </div>
           ) : (
             <button
@@ -939,7 +987,7 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
                   Google Drive Activity Reports ({reports.length})
                 </h3>
                 <p className="text-xs text-[#8a726a]">
-                  Archived fellowship minutes, attendance summaries, photos, and
+                  Archived activity minutes, attendance summaries, photos, and
                   documents.
                 </p>
               </div>
@@ -1116,8 +1164,8 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
               </h4>
               <p className="text-xs text-[#8a726a] max-w-sm">
                 This activity has concluded. Hub coordinators can upload session
-                minutes, attendance summaries, photos, or pastoral notes
-                directly to Google Drive.
+                minutes, attendance summaries, photos, or meeting notes directly
+                to Google Drive.
               </p>
               {isPrivileged && (
                 <button

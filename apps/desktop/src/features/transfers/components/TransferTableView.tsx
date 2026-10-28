@@ -96,7 +96,7 @@ export const TransferTableView: React.FC<TransferTableViewProps> = ({
           <thead>
             <tr className="bg-[#faf2ee] border-b border-[#e8e1dd] text-[#8a726a] text-[11px] font-bold uppercase tracking-wider">
               <th className="py-3 px-4 font-bold">
-                {t('transfers:table.member', 'Fellowship Member')}
+                {t('transfers:table.member', 'Community Member')}
               </th>
               <th className="py-3 px-4 font-bold">
                 {t('transfers:table.route', 'Relocation Route')}
@@ -229,7 +229,7 @@ export const TransferTableView: React.FC<TransferTableViewProps> = ({
                       <span className="text-xs text-[#8a726a] italic">
                         {t(
                           'transfers:table.standardTransfer',
-                          'Standard fellowship transfer',
+                          'Standard community transfer',
                         )}
                       </span>
                     )}

@@ -5,6 +5,7 @@ import {
 } from '@jrs/client-core';
 import { ActivityStatus, type IActivity } from '@jrs/shared';
 import {
+  Buildings,
   CalendarBlank,
   Eye,
   MapPin,
@@ -50,7 +51,7 @@ export const ActivityCardGridView: React.FC<ActivityCardGridViewProps> = ({
   isPrivileged,
 }) => {
   const { t } = useTranslation();
-  const { canWrite } = useTownContext();
+  const { canWrite, activeTownId } = useTownContext();
   const updateActivityMutation = useUpdateActivityMutation();
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
 
@@ -115,6 +116,14 @@ export const ActivityCardGridView: React.FC<ActivityCardGridViewProps> = ({
           );
           const turnoutStats = getActivityTurnoutStats(activity);
           const TypeIcon = typeConfig.icon;
+          const isHostTown =
+            !activeTownId ||
+            activeTownId === (activity.hostTownId || activity.townId);
+          const isParticipating = Boolean(
+            activeTownId &&
+              !isHostTown &&
+              activity.includedTownIds?.includes(activeTownId),
+          );
 
           return (
             <div
@@ -167,6 +176,34 @@ export const ActivityCardGridView: React.FC<ActivityCardGridViewProps> = ({
                 <h3 className="font-bold text-sm text-[#1e1b19] group-hover:text-[#b85028] transition-colors leading-snug line-clamp-1">
                   {activity.title}
                 </h3>
+
+                {isParticipating && (
+                  <div className="flex items-center">
+                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold border bg-[#edf3ee] text-[#486b52] border-[#c2e9ca]">
+                      <Buildings size={11} weight="bold" />
+                      <span>
+                        Inter-villes · Hôte:{' '}
+                        {activity.hostTown?.name ||
+                          activity.town?.name ||
+                          'Autre'}
+                      </span>
+                    </span>
+                  </div>
+                )}
+                {!isParticipating &&
+                  (activity.includedTownIds?.length ?? 0) > 0 && (
+                    <div className="flex items-center">
+                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium border bg-[#faf2ee] text-[#b85028] border-[#e8e1dd]">
+                        <Buildings size={11} weight="duotone" />
+                        <span>
+                          +{activity.includedTownIds?.length}{' '}
+                          {activity.includedTownIds?.length === 1
+                            ? 'ville participante'
+                            : 'villes participantes'}
+                        </span>
+                      </span>
+                    </div>
+                  )}
 
                 <div className="flex flex-col gap-1 text-[11px] text-[#57423b]">
                   <div className="flex items-center gap-1.5 truncate">

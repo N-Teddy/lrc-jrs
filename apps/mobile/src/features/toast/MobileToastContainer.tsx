@@ -133,7 +133,24 @@ const ToastItemComponent: React.FC<{
             ]}
             numberOfLines={3}
           >
-            {item.message}
+            {(() => {
+              const lower = (item.message || '').toLowerCase();
+              if (
+                lower.includes('network error') ||
+                lower.includes('err_network') ||
+                lower.includes('failed to fetch') ||
+                lower.includes('timeout')
+              ) {
+                return 'Network connection error. Please verify your internet connection.';
+              }
+              if (
+                lower.includes('axioserror') ||
+                lower.includes('status code 500')
+              ) {
+                return 'A server error occurred. Please try again later.';
+              }
+              return item.message;
+            })()}
           </Text>
         </View>
 
@@ -207,9 +224,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 1,
-    borderRadius: 14,
-    paddingVertical: 12,
-    paddingHorizontal: 14,
+    borderRadius: 8,
+    paddingVertical: 11,
+    paddingHorizontal: 13,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,

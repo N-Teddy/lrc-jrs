@@ -47,7 +47,7 @@ export class CreateMemberDto {
   @ApiPropertyOptional({
     enum: UserRole,
     default: UserRole.MEMBER,
-    description: 'Assigned fellowship role',
+    description: 'Assigned community role',
   })
   @IsOptional()
   @IsEnum(UserRole)

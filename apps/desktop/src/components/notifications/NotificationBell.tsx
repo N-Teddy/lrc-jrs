@@ -1,6 +1,7 @@
 import {
   type INotification,
   type NotificationResource,
+  toast,
   useMarkAllNotificationsReadMutation,
   useMarkNotificationReadMutation,
   useNotificationsQuery,
@@ -10,18 +11,30 @@ import {
   useUnreadNotificationCountQuery,
 } from '@jrs/client-core';
 import {
+  ArrowRight,
+  ArrowsLeftRight,
   Bell,
+  BellSlash,
+  Buildings,
+  CalendarCheck,
+  CaretRight,
   Check,
   CheckCircle,
+  Checks,
   CircleNotch,
-  Info,
+  Clock,
+  ShieldCheck,
+  Sparkle,
+  UserPlus,
   Warning,
   WarningCircle,
+  X,
 } from '@phosphor-icons/react';
+import { AnimatePresence, motion } from 'motion/react';
 import type React from 'react';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
-// Safe native desktop notification trigger
+// Safe native desktop notification trigger for Tauri
 async function triggerNativeDesktopNotification(title: string, body: string) {
   try {
     const tauriNotification = await import('@tauri-apps/plugin-notification');
@@ -40,10 +53,20 @@ async function triggerNativeDesktopNotification(title: string, body: string) {
 
 interface NotificationBellProps {
   onNavigateToResource?: (resource: NotificationResource) => void;
+  onOpenNotificationsPage?: () => void;
+}
+
+interface NotificationVisualConfig {
+  icon: React.ReactNode;
+  badgeBg: string;
+  badgeText: string;
+  badgeBorder: string;
+  categoryLabel: string;
 }
 
 export const NotificationBell: React.FC<NotificationBellProps> = ({
   onNavigateToResource,
+  onOpenNotificationsPage,
 }) => {
   const { t } = useTranslation();
   const { setActiveTownId, availableTowns } = useTownContext();
@@ -62,20 +85,31 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({
   const markAllReadMutation = useMarkAllNotificationsReadMutation();
 
   // Real-time WebSocket subscription & Native Notification integration
-  useNotificationsSubscription({
-    onNotificationReceived: (notification) => {
+  const handleIncomingNotification = useCallback(
+    (notification: INotification) => {
+      const title = t(notification.titleKey, {
+        defaultValue: notification.titleKey,
+        ...(notification.titleParams || {}),
+      });
+      const body = t(notification.bodyKey, {
+        defaultValue: notification.bodyKey,
+        ...(notification.bodyParams || {}),
+      });
+
       if (document.hidden) {
-        const title = t(notification.titleKey, {
-          defaultValue: notification.titleKey,
-          ...(notification.titleParams || {}),
-        });
-        const body = t(notification.bodyKey, {
-          defaultValue: notification.bodyKey,
-          ...(notification.bodyParams || {}),
-        });
         triggerNativeDesktopNotification(title, body);
+      } else {
+        toast.info(body, {
+          title,
+          duration: 5000,
+        });
       }
     },
+    [t],
+  );
+
+  useNotificationsSubscription({
+    onNotificationReceived: handleIncomingNotification,
   });
 
   // Close dropdown on outside click or escape
@@ -114,10 +148,13 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({
       // Auto-switch town context if townId is specified and user has access
       if (notification.resource.townId) {
         const hasAccess = availableTowns.some(
-          (town) => town.id === notification.resource?.townId,
+          (town) =>
+            town.id === notification.resource?.townId ||
+            town.code?.toLowerCase() ===
+              notification.resource?.townId?.toLowerCase(),
         );
         if (hasAccess) {
-          setActiveTownId(notification.resource.townId);
+          void setActiveTownId(notification.resource.townId);
         }
       }
 
@@ -126,198 +163,481 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({
     }
   };
 
+  const handleQuickMarkRead = (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    markReadMutation.mutate(id);
+  };
+
+  const handleSeeAll = () => {
+    setIsOpen(false);
+    onOpenNotificationsPage?.();
+  };
+
   const formatRelativeTime = (dateStr: string) => {
     const diffMs = Date.now() - new Date(dateStr).getTime();
     const diffMins = Math.floor(diffMs / (60 * 1000));
     const diffHours = Math.floor(diffMins / 60);
     const diffDays = Math.floor(diffHours / 24);
 
-    if (diffMins < 1) return t('notifications:justNow');
+    if (diffMins < 1) return t('notifications:justNow', 'Just now');
     if (diffMins < 60)
-      return t('notifications:minutesAgo', { count: diffMins });
+      return (
+        t('notifications:minutesAgo', { count: diffMins }) || `${diffMins}m ago`
+      );
     if (diffHours < 24)
-      return t('notifications:hoursAgo', { count: diffHours });
-    return t('notifications:daysAgo', { count: diffDays });
+      return (
+        t('notifications:hoursAgo', { count: diffHours }) || `${diffHours}h ago`
+      );
+    if (diffDays < 7)
+      return (
+        t('notifications:daysAgo', { count: diffDays }) || `${diffDays}d ago`
+      );
+
+    return new Date(dateStr).toLocaleDateString(undefined, {
+      month: 'short',
+      day: 'numeric',
+    });
   };
 
-  const getLevelIcon = (level: string) => {
-    switch (level) {
-      case 'SUCCESS':
-        return (
-          <CheckCircle size={16} weight="fill" className="text-emerald-500" />
-        );
+  const getVisualConfig = (
+    notification: INotification,
+  ): NotificationVisualConfig => {
+    const entityType = notification.resource?.entityType?.toUpperCase();
+    const action = notification.action?.toUpperCase();
+
+    if (entityType === 'ACTIVITY' || action?.includes('ACTIVITY')) {
+      return {
+        icon: <CalendarCheck size={18} weight="fill" />,
+        badgeBg: 'bg-[#fff5f0]',
+        badgeText: 'text-[#b85028]',
+        badgeBorder: 'border-[#ffd8cb]',
+        categoryLabel: t('notifications:categories.activity', 'Activity'),
+      };
+    }
+
+    if (entityType === 'ATTENDANCE' || action?.includes('ATTENDANCE')) {
+      return {
+        icon: <CheckCircle size={18} weight="fill" />,
+        badgeBg: 'bg-[#edf3ee]',
+        badgeText: 'text-[#2c4e37]',
+        badgeBorder: 'border-[#c2e9ca]',
+        categoryLabel: t('notifications:categories.attendance', 'Attendance'),
+      };
+    }
+
+    if (
+      entityType === 'MEMBER' ||
+      entityType === 'INTAKE' ||
+      action?.includes('MEMBER') ||
+      action?.includes('INTAKE')
+    ) {
+      return {
+        icon: <UserPlus size={18} weight="fill" />,
+        badgeBg: 'bg-[#eff6ff]',
+        badgeText: 'text-[#1d4ed8]',
+        badgeBorder: 'border-[#bfdbfe]',
+        categoryLabel: t('notifications:categories.member', 'Member'),
+      };
+    }
+
+    if (entityType === 'TOWN_TRANSFER' || action?.includes('TRANSFER')) {
+      return {
+        icon: <ArrowsLeftRight size={18} weight="bold" />,
+        badgeBg: 'bg-[#faf5ff]',
+        badgeText: 'text-[#6b21a8]',
+        badgeBorder: 'border-[#e9d5ff]',
+        categoryLabel: t('notifications:categories.transfer', 'Transfer'),
+      };
+    }
+
+    if (
+      entityType === 'ACCESS' ||
+      action?.includes('PASSWORD') ||
+      action?.includes('SETUP')
+    ) {
+      return {
+        icon: <ShieldCheck size={18} weight="fill" />,
+        badgeBg: 'bg-[#fff8ea]',
+        badgeText: 'text-[#9a6400]',
+        badgeBorder: 'border-[#ffecbf]',
+        categoryLabel: t('notifications:categories.security', 'Security'),
+      };
+    }
+
+    switch (notification.level) {
       case 'WARNING':
-        return <Warning size={16} weight="fill" className="text-amber-500" />;
+        return {
+          icon: <Warning size={18} weight="fill" />,
+          badgeBg: 'bg-[#fff8ea]',
+          badgeText: 'text-[#9a6400]',
+          badgeBorder: 'border-[#ffecbf]',
+          categoryLabel: t('notifications:categories.notice', 'Notice'),
+        };
       case 'ERROR':
-        return (
-          <WarningCircle size={16} weight="fill" className="text-rose-500" />
-        );
+        return {
+          icon: <WarningCircle size={18} weight="fill" />,
+          badgeBg: 'bg-[#fff2ee]',
+          badgeText: 'text-[#ba1a1a]',
+          badgeBorder: 'border-[#ffdad6]',
+          categoryLabel: t('notifications:categories.alert', 'Alert'),
+        };
       default:
-        return <Info size={16} weight="fill" className="text-blue-500" />;
+        return {
+          icon: <Sparkle size={18} weight="fill" />,
+          badgeBg: 'bg-[#faf2ee]',
+          badgeText: 'text-[#57423b]',
+          badgeBorder: 'border-[#e8e1dd]',
+          categoryLabel: t('notifications:categories.system', 'System'),
+        };
     }
   };
 
   const notifications = notificationsData?.data || [];
+  const totalCount = notificationsData?.total || notifications.length;
 
   return (
     <div ref={dropdownRef} className="relative">
+      {/* 1. Header Notification Launcher Button: crisp rounded-lg style */}
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="relative h-10 w-10 flex items-center justify-center rounded-lg border border-[#e8e1dd] bg-white hover:bg-[#faf2ee] text-[#57423b] transition cursor-pointer"
+        className={`relative h-10 w-10 flex items-center justify-center rounded-lg border transition-all cursor-pointer ${
+          isOpen
+            ? 'border-[#b85028] bg-[#fff5f0] text-[#b85028] ring-2 ring-[#b85028]/20 shadow-xs'
+            : 'border-[#e8e1dd] bg-white hover:bg-[#faf2ee] hover:border-[#dbcac2] text-[#57423b] shadow-2xs'
+        }`}
         aria-label="View notifications"
+        aria-expanded={isOpen}
       >
-        <Bell size={18} weight="bold" />
+        <Bell size={19} weight={isOpen || unreadCount > 0 ? 'fill' : 'bold'} />
+
+        {/* Unread badge with subtle ping */}
         {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-[#b85028] text-[10px] font-bold text-white shadow-sm ring-2 ring-white animate-pulse">
-            {unreadCount > 99 ? '99+' : unreadCount}
+          <span className="absolute -top-1 -right-1 flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-[#b85028] text-[10px] font-black text-white shadow-sm ring-2 ring-white">
+            <span className="absolute inset-0 rounded-full bg-[#b85028] animate-ping opacity-35" />
+            <span className="relative z-10">
+              {unreadCount > 99 ? '99+' : unreadCount}
+            </span>
           </span>
         )}
       </button>
 
-      {/* Notifications Popover Dropdown */}
-      {isOpen && (
-        <div className="absolute right-0 top-12 z-50 w-96 rounded-2xl bg-white border border-[#e8e1dd] shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
-          {/* Header */}
-          <div className="p-4 border-b border-[#f0eae6] flex items-center justify-between bg-[#fffbf9]">
-            <div className="flex items-center gap-2">
-              <h3 className="text-sm font-bold text-[#1e1b19]">
-                {t('notifications:title')}
-              </h3>
-              {unreadCount > 0 && (
-                <span className="px-2 py-0.5 rounded-full bg-[#b85028]/10 text-[#b85028] text-xs font-bold">
-                  {unreadCount}
-                </span>
+      {/* 2. Redesigned Creative Notification Dropdown: crisp rounded-lg, sanctuary aesthetic */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: 8, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 6, scale: 0.98 }}
+            transition={{ duration: 0.16, ease: [0.16, 1, 0.3, 1] }}
+            className="absolute right-0 top-12 z-50 w-[420px] sm:w-[460px] rounded-lg bg-white/98 backdrop-blur-xl border border-[#e8e1dd] shadow-[0_20px_50px_-10px_rgba(30,27,25,0.18)] overflow-hidden flex flex-col"
+          >
+            {/* Header Toolbar */}
+            <div className="p-3.5 border-b border-[#f2eae5] bg-gradient-to-b from-[#fffbf9] to-white flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-[#fff5f0] text-[#b85028] border border-[#ffd8cb] flex items-center justify-center shadow-2xs">
+                  <Bell size={17} weight="fill" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-sm font-bold text-[#1e1b19] tracking-tight">
+                      {t('notifications:title', 'Notifications')}
+                    </h3>
+                    {unreadCount > 0 && (
+                      <span className="px-2 py-0.5 rounded-md bg-[#fff2ee] text-[#b85028] border border-[#ffd8cb] text-[10px] font-bold">
+                        {unreadCount} {t('notifications:unread', 'unread')}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-[11px] text-[#8a726a] font-medium leading-none mt-0.5">
+                    {t(
+                      'notifications:centerSubtitle',
+                      'Hub activities & team alerts',
+                    )}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-1.5">
+                {unreadCount > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => markAllReadMutation.mutate()}
+                    disabled={markAllReadMutation.isPending}
+                    className="h-7 px-2.5 rounded-md bg-[#faf2ee] hover:bg-[#f2e6e0] text-[#b85028] text-xs font-bold transition flex items-center gap-1 cursor-pointer disabled:opacity-50 border border-[#ecdcd4] shadow-2xs"
+                    title={t('notifications:markAllRead', 'Mark all as read')}
+                  >
+                    {markAllReadMutation.isPending ? (
+                      <CircleNotch size={13} className="animate-spin" />
+                    ) : (
+                      <Checks size={14} weight="bold" />
+                    )}
+                    <span className="hidden sm:inline">
+                      {t('notifications:markRead', 'Mark read')}
+                    </span>
+                  </button>
+                )}
+
+                <button
+                  type="button"
+                  onClick={() => setIsOpen(false)}
+                  className="h-7 w-7 rounded-md text-[#8a726a] hover:text-[#1e1b19] hover:bg-[#faf2ee] transition flex items-center justify-center cursor-pointer"
+                  aria-label="Close notifications"
+                >
+                  <X size={15} weight="bold" />
+                </button>
+              </div>
+            </div>
+
+            {/* Segmented Filter Pills */}
+            <div className="px-3 py-2 bg-[#faf7f4] border-b border-[#f2eae5] flex items-center justify-between gap-2">
+              <div className="flex items-center gap-1 p-0.5 rounded-lg bg-[#eee6e0] border border-[#e4d8d0] w-full">
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('all')}
+                  className={`flex-1 py-1 px-3 rounded-md text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                    activeTab === 'all'
+                      ? 'bg-white text-[#1e1b19] shadow-2xs'
+                      : 'text-[#8a726a] hover:text-[#1e1b19]'
+                  }`}
+                >
+                  <span>{t('notifications:all', 'All')}</span>
+                  <span
+                    className={`px-1.5 py-0.2 rounded-md text-[10px] font-bold ${
+                      activeTab === 'all'
+                        ? 'bg-[#faf2ee] text-[#b85028]'
+                        : 'bg-[#e2d5cd] text-[#6e5851]'
+                    }`}
+                  >
+                    {totalCount}
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('unread')}
+                  className={`flex-1 py-1 px-3 rounded-md text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                    activeTab === 'unread'
+                      ? 'bg-white text-[#b85028] shadow-2xs'
+                      : 'text-[#8a726a] hover:text-[#1e1b19]'
+                  }`}
+                >
+                  <span>{t('notifications:unread', 'Unread')}</span>
+                  {unreadCount > 0 && (
+                    <span className="px-1.5 py-0.2 rounded-md bg-[#b85028] text-white text-[10px] font-bold">
+                      {unreadCount}
+                    </span>
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {/* Notification Scrollable Feed */}
+            <div className="max-h-[390px] overflow-y-auto p-2 space-y-1.5 divide-y-0 scrollbar-thin scrollbar-thumb-[#e8e1dd]">
+              {isLoading ? (
+                /* Shimmer rows */
+                <div className="space-y-2 p-2">
+                  {[1, 2, 3].map((n) => (
+                    <div
+                      key={n}
+                      className="p-3.5 rounded-lg bg-white border border-[#f0eae6] flex items-start gap-3 animate-pulse"
+                    >
+                      <div className="w-9 h-9 rounded-lg bg-[#f2ede9] shrink-0" />
+                      <div className="flex-1 space-y-2">
+                        <div className="h-3.5 bg-[#f2ede9] rounded w-2/3" />
+                        <div className="h-3 bg-[#f7f2ef] rounded w-full" />
+                        <div className="h-3 bg-[#f7f2ef] rounded w-1/3" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : notifications.length === 0 ? (
+                /* Empty State */
+                <div className="py-12 px-6 text-center flex flex-col items-center justify-center">
+                  <div className="w-12 h-12 rounded-lg bg-[#fff5f0] border border-[#ffd8cb] flex items-center justify-center text-[#b85028] mb-2.5 shadow-2xs">
+                    {activeTab === 'unread' ? (
+                      <CheckCircle
+                        size={24}
+                        weight="fill"
+                        className="text-[#486b52]"
+                      />
+                    ) : (
+                      <BellSlash size={24} weight="duotone" />
+                    )}
+                  </div>
+                  <h4 className="text-sm font-bold text-[#1e1b19]">
+                    {activeTab === 'unread'
+                      ? t('notifications:allCaughtUp', 'All caught up!')
+                      : t(
+                          'notifications:noNotifications',
+                          'No notifications yet',
+                        )}
+                  </h4>
+                  <p className="text-xs text-[#8a726a] max-w-[280px] mt-1 leading-relaxed">
+                    {activeTab === 'unread'
+                      ? t(
+                          'notifications:emptyUnreadSubtitle',
+                          'All your notifications have been viewed.',
+                        )
+                      : t(
+                          'notifications:emptySubtitle',
+                          'Activity and community notices will appear here.',
+                        )}
+                  </p>
+                </div>
+              ) : (
+                /* Rich Notification Item Cards */
+                notifications.map((item) => {
+                  const title = t(item.titleKey, {
+                    defaultValue: item.titleKey,
+                    ...(item.titleParams || {}),
+                  });
+                  const body = t(item.bodyKey, {
+                    defaultValue: item.bodyKey,
+                    ...(item.bodyParams || {}),
+                  });
+                  const visuals = getVisualConfig(item);
+                  const itemTown = availableTowns.find(
+                    (t) =>
+                      t.id === item.townId ||
+                      t.id === item.resource?.townId ||
+                      t.code.toUpperCase() ===
+                        (item.townId || item.resource?.townId)?.toUpperCase(),
+                  );
+
+                  return (
+                    <div
+                      key={item._id}
+                      onClick={() => handleNotificationClick(item)}
+                      className={`group relative p-3 rounded-lg border transition-all cursor-pointer overflow-hidden ${
+                        item.read
+                          ? 'bg-white hover:bg-[#fffcf9] border-[#f0eae6] hover:border-[#dbcac2] shadow-2xs'
+                          : 'bg-[#fffcf9] hover:bg-white border-[#fbd4c6] shadow-xs hover:border-[#f9beaa]'
+                      }`}
+                    >
+                      {/* Left accent bar for unread items */}
+                      {!item.read && (
+                        <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#b85028] rounded-l-lg" />
+                      )}
+
+                      <div className="flex items-start gap-3">
+                        {/* Categorized Visual Avatar */}
+                        <div
+                          className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 border ${visuals.badgeBg} ${visuals.badgeText} ${visuals.badgeBorder} shadow-2xs mt-0.5`}
+                        >
+                          {visuals.icon}
+                        </div>
+
+                        {/* Text and Actions */}
+                        <div className="flex-1 min-w-0">
+                          {/* Badges & Timestamp */}
+                          <div className="flex items-center justify-between gap-2 mb-1">
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <span
+                                className={`px-1.5 py-0.5 rounded-md text-[10px] font-bold border tracking-wider uppercase ${visuals.badgeBg} ${visuals.badgeText} ${visuals.badgeBorder}`}
+                              >
+                                {visuals.categoryLabel}
+                              </span>
+
+                              {itemTown && (
+                                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-[#faf2ee] text-[#8a726a] text-[10px] font-semibold border border-[#ecdcd4]">
+                                  <Buildings size={11} weight="bold" />
+                                  <span>{itemTown.name}</span>
+                                </span>
+                              )}
+                            </div>
+
+                            <div className="flex items-center gap-1.5 shrink-0">
+                              <span className="text-[11px] font-medium text-[#8a726a] flex items-center gap-1">
+                                <Clock size={12} weight="bold" />
+                                {formatRelativeTime(item.createdAt)}
+                              </span>
+
+                              {!item.read && (
+                                <span className="w-2 h-2 rounded-full bg-[#b85028] ring-3 ring-[#b85028]/20 animate-pulse" />
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Title */}
+                          <h4
+                            className={`text-xs mb-0.5 leading-snug line-clamp-1 ${
+                              item.read
+                                ? 'font-semibold text-[#1e1b19]'
+                                : 'font-bold text-[#1e1b19]'
+                            }`}
+                          >
+                            {title}
+                          </h4>
+
+                          {/* Body */}
+                          <p className="text-xs text-[#57423b] line-clamp-2 leading-relaxed">
+                            {body}
+                          </p>
+
+                          {/* Footer Action Preview */}
+                          <div className="mt-2 pt-1.5 border-t border-[#f7f0ec] flex items-center justify-between gap-2">
+                            <span className="text-[11px] font-bold text-[#b85028] flex items-center gap-1 group-hover:underline">
+                              <span>
+                                {t('notifications:viewDetails', 'Details')}
+                              </span>
+                              <CaretRight
+                                size={12}
+                                weight="bold"
+                                className="transition-transform group-hover:translate-x-0.5"
+                              />
+                            </span>
+
+                            {!item.read && (
+                              <button
+                                type="button"
+                                onClick={(e) =>
+                                  handleQuickMarkRead(e, item._id)
+                                }
+                                className="text-[11px] font-bold text-[#8a726a] hover:text-[#1e1b19] px-2 py-0.5 rounded hover:bg-[#faf2ee] transition flex items-center gap-1 cursor-pointer"
+                                title="Mark as read"
+                              >
+                                <Check size={12} weight="bold" />
+                                <span>
+                                  {t('notifications:markRead', 'Mark read')}
+                                </span>
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })
               )}
             </div>
 
-            {unreadCount > 0 && (
+            {/* Bottom Footer Bar: Live indicator + Creative "See all" redirect button */}
+            <div className="p-3 bg-[#faf7f4] border-t border-[#f2eae5] flex items-center justify-between text-[11px] text-[#8a726a]">
+              <div className="flex items-center gap-1.5 font-medium">
+                <span className="w-2 h-2 rounded-full bg-[#486b52] animate-pulse" />
+                <span>
+                  {t('notifications:realtimeConnected', 'Live updates active')}
+                </span>
+              </div>
+
+              {/* Dedicated "See all" redirect button */}
               <button
                 type="button"
-                onClick={() => markAllReadMutation.mutate()}
-                disabled={markAllReadMutation.isPending}
-                className="text-xs font-bold text-[#b85028] hover:text-[#983912] transition flex items-center gap-1 cursor-pointer disabled:opacity-50"
+                onClick={handleSeeAll}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[#b85028] hover:bg-[#9e3f1c] text-white text-xs font-bold transition-all shadow-2xs cursor-pointer group"
               >
-                {markAllReadMutation.isPending ? (
-                  <CircleNotch size={12} className="animate-spin" />
-                ) : (
-                  <Check size={12} weight="bold" />
-                )}
-                <span>{t('notifications:markAllRead')}</span>
+                <span>{t('notifications:seeAll', 'See all')}</span>
+                <ArrowRight
+                  size={13}
+                  weight="bold"
+                  className="transition-transform group-hover:translate-x-0.5"
+                />
               </button>
-            )}
-          </div>
-
-          {/* Filter Tabs */}
-          <div className="flex border-b border-[#f0eae6] bg-[#faf2ee]/50 px-3 pt-2 gap-2 text-xs font-bold">
-            <button
-              type="button"
-              onClick={() => setActiveTab('all')}
-              className={`pb-2 px-3 border-b-2 transition cursor-pointer ${
-                activeTab === 'all'
-                  ? 'border-[#b85028] text-[#b85028]'
-                  : 'border-transparent text-[#8a726a] hover:text-[#1e1b19]'
-              }`}
-            >
-              {t('notifications:all')}
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab('unread')}
-              className={`pb-2 px-3 border-b-2 transition cursor-pointer ${
-                activeTab === 'unread'
-                  ? 'border-[#b85028] text-[#b85028]'
-                  : 'border-transparent text-[#8a726a] hover:text-[#1e1b19]'
-              }`}
-            >
-              {t('notifications:unread')}
-              {unreadCount > 0 && ` (${unreadCount})`}
-            </button>
-          </div>
-
-          {/* Notification List */}
-          <div className="max-h-96 overflow-y-auto divide-y divide-[#f5ede8]">
-            {isLoading ? (
-              <div className="p-8 flex items-center justify-center text-[#8a726a]">
-                <CircleNotch
-                  size={24}
-                  className="animate-spin text-[#b85028]"
-                />
-              </div>
-            ) : notifications.length === 0 ? (
-              <div className="p-8 text-center text-xs text-[#8a726a]">
-                <Bell
-                  size={28}
-                  className="mx-auto mb-2 opacity-30 text-[#b85028]"
-                />
-                <p>
-                  {activeTab === 'unread'
-                    ? t('notifications:emptyUnread')
-                    : t('notifications:empty')}
-                </p>
-              </div>
-            ) : (
-              notifications.map((item) => {
-                const title = t(item.titleKey, {
-                  defaultValue: item.titleKey,
-                  ...(item.titleParams || {}),
-                });
-                const body = t(item.bodyKey, {
-                  defaultValue: item.bodyKey,
-                  ...(item.bodyParams || {}),
-                });
-
-                return (
-                  <div
-                    key={item._id}
-                    onClick={() => handleNotificationClick(item)}
-                    className={`p-3.5 transition flex items-start gap-3 cursor-pointer ${
-                      item.read
-                        ? 'bg-white hover:bg-[#fffbf9]'
-                        : 'bg-[#fff5f0]/60 hover:bg-[#fff0e6]'
-                    }`}
-                  >
-                    <div className="mt-0.5 shrink-0">
-                      {getLevelIcon(item.level)}
-                    </div>
-
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between gap-2 mb-0.5">
-                        <h4
-                          className={`text-xs truncate ${
-                            item.read
-                              ? 'font-medium text-[#1e1b19]'
-                              : 'font-bold text-[#1e1b19]'
-                          }`}
-                        >
-                          {title}
-                        </h4>
-                        <span className="text-[10px] text-[#8a726a] shrink-0">
-                          {formatRelativeTime(item.createdAt)}
-                        </span>
-                      </div>
-
-                      <p className="text-xs text-[#57423b] line-clamp-2 leading-relaxed">
-                        {body}
-                      </p>
-
-                      {item.resource && (
-                        <span className="inline-block mt-1 text-[10px] font-bold text-[#b85028] bg-[#b85028]/10 px-1.5 py-0.5 rounded">
-                          {item.resource.entityType}
-                        </span>
-                      )}
-                    </div>
-
-                    {!item.read && (
-                      <span className="w-2 h-2 rounded-full bg-[#b85028] shrink-0 mt-1.5" />
-                    )}
-                  </div>
-                );
-              })
-            )}
-          </div>
-        </div>
-      )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

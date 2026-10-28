@@ -1,4 +1,8 @@
-import type { ApiErrorResponse, ApiResponse } from '@jrs/shared';
+import {
+  type ApiErrorResponse,
+  type ApiResponse,
+  ErrorCode,
+} from '@jrs/shared';
 import axios, {
   type AxiosInstance,
   type AxiosRequestConfig,
@@ -30,6 +34,7 @@ export class HttpService {
 
   private refreshPromise: Promise<string | null> | null = null;
   private unauthorizedListeners: Set<() => void> = new Set();
+  private tokenRefreshedListeners: Set<(token: string) => void> = new Set();
 
   constructor(config: HttpServiceConfig) {
     this.storage = config.storage;
@@ -47,10 +52,21 @@ export class HttpService {
     this.setupInterceptors();
   }
 
+  public getStorage(): IStorageAdapter {
+    return this.storage;
+  }
+
   public onUnauthorizedEvent(listener: () => void): () => void {
     this.unauthorizedListeners.add(listener);
     return () => {
       this.unauthorizedListeners.delete(listener);
+    };
+  }
+
+  public onTokenRefreshed(listener: (token: string) => void): () => void {
+    this.tokenRefreshedListeners.add(listener);
+    return () => {
+      this.tokenRefreshedListeners.delete(listener);
     };
   }
 
@@ -69,6 +85,10 @@ export class HttpService {
         // ignore
       }
     }
+  }
+
+  public async refreshToken(): Promise<string | null> {
+    return this.executeTokenRefresh();
   }
 
   private async executeTokenRefresh(): Promise<string | null> {
@@ -101,6 +121,13 @@ export class HttpService {
               newTokens.refreshToken,
             );
           }
+          for (const listener of this.tokenRefreshedListeners) {
+            try {
+              listener(newTokens.accessToken);
+            } catch {
+              // ignore
+            }
+          }
           return newTokens.accessToken;
         }
         return null;
@@ -116,6 +143,10 @@ export class HttpService {
 
   public setBaseUrl(url: string): void {
     this.instance.defaults.baseURL = url.replace(/\/$/, '');
+  }
+
+  public getBaseUrl(): string {
+    return this.instance.defaults.baseURL || '';
   }
 
   public setActiveTownId(townId: string | null): void {
@@ -194,12 +225,30 @@ export class HttpService {
           // If the failed endpoint is an unauthenticated entry endpoint (e.g. invalid login password),
           // do NOT attempt refresh and do NOT treat it as a session termination.
           if (isPublicAuthEndpoint) {
+            const isNetworkErr =
+              !error.response ||
+              error.code === 'ERR_NETWORK' ||
+              error.code === 'ECONNABORTED' ||
+              error.code === 'ETIMEDOUT' ||
+              (error.message &&
+                (error.message.toLowerCase().includes('network') ||
+                  error.message.toLowerCase().includes('timeout') ||
+                  error.message.toLowerCase().includes('failed to fetch')));
+
+            const resolvedErrorCode =
+              errBody?.errorCode ||
+              (isNetworkErr
+                ? ErrorCode.NETWORK_ERROR
+                : status && status >= 500
+                  ? ErrorCode.INTERNAL_SERVER_ERROR
+                  : undefined);
+
             const apiError = new ApiError(
-              status || 500,
+              status || (isNetworkErr ? 0 : 500),
               errBody?.error || error.name || 'HttpError',
               errBody?.message || error.message || 'Unknown network error',
               errBody?.path,
-              errBody?.errorCode,
+              resolvedErrorCode,
               errBody?.details,
             );
             if (!originalRequest?.skipToast) {
@@ -226,12 +275,30 @@ export class HttpService {
           this.notifyUnauthorized();
         }
 
+        const isNetworkErr =
+          !error.response ||
+          error.code === 'ERR_NETWORK' ||
+          error.code === 'ECONNABORTED' ||
+          error.code === 'ETIMEDOUT' ||
+          (error.message &&
+            (error.message.toLowerCase().includes('network') ||
+              error.message.toLowerCase().includes('timeout') ||
+              error.message.toLowerCase().includes('failed to fetch')));
+
+        const resolvedErrorCode =
+          errBody?.errorCode ||
+          (isNetworkErr
+            ? ErrorCode.NETWORK_ERROR
+            : status && status >= 500
+              ? ErrorCode.INTERNAL_SERVER_ERROR
+              : undefined);
+
         const apiError = new ApiError(
-          status || 500,
+          status || (isNetworkErr ? 0 : 500),
           errBody?.error || error.name || 'HttpError',
           errBody?.message || error.message || 'Unknown network error',
           errBody?.path,
-          errBody?.errorCode,
+          resolvedErrorCode,
           errBody?.details,
         );
 

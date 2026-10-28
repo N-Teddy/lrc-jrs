@@ -590,7 +590,7 @@ export const ActivityReportUploadModal: React.FC<
               >
                 {t(
                   'activities:reportsModal.sessionNotes',
-                  'Fellowship Session Notes / Summary (Optional)',
+                  'Community Session Notes / Summary (Optional)',
                 )}
               </label>
               <textarea
@@ -600,7 +600,7 @@ export const ActivityReportUploadModal: React.FC<
                 onChange={(e) => setSummary(e.target.value)}
                 placeholder={t(
                   'activities:reportsModal.sessionNotesPlaceholder',
-                  'Record fellowship outcomes, key milestones, or notes for these reports...',
+                  'Record activity outcomes, key milestones, or notes for these reports...',
                 )}
                 className="w-full px-3.5 py-2.5 rounded-md bg-[#faf2ee]/50 border border-[#e8e1dd] text-xs text-[#1e1b19] focus:outline-none focus:border-[#b85028] transition-colors resize-none placeholder:text-[#a08a82]"
               />

@@ -9,6 +9,9 @@ import notificationsFr from './locales/notifications.fr.json';
 import successEn from './locales/success.en.json';
 import successFr from './locales/success.fr.json';
 
+declare const process: { env?: { NODE_ENV?: string } } | undefined;
+declare const __DEV__: boolean | undefined;
+
 export const defaultNS = 'common';
 export const resources = {
   fr: {
@@ -47,7 +50,73 @@ export const resources = {
   },
 } as const;
 
-export function initI18n(initialLanguage = 'fr'): typeof i18n {
+export function isDevEnvironment(): boolean {
+  try {
+    if (typeof process !== 'undefined' && process?.env?.NODE_ENV) {
+      return process.env.NODE_ENV === 'development';
+    }
+  } catch {}
+
+  try {
+    if (
+      typeof window !== 'undefined' &&
+      (window as unknown as { process?: { env?: { NODE_ENV?: string } } })
+        .process?.env?.NODE_ENV
+    ) {
+      return (
+        (window as unknown as { process?: { env?: { NODE_ENV?: string } } })
+          .process?.env?.NODE_ENV === 'development'
+      );
+    }
+  } catch {}
+
+  try {
+    if (
+      typeof globalThis !== 'undefined' &&
+      (globalThis as unknown as { process?: { env?: { NODE_ENV?: string } } })
+        .process?.env?.NODE_ENV
+    ) {
+      return (
+        (globalThis as unknown as { process?: { env?: { NODE_ENV?: string } } })
+          .process?.env?.NODE_ENV === 'development'
+      );
+    }
+  } catch {}
+
+  try {
+    if (
+      typeof window !== 'undefined' &&
+      typeof (window as unknown as { __DEV__?: boolean }).__DEV__ === 'boolean'
+    ) {
+      return Boolean((window as unknown as { __DEV__?: boolean }).__DEV__);
+    }
+  } catch {}
+
+  try {
+    if (
+      typeof import.meta !== 'undefined' &&
+      (import.meta as unknown as { env?: { DEV?: boolean; MODE?: string } }).env
+    ) {
+      const env = (
+        import.meta as unknown as { env?: { DEV?: boolean; MODE?: string } }
+      ).env;
+      return Boolean(env?.DEV || env?.MODE === 'development');
+    }
+  } catch {}
+
+  return false;
+}
+
+export interface InitI18nOptions {
+  isDev?: boolean;
+}
+
+export function initI18n(
+  initialLanguage = 'fr',
+  options?: InitI18nOptions,
+): typeof i18n {
+  const isDev = options?.isDev ?? isDevEnvironment();
+
   if (!i18n.isInitialized) {
     i18n.use(initReactI18next).init({
       resources,
@@ -71,6 +140,22 @@ export function initI18n(initialLanguage = 'fr'): typeof i18n {
         'success',
         'notifications',
       ],
+      saveMissing: true,
+      missingKeyHandler: (lngs, ns, key) => {
+        const message = `[i18n ERROR] Missing translation key: "${ns}:${key}" for language(s): ${lngs.join(', ')}`;
+        console.error(message);
+        if (isDev) {
+          throw new Error(message);
+        }
+      },
+      parseMissingKeyHandler: (key) => {
+        const message = `[i18n ERROR] Missing translation key: "${key}"`;
+        console.error(message);
+        if (isDev) {
+          throw new Error(message);
+        }
+        return `[MISSING: ${key}]`;
+      },
       interpolation: {
         escapeValue: false,
       },

@@ -11,7 +11,7 @@ export class AppService {
   } {
     return {
       status: 'online',
-      service: 'JR Church Management API',
+      service: 'LRC Youth Community Platform API',
       version: '1.0.0',
       minClientVersion: '1.0.0',
       serverTime: new Date().toISOString(),

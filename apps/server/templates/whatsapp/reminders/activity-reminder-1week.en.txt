@@ -1,0 +1,26 @@
+⚠️ *IMPORTANT REMINDER: JRS ACTIVITY IN 1 WEEK (D-7)*
+
+Hello {{userName}},
+
+Your activity is right around the corner! It will take place in *7 days*:
+
+📌 *Activity:* {{activityName}}
+📅 *Date:* {{startDateFormatted}}
+📍 *Venue:* {{locationVenue}}
+🏷️ *Type:* {{activityTypeLabel}}
+
+---
+📋 *FINAL VERIFICATION CHECKLIST:*
+{{#each checklistItems}}
+- [ ] {{this}}
+{{/each}}
+{{#if customInstructions}}
+
+💡 *Final Instructions:*
+{{customInstructions}}
+{{/if}}
+
+Please ensure facilitators, venue, and logistics are fully confirmed.
+Access activity details: {{appUrl}}
+
+_— LRC-JRS Management System_

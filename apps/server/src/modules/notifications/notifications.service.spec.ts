@@ -5,6 +5,7 @@ describe('NotificationsService', () => {
   let service: NotificationsService;
   let mockNotificationModel: any;
   let mockUserModel: any;
+  let mockTownModel: any;
   let mockGateway: any;
   let mockPushService: any;
 
@@ -62,18 +63,24 @@ describe('NotificationsService', () => {
       }),
     };
 
+    mockTownModel = {
+      findOne: jest.fn().mockResolvedValue(null),
+    };
+
     mockGateway = {
       sendToUser: jest.fn(),
+      emitToUser: jest.fn(),
       emitUnreadCount: jest.fn(),
     };
 
     mockPushService = {
-      sendPushNotifications: jest.fn().mockResolvedValue([]),
+      sendPushNotifications: jest.fn().mockResolvedValue({ invalidTokens: [] }),
     };
 
     service = new NotificationsService(
       mockNotificationModel,
       mockUserModel,
+      mockTownModel,
       mockGateway,
       mockPushService,
     );
@@ -104,8 +111,8 @@ describe('NotificationsService', () => {
     expect(insertedDocs[0].recipientId).toBe(recipient1Id);
 
     // WebSocket sent only to recipient1Id
-    expect(mockGateway.sendToUser).toHaveBeenCalledTimes(1);
-    expect(mockGateway.sendToUser).toHaveBeenCalledWith(
+    expect(mockGateway.emitToUser).toHaveBeenCalledTimes(1);
+    expect(mockGateway.emitToUser).toHaveBeenCalledWith(
       recipient1Id,
       expect.objectContaining({
         titleKey: 'notifications:testTitle',

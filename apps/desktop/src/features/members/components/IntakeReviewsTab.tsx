@@ -2,6 +2,7 @@ import {
   usePendingReviewsQuery,
   useReviewMemberMutation,
   useTownContext,
+  useTranslation,
 } from '@jrs/client-core';
 import type { IUser } from '@jrs/shared';
 import {
@@ -40,6 +41,7 @@ export const IntakeReviewsTab: React.FC<IntakeReviewsTabProps> = ({
   activeTownName,
   onOpenIntakeLinksModal,
 }) => {
+  const { t } = useTranslation();
   const { canWrite } = useTownContext();
 
   // Query & Mutation
@@ -142,11 +144,17 @@ export const IntakeReviewsTab: React.FC<IntakeReviewsTabProps> = ({
       setReviewNotes('');
       setFeedbackMessage({
         type: 'success',
-        text: `Successfully approved "${targetName}" into Fellowship Directory.`,
+        text: t('members:intake.approveSuccess', {
+          name: targetName,
+          defaultValue: `Successfully approved "${targetName}" into Community Directory.`,
+        }),
       });
       setTimeout(() => setFeedbackMessage(null), 5000);
     } catch (err: any) {
-      setActionError(err?.message || 'Failed to approve member.');
+      setActionError(
+        err?.message ||
+          t('members:intake.approveError', 'Failed to approve member.'),
+      );
     }
   };
 
@@ -168,11 +176,17 @@ export const IntakeReviewsTab: React.FC<IntakeReviewsTabProps> = ({
       setReviewNotes('');
       setFeedbackMessage({
         type: 'info',
-        text: `Rejected intake submission for "${targetName}".`,
+        text: t('members:intake.rejectSuccess', {
+          name: targetName,
+          defaultValue: `Rejected intake submission for "${targetName}".`,
+        }),
       });
       setTimeout(() => setFeedbackMessage(null), 5000);
     } catch (err: any) {
-      setActionError(err?.message || 'Failed to reject submission.');
+      setActionError(
+        err?.message ||
+          t('members:intake.rejectError', 'Failed to reject submission.'),
+      );
     }
   };
 
@@ -187,17 +201,20 @@ export const IntakeReviewsTab: React.FC<IntakeReviewsTabProps> = ({
           <div className="flex flex-col">
             <div className="flex items-center gap-2 flex-wrap">
               <h2 className="text-base font-bold text-[#1e1b19] tracking-tight">
-                Intake Registration Review Queue
+                {t('members:intake.title', 'Intake Registration Review Queue')}
               </h2>
               <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#faf2ee] text-[#b85028] border border-[#e8e1dd]">
-                {pendingMembers.length} Awaiting Verification
+                {t('members:intake.awaitingVerification', {
+                  count: pendingMembers.length,
+                  defaultValue: `${pendingMembers.length} Awaiting Verification`,
+                })}
               </span>
             </div>
             <p className="text-xs text-[#8a726a] max-w-2xl mt-0.5">
-              Prospective members who registered via self-onboarding links for{' '}
-              <strong className="text-[#57423b]">{activeTownName}</strong>.
-              Review their credentials and approve them into the active
-              fellowship directory.
+              {t('members:intake.subtitle', {
+                town: activeTownName,
+                defaultValue: `Prospective members who registered via self-onboarding links for ${activeTownName}. Review their credentials and approve them into the active community directory.`,
+              })}
             </p>
           </div>
         </div>
@@ -212,7 +229,9 @@ export const IntakeReviewsTab: React.FC<IntakeReviewsTabProps> = ({
               title="Manage and copy member invitation links"
             >
               <Link size={16} weight="bold" />
-              <span>Manage Intake Links</span>
+              <span>
+                {t('members:intake.manageLinks', 'Manage Intake Links')}
+              </span>
             </button>
           )}
 
@@ -284,7 +303,10 @@ export const IntakeReviewsTab: React.FC<IntakeReviewsTabProps> = ({
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search applicants by name, phone, or note..."
+            placeholder={t(
+              'members:intake.searchPlaceholder',
+              'Search applicants by name, phone, or note...',
+            )}
             className="bg-transparent text-xs text-[#1e1b19] placeholder:text-[#8a726a] outline-none w-full pr-6"
           />
           {searchQuery && (
@@ -312,7 +334,7 @@ export const IntakeReviewsTab: React.FC<IntakeReviewsTabProps> = ({
                   : 'hover:text-[#1e1b19]'
               }`}
             >
-              All
+              {t('members:intake.filterAll', 'All')}
             </button>
             <button
               type="button"
@@ -323,7 +345,7 @@ export const IntakeReviewsTab: React.FC<IntakeReviewsTabProps> = ({
                   : 'hover:text-[#1e1b19]'
               }`}
             >
-              Male
+              {t('members:intake.filterMale', 'Male')}
             </button>
             <button
               type="button"
@@ -334,7 +356,7 @@ export const IntakeReviewsTab: React.FC<IntakeReviewsTabProps> = ({
                   : 'hover:text-[#1e1b19]'
               }`}
             >
-              Female
+              {t('members:intake.filterFemale', 'Female')}
             </button>
           </div>
 
@@ -349,7 +371,7 @@ export const IntakeReviewsTab: React.FC<IntakeReviewsTabProps> = ({
                   : 'hover:text-[#1e1b19]'
               }`}
             >
-              Newest
+              {t('members:intake.sortNewest', 'Newest')}
             </button>
             <button
               type="button"
@@ -360,7 +382,7 @@ export const IntakeReviewsTab: React.FC<IntakeReviewsTabProps> = ({
                   : 'hover:text-[#1e1b19]'
               }`}
             >
-              Oldest
+              {t('members:intake.sortOldest', 'Oldest')}
             </button>
           </div>
         </div>
@@ -371,7 +393,7 @@ export const IntakeReviewsTab: React.FC<IntakeReviewsTabProps> = ({
         <div className="py-16 text-center text-xs text-[#8a726a] flex flex-col items-center gap-3 bg-white rounded-xl border border-[#e8e1dd] p-8 shadow-xs">
           <div className="w-7 h-7 border-2 border-[#b85028]/30 border-t-[#b85028] rounded-full animate-spin" />
           <span className="font-semibold text-[#57423b]">
-            Loading intake submissions...
+            {t('members:intake.loading', 'Loading intake submissions...')}
           </span>
         </div>
       ) : pendingMembers.length === 0 ? (
@@ -381,12 +403,16 @@ export const IntakeReviewsTab: React.FC<IntakeReviewsTabProps> = ({
             <CheckCircle size={32} weight="fill" />
           </div>
           <h3 className="text-base font-bold text-[#1e1b19] mb-1">
-            All Caught Up! No Submissions Pending Review
+            {t(
+              'members:intake.allCaughtUpTitle',
+              'All Caught Up! No Submissions Pending Review',
+            )}
           </h3>
           <p className="text-xs text-[#8a726a] max-w-md mb-6 leading-relaxed">
-            All prospective members who registered through your intake
-            invitation links for {activeTownName} have been processed and
-            admitted into the fellowship directory.
+            {t('members:intake.allCaughtUpDesc', {
+              town: activeTownName,
+              defaultValue: `All prospective members who registered through your intake invitation links for ${activeTownName} have been processed and admitted into the community directory.`,
+            })}
           </p>
           {onOpenIntakeLinksModal && (
             <button
@@ -395,7 +421,9 @@ export const IntakeReviewsTab: React.FC<IntakeReviewsTabProps> = ({
               className="px-4 py-2 rounded-md bg-[#faf2ee] hover:bg-[#f4ece9] text-xs font-bold text-[#57423b] border border-[#e8e1dd] transition-all cursor-pointer flex items-center gap-2 shadow-2xs"
             >
               <Link size={16} weight="bold" />
-              <span>Share & Manage Intake Links</span>
+              <span>
+                {t('members:intake.shareLinks', 'Share & Manage Intake Links')}
+              </span>
             </button>
           )}
         </div>
@@ -406,10 +434,16 @@ export const IntakeReviewsTab: React.FC<IntakeReviewsTabProps> = ({
             <MagnifyingGlass size={24} weight="bold" />
           </div>
           <h3 className="text-sm font-bold text-[#1e1b19] mb-1">
-            No submissions matched your criteria
+            {t(
+              'members:intake.noMatchesTitle',
+              'No submissions matched your criteria',
+            )}
           </h3>
           <p className="text-xs text-[#8a726a] max-w-sm mb-4">
-            Try adjusting your search query or reset the gender filter.
+            {t(
+              'members:intake.noMatchesDesc',
+              'Try adjusting your search query or reset the gender filter.',
+            )}
           </p>
           <button
             type="button"
@@ -419,7 +453,7 @@ export const IntakeReviewsTab: React.FC<IntakeReviewsTabProps> = ({
             }}
             className="px-3.5 py-1.5 rounded-md bg-[#faf2ee] hover:bg-[#f4ece9] text-xs font-bold text-[#1e1b19] border border-[#e8e1dd] transition-colors cursor-pointer"
           >
-            Clear Filters
+            {t('members:intake.clearFilters', 'Clear Filters')}
           </button>
         </div>
       ) : (
@@ -453,11 +487,15 @@ export const IntakeReviewsTab: React.FC<IntakeReviewsTabProps> = ({
                           {member.fullName}
                         </span>
                         <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#fff2ee] text-[#b85028] border border-[#ffdbcf]">
-                          Pending Review
+                          {t('members:intake.pendingReview', 'Pending Review')}
                         </span>
                         <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-[#faf2ee] text-[#57423b] border border-[#e8e1dd]">
-                          {member.gender === 'FEMALE' ? 'Female' : 'Male'}
-                          {age !== null ? ` • ${age} yrs` : ''}
+                          {member.gender === 'FEMALE'
+                            ? t('members:intake.filterFemale', 'Female')
+                            : t('members:intake.filterMale', 'Male')}
+                          {age !== null
+                            ? ` • ${age} ${t('members:intake.yearsOld', 'yrs')}`
+                            : ''}
                         </span>
                       </div>
 
@@ -485,7 +523,7 @@ export const IntakeReviewsTab: React.FC<IntakeReviewsTabProps> = ({
                         {member.dateOfBirth && (
                           <span className="flex items-center gap-1">
                             <Calendar size={13} />
-                            DOB:{' '}
+                            {t('members:intake.dob', 'DOB:')}{' '}
                             {new Date(member.dateOfBirth).toLocaleDateString()}
                           </span>
                         )}
@@ -493,7 +531,7 @@ export const IntakeReviewsTab: React.FC<IntakeReviewsTabProps> = ({
                         {member.createdAt && (
                           <span className="flex items-center gap-1 text-[11px] text-[#8a726a]">
                             <Clock size={12} />
-                            Submitted:{' '}
+                            {t('members:intake.submitted', 'Submitted:')}{' '}
                             {new Date(member.createdAt).toLocaleDateString()}
                           </span>
                         )}
@@ -514,7 +552,7 @@ export const IntakeReviewsTab: React.FC<IntakeReviewsTabProps> = ({
                         }`}
                       >
                         <X size={14} weight="bold" />
-                        <span>Reject</span>
+                        <span>{t('members:intake.reject', 'Reject')}</span>
                       </button>
 
                       <button
@@ -527,12 +565,12 @@ export const IntakeReviewsTab: React.FC<IntakeReviewsTabProps> = ({
                         }`}
                       >
                         <Check size={14} weight="bold" />
-                        <span>Approve</span>
+                        <span>{t('members:intake.approve', 'Approve')}</span>
                       </button>
                     </div>
                   ) : (
                     <span className="px-2.5 py-1 rounded text-[11px] font-bold bg-[#faf2ee] text-[#8a726a] border border-[#e8e1dd] self-end sm:self-center">
-                      Read-Only Hub
+                      {t('members:intake.readOnlyHub', 'Read-Only Hub')}
                     </span>
                   )}
                 </div>
@@ -541,7 +579,7 @@ export const IntakeReviewsTab: React.FC<IntakeReviewsTabProps> = ({
                 {member.intakeNote && (
                   <div className="px-3.5 py-2 rounded-lg bg-[#faf2ee] border border-[#e8e1dd] text-xs text-[#57423b] flex items-start gap-2">
                     <span className="font-bold text-[#b85028] shrink-0">
-                      Applicant Note:
+                      {t('members:intake.applicantNote', 'Applicant Note:')}
                     </span>
                     <span className="italic">"{member.intakeNote}"</span>
                   </div>
@@ -553,7 +591,10 @@ export const IntakeReviewsTab: React.FC<IntakeReviewsTabProps> = ({
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-bold text-[#2c4e37] flex items-center gap-1.5">
                         <CheckCircle size={16} weight="fill" />
-                        Approve "{member.fullName}" into Fellowship Directory
+                        {t('members:intake.approveHeader', {
+                          name: member.fullName,
+                          defaultValue: `Approve "${member.fullName}" into Community Directory`,
+                        })}
                       </span>
                       <button
                         type="button"
@@ -581,14 +622,17 @@ export const IntakeReviewsTab: React.FC<IntakeReviewsTabProps> = ({
                             className="w-4 h-4 rounded text-[#b85028] accent-[#b85028] cursor-pointer"
                           />
                           <span>
-                            Grant application access (Default: Unchecked)
+                            {t(
+                              'members:intake.grantAccessLabel',
+                              'Grant application access (Default: Unchecked)',
+                            )}
                           </span>
                         </label>
                         <p className="text-[11px] text-[#8a726a] leading-tight">
-                          By default, members who register through intake links
-                          are recorded in the directory only and cannot log into
-                          the JRS portal without explicit administrator
-                          authorization.
+                          {t(
+                            'members:intake.grantAccessDesc',
+                            'By default, members who register through intake links are recorded in the directory only and cannot log into the JRS portal without explicit administrator authorization.',
+                          )}
                         </p>
                       </div>
                     </div>
@@ -597,7 +641,10 @@ export const IntakeReviewsTab: React.FC<IntakeReviewsTabProps> = ({
                       type="text"
                       value={reviewNotes}
                       onChange={(e) => setReviewNotes(e.target.value)}
-                      placeholder="Optional verification note (e.g. Verified via WhatsApp call)"
+                      placeholder={t(
+                        'members:intake.notesPlaceholder',
+                        'Optional verification note (e.g. Verified via WhatsApp call)',
+                      )}
                       className="h-9 px-3 rounded-md bg-white border border-[#a9d0b2] text-xs text-[#1e1b19] placeholder:text-[#8a726a] outline-none"
                     />
 
@@ -607,7 +654,7 @@ export const IntakeReviewsTab: React.FC<IntakeReviewsTabProps> = ({
                         onClick={handleCancelAction}
                         className="px-3 py-1.5 rounded text-xs font-semibold text-[#8a726a] hover:bg-black/5 cursor-pointer"
                       >
-                        Cancel
+                        {t('members:intake.cancel', 'Cancel')}
                       </button>
                       <button
                         type="button"
@@ -618,12 +665,19 @@ export const IntakeReviewsTab: React.FC<IntakeReviewsTabProps> = ({
                         {reviewMutation.isPending ? (
                           <>
                             <div className="w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-                            <span>Approving...</span>
+                            <span>
+                              {t('members:intake.approving', 'Approving...')}
+                            </span>
                           </>
                         ) : (
                           <>
                             <Check size={14} weight="bold" />
-                            <span>Confirm Approval</span>
+                            <span>
+                              {t(
+                                'members:intake.confirmApproval',
+                                'Confirm Approval',
+                              )}
+                            </span>
                           </>
                         )}
                       </button>
@@ -637,7 +691,10 @@ export const IntakeReviewsTab: React.FC<IntakeReviewsTabProps> = ({
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-bold text-[#ba1a1a] flex items-center gap-1.5">
                         <XCircle size={16} weight="fill" />
-                        Reject Intake Submission for "{member.fullName}"
+                        {t('members:intake.rejectHeader', {
+                          name: member.fullName,
+                          defaultValue: `Reject Intake Submission for "${member.fullName}"`,
+                        })}
                       </span>
                       <button
                         type="button"
@@ -652,7 +709,10 @@ export const IntakeReviewsTab: React.FC<IntakeReviewsTabProps> = ({
                       type="text"
                       value={reviewNotes}
                       onChange={(e) => setReviewNotes(e.target.value)}
-                      placeholder="Reason for rejection (e.g. Duplicate entry, unreachable phone number)"
+                      placeholder={t(
+                        'members:intake.rejectNotesPlaceholder',
+                        'Reason for rejection (e.g. Duplicate entry, unreachable phone number)',
+                      )}
                       className="h-9 px-3 rounded-md bg-white border border-[#ffb4a8] text-xs text-[#1e1b19] placeholder:text-[#8a726a] outline-none"
                     />
 
@@ -662,7 +722,7 @@ export const IntakeReviewsTab: React.FC<IntakeReviewsTabProps> = ({
                         onClick={handleCancelAction}
                         className="px-3 py-1.5 rounded text-xs font-semibold text-[#8a726a] hover:bg-black/5 cursor-pointer"
                       >
-                        Cancel
+                        {t('members:intake.cancel', 'Cancel')}
                       </button>
                       <button
                         type="button"
@@ -673,12 +733,19 @@ export const IntakeReviewsTab: React.FC<IntakeReviewsTabProps> = ({
                         {reviewMutation.isPending ? (
                           <>
                             <div className="w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-                            <span>Rejecting...</span>
+                            <span>
+                              {t('members:intake.rejecting', 'Rejecting...')}
+                            </span>
                           </>
                         ) : (
                           <>
                             <X size={14} weight="bold" />
-                            <span>Confirm Rejection</span>
+                            <span>
+                              {t(
+                                'members:intake.confirmRejection',
+                                'Confirm Rejection',
+                              )}
+                            </span>
                           </>
                         )}
                       </button>

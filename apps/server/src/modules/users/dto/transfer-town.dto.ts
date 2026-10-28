@@ -12,7 +12,7 @@ export class TransferTownDto {
 
   @ApiPropertyOptional({
     example: 'Relocated for university studies at University of Yaounde I',
-    description: 'Pastoral reason or administrative note for town transfer',
+    description: 'Administrative note or transfer reason for town transfer',
   })
   @IsOptional()
   @IsString()

@@ -58,7 +58,7 @@ export const ActivityStatsOverview: React.FC<ActivityStatsOverviewProps> = ({
         </div>
         <div className="flex items-center gap-1.5 pt-1 text-xs font-semibold text-[#57423b]">
           <span className="w-1.5 h-1.5 rounded-full bg-[#b85028]" />
-          <span>Recorded fellowship cycle</span>
+          <span>Recorded community cycle</span>
         </div>
       </div>
 
@@ -138,7 +138,7 @@ export const ActivityStatsOverview: React.FC<ActivityStatsOverviewProps> = ({
         </div>
         <div className="flex items-center gap-1.5 pt-1 text-xs font-semibold text-[#486b52]">
           <TrendUp size={14} weight="bold" />
-          <span>Turnout tracked across fellowship</span>
+          <span>Turnout tracked across community</span>
         </div>
       </div>
     </div>

@@ -72,7 +72,7 @@ export function useMemberDetailQuery(id: string) {
 }
 
 /**
- * Hook to register a new member in the fellowship
+ * Hook to register a new member in the community
  */
 export function useCreateMemberMutation() {
   const http = useHttp();

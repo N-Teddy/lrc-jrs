@@ -24,5 +24,11 @@
 
   "SUCCESS_NOTIFICATION_MARKED_READ": "Notification marked as read.",
   "SUCCESS_NOTIFICATIONS_ALL_MARKED_READ": "All notifications marked as read.",
-  "SUCCESS_PUSH_TOKEN_REGISTERED": "Device registered for push notifications."
+  "SUCCESS_PUSH_TOKEN_REGISTERED": "Device registered for push notifications.",
+  "activityCreatedSuccess": "New activity created and scheduled successfully.",
+  "activityUpdatedSuccess": "Activity details saved successfully.",
+  "activityDeletedSuccess": "Activity deleted successfully.",
+  "memberCreatedSuccess": "Member registered successfully.",
+  "memberUpdatedSuccess": "Member profile updated successfully.",
+  "memberDeletedSuccess": "Member record removed successfully."
 }

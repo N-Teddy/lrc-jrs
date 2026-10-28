@@ -6,6 +6,7 @@ import {
   Notification,
   NotificationSchema,
 } from '../../database/schemas/notification.schema';
+import { Town, TownSchema } from '../../database/schemas/town.schema';
 import { User, UserSchema } from '../../database/schemas/user.schema';
 import { NotificationsController } from './notifications.controller';
 import { NotificationsGateway } from './notifications.gateway';
@@ -18,6 +19,7 @@ import { PushNotificationService } from './push-notification.service';
     MongooseModule.forFeature([
       { name: Notification.name, schema: NotificationSchema },
       { name: User.name, schema: UserSchema },
+      { name: Town.name, schema: TownSchema },
     ]),
     JwtModule.registerAsync({
       imports: [ConfigModule],

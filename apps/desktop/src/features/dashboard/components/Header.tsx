@@ -21,6 +21,7 @@ interface HeaderProps {
   onToggleSidebar: () => void;
   onOpenChangePassword: () => void;
   onNavigateToResource?: (resource: NotificationResource) => void;
+  onOpenNotificationsPage?: () => void;
   title?: string;
 }
 
@@ -29,6 +30,7 @@ export const Header: React.FC<HeaderProps> = ({
   onToggleSidebar,
   onOpenChangePassword,
   onNavigateToResource,
+  onOpenNotificationsPage,
   title = 'Dashboard Overview',
 }) => {
   const { t, i18n } = useTranslation();
@@ -127,7 +129,10 @@ export const Header: React.FC<HeaderProps> = ({
 
       {/* 3. Right: Notification Bell, Language Switcher & User Profile Button */}
       <div className="flex items-center gap-3 shrink-0">
-        <NotificationBell onNavigateToResource={onNavigateToResource} />
+        <NotificationBell
+          onNavigateToResource={onNavigateToResource}
+          onOpenNotificationsPage={onOpenNotificationsPage}
+        />
         <LanguageToggle size="md" />
 
         <div ref={profileMenuRef} className="relative">

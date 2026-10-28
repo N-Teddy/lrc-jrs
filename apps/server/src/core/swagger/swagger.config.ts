@@ -3,9 +3,9 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 export function setupSwagger(app: INestApplication): void {
   const config = new DocumentBuilder()
-    .setTitle('JR Church Management API')
+    .setTitle('LRC Youth Community Platform API')
     .setDescription(
-      'REST API for the JR Church Platform across 3 towns. Manages APs, PCs, JR Members, Activities, Open Attendance, and Drive Reports.',
+      'REST API for the LRC Youth Community Platform across regional towns. Manages APs, PCs, JR Members, Activities, Open Attendance, and Drive Reports.',
     )
     .setVersion('1.0')
     .addBearerAuth(

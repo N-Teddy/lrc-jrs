@@ -162,7 +162,7 @@ export class TransfersSeeder {
         originTownCode,
         currentTownCode: destTownCode,
         totalTransfers: transferRecords.length,
-        lastReason: lastTransfer.reason || 'Regional fellowship relocation',
+        lastReason: lastTransfer.reason || 'Regional community relocation',
         transferredBy: lastTransfer.transferredBy,
       });
 

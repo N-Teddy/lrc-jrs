@@ -30,18 +30,27 @@ export function useRegionSelector({
   const { signOut } = useAuth();
   const { availableTowns, activeTownId, setActiveTownId } = useTownContext();
 
-  // Find initial selected town (activeTownId -> homeTown -> first available)
+  // Find initial selected town: Prioritize user's assigned home town on login
   const initialTown = useMemo(() => {
-    if (activeTownId) {
-      const found = availableTowns.find((t) => t.id === activeTownId);
-      if (found) return found;
-    }
     if (user.homeTownId) {
-      const home = availableTowns.find((t) => t.id === user.homeTownId);
+      const home = availableTowns.find(
+        (t) =>
+          t.id === user.homeTownId ||
+          (user.homeTownId &&
+            t.code?.toUpperCase() === user.homeTownId.toUpperCase()),
+      );
       if (home) return home;
     }
+    if (activeTownId) {
+      const found = availableTowns.find(
+        (t) =>
+          t.id === activeTownId ||
+          (t.code && t.code.toUpperCase() === activeTownId.toUpperCase()),
+      );
+      if (found) return found;
+    }
     return availableTowns[0] || null;
-  }, [activeTownId, availableTowns, user.homeTownId]);
+  }, [user.homeTownId, activeTownId, availableTowns]);
 
   const [selectedTown, setSelectedTown] = useState<ITown | null>(initialTown);
   const [hoveredIso, setHoveredIso] = useState<string | null>(null);

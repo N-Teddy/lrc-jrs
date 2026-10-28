@@ -12,7 +12,7 @@ export type { AuthFlowScreenState as AuthScreenState };
 export function useDesktopAppFlow() {
   const { user, isAuthenticated, isLoading } = useAuth();
   const http = useHttp();
-  const { isLoadingTowns, activeTownId } = useTownContext();
+  const { isLoadingTowns } = useTownContext();
 
   const flow = useAuthFlowState(isAuthenticated);
 
@@ -44,8 +44,7 @@ export function useDesktopAppFlow() {
     isAuthenticated &&
       user &&
       hasMultiTownAccess &&
-      ((!flow.hasExplicitlySelectedTown && !activeTownId) ||
-        flow.isSwitchingRegion),
+      (!flow.hasExplicitlySelectedTown || flow.isSwitchingRegion),
   );
 
   const handleForgotPasswordClick = (id: string) => {

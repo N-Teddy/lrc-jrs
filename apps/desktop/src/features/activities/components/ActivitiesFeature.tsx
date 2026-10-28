@@ -1,5 +1,7 @@
 import {
+  toast,
   useActivitiesQuery,
+  useActivityDetailQuery,
   useActivityStatsQuery,
   useAuth,
   useCreateActivityMutation,
@@ -10,6 +12,7 @@ import {
   useUpdateActivityMutation,
 } from '@jrs/client-core';
 import { ActivityStatus, ActivityType, type IActivity } from '@jrs/shared';
+import { CircleNotch } from '@phosphor-icons/react';
 import type React from 'react';
 import { useEffect, useState } from 'react';
 import { ActivityAttendanceRoster } from './ActivityAttendanceRoster';
@@ -103,26 +106,28 @@ export const ActivitiesFeature: React.FC<ActivitiesFeatureProps> = ({
   const { data: activitiesData, isLoading: isActivitiesLoading } =
     useActivitiesQuery(queryParams);
 
+  // Directly fetch activity by ID when navigated from a notification or deep link
+  const { data: directActivity, isLoading: isDirectActivityLoading } =
+    useActivityDetailQuery(initialActivityId || '');
+
   useEffect(() => {
-    if (initialActivityId && activitiesData?.items) {
-      const found = activitiesData.items.find(
-        (a) => a.id === initialActivityId,
-      );
-      if (found) {
-        setSelectedActivity(found);
-        if (initialSubTab === 'attendance') {
-          setSubView('attendance');
-        } else if (
-          initialSubTab === 'audit-log' ||
-          initialSubTab === 'history'
-        ) {
-          setSubView('audit-log');
-        } else {
-          setSubView('details');
-        }
+    if (!initialActivityId) return;
+
+    const targetActivity =
+      directActivity ||
+      activitiesData?.items?.find((a) => a.id === initialActivityId);
+
+    if (targetActivity) {
+      setSelectedActivity(targetActivity);
+      if (initialSubTab === 'attendance') {
+        setSubView('attendance');
+      } else if (initialSubTab === 'audit-log' || initialSubTab === 'history') {
+        setSubView('audit-log');
+      } else {
+        setSubView('details');
       }
     }
-  }, [initialActivityId, initialSubTab, activitiesData]);
+  }, [initialActivityId, directActivity, activitiesData, initialSubTab]);
 
   // Mutations
   const createActivityMutation = useCreateActivityMutation();
@@ -166,6 +171,11 @@ export const ActivitiesFeature: React.FC<ActivitiesFeatureProps> = ({
         id: editingActivity.id,
         dto: formData,
       });
+      toast.success(
+        t('activities:activityUpdatedSuccess', {
+          defaultValue: 'Activity updated successfully',
+        }),
+      );
       // If we are currently in audit-log view or attendance view, update selectedActivity
       if (selectedActivity?.id === editingActivity.id) {
         setSelectedActivity({ ...selectedActivity, ...formData });
@@ -175,11 +185,21 @@ export const ActivitiesFeature: React.FC<ActivitiesFeatureProps> = ({
         ...formData,
         townId: formData.townId || activeTownId,
       });
+      toast.success(
+        t('activities:activityCreatedSuccess', {
+          defaultValue: 'Activity created successfully',
+        }),
+      );
     }
   };
 
   const handleConfirmDelete = async (id: string) => {
     await deleteActivityMutation.mutateAsync(id);
+    toast.success(
+      t('activities:activityDeletedSuccess', {
+        defaultValue: 'Activity deleted successfully',
+      }),
+    );
     if (selectedActivity?.id === id) {
       setSelectedActivity(null);
       setSubView('list');
@@ -206,11 +226,22 @@ export const ActivitiesFeature: React.FC<ActivitiesFeatureProps> = ({
 
   return (
     <div className="w-full flex flex-col gap-6 animate-in fade-in duration-200">
-      {/* 1. Activity Detail Screen View (with tabs) */}
-      {subView === 'details' && currentActivity ? (
+      {/* 0. Direct Activity Loading State (when opening from notification) */}
+      {initialActivityId && isDirectActivityLoading && !currentActivity ? (
+        <div className="w-full min-h-[420px] rounded-2xl bg-white border border-[#e8e1dd] p-12 flex flex-col items-center justify-center gap-3 shadow-xs">
+          <CircleNotch size={32} className="animate-spin text-[#b85028]" />
+          <p className="text-xs font-bold text-[#57423b]">
+            {t('common:loading') || 'Loading activity details...'}
+          </p>
+        </div>
+      ) : subView === 'details' && currentActivity ? (
+        /* 1. Activity Detail Screen View (with tabs) */
         <ActivityDetailPage
           activity={currentActivity}
-          onBack={() => setSubView('list')}
+          onBack={() => {
+            setSelectedActivity(null);
+            setSubView('list');
+          }}
           onTrackAttendance={handleTrackAttendance}
           onEditActivity={handleEditActivity}
           onDeleteActivity={(act) => setDeletingActivity(act)}

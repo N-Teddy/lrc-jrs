@@ -1,0 +1,20 @@
+🔔 *RAPPEL ACTIVITÉ INTER-VILLES (J-{{daysAhead}})*
+
+Bonjour {{userName}},
+
+Votre ville est associée à l'activité suivante{{#if hostTownName}} organisée par {{hostTownName}}{{/if}} :
+
+📌 *Activité :* {{activityName}}
+📅 *Date :* {{startDateFormatted}}
+📍 *Lieu :* {{locationVenue}}
+🏷️ *Type :* {{activityTypeLabel}}
+{{#if notes}}
+
+📝 *Notes & détails :*
+{{notes}}
+{{/if}}
+
+Merci d'informer et de mobiliser vos membres participants.
+Lien vers l'application : {{appUrl}}
+
+_— Système de gestion LRC-JRS_

@@ -154,7 +154,11 @@ function AppContent() {
 
 export default function App() {
   return (
-    <CoreProviders storageAdapter={tauriStoreAdapter} baseUrl={API_BASE_URL}>
+    <CoreProviders
+      storageAdapter={tauriStoreAdapter}
+      baseUrl={API_BASE_URL}
+      isDev={import.meta.env.DEV}
+    >
       <AppContent />
     </CoreProviders>
   );

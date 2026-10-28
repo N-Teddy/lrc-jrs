@@ -64,7 +64,7 @@ function getEngagementConfig(level: MemberEngagementLevel) {
         badgeText: 'text-[#57423b]',
         borderColor: 'border-[#e8e1dd]',
         description:
-          'Turnout below 40%. May benefit from pastoral re-engagement.',
+          'Turnout below 40%. May benefit from community re-engagement.',
       };
     case 'NEEDS_FOLLOW_UP':
       return {
@@ -73,7 +73,7 @@ function getEngagementConfig(level: MemberEngagementLevel) {
         badgeText: 'text-[#ba1a1a]',
         borderColor: 'border-[#ffb4a8]',
         description:
-          'Missed 2 or more consecutive gatherings. Immediate pastoral contact advised.',
+          'Missed 2 or more consecutive gatherings. Immediate follow-up advised.',
       };
     case 'NEW':
       return {
@@ -311,8 +311,8 @@ export const MemberAttendanceHistoryTab: React.FC<
     : null;
 
   // Hub pre-filled WhatsApp message
-  const pastoralMessage = encodeURIComponent(
-    `Bonjour ${member.fullName}, nous avons remarqué votre absence aux récentes rencontres de la Jeunesse LRC. Nous espérons que vous vous portez bien et restons disponibles si vous avez besoin d'accompagnement ou de prière. Que Dieu vous bénisse !`,
+  const followUpMessage = encodeURIComponent(
+    `Bonjour ${member.fullName}, nous avons remarqué votre absence aux récentes rencontres de la Jeunesse LRC. Nous espérons que vous vous portez bien et restons disponibles si vous avez besoin d'accompagnement ou de soutien. À très bientôt !`,
   );
 
   if (isLoading) {
@@ -347,7 +347,7 @@ export const MemberAttendanceHistoryTab: React.FC<
         </h4>
         <p className="text-xs text-[#8a726a] mb-4 max-w-md">
           Could not retrieve gathering attendance records for this member from
-          the fellowship registry.
+          the community registry.
         </p>
         <button
           type="button"
@@ -514,7 +514,7 @@ export const MemberAttendanceHistoryTab: React.FC<
               })
             ) : (
               <span className="text-[11px] text-[#8a726a]">
-                Home parish gatherings only
+                Home hub gatherings only
               </span>
             )}
           </div>
@@ -537,16 +537,16 @@ export const MemberAttendanceHistoryTab: React.FC<
                 <strong className="text-[#ba1a1a]">
                   {history.consecutiveMissed > 0
                     ? `${history.consecutiveMissed} consecutive gatherings`
-                    : 'several recent fellowship activities'}
+                    : 'several recent community activities'}
                 </strong>
-                . A pastoral check-in is advised to provide fellowship support.
+                . A check-in is advised to provide community support.
               </p>
             </div>
           </div>
 
           {member.phoneNumber && (
             <a
-              href={`https://wa.me/${cleanDigits}?text=${pastoralMessage}`}
+              href={`https://wa.me/${cleanDigits}?text=${followUpMessage}`}
               target="_blank"
               rel="noreferrer"
               className="flex items-center gap-2 px-4 py-2.5 rounded-md bg-[#c2e9ca] hover:bg-[#a9d0b2] text-[#2c4e37] text-xs font-bold transition-all shadow-2xs shrink-0 cursor-pointer"
@@ -677,7 +677,7 @@ export const MemberAttendanceHistoryTab: React.FC<
             <p className="text-xs text-[#8a726a] max-w-sm mb-4">
               {hasActiveFilters
                 ? 'Try adjusting your search keywords, status filter, or hub scope.'
-                : 'This member has not yet had attendance logged for fellowship gatherings.'}
+                : 'This member has not yet had attendance logged for community gatherings.'}
             </p>
             {hasActiveFilters && (
               <button
@@ -696,7 +696,7 @@ export const MemberAttendanceHistoryTab: React.FC<
                 <tr className="bg-[#faf2ee]/70 text-[#8a726a] font-bold uppercase tracking-wider text-[11px] border-b border-[#e8e1dd]">
                   <th className="py-3.5 px-6">Date & Schedule</th>
                   <th className="py-3.5 px-6">Gathering / Activity</th>
-                  <th className="py-3.5 px-6">Location & Parish</th>
+                  <th className="py-3.5 px-6">Location & Hub</th>
                   <th className="py-3.5 px-6">Check-In Time</th>
                   <th className="py-3.5 px-6 text-right">Attendance Status</th>
                 </tr>

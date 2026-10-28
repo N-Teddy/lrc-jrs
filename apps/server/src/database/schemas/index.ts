@@ -1,4 +1,5 @@
 export * from './activity.schema';
+export * from './activity-reminder-template.schema';
 export * from './attendance.schema';
 export * from './password-reset.schema';
 export * from './refresh-token.schema';

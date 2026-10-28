@@ -34,6 +34,7 @@ export function useNotificationsQuery(queryDto?: NotificationQueryDto) {
     queryFn: () =>
       http.get<PaginatedNotifications>('/notifications', {
         params: queryDto,
+        skipToast: true,
       }),
     enabled: isAuthenticated,
     staleTime: 30000,
@@ -52,6 +53,7 @@ export function useUnreadNotificationCountQuery() {
     queryFn: async () => {
       const res = await http.get<NotificationStatsDto>(
         '/notifications/unread-count',
+        { skipToast: true },
       );
       return res.unreadCount;
     },
@@ -146,6 +148,11 @@ export function useNotificationsSubscription(options?: {
   const http = useHttp();
   const queryClient = useQueryClient();
   const socketRef = useRef<Socket | null>(null);
+  const optionsRef = useRef(options);
+
+  useEffect(() => {
+    optionsRef.current = options;
+  });
 
   useEffect(() => {
     if (!isAuthenticated || !token || !user) {
@@ -157,13 +164,17 @@ export function useNotificationsSubscription(options?: {
     }
 
     const baseUrl =
-      (http as unknown as { instance?: { defaults?: { baseURL?: string } } })
-        ?.instance?.defaults?.baseURL || 'http://localhost:3500/api';
+      (typeof http?.getBaseUrl === 'function' ? http.getBaseUrl() : '') ||
+      'http://localhost:3000/api';
     const socketHost = baseUrl.replace(/\/api\/?$/, '');
 
     try {
       const socket = io(`${socketHost}/notifications`, {
-        auth: { token },
+        auth: async (cb: (data: { token: string | null }) => void) => {
+          const storedToken =
+            (await http.getStorage().getItem('jrs_access_token')) || token;
+          cb({ token: storedToken });
+        },
         transports: ['websocket', 'polling'],
         reconnection: true,
         reconnectionDelay: 2000,
@@ -171,6 +182,16 @@ export function useNotificationsSubscription(options?: {
       });
 
       socketRef.current = socket;
+
+      socket.on('connect', () => {
+        // Refresh notifications & unread count upon successful connection/reconnection
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.notifications.all,
+        });
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.notifications.unreadCount,
+        });
+      });
 
       socket.on('notification:new', (notification: INotification) => {
         // Localize title and body dynamically via i18n
@@ -200,7 +221,7 @@ export function useNotificationsSubscription(options?: {
           queryKey: queryKeys.notifications.unreadCount,
         });
 
-        options?.onNotificationReceived?.(notification);
+        optionsRef.current?.onNotificationReceived?.(notification);
       });
 
       socket.on(
@@ -213,8 +234,20 @@ export function useNotificationsSubscription(options?: {
         },
       );
 
-      socket.on('connect_error', () => {
-        // Silently handle connection drops or token auth rejections in the background
+      socket.on('connect_error', async (err: Error) => {
+        const msg = err?.message || '';
+        if (
+          msg.includes('jwt') ||
+          msg.includes('expired') ||
+          msg.includes('unauthorized') ||
+          msg.includes('Authentication')
+        ) {
+          const newToken = await http.refreshToken();
+          if (newToken && socketRef.current) {
+            socketRef.current.auth = { token: newToken };
+            socketRef.current.connect();
+          }
+        }
       });
 
       return () => {
@@ -224,5 +257,5 @@ export function useNotificationsSubscription(options?: {
     } catch {
       // Ignore socket connection failures in environments without network
     }
-  }, [isAuthenticated, token, user, http, queryClient, options]);
+  }, [isAuthenticated, user, token, http, queryClient]);
 }

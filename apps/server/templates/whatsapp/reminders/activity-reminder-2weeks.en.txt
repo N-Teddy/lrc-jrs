@@ -1,0 +1,26 @@
+🔔 *JRS ACTIVITY REMINDER (D-14)*
+
+Hello {{userName}},
+
+An activity is scheduled in *2 weeks*:
+
+📌 *Activity:* {{activityName}}
+📅 *Date:* {{startDateFormatted}}
+📍 *Venue:* {{locationVenue}}
+🏷️ *Type:* {{activityTypeLabel}}
+
+---
+📋 *RECOMMENDED ACTION CHECKLIST:*
+{{#each checklistItems}}
+- [ ] {{this}}
+{{/each}}
+{{#if customInstructions}}
+
+💡 *Specific Instructions:*
+{{customInstructions}}
+{{/if}}
+
+Please coordinate with your team to finalize the preparations.
+Portal link: {{appUrl}}
+
+_— LRC-JRS Management System_

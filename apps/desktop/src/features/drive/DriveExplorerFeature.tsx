@@ -978,7 +978,7 @@ export const DriveExplorerFeature: React.FC = () => {
               </div>
               <p className="text-xs text-[#8a726a] mt-0.5">
                 Browse Google Drive folder hierarchies, inspect activity
-                reports, and manage fellowship documents across all hubs.
+                reports, and manage community documents across all hubs.
               </p>
             </div>
           </div>
@@ -1658,7 +1658,7 @@ export const DriveExplorerFeature: React.FC = () => {
                   </h3>
                   <p className="text-[11px] text-[#8a726a]">
                     Select destination folder and files to archive into the
-                    fellowship vault.
+                    community vault.
                   </p>
                 </div>
               </div>

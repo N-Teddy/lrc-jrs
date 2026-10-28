@@ -11,6 +11,42 @@
   "hoursAgo": "{{count}}h ago",
   "daysAgo": "{{count}}d ago",
 
+  "centerSubtitle": "Live feed of activities and system updates",
+  "allCaughtUp": "You're all caught up!",
+  "noNotifications": "No notifications",
+  "emptyUnreadSubtitle": "All your notifications have been viewed.",
+  "emptySubtitle": "Activity and community notices will appear here.",
+  "viewDetails": "Details",
+  "markRead": "Mark read",
+  "markUnread": "Mark unread",
+  "realtimeConnected": "Live",
+  "escToClose": "Esc to close",
+  "seeAll": "See all",
+  "seeAllNotifications": "See all notifications",
+  "pageTitle": "Notifications & Alerts",
+  "pageSubtitle": "Live archive and activity alerts across all fellowship towns",
+  "filterByHub": "Filter by Hub",
+  "allHubs": "All Hubs",
+  "searchPlaceholder": "Search notifications by title or details...",
+  "noResultsTitle": "No notifications found",
+  "noResultsSubtitle": "Try adjusting your search query or category filters.",
+  "clearFilters": "Clear filters",
+  "today": "Today",
+  "yesterday": "Yesterday",
+  "earlierThisWeek": "Earlier this week",
+  "older": "Older",
+
+  "categories": {
+    "activity": "Activities",
+    "attendance": "Attendance",
+    "member": "Members",
+    "transfer": "Transfers",
+    "security": "Security",
+    "notice": "Notices",
+    "alert": "Alerts",
+    "system": "System"
+  },
+
   "activityCreatedTitle": "New Activity Added",
   "activityCreatedBody": "{{name}} scheduled for {{date}}",
 
@@ -60,5 +96,20 @@
   "passwordChangedBody": "The password for your account was recently updated",
 
   "systemAnnouncementTitle": "Notice from Administration",
-  "systemAnnouncementBody": "{{message}}"
+  "systemAnnouncementBody": "{{message}}",
+
+  "activity": {
+    "monthlyDigest": {
+      "title": "Monthly Activity Schedule",
+      "body": "Check out the upcoming community activities planned for this month"
+    },
+    "reminderParticipating": {
+      "title": "Activity Reminder",
+      "body": "Activity {{name}} is starting soon ({{date}})"
+    },
+    "reportWarning": {
+      "title": "Activity Report Due",
+      "body": "The activity report for {{name}} has not yet been submitted"
+    }
+  }
 }

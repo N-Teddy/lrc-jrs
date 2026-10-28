@@ -287,7 +287,7 @@ export const MemberModalFormFields: React.FC<MemberModalFormFieldsProps> = ({
         </div>
       </div>
 
-      {/* Row 4: Fellowship Role */}
+      {/* Row 4: Community Role */}
       {!hideRoleSelect && roleOptions && (
         <div className="flex flex-col gap-1.5">
           <label

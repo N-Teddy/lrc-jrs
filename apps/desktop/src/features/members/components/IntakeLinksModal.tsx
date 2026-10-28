@@ -2,6 +2,7 @@ import {
   useCreateRegistrationLinkMutation,
   useDeactivateRegistrationLinkMutation,
   useRegistrationLinksQuery,
+  useTranslation,
 } from '@jrs/client-core';
 import type { IRegistrationLink } from '@jrs/shared';
 import {
@@ -36,6 +37,7 @@ export const IntakeLinksModal: React.FC<IntakeLinksModalProps> = ({
   activeTownName,
   activeTownCode,
 }) => {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<'create' | 'list'>('create');
   const [copiedToken, setCopiedToken] = useState<string | null>(null);
 
@@ -126,7 +128,12 @@ export const IntakeLinksModal: React.FC<IntakeLinksModalProps> = ({
     setFormError(null);
 
     if (!title.trim()) {
-      setFormError('Please enter a descriptive title for this intake link.');
+      setFormError(
+        t(
+          'members:intakeLinks.titleRequiredError',
+          'Please enter a descriptive title for this intake link.',
+        ),
+      );
       return;
     }
 
@@ -146,7 +153,10 @@ export const IntakeLinksModal: React.FC<IntakeLinksModalProps> = ({
     } catch (err: any) {
       setFormError(
         err?.message ||
-          'Failed to generate registration link. Please try again.',
+          t(
+            'members:intakeLinks.generateError',
+            'Failed to generate registration link. Please try again.',
+          ),
       );
     }
   };
@@ -154,7 +164,10 @@ export const IntakeLinksModal: React.FC<IntakeLinksModalProps> = ({
   const handleDeactivate = async (linkId: string) => {
     if (
       !window.confirm(
-        'Are you sure you want to deactivate this registration link immediately? Anyone attempting to use it will no longer be able to submit their information.',
+        t(
+          'members:intakeLinks.deactivateConfirm',
+          'Are you sure you want to deactivate this registration link immediately? Anyone attempting to use it will no longer be able to submit their information.',
+        ),
       )
     ) {
       return;
@@ -163,7 +176,13 @@ export const IntakeLinksModal: React.FC<IntakeLinksModalProps> = ({
     try {
       await deactivateLinkMutation.mutateAsync(linkId);
     } catch (err: any) {
-      alert(err?.message || 'Failed to deactivate link.');
+      alert(
+        err?.message ||
+          t(
+            'members:intakeLinks.deactivateError',
+            'Failed to deactivate link.',
+          ),
+      );
     }
   };
 
@@ -179,15 +198,21 @@ export const IntakeLinksModal: React.FC<IntakeLinksModalProps> = ({
             <div className="flex flex-col">
               <div className="flex items-center gap-2">
                 <h2 className="text-lg font-bold text-[#1e1b19]">
-                  Member Intake Links
+                  {t(
+                    'members:intakeLinks.modalTitle',
+                    'Member Intake Registration Links',
+                  )}
                 </h2>
                 <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-[#faf2ee] text-[#b85028] border border-[#e8e1dd]">
                   {activeTownName} ({activeTownCode})
                 </span>
               </div>
               <p className="text-xs text-[#8a726a]">
-                Generate shareable, expiring invitation links so prospective
-                youth can enter their own information
+                {t('members:intakeLinks.modalSubtitle', {
+                  town: activeTownName,
+                  code: activeTownCode,
+                  defaultValue: `Generate shareable, expiring invitation links so prospective youth can enter their own information into ${activeTownName} (${activeTownCode}).`,
+                })}
               </p>
             </div>
           </div>
@@ -215,7 +240,9 @@ export const IntakeLinksModal: React.FC<IntakeLinksModalProps> = ({
             }`}
           >
             <Plus size={15} weight="bold" />
-            <span>Create New Link</span>
+            <span>
+              {t('members:intakeLinks.tabGenerate', 'Create New Link')}
+            </span>
           </button>
 
           <button
@@ -228,7 +255,12 @@ export const IntakeLinksModal: React.FC<IntakeLinksModalProps> = ({
             }`}
           >
             <ShareNetwork size={15} weight="bold" />
-            <span>Active & Past Links ({links.length})</span>
+            <span>
+              {t('members:intakeLinks.tabActiveLinks', {
+                count: links.length,
+                defaultValue: `Active & Past Links (${links.length})`,
+              })}
+            </span>
           </button>
         </div>
 
@@ -247,12 +279,17 @@ export const IntakeLinksModal: React.FC<IntakeLinksModalProps> = ({
               <div className="p-3.5 rounded-lg bg-[#f0f6ff] border border-[#d0e2ff] text-[#0043ce] text-xs flex items-start gap-2.5">
                 <Clock size={18} className="shrink-0 mt-0.5" weight="fill" />
                 <div className="space-y-0.5">
-                  <p className="font-bold">Security & Review Policy</p>
+                  <p className="font-bold">
+                    {t(
+                      'members:intakeLinks.policyTitle',
+                      'Security & Review Policy',
+                    )}
+                  </p>
                   <p className="text-[11px] text-[#0043ce]/90 leading-relaxed">
-                    Members registered via public intake links{' '}
-                    <strong>will not have application access</strong> by
-                    default. Each submission will be placed in your town's
-                    review queue for leadership verification before acceptance.
+                    {t(
+                      'members:intakeLinks.policyDesc',
+                      "Members registered via public intake links will not have application access by default. Each submission will be placed in your town's review queue for leadership verification before acceptance.",
+                    )}
                   </p>
                 </div>
               </div>
@@ -263,7 +300,10 @@ export const IntakeLinksModal: React.FC<IntakeLinksModalProps> = ({
                   htmlFor="intake-link-title"
                   className="text-xs font-bold text-[#57423b]"
                 >
-                  Link Title / Occasion{' '}
+                  {t(
+                    'members:intakeLinks.campaignTitleLabel',
+                    'Link Title / Occasion',
+                  )}{' '}
                   <span className="text-[#ba1a1a]">*</span>
                 </label>
                 <input
@@ -271,7 +311,10 @@ export const IntakeLinksModal: React.FC<IntakeLinksModalProps> = ({
                   type="text"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  placeholder="e.g. Sunday Service Intake, Youth Camp 2026, New Converts"
+                  placeholder={t(
+                    'members:intakeLinks.campaignTitlePlaceholder',
+                    'e.g. Sunday Service Intake, Youth Camp 2026, New Converts',
+                  )}
                   className="h-10 px-3.5 rounded-md bg-[#faf2ee] border border-[#e8e1dd] text-xs text-[#1e1b19] outline-none focus:bg-white focus:border-[#b85028] transition-all"
                   required
                 />
@@ -280,14 +323,30 @@ export const IntakeLinksModal: React.FC<IntakeLinksModalProps> = ({
               {/* Expiration Hours Preset */}
               <div className="flex flex-col gap-1.5">
                 <span className="text-xs font-bold text-[#57423b]">
-                  Link Expiration <span className="text-[#ba1a1a]">*</span>
+                  {t(
+                    'members:intakeLinks.linkLifespanLabel',
+                    'Link Expiration',
+                  )}{' '}
+                  <span className="text-[#ba1a1a]">*</span>
                 </span>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                   {[
-                    { label: '24 Hours', hours: 24 },
-                    { label: '3 Days (72h)', hours: 72 },
-                    { label: '7 Days', hours: 168 },
-                    { label: '30 Days', hours: 720 },
+                    {
+                      label: t('members:intakeLinks.preset24h', '24 Hours'),
+                      hours: 24,
+                    },
+                    {
+                      label: t('members:intakeLinks.preset3d', '3 Days (72h)'),
+                      hours: 72,
+                    },
+                    {
+                      label: t('members:intakeLinks.preset7d', '7 Days'),
+                      hours: 168,
+                    },
+                    {
+                      label: t('members:intakeLinks.preset30d', '30 Days'),
+                      hours: 720,
+                    },
                   ].map((preset) => (
                     <button
                       key={preset.hours}
@@ -317,14 +376,22 @@ export const IntakeLinksModal: React.FC<IntakeLinksModalProps> = ({
                   htmlFor="intake-link-custom-message"
                   className="text-xs font-bold text-[#57423b] flex items-center justify-between"
                 >
-                  <span>Custom Greeting on Intake Page (Optional)</span>
+                  <span>
+                    {t(
+                      'members:intakeLinks.customMessageLabel',
+                      'Custom Greeting on Intake Page (Optional)',
+                    )}
+                  </span>
                 </label>
                 <textarea
                   id="intake-link-custom-message"
                   rows={2}
                   value={customMessage}
                   onChange={(e) => setCustomMessage(e.target.value)}
-                  placeholder="e.g. Bienvenue à la jeunesse LRC ! Merci de renseigner votre profil pour nous permettre de faire votre suivi."
+                  placeholder={t(
+                    'members:intakeLinks.customMessagePlaceholder',
+                    'e.g. Bienvenue à la jeunesse LRC ! Merci de renseigner votre profil pour nous permettre de faire votre suivi.',
+                  )}
                   className="p-3 rounded-md bg-[#faf2ee] border border-[#e8e1dd] text-xs text-[#1e1b19] outline-none focus:bg-white focus:border-[#b85028] transition-all resize-none"
                 />
               </div>
@@ -336,7 +403,7 @@ export const IntakeLinksModal: React.FC<IntakeLinksModalProps> = ({
                   onClick={onClose}
                   className="px-4 py-2 rounded-md border border-[#e8e1dd] text-xs font-bold text-[#8a726a] hover:text-[#57423b] hover:bg-[#faf2ee] transition-all cursor-pointer"
                 >
-                  Cancel
+                  {t('members:intake.cancel', 'Cancel')}
                 </button>
                 <button
                   type="submit"
@@ -346,8 +413,14 @@ export const IntakeLinksModal: React.FC<IntakeLinksModalProps> = ({
                   <Plus size={16} weight="bold" />
                   <span>
                     {createLinkMutation.isPending
-                      ? 'Generating Link...'
-                      : 'Generate Invitation Link'}
+                      ? t(
+                          'members:intakeLinks.generating',
+                          'Generating Link...',
+                        )
+                      : t(
+                          'members:intakeLinks.generateButton',
+                          'Generate Invitation Link',
+                        )}
                   </span>
                 </button>
               </div>
@@ -359,7 +432,12 @@ export const IntakeLinksModal: React.FC<IntakeLinksModalProps> = ({
                 <div className="p-4 rounded-xl bg-[#c2e9ca]/40 border border-[#a9d0b2] flex flex-col gap-2.5">
                   <div className="flex items-center gap-2 text-[#2c4e37] font-bold text-xs">
                     <Check size={18} weight="bold" />
-                    <span>Invitation Link Generated Successfully!</span>
+                    <span>
+                      {t(
+                        'members:intakeLinks.linkCreatedTitle',
+                        'Invitation Link Generated Successfully!',
+                      )}
+                    </span>
                   </div>
                   <div className="flex items-center gap-2 p-2 bg-white rounded-lg border border-[#a9d0b2]">
                     <input
@@ -376,12 +454,16 @@ export const IntakeLinksModal: React.FC<IntakeLinksModalProps> = ({
                       {copiedToken === createdSuccessLink.token ? (
                         <>
                           <Check size={14} weight="bold" />
-                          <span>Copied</span>
+                          <span>
+                            {t('members:intakeLinks.copied', 'Copied')}
+                          </span>
                         </>
                       ) : (
                         <>
                           <Copy size={14} weight="bold" />
-                          <span>Copy</span>
+                          <span>
+                            {t('members:intakeLinks.copyLink', 'Copy')}
+                          </span>
                         </>
                       )}
                     </button>
@@ -401,10 +483,13 @@ export const IntakeLinksModal: React.FC<IntakeLinksModalProps> = ({
                         )
                       }
                       className="px-2.5 py-1.5 rounded bg-[#faf2ee] hover:bg-[#f4ece9] border border-[#e8e1dd] text-[#8a726a] hover:text-[#1e1b19] text-xs font-bold flex items-center gap-1 cursor-pointer transition-colors"
-                      title="Preview Intake Form in Browser"
+                      title={t(
+                        'members:intakeLinks.previewTitle',
+                        'Preview Intake Form in Browser',
+                      )}
                     >
                       <ArrowSquareOut size={15} />
-                      <span>Preview</span>
+                      <span>{t('members:intakeLinks.preview', 'Preview')}</span>
                     </button>
                   </div>
                 </div>
@@ -414,17 +499,25 @@ export const IntakeLinksModal: React.FC<IntakeLinksModalProps> = ({
               {isLinksLoading ? (
                 <div className="py-12 text-center text-xs text-[#8a726a] flex flex-col items-center gap-2">
                   <div className="w-6 h-6 border-2 border-[#b85028]/30 border-t-[#b85028] rounded-full animate-spin" />
-                  <span>Loading links...</span>
+                  <span>
+                    {t('members:intakeLinks.loading', 'Loading links...')}
+                  </span>
                 </div>
               ) : links.length === 0 ? (
                 <div className="py-12 text-center text-xs text-[#8a726a] flex flex-col items-center gap-2 border border-dashed border-[#e8e1dd] rounded-xl p-8">
                   <Link size={32} className="text-[#8a726a]/50" />
                   <p className="font-bold text-[#57423b]">
-                    No invitation links yet
+                    {t(
+                      'members:intakeLinks.noLinksTitle',
+                      'No invitation links yet',
+                    )}
                   </p>
                   <p className="max-w-xs text-[#8a726a]">
-                    Click "Create New Link" above to generate a shareable member
-                    registration link.
+                    {t('members:intakeLinks.noLinksDesc', {
+                      town: activeTownName,
+                      defaultValue:
+                        'Click "Create New Link" above to generate a shareable member registration link.',
+                    })}
                   </p>
                 </div>
               ) : (
@@ -457,20 +550,37 @@ export const IntakeLinksModal: React.FC<IntakeLinksModalProps> = ({
                                   : 'bg-[#c2e9ca] text-[#2c4e37]'
                               }`}
                             >
-                              {isExpired ? 'Expired / Inactive' : 'Active'}
+                              {isExpired
+                                ? t(
+                                    'members:intakeLinks.expiredInactiveBadge',
+                                    'Expired / Inactive',
+                                  )
+                                : t(
+                                    'members:intakeLinks.activeBadge',
+                                    'Active',
+                                  )}
                             </span>
                             <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-[#faf2ee] text-[#57423b] border border-[#e8e1dd]">
                               {link.usageCount}{' '}
                               {link.usageCount === 1
-                                ? 'submission'
-                                : 'submissions'}
+                                ? t(
+                                    'members:intakeLinks.submission',
+                                    'submission',
+                                  )
+                                : t(
+                                    'members:intakeLinks.submission_plural',
+                                    'submissions',
+                                  )}
                             </span>
                           </div>
 
                           <div className="flex items-center gap-3 text-[11px] text-[#8a726a]">
                             <span className="flex items-center gap-1">
                               <Clock size={13} />
-                              Expires:{' '}
+                              {t(
+                                'members:intakeLinks.expiresLabel',
+                                'Expires:',
+                              )}{' '}
                               {new Date(link.expiresAt).toLocaleDateString()}{' '}
                               {new Date(link.expiresAt).toLocaleTimeString([], {
                                 hour: '2-digit',
@@ -489,7 +599,10 @@ export const IntakeLinksModal: React.FC<IntakeLinksModalProps> = ({
                             type="button"
                             onClick={() => handleCopyLink(link.token)}
                             className="h-8 px-2.5 rounded-md border border-[#e8e1dd] bg-[#faf2ee] hover:bg-[#f4ece9] text-[#57423b] text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
-                            title="Copy public link"
+                            title={t(
+                              'members:intakeLinks.copyLink',
+                              'Copy public link',
+                            )}
                           >
                             {isCopied ? (
                               <>
@@ -498,12 +611,16 @@ export const IntakeLinksModal: React.FC<IntakeLinksModalProps> = ({
                                   className="text-[#2c4e37]"
                                   weight="bold"
                                 />
-                                <span className="text-[#2c4e37]">Copied</span>
+                                <span className="text-[#2c4e37]">
+                                  {t('members:intakeLinks.copied', 'Copied')}
+                                </span>
                               </>
                             ) : (
                               <>
                                 <Copy size={14} />
-                                <span>Copy</span>
+                                <span>
+                                  {t('members:intakeLinks.copyLink', 'Copy')}
+                                </span>
                               </>
                             )}
                           </button>
@@ -523,7 +640,10 @@ export const IntakeLinksModal: React.FC<IntakeLinksModalProps> = ({
                             type="button"
                             onClick={() => handleOpenExternalLink(url)}
                             className="h-8 w-8 rounded-md border border-[#e8e1dd] bg-[#faf2ee] hover:bg-[#f4ece9] text-[#8a726a] hover:text-[#1e1b19] flex items-center justify-center transition-colors cursor-pointer"
-                            title="Preview Intake Form in Browser"
+                            title={t(
+                              'members:intakeLinks.previewTitle',
+                              'Preview Intake Form in Browser',
+                            )}
                           >
                             <ArrowSquareOut size={15} />
                           </button>
@@ -533,7 +653,10 @@ export const IntakeLinksModal: React.FC<IntakeLinksModalProps> = ({
                               type="button"
                               onClick={() => handleDeactivate(link.id)}
                               className="h-8 w-8 rounded-md border border-[#ffb4a8]/50 bg-white hover:bg-[#ffdad6] text-[#ba1a1a] flex items-center justify-center transition-colors cursor-pointer"
-                              title="Deactivate link immediately"
+                              title={t(
+                                'members:intakeLinks.deactivateTitle',
+                                'Deactivate link immediately',
+                              )}
                             >
                               <Trash size={15} />
                             </button>

@@ -1,6 +1,7 @@
 import { ActivityType } from '@jrs/shared';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
+  IsArray,
   IsDateString,
   IsEnum,
   IsNotEmpty,
@@ -10,7 +11,7 @@ import {
 
 export class CreateActivityDto {
   @ApiProperty({
-    example: 'Youth Monthly Fellowship',
+    example: 'Youth Monthly Gathering',
     description: 'Title of the activity',
   })
   @IsNotEmpty()
@@ -60,8 +61,8 @@ export class CreateActivityDto {
   locationVenue: string;
 
   @ApiPropertyOptional({
-    example: 'Monthly reflections and youth choir rehearsal agenda.',
-    description: 'Pastoral directives, notes, and agenda',
+    example: 'Monthly planning and review agenda.',
+    description: 'Administrative notes, details, and agenda',
   })
   @IsOptional()
   @IsString()
@@ -74,4 +75,14 @@ export class CreateActivityDto {
   @IsOptional()
   @IsString()
   hostTownId?: string;
+
+  @ApiPropertyOptional({
+    example: ['60c72b2f9b1d8b001f8e4a1b'],
+    description: 'IDs of other participating towns included in this activity',
+    type: [String],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  includedTownIds?: string[];
 }

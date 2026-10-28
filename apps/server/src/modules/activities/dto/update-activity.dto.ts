@@ -1,9 +1,15 @@
 import { ActivityStatus, ActivityType } from '@jrs/shared';
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsDateString, IsEnum, IsOptional, IsString } from 'class-validator';
+import {
+  IsArray,
+  IsDateString,
+  IsEnum,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class UpdateActivityDto {
-  @ApiPropertyOptional({ example: 'Updated Fellowship Title' })
+  @ApiPropertyOptional({ example: 'Updated Activity Title' })
   @IsOptional()
   @IsString()
   title?: string;
@@ -28,12 +34,12 @@ export class UpdateActivityDto {
   @IsString()
   townId?: string;
 
-  @ApiPropertyOptional({ example: 'Cathedral Hall, Ground Floor' })
+  @ApiPropertyOptional({ example: 'Conference Hall, Ground Floor' })
   @IsOptional()
   @IsString()
   locationVenue?: string;
 
-  @ApiPropertyOptional({ example: 'Rescheduled due to diocesan retreat.' })
+  @ApiPropertyOptional({ example: 'Rescheduled due to logistics adjustment.' })
   @IsOptional()
   @IsString()
   notes?: string;
@@ -44,10 +50,20 @@ export class UpdateActivityDto {
   status?: ActivityStatus;
 
   @ApiPropertyOptional({
-    example: 'Heavy rain forced venue change to inner parish hall.',
+    example: 'Logistics constraints forced venue relocation.',
     description: 'Documented reason for change log history',
   })
   @IsOptional()
   @IsString()
   changeReason?: string;
+
+  @ApiPropertyOptional({
+    example: ['60c72b2f9b1d8b001f8e4a1b'],
+    description: 'IDs of other participating towns included in this activity',
+    type: [String],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  includedTownIds?: string[];
 }

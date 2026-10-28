@@ -18,6 +18,7 @@ export interface CoreProvidersProps {
   initialLanguage?: string;
   onUnauthorized?: () => void;
   queryClient?: QueryClient;
+  isDev?: boolean;
 }
 
 export function CoreProviders({
@@ -28,6 +29,7 @@ export function CoreProviders({
   initialLanguage = 'fr',
   onUnauthorized,
   queryClient: customQueryClient,
+  isDev,
 }: CoreProvidersProps) {
   const activeStorage = (storageAdapter || storage) as IStorageAdapter;
   if (!activeStorage) {
@@ -36,7 +38,7 @@ export function CoreProviders({
     );
   }
   // Ensure i18n is initialized once
-  initI18n(initialLanguage);
+  initI18n(initialLanguage, { isDev });
 
   // Initialize language from storage if present
   useEffect(() => {

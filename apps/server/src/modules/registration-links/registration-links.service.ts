@@ -260,7 +260,7 @@ export class RegistrationLinksService {
       title: link.title,
       town: {
         id: town?._id?.toString() || link.homeTownId.toString(),
-        name: town?.name || 'Local Fellowship Town',
+        name: town?.name || 'Local Community Town',
         code: town?.code || 'JRS',
       },
       expiresAt: link.expiresAt.toISOString(),

@@ -15,7 +15,7 @@ export interface PasswordStrength {
 }
 
 /**
- * Validates fellowship password criteria: length, casing, and number/symbol.
+ * Validates account password criteria: length, casing, and number/symbol.
  */
 export function validatePasswordRules(password: string): PasswordRule[] {
   return [

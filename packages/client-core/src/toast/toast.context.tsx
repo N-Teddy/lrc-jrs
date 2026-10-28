@@ -29,6 +29,7 @@ export const toast = {
         title: options?.title,
         duration: options?.duration ?? 4000,
         action: options?.action,
+        params: options?.params,
       });
     }
     return '';

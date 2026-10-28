@@ -266,7 +266,7 @@ export const TransfersFeature: React.FC = () => {
           <p className="text-xs text-[#8a726a]">
             {t(
               'transfers:description',
-              'Official registry of member relocations, pastoral jurisdictions, and inter-city transitions across Cameroon.',
+              'Official registry of member relocations, administrative jurisdictions, and inter-city transitions across Cameroon.',
             )}
           </p>
         </div>

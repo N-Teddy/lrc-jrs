@@ -1,0 +1,26 @@
+⚠️ *RAPPEL IMPORTANT : ACTIVITÉ JRS DANS 1 SEMAINE (J-7)*
+
+Bonjour {{userName}},
+
+Votre activité approche à grands pas ! Elle se déroulera dans *7 jours* :
+
+📌 *Activité :* {{activityName}}
+📅 *Date :* {{startDateFormatted}}
+📍 *Lieu :* {{locationVenue}}
+🏷️ *Type :* {{activityTypeLabel}}
+
+---
+📋 *POINTS DE VÉRIFICATION FINALE :*
+{{#each checklistItems}}
+- [ ] {{this}}
+{{/each}}
+{{#if customInstructions}}
+
+💡 *Dernières consignes :*
+{{customInstructions}}
+{{/if}}
+
+Assurez-vous que tous les intervenants, le lieu et la logistique sont confirmés.
+Accéder à l'activité : {{appUrl}}
+
+_— Système de gestion LRC-JRS_

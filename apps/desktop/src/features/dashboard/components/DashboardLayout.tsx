@@ -15,6 +15,7 @@ import { ActivitiesFeature } from '../../activities';
 import { ChangePasswordModal } from '../../auth';
 import { DriveExplorerFeature } from '../../drive';
 import { type MemberSubTab, MembersFeature } from '../../members';
+import { NotificationsFeature } from '../../notifications';
 import { TransfersFeature } from '../../transfers';
 import { useDashboardLayout } from '../hooks/use-dashboard-layout';
 import { Header } from './Header';
@@ -68,7 +69,10 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       ? t('dashboard:overview')
       : t(`navigation:${activeTab}`);
 
+  const [navNonce, setNavNonce] = useState(0);
+
   const handleNavigateToResource = (resource: NotificationResource) => {
+    setNavNonce((n) => n + 1);
     // 1. Auto-switch town context if townId differs and user has access
     if (resource.townId && resource.townId !== activeTown?.id) {
       const townTarget = availableTowns.find(
@@ -148,6 +152,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         onToggleSidebar={toggleSidebar}
         onOpenChangePassword={openChangePassword}
         onNavigateToResource={handleNavigateToResource}
+        onOpenNotificationsPage={() => setActiveTab('notifications')}
         title={tabTitle}
       />
 
@@ -213,11 +218,13 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           >
             {activeTab === 'members' ? (
               <MembersFeature
+                key={`members-${selectedMemberId || 'all'}-${navNonce}`}
                 initialSubTab={memberSubTab}
                 initialMemberId={selectedMemberId}
               />
             ) : activeTab === 'activities' ? (
               <ActivitiesFeature
+                key={`activities-${selectedActivityId || 'all'}-${navNonce}`}
                 initialSubTab={activitySubTab}
                 initialActivityId={selectedActivityId}
               />
@@ -230,6 +237,10 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               <DriveExplorerFeature />
             ) : activeTab === 'transfers' ? (
               <TransfersFeature />
+            ) : activeTab === 'notifications' ? (
+              <NotificationsFeature
+                onNavigateToResource={handleNavigateToResource}
+              />
             ) : (
               /* Pristine Minimalist Workspace Card */
               <div className="relative w-full min-h-[560px] rounded-xl bg-white border border-[#e8e1dd] shadow-xs flex flex-col justify-between p-8 sm:p-12 overflow-hidden">

@@ -1,0 +1,20 @@
+📅 *CALENDRIER DES ACTIVITÉS DU MOIS - {{monthName}} {{year}}*
+
+Bonjour {{userName}},
+
+Voici le récapitulatif des activités prévues ce mois-ci :
+
+{{#if activities.length}}
+{{#each activities}}
+*{{index}}.* *{{name}}*
+   📅 {{dateFormatted}} | 📍 {{locationVenue}} ({{typeLabel}})
+{{/each}}
+
+💡 N'hésitez pas à anticiper la préparation des ordres du jour, intervenants et logistique.
+{{else}}
+Aucune activité n'est actuellement planifiée pour ce mois. Pensez à inscrire vos prochaines activités sur l'application.
+{{/if}}
+
+Accéder au calendrier complet : {{appUrl}}
+
+_— Système de gestion LRC-JRS_

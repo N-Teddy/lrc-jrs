@@ -65,6 +65,7 @@ export class AuthService {
       isActivePC: user.isActivePC,
       avatarUrl: user.avatarUrl,
       gender: user.gender,
+      preferredLanguage: user.preferredLanguage || 'fr',
       account: {
         status: user.account?.status || AccountStatus.ACTIVE,
         hasAppAccess: user.account?.hasAppAccess ?? true,
