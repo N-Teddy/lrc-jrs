@@ -173,8 +173,11 @@ export class ActivitiesController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Delete a Google Drive folder' })
   @ApiResponse({ status: 200, description: 'Folder deleted successfully' })
-  async deleteDriveFolder(@Param('id') id: string) {
-    return this.activitiesService.deleteDriveFolder(id);
+  async deleteDriveFolder(
+    @Param('id') id: string,
+    @CurrentUser() currentUser: IAuthUser,
+  ) {
+    return this.activitiesService.deleteDriveFolder(id, currentUser);
   }
 
   @Public()

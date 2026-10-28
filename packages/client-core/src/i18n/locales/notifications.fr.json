@@ -131,6 +131,21 @@
   "systemAnnouncementTitle": "Communiqué de la coordination",
   "systemAnnouncementBody": "{{message}}",
 
+  "newTownPcAnnouncedTitle": "Nouveau coordinateur paroissial",
+  "newTownPcAnnouncedBody": "Veuillez accueillir {{name}} en tant que nouveau coordinateur paroissial pour {{town}}.",
+
+  "memberAccountActivatedTitle": "Nouveau compte activé",
+  "memberAccountActivatedBody": "{{name}} a activé son compte et s'est connecté.",
+
+  "driveFolderDeletedTitle": "Dossier supprimé",
+  "driveFolderDeletedBody": "Un dossier documentaire a été supprimé par {{by}}",
+
+  "registrationLinkDeactivatedTitle": "Lien d'inscription désactivé",
+  "registrationLinkDeactivatedBody": "Le lien d'inscription pour {{town}} a été désactivé par {{by}}",
+
+  "reminderTemplateUpdatedTitle": "Consignes d'activité mises à jour",
+  "reminderTemplateUpdatedBody": "Les consignes de préparation pour l'activité {{type}} ont été mises à jour.",
+
   "activity": {
     "monthlyDigest": {
       "title": "Planning mensuel des activités",

@@ -131,6 +131,21 @@
   "systemAnnouncementTitle": "Notice from Administration",
   "systemAnnouncementBody": "{{message}}",
 
+  "newTownPcAnnouncedTitle": "New Parish Coordinator",
+  "newTownPcAnnouncedBody": "Please welcome {{name}} as the new Parish Coordinator for {{town}}.",
+
+  "memberAccountActivatedTitle": "Member Onboarded",
+  "memberAccountActivatedBody": "{{name}} has completed account setup and logged in.",
+
+  "driveFolderDeletedTitle": "Vault Folder Deleted",
+  "driveFolderDeletedBody": "A document folder was deleted by {{by}}",
+
+  "registrationLinkDeactivatedTitle": "Registration Link Deactivated",
+  "registrationLinkDeactivatedBody": "The registration link for {{town}} was deactivated early by {{by}}",
+
+  "reminderTemplateUpdatedTitle": "Activity Guidelines Updated",
+  "reminderTemplateUpdatedBody": "Checklist guidelines for {{type}} have been updated by leadership.",
+
   "activity": {
     "monthlyDigest": {
       "title": "Monthly Activity Schedule",

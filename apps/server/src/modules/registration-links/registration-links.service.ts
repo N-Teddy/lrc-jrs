@@ -29,6 +29,7 @@ import {
   type UserDocument,
 } from '../../database/schemas';
 import { MediaService } from '../../services/media.service';
+import { WhatsAppService } from '../../services/whatsapp.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import {
   type CreateRegistrationLinkDto,
@@ -50,6 +51,7 @@ export class RegistrationLinksService {
     private readonly townModel: Model<TownDocument>,
     private readonly mediaService: MediaService,
     private readonly notificationsService: NotificationsService,
+    private readonly whatsAppService: WhatsAppService,
   ) {}
 
   /**
@@ -227,6 +229,42 @@ export class RegistrationLinksService {
 
     link.isActive = false;
     await link.save();
+
+    const town = await this.townModel.findById(link.homeTownId).lean().exec();
+    const townName = town?.name || 'Town';
+    const townIdStr = link.homeTownId.toString();
+
+    this.notificationsService
+      .createNotification(
+        {
+          target: {
+            roles: [UserRole.AP, UserRole.PC],
+            townId: townIdStr,
+            excludeUserIds: [currentUser.id],
+          },
+          level: 'WARNING',
+          action: 'SYSTEM_ANNOUNCEMENT',
+          titleKey: 'notifications:registrationLinkDeactivatedTitle',
+          bodyKey: 'notifications:registrationLinkDeactivatedBody',
+          bodyParams: {
+            town: townName,
+            by: currentUser.fullName,
+          },
+          resource: {
+            entityType: 'INTAKE',
+            entityId: link._id.toString(),
+            townId: townIdStr,
+            subTab: 'links',
+          },
+          sendPush: true,
+        },
+        currentUser.id,
+      )
+      .catch((err) =>
+        this.logger.warn(
+          `Failed to dispatch registration link deactivated notification: ${err.message}`,
+        ),
+      );
 
     return {
       success: true,
@@ -584,6 +622,16 @@ export class RegistrationLinksService {
         (member.homeTownId as any)?._id?.toString() ||
         member.homeTownId?.toString() ||
         '';
+
+      if (member.phoneNumber) {
+        const reasonMsg = dto.notes ? `\nMotif: ${dto.notes}` : '';
+        const whatsappMsg = `Bonjour ${member.fullName},\n\nVotre demande d'adhésion pour la communauté LRC de ${townName} n'a pas pu être retenue pour le moment.${reasonMsg}\n\nPour toute question, veuillez vous rapprocher de la coordination paroissiale.`;
+        this.whatsAppService
+          .sendTextMessage(member.phoneNumber, whatsappMsg)
+          .catch((err) =>
+            this.logger.warn(`WhatsApp rejection error: ${err.message}`),
+          );
+      }
 
       this.notificationsService
         .createNotification(

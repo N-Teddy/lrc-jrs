@@ -1222,6 +1222,44 @@ export class UsersService {
         );
     }
 
+    // Broadcast announcement to all fellowship members of the town
+    const town = await this.townModel.findById(townObjectId).exec();
+    const townName = town?.name || 'Town';
+    this.notificationsService
+      .createNotification(
+        {
+          target: {
+            townId: dto.townId,
+            excludeUserIds: [
+              currentUser.id,
+              newPc._id.toString(),
+              ...(outgoingPc ? [outgoingPc._id.toString()] : []),
+            ],
+          },
+          level: 'INFO',
+          action: 'ROLE_CHANGED',
+          titleKey: 'notifications:newTownPcAnnouncedTitle',
+          bodyKey: 'notifications:newTownPcAnnouncedBody',
+          bodyParams: {
+            name: newPc.fullName,
+            town: townName,
+          },
+          resource: {
+            entityType: 'MEMBER',
+            entityId: newPc._id.toString(),
+            townId: dto.townId,
+            subTab: 'directory',
+          },
+          sendPush: true,
+        },
+        currentUser.id,
+      )
+      .catch((err) =>
+        this.logger.warn(
+          `Failed to dispatch town PC announcement notification: ${err.message}`,
+        ),
+      );
+
     return {
       message: outgoingPc
         ? `PC leadership transferred from ${outgoingPc.fullName} to ${newPc.fullName} successfully.`

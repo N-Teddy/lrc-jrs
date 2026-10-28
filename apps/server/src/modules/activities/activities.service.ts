@@ -2112,7 +2112,41 @@ export class ActivitiesService {
   /**
    * Delete a folder from Google Drive
    */
-  async deleteDriveFolder(folderId: string) {
-    return this.driveService.deleteFolder(folderId);
+  async deleteDriveFolder(folderId: string, currentUser?: IAuthUser) {
+    const result = await this.driveService.deleteFolder(folderId);
+
+    if (currentUser) {
+      const townId = currentUser.homeTownId?.toString();
+      this.notificationsService
+        .createNotification(
+          {
+            target: {
+              ...(townId ? { townId } : {}),
+              roles: [UserRole.AP, UserRole.PC],
+              excludeUserIds: [currentUser.id],
+            },
+            level: 'WARNING',
+            action: 'DRIVE_FILE_DELETED',
+            titleKey: 'notifications:driveFolderDeletedTitle',
+            bodyKey: 'notifications:driveFolderDeletedBody',
+            bodyParams: { by: currentUser.fullName },
+            resource: {
+              entityType: 'DRIVE_FILE',
+              entityId: folderId,
+              townId,
+              subTab: 'drive',
+            },
+            sendPush: true,
+          },
+          currentUser.id,
+        )
+        .catch((err) =>
+          this.logger.warn(
+            `Failed to dispatch drive folder deleted notification: ${err.message}`,
+          ),
+        );
+    }
+
+    return result;
   }
 }

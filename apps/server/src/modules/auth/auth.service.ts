@@ -1,5 +1,5 @@
 import * as crypto from 'node:crypto';
-import { ErrorCode } from '@jrs/shared';
+import { ErrorCode, UserRole } from '@jrs/shared';
 import { Injectable, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/mongoose';
@@ -225,6 +225,35 @@ export class AuthService {
           `Failed to dispatch setup complete notification: ${err.message}`,
         ),
       );
+
+    const userTownId = user.homeTownId?.toString();
+    if (userTownId) {
+      this.notificationsService
+        .createNotification({
+          target: {
+            townId: userTownId,
+            roles: [UserRole.AP, UserRole.PC],
+            excludeUserIds: [user._id.toString()],
+          },
+          level: 'SUCCESS',
+          action: 'ACCESS_GRANTED',
+          titleKey: 'notifications:memberAccountActivatedTitle',
+          bodyKey: 'notifications:memberAccountActivatedBody',
+          bodyParams: { name: user.fullName },
+          resource: {
+            entityType: 'MEMBER',
+            entityId: user._id.toString(),
+            townId: userTownId,
+            subTab: 'directory',
+          },
+          sendPush: true,
+        })
+        .catch((err) =>
+          this.logger.warn(
+            `Failed to notify coordinators of member activation: ${err.message}`,
+          ),
+        );
+    }
 
     const accessToken = this.generateAccessToken(user);
     const refreshToken = await this.generateRefreshToken(

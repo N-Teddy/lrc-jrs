@@ -434,8 +434,29 @@ export class ActivityReminderService implements OnModuleInit {
         },
         { new: true, upsert: true },
       )
-      .lean()
-      .exec();
+      .lean();
+    this.notificationsService
+      .createNotification({
+        target: {
+          roles: [UserRole.AP, UserRole.PC],
+        },
+        level: 'INFO',
+        action: 'SYSTEM_ANNOUNCEMENT',
+        titleKey: 'notifications:reminderTemplateUpdatedTitle',
+        bodyKey: 'notifications:reminderTemplateUpdatedBody',
+        bodyParams: { type: activityType },
+        resource: {
+          entityType: 'ACTIVITY',
+          entityId: updated._id.toString(),
+          subTab: 'preparation',
+        },
+        sendPush: true,
+      })
+      .catch((err) =>
+        this.logger.warn(
+          `Failed to dispatch reminder template updated notification: ${err.message}`,
+        ),
+      );
 
     return {
       id: updated._id.toString(),
