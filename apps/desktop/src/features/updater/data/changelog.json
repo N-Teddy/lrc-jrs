@@ -1,35 +1,69 @@
 [
   {
-    "version": "0.0.1",
-    "date": "2026-10-26",
+    "version": "0.0.2",
+    "date": "2026-10-28",
     "releaseTitle": {
-      "en": "Activity Reminders & Team Alerts",
-      "fr": "Rappels d'Activités & Alertes d'Équipe"
+      "en": "Activity Reminders & What's New",
+      "fr": "Rappels d'Activités & Nouveautés"
     },
     "features": {
       "en": [
+        "What's New Dialog: View release highlights and update history anytime.",
         "Activity Reminders: Automatic popups before upcoming meetings and events.",
-        "Offline Note Saving: Keep writing notes and attendance even without internet.",
-        "Live Team Alerts: Instant notices for member transfers, reviews, and reports.",
-        "Member Self-Onboarding: Direct links for new youth intake registration."
+        "Reliable Push Notifications: Native system alerts for important team events.",
+        "Report & Drive Alerts: Instant notices when activity reports are ready."
       ],
       "fr": [
+        "Fenêtre Nouveautés : Consultez l'historique des améliorations à tout moment.",
         "Rappels d'activités : Alertes automatiques avant vos réunions et événements.",
-        "Sauvegarde hors ligne : Continuez à saisir vos notes même sans connexion.",
-        "Alertes d'équipe en direct : Notifications pour transferts, révisions et rapports.",
-        "Auto-inscription des jeunes : Liens directs pour l'accueil de nouveaux membres."
+        "Notifications fiables : Alertes système directes pour les événements d'équipe.",
+        "Alertes Rapports & Drive : Notifications dès la publication d'un nouveau rapport."
       ]
     },
     "fixes": {
       "en": [
-        "Smoother Reconnection: Auto-syncs your data instantly when connection returns.",
+        "Offline Note Saving: Keep writing notes and attendance even without internet.",
         "Full Bilingual Interface: Clear English and French text across all screens.",
-        "Cleaner Dropdowns: Easier city and regional hub selection."
+        "Custom Hub Dropdowns: Faster and cleaner town and community hub selection.",
+        "Warm Light Theme: Friendly, soft alert colors designed for staff comfort."
       ],
       "fr": [
-        "Reconnexion fluide : Synchronisation automatique dès le retour d'Internet.",
+        "Sauvegarde hors ligne : Continuez vos saisies même sans connexion internet.",
         "Interface bilingue intégrale : Textes clairs en français et anglais sur tous les écrans.",
-        "Menus déroulants simplifiés : Choix plus rapide de votre ville et centre régional."
+        "Sélecteur de centre : Choix plus rapide de votre ville et centre régional.",
+        "Thème clair et chaleureux : Couleurs douces conçues pour le confort des équipes."
+      ]
+    }
+  },
+  {
+    "version": "0.0.1",
+    "date": "2026-10-26",
+    "releaseTitle": {
+      "en": "Member Self-Onboarding & Team Services",
+      "fr": "Accueil des Jeunes & Services d'Équipe"
+    },
+    "features": {
+      "en": [
+        "Member Self-Onboarding: Direct links for new youth intake registration.",
+        "Multi-Channel Notifications: Central service for dispatching team alerts.",
+        "Automated Regional Seeding: Pre-configured towns and coordinators across Cameroon."
+      ],
+      "fr": [
+        "Auto-inscription des jeunes : Liens directs pour l'accueil de nouveaux membres.",
+        "Notifications multi-canaux : Service central pour distribuer les alertes d'équipe.",
+        "Configuration régionale automatique : Villes et coordinateurs pré-configurés au Cameroun."
+      ]
+    },
+    "fixes": {
+      "en": [
+        "Cloud Media Reliability: Smoother document and image uploads with automatic fallbacks.",
+        "Staff Account Management: Cleaner dropdowns and auto-generated avatars in team tables.",
+        "Performance Improvements: Streamlined server pagination and response times."
+      ],
+      "fr": [
+        "Fiabilité des médias en ligne : Envoi plus fluide des documents avec secours automatique.",
+        "Gestion des comptes d'équipe : Menus plus clairs et avatars générés automatiquement.",
+        "Performances optimisées : Réponses plus rapides et navigation par page améliorée."
       ]
     }
   },

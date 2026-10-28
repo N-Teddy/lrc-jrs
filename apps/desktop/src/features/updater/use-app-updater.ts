@@ -1,7 +1,8 @@
 import type { Update } from '@tauri-apps/plugin-updater';
 import { useCallback, useEffect, useState } from 'react';
+import pkg from '../../../package.json';
 
-export const CURRENT_APP_VERSION = '0.0.1';
+export const CURRENT_APP_VERSION = pkg.version;
 
 export interface UpdaterStatus {
   isChecking: boolean;
