@@ -30,55 +30,51 @@ const TOAST_CONFIG: Record<
   }
 > = {
   success: {
-    bg: 'bg-white dark:bg-[#1e1b19]',
-    border: 'border-[#c2e9ca] dark:border-[#2d4d35]',
-    glow: 'shadow-[0_10px_25px_-5px_rgba(30,27,25,0.12),0_4px_10px_rgba(30,27,25,0.06)]',
+    bg: 'bg-white',
+    border: 'border-[#c2e9ca]',
+    glow: 'shadow-[0_10px_25px_-5px_rgba(30,27,25,0.08),0_4px_10px_rgba(30,27,25,0.04)]',
     progressBar: 'bg-[#486b52]',
-    badgeBg:
-      'bg-[#edf3ee] dark:bg-[#1e3324] border-[#c2e9ca] dark:border-[#2d4d35]',
-    badgeText: 'text-[#2c4e37] dark:text-[#a0d8ab]',
+    badgeBg: 'bg-[#edf3ee] border-[#c2e9ca]',
+    badgeText: 'text-[#2c4e37]',
     badgeKey: 'common:toast.successTitle',
     badgeDefault: 'Awesome!',
-    iconColor: 'text-[#486b52] dark:text-[#68a377]',
+    iconColor: 'text-[#486b52]',
     Icon: CheckCircle,
   },
   error: {
-    bg: 'bg-white dark:bg-[#1e1b19]',
-    border: 'border-[#ffdad6] dark:border-[#5c1d18]',
-    glow: 'shadow-[0_10px_25px_-5px_rgba(30,27,25,0.12),0_4px_10px_rgba(30,27,25,0.06)]',
+    bg: 'bg-white',
+    border: 'border-[#ffdad6]',
+    glow: 'shadow-[0_10px_25px_-5px_rgba(30,27,25,0.08),0_4px_10px_rgba(30,27,25,0.04)]',
     progressBar: 'bg-[#ba1a1a]',
-    badgeBg:
-      'bg-[#fff2ee] dark:bg-[#3d1612] border-[#ffdad6] dark:border-[#5c1d18]',
-    badgeText: 'text-[#ba1a1a] dark:text-[#ffb4ab]',
+    badgeBg: 'bg-[#fff2ee] border-[#ffdad6]',
+    badgeText: 'text-[#ba1a1a]',
     badgeKey: 'common:toast.errorTitle',
     badgeDefault: 'Error',
-    iconColor: 'text-[#ba1a1a] dark:text-[#ff897d]',
+    iconColor: 'text-[#ba1a1a]',
     Icon: WarningCircle,
   },
   warning: {
-    bg: 'bg-white dark:bg-[#1e1b19]',
-    border: 'border-[#ffecbf] dark:border-[#523c0c]',
-    glow: 'shadow-[0_10px_25px_-5px_rgba(30,27,25,0.12),0_4px_10px_rgba(30,27,25,0.06)]',
+    bg: 'bg-white',
+    border: 'border-[#ffecbf]',
+    glow: 'shadow-[0_10px_25px_-5px_rgba(30,27,25,0.08),0_4px_10px_rgba(30,27,25,0.04)]',
     progressBar: 'bg-[#d97706]',
-    badgeBg:
-      'bg-[#fff8ea] dark:bg-[#382806] border-[#ffecbf] dark:border-[#523c0c]',
-    badgeText: 'text-[#9a6400] dark:text-[#ffd27a]',
+    badgeBg: 'bg-[#fff8ea] border-[#ffecbf]',
+    badgeText: 'text-[#9a6400]',
     badgeKey: 'common:toast.warningTitle',
     badgeDefault: 'Warning',
-    iconColor: 'text-[#d97706] dark:text-[#f59e0b]',
+    iconColor: 'text-[#d97706]',
     Icon: Warning,
   },
   info: {
-    bg: 'bg-white dark:bg-[#1e1b19]',
-    border: 'border-[#ffd8cb] dark:border-[#542918]',
-    glow: 'shadow-[0_10px_25px_-5px_rgba(30,27,25,0.12),0_4px_10px_rgba(30,27,25,0.06)]',
+    bg: 'bg-white',
+    border: 'border-[#ffd8cb]',
+    glow: 'shadow-[0_10px_25px_-5px_rgba(30,27,25,0.08),0_4px_10px_rgba(30,27,25,0.04)]',
     progressBar: 'bg-[#b85028]',
-    badgeBg:
-      'bg-[#fff5f0] dark:bg-[#39190d] border-[#ffd8cb] dark:border-[#542918]',
-    badgeText: 'text-[#b85028] dark:text-[#ffb59d]',
+    badgeBg: 'bg-[#fff5f0] border-[#ffd8cb]',
+    badgeText: 'text-[#b85028]',
     badgeKey: 'common:toast.infoTitle',
     badgeDefault: 'Notice',
-    iconColor: 'text-[#b85028] dark:text-[#ff8c69]',
+    iconColor: 'text-[#b85028]',
     Icon: Info,
   },
 };
@@ -172,7 +168,7 @@ export const ToastItemComponent: React.FC<{
             </span>
           </div>
 
-          <p className="text-xs font-medium text-[#1e1b19] dark:text-[#f0e9e4] leading-relaxed break-words">
+          <p className="text-xs font-medium text-[#1e1b19] leading-relaxed break-words">
             {resolvedMessage}
           </p>
 
@@ -194,7 +190,7 @@ export const ToastItemComponent: React.FC<{
         <button
           type="button"
           onClick={() => onDismiss(item.id)}
-          className="shrink-0 p-1 rounded-md text-[#8a726a] hover:text-[#1e1b19] hover:bg-[#faf2ee] dark:hover:bg-[#2b2522] transition-colors cursor-pointer"
+          className="shrink-0 p-1 rounded-md text-[#8a726a] hover:text-[#1e1b19] hover:bg-[#faf2ee] transition-colors cursor-pointer"
           aria-label={t('common:toast.dismiss', 'Dismiss notification')}
         >
           <X size={15} weight="bold" />
@@ -203,7 +199,7 @@ export const ToastItemComponent: React.FC<{
 
       {/* Animated countdown progress bar */}
       {duration > 0 && (
-        <div className="w-full h-0.5 bg-black/5 dark:bg-white/5 overflow-hidden">
+        <div className="w-full h-0.5 bg-black/5 overflow-hidden">
           <motion.div
             initial={{ width: '100%' }}
             animate={{ width: '0%' }}
