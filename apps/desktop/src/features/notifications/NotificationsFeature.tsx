@@ -31,6 +31,7 @@ import {
 } from '@phosphor-icons/react';
 import type React from 'react';
 import { useMemo, useState } from 'react';
+import { CustomSelect, type SelectOption } from '../../components';
 
 interface NotificationsFeatureProps {
   onNavigateToResource?: (resource: NotificationResource) => void;
@@ -55,6 +56,21 @@ export const NotificationsFeature: React.FC<NotificationsFeatureProps> = ({
     useState<CategoryFilter>('ALL');
   const [selectedTownFilter, setSelectedTownFilter] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
+
+  const townOptions: SelectOption<string>[] = useMemo(() => {
+    return [
+      {
+        value: 'ALL',
+        label: t('notifications:allHubs', 'All Hubs'),
+        icon: Buildings,
+      },
+      ...availableTowns.map((town) => ({
+        value: town.id,
+        label: `${town.name} (${town.code})`,
+        icon: Buildings,
+      })),
+    ];
+  }, [availableTowns, t]);
 
   // Queries & Mutations
   const { data: unreadCount = 0 } = useUnreadNotificationCountQuery();
@@ -477,22 +493,14 @@ export const NotificationsFeature: React.FC<NotificationsFeatureProps> = ({
 
             {/* Town Selector Filter (if multiple towns exist) */}
             {availableTowns.length > 1 && (
-              <div className="relative">
-                <select
-                  value={selectedTownFilter}
-                  onChange={(e) => setSelectedTownFilter(e.target.value)}
-                  className="h-9 px-3 pr-8 rounded-lg bg-[#faf2ee] border border-[#e8e1dd] text-xs font-semibold text-[#1e1b19] outline-none transition focus:bg-white focus:border-[#b85028] cursor-pointer"
-                >
-                  <option value="ALL">
-                    {t('notifications:allHubs', 'All Hubs')}
-                  </option>
-                  {availableTowns.map((town) => (
-                    <option key={town.id} value={town.id}>
-                      {town.name} ({town.code})
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <CustomSelect<string>
+                value={selectedTownFilter}
+                onChange={setSelectedTownFilter}
+                options={townOptions}
+                size="sm"
+                className="w-44"
+                ariaLabel={t('notifications:allHubs', 'All Hubs')}
+              />
             )}
           </div>
         </div>
