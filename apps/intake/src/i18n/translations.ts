@@ -123,8 +123,7 @@ export const translations = {
         'Échec de la soumission. Veuillez vérifier vos informations.',
     },
     footer: {
-      copyright:
-        "© 2026 LRC Jeunesse (JRS) • Portail d'inscription des membres",
+      copyright: "© 2026 LRC JRS • Portail d'inscription des membres",
       subtitle:
         "Portail officiel d'inscription des membres • Vérifié par l'équipe de coordination",
     },
@@ -251,7 +250,7 @@ export const translations = {
         'Failed to submit registration details. Please check your information.',
     },
     footer: {
-      copyright: '© 2026 LRC Jeunesse (JRS) • Member Registration Portal',
+      copyright: '© 2026 LRC JRS • Member Registration Portal',
       subtitle:
         'Official member intake portal • Verified by local coordination team',
     },

@@ -226,7 +226,7 @@ export default function App() {
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-[#b85028]" />
             <span className="text-xs font-bold tracking-tight text-[#1e1b19] uppercase">
-              LRC Jeunesse
+              LRC JRS
             </span>
             <span className="text-[10px] text-[#8a726a] font-medium hidden sm:inline">
               •{' '}
