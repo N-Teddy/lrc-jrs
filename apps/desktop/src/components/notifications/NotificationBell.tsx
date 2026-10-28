@@ -39,37 +39,27 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 async function triggerNativeDesktopNotification(title: string, body: string) {
   try {
     const tauriNotification = await import('@tauri-apps/plugin-notification');
-    let permissionGranted = await tauriNotification.isPermissionGranted();
-    if (!permissionGranted) {
-      const permission = await tauriNotification.requestPermission();
-      permissionGranted = permission === 'granted';
-    }
-    if (permissionGranted) {
-      tauriNotification.sendNotification({ title, body });
-    }
+    tauriNotification.sendNotification({ title, body });
+    return;
   } catch (err) {
     console.error('Failed to trigger native desktop notification:', err);
   }
-}
 
-async function isAppInBackgroundOrUnfocused(): Promise<boolean> {
-  if (typeof document !== 'undefined' && document.hidden) {
-    return true;
-  }
   try {
-    const { getCurrentWindow } = await import('@tauri-apps/api/window');
-    const win = getCurrentWindow();
-    const [minimized, focused] = await Promise.all([
-      win.isMinimized(),
-      win.isFocused(),
-    ]);
-    if (minimized || !focused) {
-      return true;
+    if (typeof window !== 'undefined' && 'Notification' in window) {
+      if (Notification.permission === 'granted') {
+        new Notification(title, { body });
+      } else if (Notification.permission !== 'denied') {
+        Notification.requestPermission().then((perm) => {
+          if (perm === 'granted') {
+            new Notification(title, { body });
+          }
+        });
+      }
     }
-  } catch {
-    // Non-Tauri web environment fallback
+  } catch (err) {
+    console.error('Fallback notification error:', err);
   }
-  return false;
 }
 
 interface NotificationBellProps {
@@ -117,15 +107,14 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({
         ...(notification.bodyParams || {}),
       });
 
-      const isBackground = await isAppInBackgroundOrUnfocused();
-      if (isBackground) {
-        await triggerNativeDesktopNotification(title, body);
-      } else {
-        toast.info(body, {
-          title,
-          duration: 5000,
-        });
-      }
+      // Always dispatch native OS push notification
+      await triggerNativeDesktopNotification(title, body);
+
+      // In-app toast feedback
+      toast.info(body, {
+        title,
+        duration: 5000,
+      });
     },
     [t],
   );
