@@ -94,7 +94,12 @@ export const ToastItemComponent: React.FC<{
   // Multi-language translation resolver: handles raw keys like 'activities:activityUpdatedSuccess'
   const resolveI18n = (text?: string): string => {
     if (!text) return '';
-    if (text.includes(':') || text.includes('.') || i18n.exists(text)) {
+    // If text contains whitespace, it is already a formatted message or translated sentence, not a raw i18n key
+    if (/\s/.test(text.trim())) {
+      return text;
+    }
+    // Only resolve if it actually exists in i18n as a key to avoid triggering missingKeyHandler in dev
+    if (i18n.exists(text)) {
       const translated = t(text, {
         defaultValue: text,
         ...(item.params || {}),
