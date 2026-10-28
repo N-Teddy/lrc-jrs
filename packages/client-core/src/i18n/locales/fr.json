@@ -23,7 +23,8 @@
       "dismiss": "Fermer la notification",
       "welcomeTitle": "Bon retour !",
       "welcomeMessage": "Connexion réussie. Ravi de vous revoir, {{name}} !",
-      "welcomeGeneric": "Connexion réussie. Bienvenue !"
+      "welcomeGeneric": "Connexion réussie. Bienvenue !",
+      "signedOut": "Vous avez été déconnecté avec succès."
     },
     "refresh": "Actualiser",
     "required": "Requis",

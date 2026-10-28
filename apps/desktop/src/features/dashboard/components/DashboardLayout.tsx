@@ -130,6 +130,20 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         setActiveTab('access');
         break;
 
+      case 'REPORT':
+        if (resource.entityId) {
+          setSelectedActivityId(resource.entityId);
+          setActivitySubTab('report');
+          setActiveTab('activities');
+        } else {
+          setActiveTab('reports');
+        }
+        break;
+
+      case 'DRIVE_FILE':
+        setActiveTab('reports');
+        break;
+
       default:
         setActiveTab('dashboard');
     }

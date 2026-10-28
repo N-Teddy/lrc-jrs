@@ -53,14 +53,35 @@
   "activityUpdatedTitle": "Activité modifiée",
   "activityUpdatedBody": "Les informations de {{name}} ont été mises à jour",
 
+  "activityRescheduledTitle": "Activité reprogrammée",
+  "activityRescheduledBody": "{{name}} a été reprogrammée du {{oldDate}} au {{newDate}}",
+
+  "activityLocationChangedTitle": "Lieu d'activité modifié",
+  "activityLocationChangedBody": "Le lieu pour {{name}} a été déplacé à {{venue}}",
+
   "activityCancelledTitle": "Activité annulée",
   "activityCancelledBody": "L'activité {{name}} du {{date}} a été annulée",
+
+  "activityReopenedTitle": "Activité réouverte",
+  "activityReopenedBody": "{{name}} a été réouverte pour le {{date}}",
+
+  "activityCompletedTitle": "Activité terminée",
+  "activityCompletedBody": "{{name}} a pris fin. Veuillez finaliser les présences et déposer le rapport.",
+
+  "activityDeletedTitle": "Activité supprimée",
+  "activityDeletedBody": "L'activité {{name}} a été supprimée par {{by}}",
 
   "attendanceRecordedTitle": "Présences enregistrées",
   "attendanceRecordedBody": "La feuille de présence pour {{name}} a été validée",
 
   "memberRegisteredTitle": "Nouveau membre inscrit",
   "memberRegisteredBody": "{{name}} a rejoint la ville de {{town}}",
+
+  "memberUpdatedTitle": "Profil membre mis à jour",
+  "memberUpdatedBody": "Les informations du profil de {{name}} ont été mises à jour",
+
+  "memberDeletedTitle": "Membre retiré",
+  "memberDeletedBody": "{{name}} a été retiré(e) de {{town}} par {{by}}",
 
   "memberIntakeSubmittedTitle": "Nouvelle demande d'adhésion",
   "memberIntakeSubmittedBody": "{{name}} a soumis une demande d'inscription pour {{town}}",
@@ -80,6 +101,9 @@
   "roleChangedTitle": "Rôle modifié",
   "roleChangedBody": "Votre rôle a été mis à jour : {{role}}",
 
+  "townScopeUpdatedTitle": "Périmètre de juridiction étendu",
+  "townScopeUpdatedBody": "Votre accès a été étendu avec les permissions de consultation pour d'autres paroisses",
+
   "attendanceLockedTitle": "Présences verrouillées",
   "attendanceLockedBody": "La feuille de présence pour {{name}} a été validée et verrouillée",
 
@@ -88,6 +112,15 @@
 
   "reportUploadedTitle": "Rapport téléversé",
   "reportUploadedBody": "{{fileName}} a été ajouté pour {{name}}",
+
+  "reportDeletedTitle": "Rapport supprimé",
+  "reportDeletedBody": "Un fichier de rapport pour {{name}} a été supprimé",
+
+  "driveFileUploadedTitle": "Nouveau document",
+  "driveFileUploadedBody": "{{fileName}} a été ajouté à l'espace documentaire",
+
+  "driveFileDeletedTitle": "Document retiré",
+  "driveFileDeletedBody": "Le document {{fileName}} a été retiré par {{by}}",
 
   "memberIntakeRejectedTitle": "Mise à jour de votre candidature",
   "memberIntakeRejectedBody": "Votre demande pour rejoindre {{town}} a été mise à jour",

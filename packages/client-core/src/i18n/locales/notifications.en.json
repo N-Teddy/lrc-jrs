@@ -53,14 +53,35 @@
   "activityUpdatedTitle": "Activity Updated",
   "activityUpdatedBody": "Details for {{name}} have been updated",
 
+  "activityRescheduledTitle": "Activity Rescheduled",
+  "activityRescheduledBody": "{{name}} rescheduled from {{oldDate}} to {{newDate}}",
+
+  "activityLocationChangedTitle": "Activity Venue Changed",
+  "activityLocationChangedBody": "The location for {{name}} has moved to {{venue}}",
+
   "activityCancelledTitle": "Activity Cancelled",
   "activityCancelledBody": "{{name}} scheduled for {{date}} has been cancelled",
+
+  "activityReopenedTitle": "Activity Reopened",
+  "activityReopenedBody": "{{name}} has been reopened for {{date}}",
+
+  "activityCompletedTitle": "Activity Concluded",
+  "activityCompletedBody": "{{name}} has concluded. Please finalize attendance and submit reports.",
+
+  "activityDeletedTitle": "Activity Deleted",
+  "activityDeletedBody": "Activity {{name}} was deleted by {{by}}",
 
   "attendanceRecordedTitle": "Attendance Finalized",
   "attendanceRecordedBody": "Attendance for {{name}} has been recorded",
 
   "memberRegisteredTitle": "New Member Joined",
   "memberRegisteredBody": "{{name}} has joined {{town}}",
+
+  "memberUpdatedTitle": "Member Profile Updated",
+  "memberUpdatedBody": "Profile details for {{name}} have been updated",
+
+  "memberDeletedTitle": "Member Removed",
+  "memberDeletedBody": "{{name}} was removed from {{town}} by {{by}}",
 
   "memberIntakeSubmittedTitle": "New Membership Application",
   "memberIntakeSubmittedBody": "{{name}} submitted a registration request for {{town}}",
@@ -80,6 +101,9 @@
   "roleChangedTitle": "Role Updated",
   "roleChangedBody": "Your role has been updated to {{role}}",
 
+  "townScopeUpdatedTitle": "Multi-Town Jurisdiction Updated",
+  "townScopeUpdatedBody": "Your access has been updated with permissions to view additional town hubs",
+
   "attendanceLockedTitle": "Attendance Locked",
   "attendanceLockedBody": "Attendance for {{name}} has been finalized and locked",
 
@@ -88,6 +112,15 @@
 
   "reportUploadedTitle": "Report Uploaded",
   "reportUploadedBody": "{{fileName}} uploaded for {{name}}",
+
+  "reportDeletedTitle": "Report Deleted",
+  "reportDeletedBody": "A report file for {{name}} was deleted",
+
+  "driveFileUploadedTitle": "New Vault Document",
+  "driveFileUploadedBody": "{{fileName}} has been uploaded to the document vault",
+
+  "driveFileDeletedTitle": "Vault Document Removed",
+  "driveFileDeletedBody": "Document {{fileName}} was removed by {{by}}",
 
   "memberIntakeRejectedTitle": "Application Update",
   "memberIntakeRejectedBody": "Your application to join {{town}} has been updated",

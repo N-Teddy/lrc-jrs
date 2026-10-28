@@ -506,7 +506,7 @@ export class UsersService {
   async updateMember(
     id: string,
     dto: UpdateMemberDto,
-    _currentUser: IAuthUser,
+    currentUser: IAuthUser,
     file?: Express.Multer.File,
   ): Promise<IUser> {
     const user = await this.userModel.findById(id).exec();
@@ -620,6 +620,52 @@ export class UsersService {
     }
 
     const populated = await saved.populate('homeTownId');
+
+    // Notify member (if edited by leader) and notify Town PC
+    const isSensitiveChange =
+      dto.phoneNumber !== undefined ||
+      dto.email !== undefined ||
+      dto.role !== undefined ||
+      dto.isActivePC !== undefined ||
+      dto.hasAppAccess !== undefined;
+    const isEditedByLeader = currentUser.id !== user._id.toString();
+
+    if (isSensitiveChange || isEditedByLeader) {
+      const townIdStr = user.homeTownId?.toString();
+      this.notificationsService
+        .createNotification(
+          {
+            target: {
+              userIds: [user._id.toString()],
+              roles: [UserRole.AP, UserRole.PC],
+              townId: townIdStr,
+              excludeUserIds: [currentUser.id],
+            },
+            level: 'INFO',
+            action: 'MEMBER_UPDATED',
+            titleKey: 'notifications:memberUpdatedTitle',
+            bodyKey: 'notifications:memberUpdatedBody',
+            bodyParams: {
+              name: user.fullName,
+              by: currentUser.fullName,
+            },
+            resource: {
+              entityType: 'MEMBER',
+              entityId: user._id.toString(),
+              townId: townIdStr,
+              subTab: 'directory',
+            },
+            sendPush: true,
+          },
+          currentUser.id,
+        )
+        .catch((err) =>
+          this.logger.warn(
+            `Failed to dispatch member updated notification: ${err.message}`,
+          ),
+        );
+    }
+
     return this.mapUser(populated);
   }
 
@@ -756,6 +802,32 @@ export class UsersService {
             `Failed to dispatch access revoked notification: ${err.message}`,
           ),
         );
+    } else if (dto.allowedReadTownIds !== undefined) {
+      this.notificationsService
+        .createNotification(
+          {
+            target: {
+              userIds: [user._id.toString()],
+            },
+            level: 'INFO',
+            action: 'TOWN_SCOPE_UPDATED',
+            titleKey: 'notifications:townScopeUpdatedTitle',
+            bodyKey: 'notifications:townScopeUpdatedBody',
+            resource: {
+              entityType: 'ACCESS',
+              entityId: user._id.toString(),
+              townId: user.homeTownId?.toString(),
+              subTab: 'access',
+            },
+            sendPush: true,
+          },
+          _currentUser.id,
+        )
+        .catch((err) =>
+          this.logger.warn(
+            `Failed to dispatch town scope updated notification: ${err.message}`,
+          ),
+        );
     }
 
     return this.mapUser(populated);
@@ -775,6 +847,10 @@ export class UsersService {
     }
 
     const townId = user.homeTownId;
+    const populated = await user.populate('homeTownId');
+    const townName = (populated.homeTownId as any)?.name || 'Town';
+    const townIdStr = townId?.toString();
+
     await this.userModel.findByIdAndDelete(id).exec();
 
     if (townId) {
@@ -783,6 +859,39 @@ export class UsersService {
         .findByIdAndUpdate(townId, { activePcCount: pcCount })
         .exec();
     }
+
+    this.notificationsService
+      .createNotification(
+        {
+          target: {
+            townId: townIdStr,
+            roles: [UserRole.AP, UserRole.PC],
+            excludeUserIds: [currentUser.id],
+          },
+          level: 'WARNING',
+          action: 'MEMBER_DELETED',
+          titleKey: 'notifications:memberDeletedTitle',
+          bodyKey: 'notifications:memberDeletedBody',
+          bodyParams: {
+            name: user.fullName,
+            town: townName,
+            by: currentUser.fullName,
+          },
+          resource: {
+            entityType: 'MEMBER',
+            entityId: id,
+            townId: townIdStr,
+            subTab: 'directory',
+          },
+          sendPush: true,
+        },
+        currentUser.id,
+      )
+      .catch((err) =>
+        this.logger.warn(
+          `Failed to dispatch member deleted notification: ${err.message}`,
+        ),
+      );
   }
 
   async deleteAll(): Promise<void> {

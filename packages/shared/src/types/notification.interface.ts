@@ -5,7 +5,12 @@ export type NotificationLevel = 'INFO' | 'SUCCESS' | 'WARNING' | 'ERROR';
 export type NotificationAction =
   | 'ACTIVITY_CREATED'
   | 'ACTIVITY_UPDATED'
+  | 'ACTIVITY_RESCHEDULED'
+  | 'ACTIVITY_LOCATION_CHANGED'
   | 'ACTIVITY_CANCELLED'
+  | 'ACTIVITY_REOPENED'
+  | 'ACTIVITY_COMPLETED'
+  | 'ACTIVITY_DELETED'
   | 'ACTIVITY_REMINDER_2_WEEKS'
   | 'ACTIVITY_REMINDER_1_WEEK'
   | 'ACTIVITY_REMINDER_PARTICIPATING'
@@ -15,7 +20,12 @@ export type NotificationAction =
   | 'ATTENDANCE_LOCKED'
   | 'ATTENDANCE_UNLOCKED'
   | 'REPORT_UPLOADED'
+  | 'REPORT_DELETED'
+  | 'DRIVE_FILE_UPLOADED'
+  | 'DRIVE_FILE_DELETED'
   | 'MEMBER_REGISTERED'
+  | 'MEMBER_UPDATED'
+  | 'MEMBER_DELETED'
   | 'MEMBER_INTAKE_SUBMITTED'
   | 'MEMBER_INTAKE_APPROVED'
   | 'MEMBER_INTAKE_REJECTED'
@@ -23,6 +33,7 @@ export type NotificationAction =
   | 'ACCESS_GRANTED'
   | 'ACCESS_REVOKED'
   | 'ROLE_CHANGED'
+  | 'TOWN_SCOPE_UPDATED'
   | 'PASSWORD_CHANGED'
   | 'SYSTEM_ANNOUNCEMENT';
 
@@ -34,6 +45,7 @@ export type NotificationResourceType =
   | 'ACCESS'
   | 'INTAKE'
   | 'REPORT'
+  | 'DRIVE_FILE'
   | 'SYSTEM';
 
 export type NotificationPlatform = 'ios' | 'android' | 'desktop';
@@ -66,6 +78,7 @@ export interface NotificationTarget {
   userIds?: string[];
   roles?: UserRole[];
   townId?: string;
+  townIds?: string[];
   global?: boolean;
   excludeUserIds?: string[];
 }

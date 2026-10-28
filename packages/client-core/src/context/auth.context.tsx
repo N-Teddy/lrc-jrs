@@ -9,7 +9,9 @@ import {
   useState,
 } from 'react';
 import type { HttpService } from '../http/axios-client';
+import { useTranslation } from '../i18n/i18n';
 import type { IStorageAdapter } from '../storage/storage.interface';
+import { toast } from '../toast';
 
 export interface AuthContextValue {
   user: IAuthUser | null;
@@ -34,6 +36,7 @@ export interface AuthProviderProps {
 }
 
 export function AuthProvider({ children, storage, http }: AuthProviderProps) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [user, setUser] = useState<IAuthUser | null>(null);
   const [token, setToken] = useState<string | null>(null);
@@ -150,8 +153,17 @@ export function AuthProvider({ children, storage, http }: AuthProviderProps) {
       setToken(null);
       setIsAuthenticated(false);
       queryClient.clear();
+      toast.info(
+        t('common:toast.signedOut', {
+          defaultValue: 'You have been signed out successfully.',
+        }),
+        {
+          title: t('common:signOut', { defaultValue: 'Sign Out' }),
+          duration: 3500,
+        },
+      );
     }
-  }, [http, storage, queryClient]);
+  }, [http, storage, queryClient, t]);
 
   const updateUser = useCallback(
     async (updatedUser: IAuthUser): Promise<void> => {

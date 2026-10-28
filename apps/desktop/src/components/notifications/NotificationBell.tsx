@@ -23,6 +23,7 @@ import {
   Checks,
   CircleNotch,
   Clock,
+  FileText,
   ShieldCheck,
   Sparkle,
   UserPlus,
@@ -253,7 +254,8 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({
     if (
       entityType === 'ACCESS' ||
       action?.includes('PASSWORD') ||
-      action?.includes('SETUP')
+      action?.includes('SETUP') ||
+      action?.includes('SCOPE')
     ) {
       return {
         icon: <ShieldCheck size={18} weight="fill" />,
@@ -261,6 +263,21 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({
         badgeText: 'text-[#9a6400]',
         badgeBorder: 'border-[#ffecbf]',
         categoryLabel: t('notifications:categories.security', 'Security'),
+      };
+    }
+
+    if (
+      entityType === 'REPORT' ||
+      entityType === 'DRIVE_FILE' ||
+      action?.includes('REPORT') ||
+      action?.includes('DRIVE')
+    ) {
+      return {
+        icon: <FileText size={18} weight="fill" />,
+        badgeBg: 'bg-[#f0f9ff]',
+        badgeText: 'text-[#0369a1]',
+        badgeBorder: 'border-[#bae6fd]',
+        categoryLabel: t('notifications:categories.report', 'Reports'),
       };
     }
 

@@ -68,27 +68,35 @@ export class NotificationsService {
       query.role = { $in: dto.target.roles };
     }
 
-    let townObjectId: Types.ObjectId | null = null;
-    if (dto.target.townId) {
-      const tid = String(dto.target.townId).trim();
+    const targetTownObjectIds: Types.ObjectId[] = [];
+    const rawTownIds = [
+      ...(dto.target.townId ? [dto.target.townId] : []),
+      ...(dto.target.townIds || []),
+    ];
+
+    for (const rawTid of rawTownIds) {
+      const tid = String(rawTid).trim();
       if (Types.ObjectId.isValid(tid) && tid.length === 24) {
-        townObjectId = new Types.ObjectId(tid);
+        targetTownObjectIds.push(new Types.ObjectId(tid));
       } else {
         const foundTown = await this.townModel.findOne({
           code: new RegExp(`^${tid}$`, 'i'),
         });
         if (foundTown) {
-          townObjectId = foundTown._id as Types.ObjectId;
+          targetTownObjectIds.push(foundTown._id as Types.ObjectId);
         }
       }
     }
 
-    if (townObjectId) {
+    if (targetTownObjectIds.length > 0) {
       // APs oversee all hubs across Cameroon, so include APs even when filtered by town
       if (dto.target.roles && dto.target.roles.includes(UserRole.AP)) {
-        query.$or = [{ homeTownId: townObjectId }, { role: UserRole.AP }];
+        query.$or = [
+          { homeTownId: { $in: targetTownObjectIds } },
+          { role: UserRole.AP },
+        ];
       } else {
-        query.homeTownId = townObjectId;
+        query.homeTownId = { $in: targetTownObjectIds };
       }
     }
 

@@ -15,6 +15,8 @@ import {
   type IMemberAttendanceHistoryResponse,
   type IPaginatedActivitiesResponse,
   type MemberEngagementLevel,
+  type NotificationAction,
+  type NotificationLevel,
   UserRole,
 } from '@jrs/shared';
 import { Injectable, Logger } from '@nestjs/common';
@@ -674,11 +676,17 @@ export class ActivitiesService {
     const saved = await newActivity.save();
     const result = await this.findById(saved._id.toString());
 
+    const townIdStr = townId.toString();
+    const allTownIds = [
+      townIdStr,
+      ...(includedTownIds || []).map((id) => id.toString()),
+    ].filter(Boolean);
+
     this.notificationsService
       .createNotification(
         {
           target: {
-            townId: townId.toString(),
+            townIds: allTownIds,
           },
           level: 'INFO',
           action: 'ACTIVITY_CREATED',
@@ -871,69 +879,95 @@ export class ActivitiesService {
 
     const townIdStr =
       activity.townId?._id?.toString() || activity.townId?.toString() || '';
+    const allTownIds = [
+      townIdStr,
+      ...(activity.includedTownIds || []).map((t: any) => t?.toString()),
+    ].filter(Boolean);
+
+    let action: NotificationAction = 'ACTIVITY_UPDATED';
+    let level: NotificationLevel = 'INFO';
+    let titleKey = 'notifications:activityUpdatedTitle';
+    let bodyKey = 'notifications:activityUpdatedBody';
+    let bodyParams: Record<string, string | number> = {
+      name: activity.title,
+    };
 
     if (activity.status === ActivityStatus.CANCELLED) {
-      this.notificationsService
-        .createNotification(
-          {
-            target: {
-              townId: townIdStr,
-              excludeUserIds: [currentUser.id],
-            },
-            level: 'WARNING',
-            action: 'ACTIVITY_CANCELLED',
-            titleKey: 'notifications:activityCancelledTitle',
-            bodyKey: 'notifications:activityCancelledBody',
-            bodyParams: {
-              name: activity.title,
-              date: new Date(activity.startDate).toLocaleDateString(),
-            },
-            resource: {
-              entityType: 'ACTIVITY',
-              entityId: id,
-              townId: townIdStr,
-              subTab: 'overview',
-            },
-            sendPush: true,
-          },
-          currentUser.id,
-        )
-        .catch((err) =>
-          this.logger.warn(
-            `Failed to dispatch activity cancelled notification: ${err.message}`,
-          ),
-        );
-    } else {
-      this.notificationsService
-        .createNotification(
-          {
-            target: {
-              townId: townIdStr,
-              excludeUserIds: [currentUser.id],
-            },
-            level: 'INFO',
-            action: 'ACTIVITY_UPDATED',
-            titleKey: 'notifications:activityUpdatedTitle',
-            bodyKey: 'notifications:activityUpdatedBody',
-            bodyParams: {
-              name: activity.title,
-            },
-            resource: {
-              entityType: 'ACTIVITY',
-              entityId: id,
-              townId: townIdStr,
-              subTab: 'overview',
-            },
-            sendPush: true,
-          },
-          currentUser.id,
-        )
-        .catch((err) =>
-          this.logger.warn(
-            `Failed to dispatch activity updated notification: ${err.message}`,
-          ),
-        );
+      action = 'ACTIVITY_CANCELLED';
+      level = 'WARNING';
+      titleKey = 'notifications:activityCancelledTitle';
+      bodyKey = 'notifications:activityCancelledBody';
+      bodyParams = {
+        name: activity.title,
+        date: new Date(activity.startDate).toLocaleDateString(),
+      };
+    } else if (previousValues.status === ActivityStatus.CANCELLED) {
+      action = 'ACTIVITY_REOPENED';
+      level = 'SUCCESS';
+      titleKey = 'notifications:activityReopenedTitle';
+      bodyKey = 'notifications:activityReopenedBody';
+      bodyParams = {
+        name: activity.title,
+        date: new Date(activity.startDate).toLocaleDateString(),
+      };
+    } else if (dateChanged) {
+      action = 'ACTIVITY_RESCHEDULED';
+      level = 'WARNING';
+      titleKey = 'notifications:activityRescheduledTitle';
+      bodyKey = 'notifications:activityRescheduledBody';
+      bodyParams = {
+        name: activity.title,
+        oldDate: new Date(
+          previousValues.startDate || activity.startDate,
+        ).toLocaleDateString(),
+        newDate: new Date(activity.startDate).toLocaleDateString(),
+      };
+    } else if (locationChanged) {
+      action = 'ACTIVITY_LOCATION_CHANGED';
+      level = 'INFO';
+      titleKey = 'notifications:activityLocationChangedTitle';
+      bodyKey = 'notifications:activityLocationChangedBody';
+      bodyParams = {
+        name: activity.title,
+        venue: activity.locationVenue,
+      };
+    } else if (activity.status === ActivityStatus.COMPLETED) {
+      action = 'ACTIVITY_COMPLETED';
+      level = 'INFO';
+      titleKey = 'notifications:activityCompletedTitle';
+      bodyKey = 'notifications:activityCompletedBody';
+      bodyParams = {
+        name: activity.title,
+      };
     }
+
+    this.notificationsService
+      .createNotification(
+        {
+          target: {
+            townIds: allTownIds,
+            excludeUserIds: [currentUser.id],
+          },
+          level,
+          action,
+          titleKey,
+          bodyKey,
+          bodyParams,
+          resource: {
+            entityType: 'ACTIVITY',
+            entityId: id,
+            townId: townIdStr,
+            subTab: 'overview',
+          },
+          sendPush: true,
+        },
+        currentUser.id,
+      )
+      .catch((err) =>
+        this.logger.warn(
+          `Failed to dispatch activity ${action} notification: ${err.message}`,
+        ),
+      );
 
     return this.findById(id);
   }
@@ -1192,7 +1226,7 @@ export class ActivitiesService {
    */
   async delete(
     id: string,
-    _currentUser: IAuthUser,
+    currentUser: IAuthUser,
   ): Promise<{ success: boolean }> {
     if (!Types.ObjectId.isValid(id)) {
       throw new BadRequestAppException(ErrorCode.ACTIVITY_INVALID_ID);
@@ -1208,6 +1242,44 @@ export class ActivitiesService {
 
     activity.isDeleted = true;
     await activity.save();
+
+    const townIdStr = activity.townId?.toString() || '';
+    const allTownIds = [
+      townIdStr,
+      ...(activity.includedTownIds || []).map((t: any) => t?.toString()),
+    ].filter(Boolean);
+
+    this.notificationsService
+      .createNotification(
+        {
+          target: {
+            townIds: allTownIds,
+            roles: [UserRole.AP, UserRole.PC],
+            excludeUserIds: [currentUser.id],
+          },
+          level: 'WARNING',
+          action: 'ACTIVITY_DELETED',
+          titleKey: 'notifications:activityDeletedTitle',
+          bodyKey: 'notifications:activityDeletedBody',
+          bodyParams: {
+            name: activity.title,
+            by: currentUser.fullName,
+          },
+          resource: {
+            entityType: 'ACTIVITY',
+            entityId: id,
+            townId: townIdStr,
+            subTab: 'overview',
+          },
+          sendPush: true,
+        },
+        currentUser.id,
+      )
+      .catch((err) =>
+        this.logger.warn(
+          `Failed to dispatch activity deleted notification: ${err.message}`,
+        ),
+      );
 
     return { success: true };
   }
@@ -1830,6 +1902,40 @@ export class ActivitiesService {
     }
 
     await activity.save();
+
+    const reportTownIdStr =
+      activity.townId?._id?.toString() || activity.townId?.toString() || '';
+    this.notificationsService
+      .createNotification(
+        {
+          target: {
+            townId: reportTownIdStr,
+            roles: [UserRole.AP, UserRole.PC],
+            excludeUserIds: [currentUser.id],
+          },
+          level: 'WARNING',
+          action: 'REPORT_DELETED',
+          titleKey: 'notifications:reportDeletedTitle',
+          bodyKey: 'notifications:reportDeletedBody',
+          bodyParams: {
+            name: activity.title,
+          },
+          resource: {
+            entityType: 'REPORT',
+            entityId: activityId,
+            townId: reportTownIdStr,
+            subTab: 'report',
+          },
+          sendPush: true,
+        },
+        currentUser.id,
+      )
+      .catch((err) =>
+        this.logger.warn(
+          `Failed to dispatch report deleted notification: ${err.message}`,
+        ),
+      );
+
     return this.mapActivity(activity);
   }
 
@@ -1875,6 +1981,39 @@ export class ActivitiesService {
       });
     }
 
+    const userTownId = currentUser.homeTownId;
+    if (uploadedResults.length > 0 && userTownId) {
+      this.notificationsService
+        .createNotification(
+          {
+            target: {
+              townId: userTownId,
+              roles: [UserRole.AP, UserRole.PC],
+              excludeUserIds: [currentUser.id],
+            },
+            level: 'INFO',
+            action: 'DRIVE_FILE_UPLOADED',
+            titleKey: 'notifications:driveFileUploadedTitle',
+            bodyKey: 'notifications:driveFileUploadedBody',
+            bodyParams: {
+              fileName: uploadedResults[0].filename,
+            },
+            resource: {
+              entityType: 'DRIVE_FILE',
+              entityId: uploadedResults[0].fileId,
+              townId: userTownId,
+            },
+            sendPush: true,
+          },
+          currentUser.id,
+        )
+        .catch((err) =>
+          this.logger.warn(
+            `Failed to dispatch drive file uploaded notification: ${err.message}`,
+          ),
+        );
+    }
+
     return uploadedResults;
   }
 
@@ -1907,6 +2046,45 @@ export class ActivitiesService {
 
     // 2. Delete from Drive
     await this.driveService.deleteFile(fileId);
+
+    const targetTownId = activity?.townId?.toString() || currentUser.homeTownId;
+    if (targetTownId) {
+      this.notificationsService
+        .createNotification(
+          {
+            target: {
+              townId: targetTownId,
+              roles: [UserRole.AP, UserRole.PC],
+              excludeUserIds: [currentUser.id],
+            },
+            level: 'WARNING',
+            action: activity ? 'REPORT_DELETED' : 'DRIVE_FILE_DELETED',
+            titleKey: activity
+              ? 'notifications:reportDeletedTitle'
+              : 'notifications:driveFileDeletedTitle',
+            bodyKey: activity
+              ? 'notifications:reportDeletedBody'
+              : 'notifications:driveFileDeletedBody',
+            bodyParams: {
+              name: activity ? activity.title : 'Vault',
+              fileName: fileId,
+              by: currentUser.fullName,
+            },
+            resource: {
+              entityType: activity ? 'REPORT' : 'DRIVE_FILE',
+              entityId: activity ? activity._id.toString() : fileId,
+              townId: targetTownId,
+            },
+            sendPush: true,
+          },
+          currentUser.id,
+        )
+        .catch((err) =>
+          this.logger.warn(
+            `Failed to dispatch file deletion notification: ${err.message}`,
+          ),
+        );
+    }
 
     return { success: true, fileId };
   }

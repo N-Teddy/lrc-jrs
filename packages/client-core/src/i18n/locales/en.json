@@ -21,7 +21,8 @@
       "dismiss": "Dismiss notification",
       "welcomeTitle": "Welcome back!",
       "welcomeMessage": "Signed in successfully. Glad to see you, {{name}}!",
-      "welcomeGeneric": "Signed in successfully. Welcome back!"
+      "welcomeGeneric": "Signed in successfully. Welcome back!",
+      "signedOut": "You have been signed out successfully."
     },
     "refresh": "Refresh",
     "required": "Required",

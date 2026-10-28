@@ -56,6 +56,7 @@ jobs:
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
           VITE_API_URL: ${{ secrets.VITE_API_URL }}
+          VITE_INTAKE_URL: ${{ secrets.VITE_INTAKE_URL }}
         with:
           projectPath: './apps/desktop'
           tagName: v__VERSION__
