@@ -38,7 +38,7 @@ export const ActivityPreparationTab: React.FC<ActivityPreparationTabProps> = ({
   isPrivileged,
   onOpenTemplatesModal,
 }) => {
-  const { t, i18n } = useTranslation();
+  const { t, i18n } = useTranslation(['activities', 'common', 'errors']);
   const currentLang = i18n.language?.startsWith('fr') ? 'fr' : 'en';
   const { addToast } = useToast();
 
@@ -151,10 +151,10 @@ export const ActivityPreparationTab: React.FC<ActivityPreparationTabProps> = ({
   return (
     <div className="w-full flex flex-col gap-6 animate-in fade-in duration-200">
       {/* 1. Header & Milestone Status Timeline Card */}
-      <div className="bg-white rounded-xl border border-[#e8e1dd] shadow-xs p-5 md:p-6 flex flex-col gap-5">
+      <div className="bg-white rounded-lg border border-[#e8e1dd] shadow-2xs p-5 md:p-6 flex flex-col gap-5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#f2ebe7] pb-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[#faf2ee] border border-[#e8e1dd] flex items-center justify-center text-[#b85028] shadow-2xs">
+            <div className="w-10 h-10 rounded-lg bg-[#faf2ee] border border-[#e8e1dd] flex items-center justify-center text-[#b85028] shadow-2xs">
               <Bell size={22} weight="duotone" />
             </div>
             <div className="flex flex-col">
@@ -477,10 +477,10 @@ export const ActivityPreparationTab: React.FC<ActivityPreparationTabProps> = ({
       </div>
 
       {/* 2. Interactive Preparation Checklist Card */}
-      <div className="bg-white rounded-xl border border-[#e8e1dd] shadow-xs p-5 md:p-6 flex flex-col gap-5">
+      <div className="bg-white rounded-lg border border-[#e8e1dd] shadow-2xs p-5 md:p-6 flex flex-col gap-5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#f2ebe7] pb-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[#edf3ee] border border-[#c2e9ca] flex items-center justify-center text-[#486b52] shadow-2xs">
+            <div className="w-10 h-10 rounded-lg bg-[#edf3ee] border border-[#c2e9ca] flex items-center justify-center text-[#486b52] shadow-2xs">
               <ListChecks size={22} weight="bold" />
             </div>
             <div className="flex flex-col">
@@ -640,7 +640,7 @@ export const ActivityPreparationTab: React.FC<ActivityPreparationTabProps> = ({
 
         {/* 3. Leadership Directives / Custom Instructions Alert Box */}
         {customInstructions && (
-          <div className="p-4 rounded-xl bg-[#fffaf5] border border-[#f3dfcf] flex items-start gap-3 mt-1 shadow-2xs">
+          <div className="p-4 rounded-lg bg-[#fffaf5] border border-[#f3dfcf] flex items-start gap-3 mt-1 shadow-2xs">
             <div className="w-8 h-8 rounded-lg bg-[#b85028]/10 text-[#b85028] flex items-center justify-center shrink-0 mt-0.5">
               <Sparkle size={18} weight="fill" />
             </div>

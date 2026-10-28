@@ -1,6 +1,8 @@
 import type { Update } from '@tauri-apps/plugin-updater';
 import { useCallback, useEffect, useState } from 'react';
 
+export const CURRENT_APP_VERSION = '0.0.1';
+
 export interface UpdaterStatus {
   isChecking: boolean;
   isDownloading: boolean;
@@ -10,9 +12,11 @@ export interface UpdaterStatus {
   downloadedBytes: number;
   availableUpdate: Update | null;
   error: string | null;
+  lastCheckedAt: Date | null;
 }
 
 export function useAppUpdater() {
+  const [realVersion, setRealVersion] = useState<string>(CURRENT_APP_VERSION);
   const [status, setStatus] = useState<UpdaterStatus>({
     isChecking: false,
     isDownloading: false,
@@ -22,9 +26,31 @@ export function useAppUpdater() {
     downloadedBytes: 0,
     availableUpdate: null,
     error: null,
+    lastCheckedAt: null,
   });
 
   const [isOpen, setIsOpen] = useState(false);
+
+  // Dynamically resolve real app version from Tauri runtime
+  useEffect(() => {
+    async function resolveRealVersion() {
+      try {
+        const isTauriEnv =
+          typeof window !== 'undefined' &&
+          ('__TAURI_INTERNALS__' in window || '__TAURI__' in window);
+        if (isTauriEnv) {
+          const { getVersion } = await import('@tauri-apps/api/app');
+          const v = await getVersion();
+          if (v) {
+            setRealVersion(v);
+          }
+        }
+      } catch (err) {
+        console.warn('[Updater] Could not resolve runtime version:', err);
+      }
+    }
+    resolveRealVersion();
+  }, []);
 
   const checkForUpdates = useCallback(async (manual = false) => {
     // Only check if running inside Tauri environment
@@ -36,6 +62,8 @@ export function useAppUpdater() {
       if (manual) {
         setStatus((s) => ({
           ...s,
+          isChecking: false,
+          lastCheckedAt: new Date(),
           error: 'Updater is only active in the desktop application.',
         }));
       }
@@ -52,19 +80,21 @@ export function useAppUpdater() {
           ...s,
           isChecking: false,
           availableUpdate: update,
+          lastCheckedAt: new Date(),
           error: null,
         }));
-        setIsOpen(true);
+        // If manually checked or found update, show modal
+        if (manual) {
+          setIsOpen(true);
+        }
       } else {
         setStatus((s) => ({
           ...s,
           isChecking: false,
           availableUpdate: null,
+          lastCheckedAt: new Date(),
           error: null,
         }));
-        if (manual) {
-          // If manually checked, could display a toast or notification
-        }
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
@@ -72,6 +102,7 @@ export function useAppUpdater() {
       setStatus((s) => ({
         ...s,
         isChecking: false,
+        lastCheckedAt: new Date(),
         error: manual ? msg : null,
       }));
     }
@@ -137,6 +168,10 @@ export function useAppUpdater() {
     setIsOpen(false);
   }, []);
 
+  const openWhatsNew = useCallback(() => {
+    setIsOpen(true);
+  }, []);
+
   // Check once automatically on application launch
   useEffect(() => {
     // Delay 3 seconds after launch to let initial UI & authentication load smoothly
@@ -148,9 +183,12 @@ export function useAppUpdater() {
 
   return {
     ...status,
+    currentVersion: realVersion,
+    hasUpdate: Boolean(status.availableUpdate),
     isOpen,
     checkForUpdates,
     startUpdate,
     dismiss,
+    openWhatsNew,
   };
 }

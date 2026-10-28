@@ -145,10 +145,8 @@ export function initI18n(
         const message = `[i18n ERROR] Missing translation key: "${ns}:${key}" for language(s): ${lngs.join(', ')}`;
         console.error(message);
       },
-      parseMissingKeyHandler: (key) => {
-        const message = `[i18n ERROR] Missing translation key: "${key}"`;
-        console.error(message);
-        return `[MISSING: ${key}]`;
+      parseMissingKeyHandler: (key, defaultValue) => {
+        return defaultValue || key;
       },
       interpolation: {
         escapeValue: false,

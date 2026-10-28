@@ -47,9 +47,29 @@ async function triggerNativeDesktopNotification(title: string, body: string) {
     if (permissionGranted) {
       tauriNotification.sendNotification({ title, body });
     }
-  } catch {
-    // Web environment or plugin not configured, fallback gracefully
+  } catch (err) {
+    console.error('Failed to trigger native desktop notification:', err);
   }
+}
+
+async function isAppInBackgroundOrUnfocused(): Promise<boolean> {
+  if (typeof document !== 'undefined' && document.hidden) {
+    return true;
+  }
+  try {
+    const { getCurrentWindow } = await import('@tauri-apps/api/window');
+    const win = getCurrentWindow();
+    const [minimized, focused] = await Promise.all([
+      win.isMinimized(),
+      win.isFocused(),
+    ]);
+    if (minimized || !focused) {
+      return true;
+    }
+  } catch {
+    // Non-Tauri web environment fallback
+  }
+  return false;
 }
 
 interface NotificationBellProps {
@@ -87,7 +107,7 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({
 
   // Real-time WebSocket subscription & Native Notification integration
   const handleIncomingNotification = useCallback(
-    (notification: INotification) => {
+    async (notification: INotification) => {
       const title = t(notification.titleKey, {
         defaultValue: notification.titleKey,
         ...(notification.titleParams || {}),
@@ -97,8 +117,9 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({
         ...(notification.bodyParams || {}),
       });
 
-      if (document.hidden) {
-        triggerNativeDesktopNotification(title, body);
+      const isBackground = await isAppInBackgroundOrUnfocused();
+      if (isBackground) {
+        await triggerNativeDesktopNotification(title, body);
       } else {
         toast.info(body, {
           title,

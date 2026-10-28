@@ -48,7 +48,7 @@ export const ActivityRemindersTab: React.FC<ActivityRemindersTabProps> = ({
   onNavigateToActivity,
   isPrivileged = true,
 }) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['activities', 'common', 'errors']);
   const { addToast } = useToast();
   const { activeTownId } = useTownContext();
 
@@ -62,7 +62,7 @@ export const ActivityRemindersTab: React.FC<ActivityRemindersTabProps> = ({
   const triggerDailyMutation = useTriggerDailyMilestonesMutation();
   const triggerMonthlyMutation = useTriggerMonthlyDigestMutation();
 
-  // Query upcoming activities for this town
+  // Query upcoming scheduled activities for this hub
   const { data: activitiesData, isLoading: isActivitiesLoading } =
     useActivitiesQuery({
       townId: activeTownId || undefined,
@@ -212,27 +212,27 @@ export const ActivityRemindersTab: React.FC<ActivityRemindersTabProps> = ({
   const ActiveIcon = activeConfig.icon;
 
   return (
-    <div className="w-full flex flex-col gap-6 animate-in fade-in duration-200">
-      {/* 1. Header Banner & Milestone Engine Quick Actions */}
-      <section className="bg-gradient-to-r from-[#faf2ee] via-white to-[#faf2ee] rounded-xl border border-[#e8e1dd] p-5 shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+    <div className="w-full flex flex-col gap-6 animate-in fade-in duration-150">
+      {/* 1. Header Hero Card with Active Cron Status & Action Triggers */}
+      <section className="bg-gradient-to-r from-white via-white to-[#faf2ee] rounded-lg border border-[#e8e1dd] p-5 shadow-2xs flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div className="flex items-start gap-3.5">
-          <div className="w-12 h-12 rounded-xl bg-white border border-[#e8e1dd] flex items-center justify-center text-[#b85028] shadow-2xs shrink-0">
-            <Bell size={26} weight="duotone" />
+          <div className="w-11 h-11 rounded-lg bg-[#fff2ee] border border-[#ffdbcf] flex items-center justify-center text-[#b85028] shadow-2xs shrink-0">
+            <Bell size={24} weight="duotone" />
           </div>
           <div className="flex flex-col gap-0.5">
-            <div className="flex items-center gap-2">
-              <h2 className="text-base sm:text-lg font-bold text-[#1e1b19]">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h2 className="text-base font-bold text-[#1e1b19] tracking-tight">
                 {t(
                   'activities:reminders.tabTitle',
                   'Reminders & Guidelines Command Center',
                 )}
               </h2>
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#486b52]/10 text-[#486b52] text-[10px] font-bold">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-[#edf3ee] border border-[#c2e9ca] text-[#486b52] text-[11px] font-bold">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#486b52] animate-pulse" />
-                Active Cron Engine
+                Active Cron Automation
               </span>
             </div>
-            <p className="text-xs text-[#8a726a] max-w-2xl leading-relaxed">
+            <p className="text-xs text-[#8a726a] max-w-2xl leading-relaxed mt-0.5">
               {t(
                 'activities:reminders.tabSubtitle',
                 'Milestone broadcast automation, preparation checklists, and leadership directives per activity type.',
@@ -248,9 +248,9 @@ export const ActivityRemindersTab: React.FC<ActivityRemindersTabProps> = ({
               type="button"
               onClick={handleTriggerDaily}
               disabled={triggerDailyMutation.isPending}
-              className="inline-flex items-center gap-1.5 px-3 py-2 bg-white hover:bg-[#faf2ee] text-[#57423b] border border-[#e8e1dd] hover:border-[#b85028]/30 rounded-lg text-xs font-bold shadow-2xs transition-all disabled:opacity-50 cursor-pointer"
+              className="inline-flex items-center gap-1.5 h-9 px-3.5 bg-white hover:bg-[#faf2ee] text-[#57423b] border border-[#e8e1dd] hover:border-[#b85028]/40 rounded-md text-xs font-semibold shadow-2xs transition-all disabled:opacity-50 cursor-pointer"
             >
-              <Lightning size={14} weight="fill" className="text-[#b85028]" />
+              <Lightning size={15} weight="fill" className="text-[#b85028]" />
               <span>
                 {triggerDailyMutation.isPending
                   ? t('activities:reminders.runningCheck', 'Running...')
@@ -265,12 +265,12 @@ export const ActivityRemindersTab: React.FC<ActivityRemindersTabProps> = ({
               type="button"
               onClick={handleTriggerMonthly}
               disabled={triggerMonthlyMutation.isPending}
-              className="inline-flex items-center gap-1.5 px-3 py-2 bg-[#b85028] hover:bg-[#a44520] text-white rounded-lg text-xs font-bold shadow-xs active:scale-[0.98] transition-all disabled:opacity-50 cursor-pointer"
+              className="inline-flex items-center gap-1.5 h-9 px-4 bg-[#b85028] hover:bg-[#a44520] text-white rounded-md text-xs font-semibold shadow-2xs active:scale-[0.98] transition-all disabled:opacity-50 cursor-pointer"
             >
-              <PaperPlaneRight size={14} weight="bold" />
+              <PaperPlaneRight size={15} weight="bold" />
               <span>
                 {triggerMonthlyMutation.isPending
-                  ? t('common:sending', 'Sending...')
+                  ? t('common:loading', 'Sending...')
                   : t(
                       'activities:reminders.triggerMonthlyButton',
                       'Trigger Monthly Digest',
@@ -281,8 +281,8 @@ export const ActivityRemindersTab: React.FC<ActivityRemindersTabProps> = ({
         )}
       </section>
 
-      {/* 2. Upcoming Gatherings Preparation Status Tracker */}
-      <section className="bg-white rounded-xl border border-[#e8e1dd] shadow-2xs overflow-hidden">
+      {/* 2. Upcoming Gatherings Preparation Status Monitor */}
+      <section className="bg-white rounded-lg border border-[#e8e1dd] shadow-2xs overflow-hidden">
         <div className="p-4 bg-[#faf6f4] border-b border-[#f2ebe7] flex items-center justify-between gap-3">
           <div className="flex items-center gap-2.5">
             <ClockCountdown
@@ -306,8 +306,9 @@ export const ActivityRemindersTab: React.FC<ActivityRemindersTabProps> = ({
             </div>
           </div>
 
-          <span className="text-xs font-bold text-[#8a726a] px-2.5 py-1 bg-white border border-[#e8e1dd] rounded-lg">
-            {upcomingActivities.length} {t('activities:types.all', 'Scheduled')}
+          <span className="text-xs font-bold text-[#8a726a] px-2.5 py-1 bg-white border border-[#e8e1dd] rounded-md">
+            {upcomingActivities.length}{' '}
+            {t('activities:table.activity', 'Scheduled Gatherings')}
           </span>
         </div>
 
@@ -345,16 +346,27 @@ export const ActivityRemindersTab: React.FC<ActivityRemindersTabProps> = ({
               const d14Sent = activity.remindersSent?.includes('2_WEEKS');
               const d7Sent = activity.remindersSent?.includes('1_WEEK');
 
+              const monthLabel = actDate
+                .toLocaleString('default', {
+                  month: 'short',
+                })
+                .toUpperCase();
+              const dayLabel = actDate.getDate();
+
               return (
                 <div
                   key={activity.id}
-                  className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-[#faf6f4]/50 transition-colors"
+                  className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-[#faf6f4]/60 transition-colors"
                 >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div
-                      className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border ${typeCfg.badgeBg} ${typeCfg.badgeBorder} ${typeCfg.badgeText}`}
-                    >
-                      <Icon size={20} weight="duotone" />
+                  <div className="flex items-center gap-3.5 min-w-0">
+                    {/* Compact Date Box */}
+                    <div className="w-12 h-12 rounded-md bg-[#faf2ee] border border-[#e8e1dd] flex flex-col items-center justify-center shrink-0">
+                      <span className="text-[10px] font-bold text-[#b85028] leading-tight">
+                        {monthLabel}
+                      </span>
+                      <span className="text-sm font-extrabold text-[#1e1b19] leading-tight">
+                        {dayLabel}
+                      </span>
                     </div>
 
                     <div className="flex flex-col min-w-0">
@@ -363,9 +375,10 @@ export const ActivityRemindersTab: React.FC<ActivityRemindersTabProps> = ({
                           {activity.title}
                         </span>
                         <span
-                          className={`px-2 py-0.5 rounded text-[10px] font-bold border ${typeCfg.badgeBg} ${typeCfg.badgeBorder} ${typeCfg.badgeText}`}
+                          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold border ${typeCfg.badgeBg} ${typeCfg.badgeBorder} ${typeCfg.badgeText}`}
                         >
-                          {typeCfg.label}
+                          <Icon size={12} weight="bold" />
+                          <span>{typeCfg.label}</span>
                         </span>
                       </div>
 
@@ -408,10 +421,10 @@ export const ActivityRemindersTab: React.FC<ActivityRemindersTabProps> = ({
                     <div className="flex items-center gap-1.5">
                       <span
                         title="D-14 (2-Weeks Advance WhatsApp & In-App Notice)"
-                        className={`px-2 py-0.5 rounded text-[10px] font-bold border ${
+                        className={`px-2 py-0.5 rounded-md text-[10px] font-bold border ${
                           d14Sent
-                            ? 'bg-[#486b52]/10 text-[#486b52] border-[#486b52]/30'
-                            : 'bg-[#8a726a]/10 text-[#8a726a] border-transparent'
+                            ? 'bg-[#edf3ee] text-[#486b52] border-[#c2e9ca]'
+                            : 'bg-[#faf6f4] text-[#8a726a] border-[#e8e1dd]'
                         }`}
                       >
                         {d14Sent
@@ -421,10 +434,10 @@ export const ActivityRemindersTab: React.FC<ActivityRemindersTabProps> = ({
 
                       <span
                         title="D-7 (1-Week Final Checklist & WhatsApp Call)"
-                        className={`px-2 py-0.5 rounded text-[10px] font-bold border ${
+                        className={`px-2 py-0.5 rounded-md text-[10px] font-bold border ${
                           d7Sent
-                            ? 'bg-[#486b52]/10 text-[#486b52] border-[#486b52]/30'
-                            : 'bg-[#8a726a]/10 text-[#8a726a] border-transparent'
+                            ? 'bg-[#edf3ee] text-[#486b52] border-[#c2e9ca]'
+                            : 'bg-[#faf6f4] text-[#8a726a] border-[#e8e1dd]'
                         }`}
                       >
                         {d7Sent
@@ -438,7 +451,7 @@ export const ActivityRemindersTab: React.FC<ActivityRemindersTabProps> = ({
                       <button
                         type="button"
                         onClick={() => onNavigateToActivity(activity.id)}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-[#faf2ee] text-[#57423b] hover:text-[#b85028] border border-[#e8e1dd] hover:border-[#b85028]/30 rounded-lg text-xs font-bold transition-all cursor-pointer shadow-2xs"
+                        className="inline-flex items-center gap-1.5 h-8 px-3 bg-white hover:bg-[#faf2ee] text-[#57423b] hover:text-[#b85028] border border-[#e8e1dd] hover:border-[#b85028]/40 rounded-md text-xs font-semibold transition-all cursor-pointer shadow-2xs"
                       >
                         <ListChecks size={15} weight="bold" />
                         <span className="hidden md:inline">
@@ -447,7 +460,7 @@ export const ActivityRemindersTab: React.FC<ActivityRemindersTabProps> = ({
                             'Checklist & Milestones',
                           )}
                         </span>
-                        <ArrowRight size={14} />
+                        <ArrowRight size={13} />
                       </button>
                     )}
                   </div>
@@ -459,7 +472,7 @@ export const ActivityRemindersTab: React.FC<ActivityRemindersTabProps> = ({
       </section>
 
       {/* 3. Guidelines & Standardized Preparation Checklist Template Editor */}
-      <section className="bg-white rounded-xl border border-[#e8e1dd] shadow-2xs overflow-hidden flex flex-col">
+      <section className="bg-white rounded-lg border border-[#e8e1dd] shadow-2xs overflow-hidden flex flex-col">
         {/* Section Header */}
         <div className="p-4 bg-[#faf6f4] border-b border-[#f2ebe7] flex items-center justify-between gap-3">
           <div className="flex items-center gap-2.5">
@@ -481,8 +494,8 @@ export const ActivityRemindersTab: React.FC<ActivityRemindersTabProps> = ({
           </div>
         </div>
 
-        {/* Activity Type Switcher Pills */}
-        <div className="p-3 border-b border-[#f2ebe7] bg-[#fdfbf9] overflow-x-auto flex items-center gap-1.5 scrollbar-thin">
+        {/* Activity Type Switcher Ribbon */}
+        <div className="p-2.5 border-b border-[#f2ebe7] bg-[#fdfbf9] overflow-x-auto flex items-center gap-1.5 scrollbar-thin">
           {ALL_ACTIVITY_TYPES.map((type) => {
             const config = getActivityTypeConfig(type, t);
             const Icon = config.icon;
@@ -493,13 +506,13 @@ export const ActivityRemindersTab: React.FC<ActivityRemindersTabProps> = ({
                 key={type}
                 type="button"
                 onClick={() => setSelectedType(type)}
-                className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer shrink-0 ${
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer shrink-0 ${
                   isSelected
-                    ? 'bg-[#b85028] text-white shadow-xs'
+                    ? 'bg-[#b85028] text-white shadow-2xs'
                     : 'bg-white text-[#57423b] hover:bg-[#faf2ee] border border-[#e8e1dd]'
                 }`}
               >
-                <Icon size={16} weight={isSelected ? 'fill' : 'regular'} />
+                <Icon size={14} weight={isSelected ? 'fill' : 'regular'} />
                 <span>{config.label}</span>
               </button>
             );
@@ -507,16 +520,16 @@ export const ActivityRemindersTab: React.FC<ActivityRemindersTabProps> = ({
         </div>
 
         {/* Template Form Content */}
-        <div className="p-6 flex flex-col gap-6">
+        <div className="p-5 flex flex-col gap-6">
           {/* Active Type Header Box */}
           <div
-            className={`p-4 rounded-xl border flex items-center justify-between gap-4 ${activeConfig.badgeBg} ${activeConfig.badgeBorder}`}
+            className={`p-3.5 rounded-lg border flex items-center justify-between gap-4 ${activeConfig.badgeBg} ${activeConfig.badgeBorder}`}
           >
             <div className="flex items-center gap-3">
               <div
-                className={`w-10 h-10 rounded-xl bg-white flex items-center justify-center border shadow-2xs ${activeConfig.badgeBorder} ${activeConfig.badgeText}`}
+                className={`w-9 h-9 rounded-md bg-white flex items-center justify-center border shadow-2xs ${activeConfig.badgeBorder} ${activeConfig.badgeText}`}
               >
-                <ActiveIcon size={22} weight="duotone" />
+                <ActiveIcon size={20} weight="duotone" />
               </div>
               <div className="flex flex-col">
                 <span className="text-sm font-bold text-[#1e1b19]">
@@ -535,7 +548,7 @@ export const ActivityRemindersTab: React.FC<ActivityRemindersTabProps> = ({
             <button
               type="button"
               onClick={handleAddItem}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-[#faf2ee] text-[#b85028] border border-[#e8e1dd] hover:border-[#b85028]/40 rounded-lg text-xs font-bold shadow-2xs transition-all cursor-pointer"
+              className="inline-flex items-center gap-1.5 h-8 px-3 bg-white hover:bg-[#faf2ee] text-[#b85028] border border-[#e8e1dd] hover:border-[#b85028]/40 rounded-md text-xs font-semibold shadow-2xs transition-all cursor-pointer"
             >
               <Plus size={14} weight="bold" />
               <span>
@@ -558,7 +571,7 @@ export const ActivityRemindersTab: React.FC<ActivityRemindersTabProps> = ({
               </div>
 
               {items.length === 0 ? (
-                <div className="p-8 border border-dashed border-[#e8e1dd] rounded-xl text-center flex flex-col items-center justify-center gap-2">
+                <div className="p-8 border border-dashed border-[#e8e1dd] rounded-lg text-center flex flex-col items-center justify-center gap-2">
                   <ListChecks size={28} className="text-[#8a726a]/50" />
                   <p className="text-xs text-[#8a726a]">
                     No checklist items defined yet for this activity type.
@@ -576,10 +589,10 @@ export const ActivityRemindersTab: React.FC<ActivityRemindersTabProps> = ({
                   {items.map((item, idx) => (
                     <div
                       key={item.id || idx}
-                      className="p-3.5 rounded-xl border border-[#e8e1dd] bg-[#faf6f4]/50 flex flex-col gap-2.5 hover:border-[#b85028]/30 transition-colors"
+                      className="p-3.5 rounded-lg border border-[#e8e1dd] bg-[#faf6f4]/50 flex flex-col gap-2.5 hover:border-[#b85028]/30 transition-colors"
                     >
                       <div className="flex items-center justify-between gap-2">
-                        <span className="w-5 h-5 rounded-full bg-white border border-[#e8e1dd] flex items-center justify-center text-[10px] font-bold text-[#8a726a]">
+                        <span className="w-5 h-5 rounded-md bg-white border border-[#e8e1dd] flex items-center justify-center text-[10px] font-bold text-[#8a726a]">
                           {idx + 1}
                         </span>
 
@@ -593,7 +606,7 @@ export const ActivityRemindersTab: React.FC<ActivityRemindersTabProps> = ({
                                 !item.isRequired,
                               )
                             }
-                            className={`px-2 py-0.5 rounded text-[10px] font-bold cursor-pointer transition-colors border ${
+                            className={`px-2 py-0.5 rounded-md text-[10px] font-semibold cursor-pointer transition-colors border ${
                               item.isRequired
                                 ? 'bg-[#b85028]/10 text-[#b85028] border-[#b85028]/30'
                                 : 'bg-white text-[#8a726a] border-[#e8e1dd]'
@@ -613,7 +626,7 @@ export const ActivityRemindersTab: React.FC<ActivityRemindersTabProps> = ({
                           <button
                             type="button"
                             onClick={() => handleRemoveItem(idx)}
-                            className="w-7 h-7 rounded-lg hover:bg-white text-[#8a726a] hover:text-[#b85028] flex items-center justify-center transition-colors cursor-pointer"
+                            className="w-7 h-7 rounded-md hover:bg-white text-[#8a726a] hover:text-[#b85028] flex items-center justify-center transition-colors cursor-pointer"
                           >
                             <Trash size={14} />
                           </button>
@@ -621,49 +634,41 @@ export const ActivityRemindersTab: React.FC<ActivityRemindersTabProps> = ({
                       </div>
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        <div className="flex flex-col gap-1">
-                          <label
-                            htmlFor={`tab-item-fr-${item.id || idx}`}
-                            className="text-[10px] font-bold text-[#8a726a]"
-                          >
+                        <label className="flex flex-col gap-1 text-[10px] font-bold text-[#8a726a]">
+                          <span>
                             {t(
                               'activities:reminders.itemLabelFr',
                               'French Label',
                             )}
-                          </label>
+                          </span>
                           <input
-                            id={`tab-item-fr-${item.id || idx}`}
                             type="text"
                             value={item.labelFr || ''}
                             onChange={(e) =>
                               handleUpdateItem(idx, 'labelFr', e.target.value)
                             }
                             placeholder="ex: Réserver la salle et la sonorisation"
-                            className="h-8 px-2.5 rounded-md border border-[#e8e1dd] bg-white text-xs text-[#1e1b19] focus:outline-none focus:border-[#b85028]"
+                            className="h-8 px-2.5 rounded-md border border-[#e8e1dd] bg-white text-xs text-[#1e1b19] font-normal focus:outline-none focus:border-[#b85028]"
                           />
-                        </div>
+                        </label>
 
-                        <div className="flex flex-col gap-1">
-                          <label
-                            htmlFor={`tab-item-en-${item.id || idx}`}
-                            className="text-[10px] font-bold text-[#8a726a]"
-                          >
+                        <label className="flex flex-col gap-1 text-[10px] font-bold text-[#8a726a]">
+                          <span>
                             {t(
                               'activities:reminders.itemLabelEn',
                               'English Label',
                             )}
-                          </label>
+                          </span>
                           <input
-                            id={`tab-item-en-${item.id || idx}`}
                             type="text"
                             value={item.labelEn || ''}
                             onChange={(e) =>
                               handleUpdateItem(idx, 'labelEn', e.target.value)
                             }
                             placeholder="ex: Confirm venue and sound equipment"
-                            className="h-8 px-2.5 rounded-md border border-[#e8e1dd] bg-white text-xs text-[#1e1b19] focus:outline-none focus:border-[#b85028]"
+                            className="h-8 px-2.5 rounded-md border border-[#e8e1dd] bg-white text-xs text-[#1e1b19] font-normal focus:outline-none focus:border-[#b85028]"
                           />
-                        </div>
+                        </label>
                       </div>
                     </div>
                   ))}
@@ -680,48 +685,40 @@ export const ActivityRemindersTab: React.FC<ActivityRemindersTabProps> = ({
                 )}
               </h4>
 
-              <div className="flex flex-col gap-1.5">
-                <label
-                  htmlFor="tab-instructions-fr"
-                  className="text-xs font-bold text-[#57423b]"
-                >
+              <label className="flex flex-col gap-1.5 text-xs font-bold text-[#57423b]">
+                <span>
                   {t(
                     'activities:reminders.instructionsFr',
                     'Directives Pastorales (Français)',
                   )}
-                </label>
+                </span>
                 <textarea
-                  id="tab-instructions-fr"
                   rows={4}
                   value={instructionsFr}
                   onChange={(e) => setInstructionsFr(e.target.value)}
                   placeholder="Instructions pastorales envoyées aux coordinateurs de centre..."
-                  className="p-3 rounded-lg border border-[#e8e1dd] bg-white text-xs text-[#1e1b19] focus:outline-none focus:border-[#b85028] resize-none leading-relaxed"
+                  className="p-3 rounded-md border border-[#e8e1dd] bg-white text-xs text-[#1e1b19] font-normal focus:outline-none focus:border-[#b85028] resize-none leading-relaxed"
                 />
-              </div>
+              </label>
 
-              <div className="flex flex-col gap-1.5">
-                <label
-                  htmlFor="tab-instructions-en"
-                  className="text-xs font-bold text-[#57423b]"
-                >
+              <label className="flex flex-col gap-1.5 text-xs font-bold text-[#57423b]">
+                <span>
                   {t(
                     'activities:reminders.instructionsEn',
                     'Leadership Directives (English)',
                   )}
-                </label>
+                </span>
                 <textarea
-                  id="tab-instructions-en"
                   rows={4}
                   value={instructionsEn}
                   onChange={(e) => setInstructionsEn(e.target.value)}
                   placeholder="Pastoral directives sent to town coordinators..."
-                  className="p-3 rounded-lg border border-[#e8e1dd] bg-white text-xs text-[#1e1b19] focus:outline-none focus:border-[#b85028] resize-none leading-relaxed"
+                  className="p-3 rounded-md border border-[#e8e1dd] bg-white text-xs text-[#1e1b19] font-normal focus:outline-none focus:border-[#b85028] resize-none leading-relaxed"
                 />
-              </div>
+              </label>
 
-              {/* Informational Box */}
-              <div className="p-3 rounded-lg bg-[#faf2ee] border border-[#e8e1dd] text-[11px] text-[#57423b] flex items-start gap-2">
+              {/* Informational Alert Box */}
+              <div className="p-3 rounded-md bg-[#faf2ee] border border-[#e8e1dd] text-[11px] text-[#57423b] flex items-start gap-2">
                 <Sparkle
                   size={16}
                   weight="fill"
@@ -742,7 +739,7 @@ export const ActivityRemindersTab: React.FC<ActivityRemindersTabProps> = ({
               type="button"
               onClick={handleSave}
               disabled={updateTemplateMutation.isPending}
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#b85028] hover:bg-[#a44520] text-white rounded-lg text-xs font-bold shadow-xs active:scale-[0.98] transition-all disabled:opacity-50 cursor-pointer"
+              className="inline-flex items-center gap-2 h-9 px-5 bg-[#b85028] hover:bg-[#a44520] text-white rounded-md text-xs font-semibold shadow-2xs active:scale-[0.98] transition-all disabled:opacity-50 cursor-pointer"
             >
               <Check size={16} weight="bold" />
               <span>

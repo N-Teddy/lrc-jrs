@@ -6,6 +6,7 @@ import {
   MagnifyingGlass,
   SidebarSimple,
   SignOut,
+  Sparkle,
 } from '@phosphor-icons/react';
 import type React from 'react';
 import { useEffect, useRef, useState } from 'react';
@@ -23,6 +24,8 @@ interface HeaderProps {
   onNavigateToResource?: (resource: NotificationResource) => void;
   onOpenNotificationsPage?: () => void;
   title?: string;
+  hasUpdate?: boolean;
+  onOpenWhatsNew?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -32,6 +35,8 @@ export const Header: React.FC<HeaderProps> = ({
   onNavigateToResource,
   onOpenNotificationsPage,
   title = 'Dashboard Overview',
+  hasUpdate = false,
+  onOpenWhatsNew,
 }) => {
   const { t, i18n } = useTranslation();
   const { user, signOut } = useAuth();
@@ -139,13 +144,21 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             type="button"
             onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
-            className="h-10 flex items-center gap-2.5 px-3 rounded-lg border border-[#e8e1dd] bg-white hover:bg-[#faf2ee] transition cursor-pointer"
+            className="h-10 flex items-center gap-2.5 px-3 rounded-lg border border-[#e8e1dd] bg-white hover:bg-[#faf2ee] transition cursor-pointer relative"
           >
-            <UserAvatar
-              avatarUrl={user?.avatarUrl}
-              name={user?.fullName}
-              size="sm"
-            />
+            <div className="relative">
+              <UserAvatar
+                avatarUrl={user?.avatarUrl}
+                name={user?.fullName}
+                size="sm"
+              />
+              {hasUpdate && (
+                <span className="absolute -top-0.5 -right-0.5 flex h-2.5 w-2.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#b85028] opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#b85028] ring-2 ring-white" />
+                </span>
+              )}
+            </div>
 
             {/* User Name & Role always visible */}
             <div className="flex flex-col text-left leading-tight">
@@ -197,6 +210,26 @@ export const Header: React.FC<HeaderProps> = ({
                   </div>
                 </div>
               </div>
+
+              {/* What's New & Release Updates */}
+              <button
+                type="button"
+                onClick={() => {
+                  setIsProfileMenuOpen(false);
+                  onOpenWhatsNew?.();
+                }}
+                className="w-full flex items-center justify-between px-3 py-2 rounded-md text-xs font-medium text-[#57423b] hover:bg-[#faf2ee] hover:text-[#1e1b19] transition cursor-pointer"
+              >
+                <div className="flex items-center gap-2">
+                  <Sparkle size={15} weight="bold" className="text-[#b85028]" />
+                  <span>{t('dashboard:whatsNew', "What's New")}</span>
+                </div>
+                {hasUpdate && (
+                  <span className="px-1.5 py-0.5 rounded-full bg-[#b85028] text-white text-[10px] font-bold shadow-2xs animate-pulse">
+                    {t('dashboard:updateBadge', 'Update')}
+                  </span>
+                )}
+              </button>
 
               <button
                 type="button"

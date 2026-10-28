@@ -26,11 +26,15 @@ interface DashboardLayoutProps {
   user: IAuthUser;
   onSwitchRegion: () => void;
   hasMultiTownAccess: boolean;
+  hasUpdate?: boolean;
+  onOpenWhatsNew?: () => void;
 }
 
 export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   user,
   onSwitchRegion,
+  hasUpdate,
+  onOpenWhatsNew,
 }) => {
   const { t } = useTranslation();
   const {
@@ -189,6 +193,8 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         onNavigateToResource={handleNavigateToResource}
         onOpenNotificationsPage={() => setActiveTab('notifications')}
         title={tabTitle}
+        hasUpdate={hasUpdate}
+        onOpenWhatsNew={onOpenWhatsNew}
       />
 
       {/* 3. Main Workspace Area */}

@@ -77,6 +77,8 @@ function AppContent() {
           user={user}
           hasMultiTownAccess={hasMultiTownAccess}
           onSwitchRegion={handleSwitchRegion}
+          hasUpdate={updater.hasUpdate}
+          onOpenWhatsNew={updater.openWhatsNew}
         />
       );
     }

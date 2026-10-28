@@ -1,0 +1,70 @@
+[
+  {
+    "version": "0.0.1",
+    "date": "2026-10-26",
+    "releaseTitle": {
+      "en": "Activity Reminders & Team Alerts",
+      "fr": "Rappels d'Activités & Alertes d'Équipe"
+    },
+    "features": {
+      "en": [
+        "Activity Reminders: Automatic popups before upcoming meetings and events.",
+        "Offline Note Saving: Keep writing notes and attendance even without internet.",
+        "Live Team Alerts: Instant notices for member transfers, reviews, and reports.",
+        "Member Self-Onboarding: Direct links for new youth intake registration."
+      ],
+      "fr": [
+        "Rappels d'activités : Alertes automatiques avant vos réunions et événements.",
+        "Sauvegarde hors ligne : Continuez à saisir vos notes même sans connexion.",
+        "Alertes d'équipe en direct : Notifications pour transferts, révisions et rapports.",
+        "Auto-inscription des jeunes : Liens directs pour l'accueil de nouveaux membres."
+      ]
+    },
+    "fixes": {
+      "en": [
+        "Smoother Reconnection: Auto-syncs your data instantly when connection returns.",
+        "Full Bilingual Interface: Clear English and French text across all screens.",
+        "Cleaner Dropdowns: Easier city and regional hub selection."
+      ],
+      "fr": [
+        "Reconnexion fluide : Synchronisation automatique dès le retour d'Internet.",
+        "Interface bilingue intégrale : Textes clairs en français et anglais sur tous les écrans.",
+        "Menus déroulants simplifiés : Choix plus rapide de votre ville et centre régional."
+      ]
+    }
+  },
+  {
+    "version": "0.0.0",
+    "date": "2026-10-19",
+    "releaseTitle": {
+      "en": "Desktop Portal Foundation",
+      "fr": "Lancement du Portail Bureau"
+    },
+    "features": {
+      "en": [
+        "Desktop Application: Dedicated desktop portal for Cameroon regional teams.",
+        "Regional Hub Switching: One-click switching between Yaoundé, Douala, Bertoua, and more.",
+        "Document Drive: Browse and open youth files and reports directly on your computer.",
+        "Secure Sign-In: Protected accounts with temporary password setup for new staff."
+      ],
+      "fr": [
+        "Application Bureau : Portail dédié pour les équipes régionales du Cameroun.",
+        "Changement de centre : Basculez en un clic entre Yaoundé, Douala, Bertoua, etc.",
+        "Espace Documents : Ouvrez et consultez les dossiers et rapports sur votre ordinateur.",
+        "Connexion sécurisée : Accès protégé avec mot de passe temporaire pour le personnel."
+      ]
+    },
+    "fixes": {
+      "en": [
+        "Offline Fonts: Fast, crisp typography that loads without internet access.",
+        "Refined Sidebar: Streamlined navigation with responsive hover tooltips.",
+        "Auto-Update Support: Built-in system to receive future desktop releases."
+      ],
+      "fr": [
+        "Polices hors ligne : Affichage net et rapide sans besoin de connexion.",
+        "Barre latérale allégée : Navigation épurée avec infobulles explicatives.",
+        "Mises à jour automatiques : Prêt à recevoir directement les futures versions."
+      ]
+    }
+  }
+]
