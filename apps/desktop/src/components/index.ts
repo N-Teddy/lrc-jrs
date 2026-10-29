@@ -1,3 +1,4 @@
+export * from './ComingSoonModal';
 export * from './CustomSelect';
 export * from './DatePeriodFilter';
 export * from './DatePicker';

@@ -15,6 +15,7 @@ import { ActivityStatus, ActivityType, type IActivity } from '@jrs/shared';
 import { Bell, CalendarBlank, CircleNotch } from '@phosphor-icons/react';
 import type React from 'react';
 import { useEffect, useState } from 'react';
+import { ComingSoonModal } from '../../../components';
 import { ActivityAttendanceRoster } from './ActivityAttendanceRoster';
 import { ActivityAuditLogView } from './ActivityAuditLogView';
 import { ActivityCalendarView } from './ActivityCalendarView';
@@ -56,9 +57,11 @@ export const ActivitiesFeature: React.FC<ActivitiesFeatureProps> = ({
   const { user } = useAuth();
   const { activeTown, activeTownId } = useTownContext();
 
+  const isProd = import.meta.env.PROD || import.meta.env.MODE === 'production';
+
   // Navigation State
   const [activeTab, setActiveTab] = useState<ActivityMainTab>(
-    initialSubTab === 'reminders' ? 'reminders' : 'schedule',
+    initialSubTab === 'reminders' && !isProd ? 'reminders' : 'schedule',
   );
   const [subView, setSubView] = useState<ActivitySubView>('list');
   const [selectedActivity, setSelectedActivity] = useState<IActivity | null>(
@@ -83,6 +86,7 @@ export const ActivitiesFeature: React.FC<ActivitiesFeatureProps> = ({
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [isReminderTemplatesModalOpen, setIsReminderTemplatesModalOpen] =
     useState(false);
+  const [isComingSoonModalOpen, setIsComingSoonModalOpen] = useState(false);
   const [editingActivity, setEditingActivity] = useState<IActivity | null>(
     null,
   );
@@ -124,7 +128,12 @@ export const ActivitiesFeature: React.FC<ActivitiesFeatureProps> = ({
 
   useEffect(() => {
     if (initialSubTab === 'reminders' && !initialActivityId) {
-      setActiveTab('reminders');
+      if (isProd) {
+        setIsComingSoonModalOpen(true);
+        setActiveTab('schedule');
+      } else {
+        setActiveTab('reminders');
+      }
       setSubView('list');
       setSelectedActivity(null);
     } else if (initialSubTab === 'schedule' && !initialActivityId) {
@@ -350,7 +359,13 @@ export const ActivitiesFeature: React.FC<ActivitiesFeatureProps> = ({
 
               <button
                 type="button"
-                onClick={() => setActiveTab('reminders')}
+                onClick={() => {
+                  if (isProd) {
+                    setIsComingSoonModalOpen(true);
+                  } else {
+                    setActiveTab('reminders');
+                  }
+                }}
                 className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md text-xs font-bold transition-all cursor-pointer ${
                   activeTab === 'reminders'
                     ? 'bg-white text-[#b85028] shadow-xs border border-[#e8e1dd]'
@@ -410,7 +425,6 @@ export const ActivitiesFeature: React.FC<ActivitiesFeatureProps> = ({
                   setPage(1);
                 }}
                 onOpenCreateModal={handleOpenCreateModal}
-                onOpenReminderGuidelines={() => setActiveTab('reminders')}
                 onClearFilters={handleClearFilters}
               />
 
@@ -501,6 +515,16 @@ export const ActivitiesFeature: React.FC<ActivitiesFeatureProps> = ({
       <ActivityReminderTemplatesModal
         isOpen={isReminderTemplatesModalOpen}
         onClose={() => setIsReminderTemplatesModalOpen(false)}
+      />
+
+      {/* Coming Soon Modal for Reminders & Guidelines on PROD */}
+      <ComingSoonModal
+        isOpen={isComingSoonModalOpen}
+        onClose={() => setIsComingSoonModalOpen(false)}
+        featureName={t(
+          'activities:reminders.tabTitle',
+          'Reminders & Automated Guidelines',
+        )}
       />
     </div>
   );

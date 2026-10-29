@@ -2,7 +2,6 @@ import { useTownContext, useTranslation } from '@jrs/client-core';
 import {
   Check,
   GridFour,
-  Link,
   MagnifyingGlass,
   ShieldCheck,
   Table,
@@ -25,7 +24,6 @@ interface MemberFilterToolbarProps {
   viewMode: ViewMode;
   onViewModeChange: (mode: ViewMode) => void;
   onOpenRegisterModal: () => void;
-  onOpenIntakeLinksModal?: () => void;
   pendingReviewsCount?: number;
   onOpenPendingReviewsModal?: () => void;
 }
@@ -41,7 +39,6 @@ export const MemberFilterToolbar: React.FC<MemberFilterToolbarProps> = ({
   viewMode,
   onViewModeChange,
   onOpenRegisterModal,
-  onOpenIntakeLinksModal,
   pendingReviewsCount = 0,
   onOpenPendingReviewsModal,
 }) => {
@@ -160,19 +157,6 @@ export const MemberFilterToolbar: React.FC<MemberFilterToolbarProps> = ({
                 <span className="w-5 h-5 rounded-full bg-[#b85028] text-white text-[10px] flex items-center justify-center font-bold">
                   {pendingReviewsCount}
                 </span>
-              </button>
-            )}
-
-            {/* Intake Links Modal Button */}
-            {onOpenIntakeLinksModal && (
-              <button
-                type="button"
-                onClick={onOpenIntakeLinksModal}
-                className="h-10 flex items-center gap-1.5 px-3 bg-[#faf2ee] hover:bg-[#f4ece9] text-[#57423b] border border-[#e8e1dd] rounded-md text-xs font-bold transition-all cursor-pointer shadow-2xs"
-                title="Share and manage member intake invitation links"
-              >
-                <Link size={16} weight="bold" />
-                <span>Intake Links</span>
               </button>
             )}
 
