@@ -25,18 +25,28 @@ export function getAgeCategory(age: number | null): AgeCategory {
   return 'SENIOR';
 }
 
+export function extractCameroonLocalDigits(
+  val: string | undefined | null,
+): string {
+  if (!val) return '';
+  let digits = val.replace(/\D/g, '');
+
+  // Strip international prefix (00237 or 237)
+  if (digits.startsWith('00237')) {
+    digits = digits.slice(5);
+  } else if (digits.startsWith('237')) {
+    digits = digits.slice(3);
+  }
+
+  return digits.slice(0, 9);
+}
+
 export function formatCameroonPhone(
   phone: string | undefined | null,
   options?: { includeCountryCode?: boolean },
 ): string {
   if (!phone) return '';
-  const digits = phone.replace(/\D/g, '');
-  let localDigits = '';
-  if (digits.startsWith('237') && digits.length === 12) {
-    localDigits = digits.slice(3);
-  } else if (digits.length === 9) {
-    localDigits = digits;
-  }
+  const localDigits = extractCameroonLocalDigits(phone);
 
   if (localDigits.length === 9) {
     const formatted = `${localDigits.slice(0, 3)} ${localDigits.slice(3, 5)} ${localDigits.slice(5, 7)} ${localDigits.slice(7, 9)}`;
@@ -49,26 +59,24 @@ export function formatCameroonPhoneInput(
   val: string | undefined | null,
 ): string {
   if (!val) return '';
-  const digits = val.replace(/\D/g, '').slice(0, 9);
-  if (digits.length <= 3) return digits;
-  if (digits.length <= 5) return `${digits.slice(0, 3)} ${digits.slice(3)}`;
-  if (digits.length <= 7)
-    return `${digits.slice(0, 3)} ${digits.slice(3, 5)} ${digits.slice(5)}`;
-  return `${digits.slice(0, 3)} ${digits.slice(3, 5)} ${digits.slice(5, 7)} ${digits.slice(7, 9)}`;
+  const localDigits = extractCameroonLocalDigits(val);
+  if (localDigits.length <= 3) return localDigits;
+  if (localDigits.length <= 5)
+    return `${localDigits.slice(0, 3)} ${localDigits.slice(3)}`;
+  if (localDigits.length <= 7)
+    return `${localDigits.slice(0, 3)} ${localDigits.slice(3, 5)} ${localDigits.slice(5)}`;
+  return `${localDigits.slice(0, 3)} ${localDigits.slice(3, 5)} ${localDigits.slice(5, 7)} ${localDigits.slice(7, 9)}`;
 }
 
 export function getCleanDigitsForWhatsApp(
   phone: string | undefined | null,
 ): string {
   if (!phone) return '';
-  const digits = phone.replace(/\D/g, '');
-  if (digits.startsWith('237') && digits.length === 12) {
-    return digits;
+  const localDigits = extractCameroonLocalDigits(phone);
+  if (localDigits.length === 9) {
+    return `237${localDigits}`;
   }
-  if (digits.length === 9) {
-    return `237${digits}`;
-  }
-  return digits;
+  return phone.replace(/\D/g, '');
 }
 
 // fallow-ignore-next-line unused-export

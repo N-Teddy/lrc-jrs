@@ -20,6 +20,7 @@ import {
 } from '../../../components';
 import {
   calculateAge,
+  extractCameroonLocalDigits,
   formatCameroonPhoneInput,
 } from '../utils/member-ui.utils';
 
@@ -110,7 +111,8 @@ export const EditApproveIntakeModal: React.FC<EditApproveIntakeModalProps> = ({
       );
       return;
     }
-    if (!phoneNumber.trim()) {
+    const localPhoneDigits = extractCameroonLocalDigits(phoneNumber);
+    if (!localPhoneDigits) {
       setFormError(
         t('members:intake.errors.phoneRequired', 'Phone Number is required'),
       );
@@ -130,7 +132,7 @@ export const EditApproveIntakeModal: React.FC<EditApproveIntakeModalProps> = ({
       await onConfirm({
         fullName: fullName.trim(),
         townId,
-        phoneNumber: phoneNumber.trim(),
+        phoneNumber: `+237${localPhoneDigits}`,
         email: email.trim() || undefined,
         gender,
         dateOfBirth: dateOfBirth || candidate.dateOfBirth || '',

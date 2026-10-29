@@ -133,14 +133,20 @@ export const IntakeForm: React.FC<IntakeFormProps> = ({
 
   // Phone sanitizer with 6xx xx xx xx formatting
   const handlePhoneChange = (val: string) => {
-    const digits = val.replace(/\D/g, '').slice(0, 9);
-    let formatted = digits;
-    if (digits.length > 7) {
-      formatted = `${digits.slice(0, 3)} ${digits.slice(3, 5)} ${digits.slice(5, 7)} ${digits.slice(7, 9)}`;
-    } else if (digits.length > 5) {
-      formatted = `${digits.slice(0, 3)} ${digits.slice(3, 5)} ${digits.slice(5)}`;
-    } else if (digits.length > 3) {
-      formatted = `${digits.slice(0, 3)} ${digits.slice(3)}`;
+    let digits = val.replace(/\D/g, '');
+    if (digits.startsWith('00237')) {
+      digits = digits.slice(5);
+    } else if (digits.startsWith('237')) {
+      digits = digits.slice(3);
+    }
+    const localDigits = digits.slice(0, 9);
+    let formatted = localDigits;
+    if (localDigits.length > 7) {
+      formatted = `${localDigits.slice(0, 3)} ${localDigits.slice(3, 5)} ${localDigits.slice(5, 7)} ${localDigits.slice(7, 9)}`;
+    } else if (localDigits.length > 5) {
+      formatted = `${localDigits.slice(0, 3)} ${localDigits.slice(3, 5)} ${localDigits.slice(5)}`;
+    } else if (localDigits.length > 3) {
+      formatted = `${localDigits.slice(0, 3)} ${localDigits.slice(3)}`;
     }
     setPhoneNumber(formatted);
   };
