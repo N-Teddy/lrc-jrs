@@ -1,6 +1,7 @@
 import {
   usePendingReviewsQuery,
   useReviewMemberMutation,
+  useTownContext,
   useTranslation,
 } from '@jrs/client-core';
 import { calculateAge, type IUser } from '@jrs/shared';
@@ -10,6 +11,7 @@ import {
   CheckCircle,
   Clock,
   Key,
+  PencilSimple,
   Phone,
   ShieldCheck,
   Warning,
@@ -31,14 +33,23 @@ export const PendingIntakeReviewsModal: React.FC<
   PendingIntakeReviewsModalProps
 > = ({ isOpen, onClose, activeTownId, activeTownName }) => {
   const { t } = useTranslation();
+  const { availableTowns = [] } = useTownContext();
+
   // Selected member for approve / reject confirmation
   const [approvingMember, setApprovingMember] = useState<IUser | null>(null);
   const [rejectingMember, setRejectingMember] = useState<IUser | null>(null);
 
-  // Approval Options
+  // Approval Options & Candidate Edits
   const [grantAppAccess, setGrantAppAccess] = useState(false);
   const [reviewNotes, setReviewNotes] = useState('');
   const [actionError, setActionError] = useState<string | null>(null);
+
+  const [editFullName, setEditFullName] = useState('');
+  const [editPhoneNumber, setEditPhoneNumber] = useState('');
+  const [editEmail, setEditEmail] = useState('');
+  const [editTownId, setEditTownId] = useState('');
+  const [editGender, setEditGender] = useState<'MALE' | 'FEMALE'>('MALE');
+  const [editDateOfBirth, setEditDateOfBirth] = useState('');
 
   // Queries & Mutations
   const { data: pendingMembers = [], isLoading } =
@@ -46,6 +57,29 @@ export const PendingIntakeReviewsModal: React.FC<
   const reviewMutation = useReviewMemberMutation();
 
   if (!isOpen) return null;
+
+  const handleStartApprove = (member: IUser) => {
+    setApprovingMember(member);
+    setRejectingMember(null);
+    setEditFullName(member.fullName || '');
+    setEditPhoneNumber(member.phoneNumber || '');
+    setEditEmail(member.email || '');
+    const townIdStr =
+      typeof member.homeTownId === 'object' && member.homeTownId !== null
+        ? (member.homeTownId as any)._id?.toString() ||
+          (member.homeTownId as any).id
+        : member.homeTownId?.toString() || activeTownId || '';
+    setEditTownId(townIdStr);
+    setEditGender(member.gender || 'MALE');
+    setEditDateOfBirth(
+      member.dateOfBirth
+        ? new Date(member.dateOfBirth).toISOString().split('T')[0]
+        : '',
+    );
+    setGrantAppAccess(false);
+    setReviewNotes('');
+    setActionError(null);
+  };
 
   const handleConfirmApproval = async () => {
     if (!approvingMember) return;
@@ -56,6 +90,12 @@ export const PendingIntakeReviewsModal: React.FC<
         memberId: approvingMember.id,
         dto: {
           action: 'APPROVE',
+          fullName: editFullName.trim() || undefined,
+          phoneNumber: editPhoneNumber.trim() || undefined,
+          email: editEmail.trim() || undefined,
+          homeTownId: editTownId || undefined,
+          gender: editGender,
+          dateOfBirth: editDateOfBirth || undefined,
           grantAppAccess,
           notes: reviewNotes.trim() ? reviewNotes.trim() : undefined,
         },
@@ -256,12 +296,7 @@ export const PendingIntakeReviewsModal: React.FC<
 
                       <button
                         type="button"
-                        onClick={() => {
-                          setApprovingMember(member);
-                          setRejectingMember(null);
-                          setGrantAppAccess(false); // DEFAULT FALSE as requested
-                          setReviewNotes('');
-                        }}
+                        onClick={() => handleStartApprove(member)}
                         className="px-3.5 py-1.5 rounded-md bg-[#2c4e37] hover:bg-[#223d2b] text-white text-xs font-bold shadow-2xs transition-all cursor-pointer flex items-center gap-1.5"
                       >
                         <Check size={14} weight="bold" />
@@ -276,22 +311,121 @@ export const PendingIntakeReviewsModal: React.FC<
 
           {/* APPROVAL CONFIRMATION DRAWER / SUBPANEL */}
           {approvingMember && (
-            <div className="mt-2 p-4 rounded-xl bg-[#c2e9ca]/20 border border-[#a9d0b2] flex flex-col gap-3 animate-in fade-in duration-150">
-              <div className="flex items-center justify-between">
+            <div className="mt-2 p-4.5 rounded-xl bg-[#f4faf5] border border-[#a9d0b2] flex flex-col gap-3.5 animate-in fade-in duration-150">
+              <div className="flex items-center justify-between border-b border-[#c2e9ca] pb-2.5">
                 <span className="text-xs font-bold text-[#2c4e37] flex items-center gap-1.5">
-                  <CheckCircle size={16} weight="fill" />
-                  {t('members:intake.approveHeader', {
+                  <PencilSimple size={16} weight="bold" />
+                  {t('members:intake.reviewAndApproveTitle', {
                     name: approvingMember.fullName,
-                    defaultValue: `Approve "${approvingMember.fullName}" for Community Directory`,
+                    defaultValue: `Review & Edit Candidate Details: "${approvingMember.fullName}"`,
                   })}
                 </span>
                 <button
                   type="button"
                   onClick={() => setApprovingMember(null)}
-                  className="text-[#8a726a] hover:text-[#1e1b19] cursor-pointer"
+                  className="text-[#8a726a] hover:text-[#1e1b19] cursor-pointer p-1 rounded hover:bg-black/5"
+                  aria-label="Cancel"
                 >
                   <X size={15} />
                 </button>
+              </div>
+
+              {/* Editable candidate information grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-xs">
+                {/* Full Name */}
+                <label className="block text-[11px] font-bold text-[#2c4e37]">
+                  <span className="block mb-1">
+                    {t('members:intake.editFullName', 'Full Name')} *
+                  </span>
+                  <input
+                    type="text"
+                    value={editFullName}
+                    onChange={(e) => setEditFullName(e.target.value)}
+                    placeholder="Candidate full name"
+                    className="w-full h-9 px-3 rounded-md bg-white border border-[#a9d0b2] text-xs font-normal text-[#1e1b19] placeholder:text-[#8a726a] outline-none focus:border-[#2c4e37] focus:ring-1 focus:ring-[#2c4e37]"
+                  />
+                </label>
+
+                {/* Community Town / Hub */}
+                <label className="block text-[11px] font-bold text-[#2c4e37]">
+                  <span className="block mb-1">
+                    {t('members:intake.editTown', 'Community Hub / Town')} *
+                  </span>
+                  <select
+                    value={editTownId}
+                    onChange={(e) => setEditTownId(e.target.value)}
+                    className="w-full h-9 px-3 rounded-md bg-white border border-[#a9d0b2] text-xs font-normal text-[#1e1b19] outline-none focus:border-[#2c4e37] focus:ring-1 focus:ring-[#2c4e37] cursor-pointer"
+                  >
+                    {availableTowns.map((town) => (
+                      <option key={town.id} value={town.id}>
+                        {town.name} ({town.code})
+                      </option>
+                    ))}
+                  </select>
+                </label>
+
+                {/* Phone Number */}
+                <label className="block text-[11px] font-bold text-[#2c4e37]">
+                  <span className="block mb-1">
+                    {t('members:intake.editPhone', 'Phone Number')} *
+                  </span>
+                  <input
+                    type="text"
+                    value={editPhoneNumber}
+                    onChange={(e) => setEditPhoneNumber(e.target.value)}
+                    placeholder="6XXXXXXXX"
+                    className="w-full h-9 px-3 rounded-md bg-white border border-[#a9d0b2] text-xs font-normal text-[#1e1b19] placeholder:text-[#8a726a] outline-none focus:border-[#2c4e37] focus:ring-1 focus:ring-[#2c4e37]"
+                  />
+                </label>
+
+                {/* Email */}
+                <label className="block text-[11px] font-bold text-[#2c4e37]">
+                  <span className="block mb-1">
+                    {t('members:intake.editEmail', 'Email Address')}
+                  </span>
+                  <input
+                    type="email"
+                    value={editEmail}
+                    onChange={(e) => setEditEmail(e.target.value)}
+                    placeholder="name@example.com (optional)"
+                    className="w-full h-9 px-3 rounded-md bg-white border border-[#a9d0b2] text-xs font-normal text-[#1e1b19] placeholder:text-[#8a726a] outline-none focus:border-[#2c4e37] focus:ring-1 focus:ring-[#2c4e37]"
+                  />
+                </label>
+
+                {/* Gender */}
+                <label className="block text-[11px] font-bold text-[#2c4e37]">
+                  <span className="block mb-1">
+                    {t('members:intake.editGender', 'Gender')} *
+                  </span>
+                  <select
+                    value={editGender}
+                    onChange={(e) =>
+                      setEditGender(e.target.value as 'MALE' | 'FEMALE')
+                    }
+                    className="w-full h-9 px-3 rounded-md bg-white border border-[#a9d0b2] text-xs font-normal text-[#1e1b19] outline-none focus:border-[#2c4e37] focus:ring-1 focus:ring-[#2c4e37] cursor-pointer"
+                  >
+                    <option value="MALE">
+                      {t('members:intake.filterMale', 'Male')}
+                    </option>
+                    <option value="FEMALE">
+                      {t('members:intake.filterFemale', 'Female')}
+                    </option>
+                  </select>
+                </label>
+
+                {/* Date of Birth */}
+                <label className="block text-[11px] font-bold text-[#2c4e37]">
+                  <span className="block mb-1">
+                    {t('members:intake.editDob', 'Date of Birth')} *
+                  </span>
+                  <input
+                    type="date"
+                    value={editDateOfBirth}
+                    onChange={(e) => setEditDateOfBirth(e.target.value)}
+                    max={new Date().toISOString().split('T')[0]}
+                    className="w-full h-9 px-3 rounded-md bg-white border border-[#a9d0b2] text-xs font-normal text-[#1e1b19] outline-none focus:border-[#2c4e37] focus:ring-1 focus:ring-[#2c4e37]"
+                  />
+                </label>
               </div>
 
               {/* Security policy notice */}
@@ -329,7 +463,7 @@ export const PendingIntakeReviewsModal: React.FC<
                   'members:intake.notesPlaceholder',
                   'Optional verification note (e.g. Verified via WhatsApp)',
                 )}
-                className="h-9 px-3 rounded-md bg-white border border-[#a9d0b2] text-xs text-[#1e1b19] outline-none"
+                className="h-9 px-3 rounded-md bg-white border border-[#a9d0b2] text-xs text-[#1e1b19] outline-none focus:border-[#2c4e37] focus:ring-1 focus:ring-[#2c4e37]"
               />
 
               <div className="flex items-center justify-end gap-2 pt-1">
@@ -343,12 +477,31 @@ export const PendingIntakeReviewsModal: React.FC<
                 <button
                   type="button"
                   onClick={handleConfirmApproval}
-                  disabled={reviewMutation.isPending}
+                  disabled={
+                    reviewMutation.isPending ||
+                    !editFullName.trim() ||
+                    !editPhoneNumber.trim()
+                  }
                   className="px-4 py-1.5 rounded bg-[#2c4e37] hover:bg-[#223d2b] text-white text-xs font-bold transition-colors cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
                 >
-                  {reviewMutation.isPending
-                    ? t('members:intake.approving', 'Approving...')
-                    : t('members:intake.confirmApproval', 'Confirm Approval')}
+                  {reviewMutation.isPending ? (
+                    <>
+                      <div className="w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                      <span>
+                        {t('members:intake.approving', 'Approving...')}
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <Check size={14} weight="bold" />
+                      <span>
+                        {t(
+                          'members:intake.confirmApproval',
+                          'Confirm Approval & Save Changes',
+                        )}
+                      </span>
+                    </>
+                  )}
                 </button>
               </div>
             </div>

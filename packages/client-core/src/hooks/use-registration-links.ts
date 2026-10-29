@@ -16,6 +16,12 @@ export interface IReviewMemberDto {
   action: 'APPROVE' | 'REJECT';
   grantAppAccess?: boolean;
   notes?: string;
+  fullName?: string;
+  phoneNumber?: string;
+  email?: string;
+  homeTownId?: string;
+  dateOfBirth?: string;
+  gender?: 'MALE' | 'FEMALE';
 }
 
 export function useRegistrationLinksQuery(

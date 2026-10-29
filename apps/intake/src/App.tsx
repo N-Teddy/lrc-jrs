@@ -136,6 +136,7 @@ export default function App() {
         if (formData.email) body.append('email', formData.email);
         body.append('dateOfBirth', formData.dateOfBirth);
         body.append('gender', formData.gender);
+        if (formData.homeTownId) body.append('homeTownId', formData.homeTownId);
         if (formData.integrationDate)
           body.append('integrationDate', formData.integrationDate);
         if (formData.intakeNote) body.append('intakeNote', formData.intakeNote);
@@ -158,6 +159,7 @@ export default function App() {
             email: formData.email || undefined,
             dateOfBirth: formData.dateOfBirth,
             gender: formData.gender,
+            homeTownId: formData.homeTownId || undefined,
             integrationDate: formData.integrationDate || undefined,
             intakeNote: formData.intakeNote || undefined,
           }),

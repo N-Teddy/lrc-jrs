@@ -292,6 +292,12 @@ export class RegistrationLinksService {
       Boolean(link.maxUses && link.usageCount >= link.maxUses);
 
     const town = link.homeTownId as unknown as TownDocument;
+    const towns = await this.townModel.find().sort({ name: 1 }).exec();
+    const availableTowns = towns.map((t) => ({
+      id: t._id.toString(),
+      name: t.name,
+      code: t.code,
+    }));
 
     return {
       token: link.token,
@@ -301,6 +307,7 @@ export class RegistrationLinksService {
         name: town?.name || 'Local Community Town',
         code: town?.code || 'JRS',
       },
+      availableTowns,
       expiresAt: link.expiresAt.toISOString(),
       isExpired,
       isActive: link.isActive,
@@ -407,6 +414,19 @@ export class RegistrationLinksService {
       );
     }
 
+    // Resolve homeTownId (user selection overrides link default)
+    let effectiveTownId = link.homeTownId;
+    if (dto.homeTownId) {
+      const resolvedTown = Types.ObjectId.isValid(dto.homeTownId)
+        ? await this.townModel.findById(dto.homeTownId).exec()
+        : await this.townModel
+            .findOne({ code: dto.homeTownId.toUpperCase() })
+            .exec();
+      if (resolvedTown) {
+        effectiveTownId = resolvedTown._id as Types.ObjectId;
+      }
+    }
+
     // Create user with intakeStatus: PENDING_REVIEW & hasAppAccess: FALSE
     const newMember = new this.userModel({
       fullName: dto.fullName.trim(),
@@ -416,7 +436,7 @@ export class RegistrationLinksService {
       gender: dto.gender,
       dateOfBirth: dto.dateOfBirth,
       isJr: true,
-      homeTownId: link.homeTownId,
+      homeTownId: effectiveTownId,
       role: UserRole.MEMBER,
       isActivePC: false,
       intakeStatus: IntakeStatus.PENDING_REVIEW,
@@ -440,13 +460,13 @@ export class RegistrationLinksService {
     const shortId = newMember._id.toString().slice(-6).toUpperCase();
     const referenceCode = `JRS-${shortId}`;
 
-    const town = await this.townModel.findById(link.homeTownId).exec();
+    const town = await this.townModel.findById(effectiveTownId).exec();
     const townName = town?.name || 'Town';
 
     this.notificationsService
       .createNotification({
         target: {
-          townId: link.homeTownId.toString(),
+          townId: effectiveTownId.toString(),
           roles: [UserRole.AP, UserRole.PC],
         },
         level: 'INFO',
@@ -460,7 +480,7 @@ export class RegistrationLinksService {
         resource: {
           entityType: 'INTAKE',
           entityId: newMember._id.toString(),
-          townId: link.homeTownId.toString(),
+          townId: effectiveTownId.toString(),
           subTab: 'reviews',
         },
         sendPush: true,
@@ -540,19 +560,91 @@ export class RegistrationLinksService {
     }
 
     // Role check: PC can only review members in their town
-    if (
-      currentUser.role !== UserRole.AP &&
-      member.homeTownId?.toString() !== currentUser.homeTownId
-    ) {
-      throw new ForbiddenAppException(ErrorCode.FORBIDDEN);
+    if (currentUser.role !== UserRole.AP) {
+      const memberTownIdStr =
+        (member.homeTownId as any)?._id?.toString() ||
+        member.homeTownId?.toString();
+      const userTownId = Types.ObjectId.isValid(currentUser.homeTownId)
+        ? currentUser.homeTownId
+        : (
+            await this.townModel
+              .findOne({ code: currentUser.homeTownId?.toUpperCase() })
+              .exec()
+          )?._id?.toString();
+
+      if (memberTownIdStr !== userTownId) {
+        throw new ForbiddenAppException(ErrorCode.FORBIDDEN);
+      }
     }
 
     if (dto.action === IntakeReviewAction.APPROVE) {
       member.intakeStatus = IntakeStatus.APPROVED;
+
+      // Update candidate details if modified by leader
+      if (dto.fullName?.trim()) {
+        member.fullName = dto.fullName.trim();
+      }
+
+      if (dto.phoneNumber?.trim()) {
+        const sanitizedPhone = PhoneSanitizer.toInternationalDigits(
+          dto.phoneNumber,
+        );
+        if (sanitizedPhone) {
+          const existingPhone = await this.userModel
+            .findOne({
+              phoneNumber: sanitizedPhone,
+              _id: { $ne: member._id },
+            })
+            .exec();
+          if (existingPhone) {
+            throw new ConflictAppException(ErrorCode.MEMBER_ALREADY_EXISTS);
+          }
+          member.phoneNumber = sanitizedPhone;
+        }
+      }
+
+      if (dto.email !== undefined) {
+        const normalizedEmail = dto.email?.trim().toLowerCase();
+        if (normalizedEmail) {
+          const existingEmail = await this.userModel
+            .findOne({
+              email: normalizedEmail,
+              _id: { $ne: member._id },
+            })
+            .exec();
+          if (existingEmail) {
+            throw new ConflictAppException(ErrorCode.MEMBER_ALREADY_EXISTS);
+          }
+          member.email = normalizedEmail;
+        } else {
+          member.email = undefined;
+        }
+      }
+
+      if (dto.gender) {
+        member.gender = dto.gender;
+      }
+
+      if (dto.dateOfBirth) {
+        member.dateOfBirth = dto.dateOfBirth;
+        member.isJr = isJrAgeEligible(dto.dateOfBirth);
+      }
+
+      if (dto.homeTownId) {
+        const resolvedTown = Types.ObjectId.isValid(dto.homeTownId)
+          ? await this.townModel.findById(dto.homeTownId).exec()
+          : await this.townModel
+              .findOne({ code: dto.homeTownId.toUpperCase() })
+              .exec();
+        if (resolvedTown) {
+          member.homeTownId = resolvedTown._id as Types.ObjectId;
+        }
+      }
+
       // Grant app access only if explicitly chosen by leader
       if (dto.grantAppAccess === true) {
         member.account.hasAppAccess = true;
-      } else {
+      } else if (dto.grantAppAccess === false) {
         member.account.hasAppAccess = false;
       }
 
@@ -563,6 +655,7 @@ export class RegistrationLinksService {
       }
 
       await member.save();
+      await member.populate('homeTownId');
 
       const townName = (member.homeTownId as any)?.name || 'Town';
       const townIdStr =

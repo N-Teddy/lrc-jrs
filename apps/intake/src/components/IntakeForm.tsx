@@ -4,6 +4,7 @@ import {
   ArrowRight,
   CalendarBlank,
   Camera,
+  CaretDown,
   CaretLeft,
   CheckCircle,
   CircleNotch,
@@ -16,7 +17,7 @@ import {
   User,
   WhatsappLogo,
 } from '@phosphor-icons/react';
-import React, { useId, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { LanguageToggle, useTranslation } from '../i18n';
 import { DatePicker } from './DatePicker';
 
@@ -26,6 +27,7 @@ export interface IntakeFormData {
   email: string;
   dateOfBirth: string;
   gender: 'MALE' | 'FEMALE';
+  homeTownId?: string;
   integrationDate?: string;
   intakeNote?: string;
   avatarUrl: string;
@@ -50,6 +52,38 @@ export const IntakeForm: React.FC<IntakeFormProps> = ({
   const { t } = useTranslation();
   const formId = useId();
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Available Towns
+  const availableTowns = useMemo(() => {
+    if (linkInfo?.availableTowns && linkInfo.availableTowns.length > 0) {
+      return linkInfo.availableTowns;
+    }
+    if (linkInfo?.town) {
+      return [linkInfo.town];
+    }
+    return [];
+  }, [linkInfo?.availableTowns, linkInfo?.town]);
+
+  const [selectedTownId, setSelectedTownId] = useState<string>(
+    linkInfo?.town?.id || '',
+  );
+
+  useEffect(() => {
+    if (!selectedTownId && linkInfo?.town?.id) {
+      setSelectedTownId(linkInfo.town.id);
+    }
+  }, [linkInfo?.town?.id, selectedTownId]);
+
+  const activeTown = useMemo(() => {
+    return (
+      availableTowns.find((t) => t.id === selectedTownId) ||
+      linkInfo?.town || {
+        id: '',
+        name: townName,
+        code: townCode,
+      }
+    );
+  }, [availableTowns, selectedTownId, linkInfo?.town, townName, townCode]);
 
   // 3-Step Native Mobile Flow:
   // 1 = Profile (Identity & Birth Date)
@@ -129,7 +163,8 @@ export const IntakeForm: React.FC<IntakeFormProps> = ({
   const isDobValid = Boolean(
     dateOfBirth && computedAge !== null && computedAge > 0,
   );
-  const isStep1Valid = isNameValid && isDobValid;
+  const isTownValid = Boolean(selectedTownId || linkInfo?.town?.id);
+  const isStep1Valid = isNameValid && isDobValid && isTownValid;
 
   const isPhoneValid = phoneNumber.replace(/\D/g, '').length >= 9;
   const isStep2Valid = isPhoneValid;
@@ -146,6 +181,7 @@ export const IntakeForm: React.FC<IntakeFormProps> = ({
       email: email.trim(),
       dateOfBirth,
       gender,
+      homeTownId: selectedTownId || undefined,
       integrationDate: '',
       intakeNote: '',
       avatarUrl: '', // empty: backend generates default avatar automatically
@@ -198,7 +234,7 @@ export const IntakeForm: React.FC<IntakeFormProps> = ({
             <div className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#FAF7F2] border border-[#E8E0D7] text-[11px] font-semibold text-[#5C554F]">
               <MapPin size={11} weight="fill" className="text-[#B85028]" />
               <span>
-                {townName} ({townCode})
+                {activeTown.name} ({activeTown.code})
               </span>
             </div>
           </div>
@@ -429,6 +465,35 @@ export const IntakeForm: React.FC<IntakeFormProps> = ({
                 maxDate={new Date().toISOString().split('T')[0]}
               />
             </div>
+
+            {/* Community Town / Hub Selection */}
+            {availableTowns.length > 0 && (
+              <div>
+                <label
+                  htmlFor={`${formId}-town`}
+                  className="block text-xs font-bold text-[#23201E] mb-1.5"
+                >
+                  {t('form.town')} <span className="text-[#B85028]">*</span>
+                </label>
+                <div className="relative">
+                  <select
+                    id={`${formId}-town`}
+                    value={selectedTownId}
+                    onChange={(e) => setSelectedTownId(e.target.value)}
+                    className="w-full h-11 px-3.5 pr-9 rounded-xl border border-[#E0D7CE] bg-white hover:border-[#C8BEB4] focus:border-[#B85028] focus:ring-3 focus:ring-[#B85028]/12 outline-hidden text-xs sm:text-sm text-[#23201E] transition-all appearance-none cursor-pointer"
+                  >
+                    {availableTowns.map((t) => (
+                      <option key={t.id} value={t.id}>
+                        {t.name} ({t.code})
+                      </option>
+                    ))}
+                  </select>
+                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-[#5C554F]">
+                    <CaretDown size={14} weight="bold" />
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Bottom Thumb CTA Bar */}
@@ -656,7 +721,7 @@ export const IntakeForm: React.FC<IntakeFormProps> = ({
                     <span>{t('form.location')}</span>
                   </span>
                   <strong className="font-bold text-[#B85028]">
-                    {townName} ({townCode})
+                    {activeTown.name} ({activeTown.code})
                   </strong>
                 </div>
               </div>

@@ -73,4 +73,12 @@ export class PublicSubmitMemberDto {
   @IsOptional()
   @IsString()
   avatarUrl?: string;
+
+  @ApiPropertyOptional({
+    example: '6ac68720ccf60d46db9f8bfe',
+    description: 'Optional selected community town ID',
+  })
+  @IsOptional()
+  @IsString()
+  homeTownId?: string;
 }

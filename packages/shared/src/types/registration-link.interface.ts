@@ -27,6 +27,11 @@ export interface IRegistrationLinkPublicInfo {
     name: string;
     code: string;
   };
+  availableTowns?: {
+    id: string;
+    name: string;
+    code: string;
+  }[];
   expiresAt: string;
   isExpired: boolean;
   isActive: boolean;
@@ -41,4 +46,5 @@ export interface IPublicMemberRegistrationDto {
   gender?: Gender;
   integrationDate?: string;
   intakeNote?: string;
+  homeTownId?: string;
 }
