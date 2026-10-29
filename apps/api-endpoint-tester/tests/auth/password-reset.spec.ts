@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { expectAppError } from '../../src/utils/error.assert.js';
+import { expectSuccessResponse } from '../../src/utils/success.assert.js';
 import { TEST_USERS } from '../../src/fixtures/users.js';
 
 test.describe('Auth - Password Reset Flow', () => {
@@ -10,11 +11,12 @@ test.describe('Auth - Password Reset Flow', () => {
       },
     });
 
-    expect(response.ok()).toBeTruthy();
-    const body = await response.json();
-    const data = body.data || body;
-    expect(data.sent).toBe(true);
+    const body = await expectSuccessResponse(response, { status: 200, hasData: true });
+    const data = body.data;
+    expect(data).toHaveProperty('sent');
+    expect(typeof data.sent).toBe('boolean');
     expect(data).toHaveProperty('message');
+    expect(typeof data.message).toBe('string');
   });
 
   test('POST /auth/forgot-password with non-existent identifier returns same success (anti-enumeration)', async ({ request }) => {
@@ -24,10 +26,10 @@ test.describe('Auth - Password Reset Flow', () => {
       },
     });
 
-    expect(response.ok()).toBeTruthy();
-    const body = await response.json();
-    const data = body.data || body;
-    expect(data.sent).toBe(true);
+    const body = await expectSuccessResponse(response, { status: 200, hasData: true });
+    const data = body.data;
+    expect(data).toHaveProperty('sent');
+    expect(typeof data.sent).toBe('boolean');
   });
 
   test('POST /auth/forgot-password with missing identifier returns validation error', async ({ request }) => {

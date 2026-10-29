@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { expectAppError } from '../../src/utils/error.assert.js';
+import { expectSuccessResponse } from '../../src/utils/success.assert.js';
 import { TEST_USERS } from '../../src/fixtures/users.js';
 
 test.describe('Auth - Login', () => {
@@ -11,16 +12,28 @@ test.describe('Auth - Login', () => {
       },
     });
 
-    expect(response.ok()).toBeTruthy();
-    const body = await response.json();
-    expect(body.success).toBe(true);
-    expect(body).toHaveProperty('data');
-    expect(body.data).toHaveProperty('accessToken');
-    expect(body.data).toHaveProperty('refreshToken');
-    expect(body.data).toHaveProperty('user');
-    expect(body.data.requiresPasswordChange).toBe(false);
-    expect(body.data.user).toHaveProperty('id');
-    expect(body.data.user).toHaveProperty('role');
+    const body = await expectSuccessResponse(response, { status: 200, hasData: true });
+    const data = body.data;
+    expect(data).toBeDefined();
+    expect(typeof data).toBe('object');
+    expect(data).toHaveProperty('accessToken');
+    expect(typeof data.accessToken).toBe('string');
+    expect(data).toHaveProperty('refreshToken');
+    expect(typeof data.refreshToken).toBe('string');
+    expect(data).toHaveProperty('user');
+    expect(typeof data.user).toBe('object');
+    expect(data.user).toHaveProperty('id');
+    expect(typeof data.user.id).toBe('string');
+    expect(data.user).toHaveProperty('fullName');
+    expect(data.user).toHaveProperty('role');
+    expect(data.user).toHaveProperty('phoneNumber');
+    expect(data.user).toHaveProperty('email');
+    expect(data.user).toHaveProperty('account');
+    expect(typeof data.user.account).toBe('object');
+    expect(data).toHaveProperty('requiresPasswordChange');
+    expect(data.requiresPasswordChange).toBe(false);
+    expect(data).toHaveProperty('expiresIn');
+    expect(typeof data.expiresIn).toBe('number');
   });
 
   test('login with invalid identifier returns ERR_AUTH_INVALID_CREDENTIALS', async ({ request }) => {

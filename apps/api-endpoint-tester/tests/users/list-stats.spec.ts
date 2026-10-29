@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { AuthHelper } from '../../src/utils/auth.helper.js';
 import { expectAppError } from '../../src/utils/error.assert.js';
+import { expectSuccessResponse, expectPaginationShape } from '../../src/utils/success.assert.js';
 import { TEST_USERS } from '../../src/fixtures/users.js';
 import { writeBugReport } from '../../src/utils/report.helper.js';
 
@@ -18,13 +19,9 @@ test.describe('Users - List and Stats', () => {
       headers: auth.authHeaders(tokens.accessToken),
     });
 
-    expect(response.ok()).toBeTruthy();
-    const body = await response.json();
-    const data = body.data || body;
-    expect(data).toHaveProperty('items');
-    expect(data).toHaveProperty('total');
-    expect(data).toHaveProperty('page');
-    expect(data).toHaveProperty('limit');
+    const body = await expectSuccessResponse(response, { status: 200, hasData: true });
+    const data = body.data;
+    expectPaginationShape(data);
     expect(Array.isArray(data.items)).toBe(true);
   });
 
@@ -36,9 +33,9 @@ test.describe('Users - List and Stats', () => {
       headers: auth.authHeaders(tokens.accessToken),
     });
 
-    expect(response.ok()).toBeTruthy();
-    const body = await response.json();
-    const data = body.data || body;
+    const body = await expectSuccessResponse(response, { status: 200, hasData: true });
+    const data = body.data;
+    expectPaginationShape(data);
     expect(data.page).toBe(1);
     expect(data.limit).toBe(5);
   });
