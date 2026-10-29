@@ -1,5 +1,33 @@
 [
   {
+    "version": "0.0.4",
+    "date": "2026-10-29",
+    "releaseTitle": {
+      "en": "Streamlined Activity Management & Phone Formatter Enhancements",
+      "fr": "Gestion Simplifiée des Activités & Formatage des Numéros"
+    },
+    "features": {
+      "en": [
+        "Streamlined Activity Creation: Removed venue specification requirement and extra directive sections to focus on town hubs and schedules.",
+        "Automatic Schedule-Based Status: Activities now compute lifecycle status automatically upon scheduling without manual status mismatch errors."
+      ],
+      "fr": [
+        "Création d'activité simplifiée : Suppression de l'exigence de salle et des sections superflues pour se concentrer sur les pôles et le calendrier.",
+        "Statut automatique selon l'horaire : Le statut de l'activité est désormais calculé directement selon les dates sans erreurs de validation."
+      ]
+    },
+    "fixes": {
+      "en": [
+        "Phone Input 237 Prefix Handling: Automatic country code stripping when entering or editing Cameroon telephone numbers.",
+        "Host Town Hub Display: Unified location indicators across activity detail, reminder lists, and mobile overview to highlight host towns."
+      ],
+      "fr": [
+        "Gestion du préfixe 237 : Suppression automatique du code pays lors de la saisie ou de l'édition des numéros camerounais.",
+        "Affichage du pôle organisateur : Harmonisation des indicateurs de lieu sur les détails d'activité, rappels et mobile avec la ville hôte."
+      ]
+    }
+  },
+  {
     "version": "0.0.3",
     "date": "2026-10-29",
     "releaseTitle": {
