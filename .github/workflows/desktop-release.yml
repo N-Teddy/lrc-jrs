@@ -64,6 +64,6 @@ jobs:
           tagName: v__VERSION__
           releaseName: 'JR Desktop App v__VERSION__'
           releaseBody: 'See the release notes for what is new in this build.'
-          releaseDraft: true
+          releaseDraft: false
           prerelease: false
           args: ${{ matrix.args }}

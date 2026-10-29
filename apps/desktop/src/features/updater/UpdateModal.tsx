@@ -334,7 +334,13 @@ export const UpdateModal: React.FC<UpdateModalProps> = ({ updater }) => {
               />
               <div className="text-xs text-[#410002] leading-relaxed">
                 <span className="font-bold">Notice: </span>
-                {error}
+                {error.includes('Could not fetch a valid release JSON') ||
+                error.includes('404')
+                  ? t(
+                      'dashboard:whatsNewModal.noRemoteRelease',
+                      'No online release found. The build may still be compiling on GitHub, or you are already up to date.',
+                    )
+                  : error}
               </div>
             </div>
           )}

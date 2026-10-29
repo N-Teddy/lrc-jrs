@@ -249,7 +249,8 @@
       "installed": "Mise à jour installée ! Veuillez redémarrer le portail pour appliquer les changements.",
       "releaseDate": "Publié le {{date}}",
       "versions": "Versions",
-      "current": "Actuelle"
+      "current": "Actuelle",
+      "noRemoteRelease": "Aucune version en ligne trouvée. La compilation est peut-être en cours sur GitHub, ou vous êtes déjà à jour."
     },
     "reservedWorkspace": "Espace réservé initialisé",
     "pristineTitle": "Espace de travail prêt",

@@ -250,7 +250,8 @@
       "installed": "Update installed! Please restart the portal to use the new version.",
       "releaseDate": "Released on {{date}}",
       "versions": "Releases",
-      "current": "Current"
+      "current": "Current",
+      "noRemoteRelease": "No online release found. The build may still be compiling on GitHub, or you are already up to date."
     },
     "reservedWorkspace": "Reserved Workspace Initialized",
     "pristineTitle": "Workspace Ready",
