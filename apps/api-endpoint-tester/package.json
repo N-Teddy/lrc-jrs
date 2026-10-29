@@ -1,0 +1,24 @@
+{
+  "name": "@jrs/api-endpoint-tester",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "Black-box HTTP endpoint tester for JRS API",
+  "scripts": {
+    "test": "playwright test",
+    "test:health": "playwright test tests/health.spec.ts",
+    "test:setup": "playwright test tests/health.spec.ts",
+    "codegen": "playwright codegen",
+    "report": "playwright show-report"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.1",
+    "@types/node": "^24.0.0",
+    "dotenv": "^16.4.7",
+    "typescript": "7.0.2",
+    "zod": "^3.24.1"
+  }
+}
