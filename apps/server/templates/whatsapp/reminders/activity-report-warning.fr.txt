@@ -6,7 +6,7 @@ L'activité suivante est désormais terminée :
 
 📌 *Activité :* {{activityName}}
 📅 *Date de fin :* {{endDateFormatted}}
-📍 *Lieu :* {{locationVenue}}
+📍 *Lieu :* {{townName}}
 
 📄 *Action requise :*
 Le rapport officiel de cette activité n'a pas encore été téléversé sur la plateforme JRS.

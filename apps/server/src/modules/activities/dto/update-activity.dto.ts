@@ -34,11 +34,6 @@ export class UpdateActivityDto {
   @IsString()
   townId?: string;
 
-  @ApiPropertyOptional({ example: 'Conference Hall, Ground Floor' })
-  @IsOptional()
-  @IsString()
-  locationVenue?: string;
-
   @ApiPropertyOptional({ example: 'Rescheduled due to logistics adjustment.' })
   @IsOptional()
   @IsString()

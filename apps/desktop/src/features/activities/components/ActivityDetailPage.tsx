@@ -484,14 +484,10 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
               <span className="text-[#8a726a]">· {dateInfo.timeRange}</span>
             </div>
 
-            <div className="flex items-center gap-1.5">
-              <MapPin size={16} weight="fill" className="text-[#486b52]" />
-              <span>{activity.locationVenue}</span>
-            </div>
-
             {activity.town?.name && (
-              <div className="flex items-center gap-1.5 text-[#8a726a]">
-                <span>
+              <div className="flex items-center gap-1.5">
+                <MapPin size={16} weight="fill" className="text-[#486b52]" />
+                <span className="font-medium text-[#1e1b19]">
                   {t('activities:detail.hostPrefix', {
                     host: activity.town.name,
                     defaultValue: 'Host: {{host}}',

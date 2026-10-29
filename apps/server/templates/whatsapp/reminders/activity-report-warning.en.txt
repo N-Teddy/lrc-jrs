@@ -6,7 +6,7 @@ The following activity has now concluded:
 
 📌 *Activity:* {{activityName}}
 📅 *End Date:* {{endDateFormatted}}
-📍 *Venue:* {{locationVenue}}
+📍 *Town:* {{townName}}
 
 📄 *Action Required:*
 The official report for this activity has not yet been uploaded to the JRS platform.

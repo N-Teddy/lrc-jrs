@@ -97,8 +97,8 @@ export class Activity extends BaseDocument {
   })
   townId: Types.ObjectId;
 
-  @Prop({ type: String, required: true, trim: true })
-  locationVenue: string;
+  @Prop({ type: String, trim: true })
+  locationVenue?: string;
 
   @Prop({ type: String, trim: true })
   notes?: string;

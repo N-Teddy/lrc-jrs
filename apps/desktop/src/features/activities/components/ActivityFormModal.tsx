@@ -79,7 +79,6 @@ export const ActivityFormModal: React.FC<ActivityFormModalProps> = ({
   const [includedTownIds, setIncludedTownIds] = useState<string[]>([]);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
-  const [notes, setNotes] = useState('');
   const [changeReason, setChangeReason] = useState('');
   const [error, setError] = useState<string | null>(null);
 
@@ -119,7 +118,6 @@ export const ActivityFormModal: React.FC<ActivityFormModalProps> = ({
       setIncludedTownIds(initialActivity.includedTownIds || []);
       setStartDate(toDateTimeLocalString(initialActivity.startDate));
       setEndDate(toDateTimeLocalString(initialActivity.endDate));
-      setNotes(initialActivity.notes || '');
       setChangeReason('');
     } else {
       setTitle('');
@@ -134,7 +132,6 @@ export const ActivityFormModal: React.FC<ActivityFormModalProps> = ({
       const later = new Date(now);
       later.setHours(12, 0, 0, 0);
       setEndDate(toDateTimeLocalString(later.toISOString()));
-      setNotes('');
       setChangeReason('');
     }
     setError(null);
@@ -155,7 +152,6 @@ export const ActivityFormModal: React.FC<ActivityFormModalProps> = ({
     if (startDate !== toDateTimeLocalString(initialActivity.startDate))
       return true;
     if (endDate !== toDateTimeLocalString(initialActivity.endDate)) return true;
-    if (notes.trim() !== (initialActivity.notes || '')) return true;
     if (changeReason.trim() !== '') return true;
     return false;
   }, [
@@ -167,7 +163,6 @@ export const ActivityFormModal: React.FC<ActivityFormModalProps> = ({
     includedTownIds,
     startDate,
     endDate,
-    notes,
     changeReason,
   ]);
 
@@ -282,9 +277,12 @@ export const ActivityFormModal: React.FC<ActivityFormModalProps> = ({
         includedTownIds: includedTownIds.filter((id) => id !== townId),
         startDate: startIso,
         endDate: endIso,
-        notes: notes.trim() || undefined,
-        status: computedStatus,
-        changeReason: isEditing ? changeReason.trim() : undefined,
+        ...(isEditing
+          ? {
+              status: computedStatus,
+              changeReason: changeReason.trim(),
+            }
+          : {}),
       });
       onClose();
     } catch (err: any) {
@@ -671,34 +669,6 @@ export const ActivityFormModal: React.FC<ActivityFormModalProps> = ({
                 />
                 <span>{t(`activities:statuses.${computedStatus}`)}</span>
               </span>
-            </div>
-          </div>
-
-          {/* SECTION: Program Notes & Notes */}
-          <div className="flex flex-col gap-3 pt-3 border-t border-[#f4ece9]">
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-[#b85028]" />
-              <span className="text-[11px] font-bold text-[#8a726a] uppercase tracking-wider">
-                Transfer Notes & Directives
-              </span>
-            </div>
-
-            <div className="flex flex-col gap-1.5">
-              <label
-                htmlFor="activity-notes-input"
-                className="font-bold text-[#1e1b19]"
-              >
-                Notes & Agenda{' '}
-                <span className="text-[#8a726a] font-normal">(Optional)</span>
-              </label>
-              <textarea
-                id="activity-notes-input"
-                rows={3}
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                placeholder="Meeting reflections, choir rehearsal agenda, items to bring..."
-                className="w-full p-3.5 rounded-md bg-[#faf2ee] focus:bg-white text-xs border border-[#e8e1dd] focus:border-[#b85028] outline-none transition-all font-medium resize-none"
-              />
             </div>
           </div>
 

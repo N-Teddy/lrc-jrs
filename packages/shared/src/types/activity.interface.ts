@@ -47,7 +47,7 @@ export interface IActivity {
   endDate: string;
   townId: string;
   town?: ITown;
-  locationVenue: string;
+  locationVenue?: string;
   notes?: string;
   hostTownId: string;
   hostTown?: ITown;
@@ -78,10 +78,10 @@ export interface ICreateActivityDto {
   startDate: string;
   endDate?: string;
   townId: string;
-  locationVenue: string;
   notes?: string;
   hostTownId?: string;
   includedTownIds?: string[];
+  status?: ActivityStatus;
 }
 
 export interface IUpdateActivityDto {
@@ -90,7 +90,6 @@ export interface IUpdateActivityDto {
   startDate?: string;
   endDate?: string;
   townId?: string;
-  locationVenue?: string;
   notes?: string;
   status?: ActivityStatus;
   changeReason?: string;

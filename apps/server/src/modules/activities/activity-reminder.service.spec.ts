@@ -117,7 +117,6 @@ describe('ActivityReminderService', () => {
       endDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000 + 7200000),
       hostTownId: townId,
       townId,
-      locationVenue: 'Centre Communautaire Saint-Paul',
       remindersSent: [],
     };
 
@@ -174,7 +173,6 @@ describe('ActivityReminderService', () => {
       endDate: new Date(Date.now() - 24 * 60 * 60 * 1000),
       hostTownId: townId,
       townId,
-      locationVenue: 'Hôpital Laquintinie',
       remindersSent: ['2_WEEKS', '1_WEEK'],
       reports: [],
       report: undefined,
@@ -230,7 +228,6 @@ describe('ActivityReminderService', () => {
       endDate: new Date(Date.now() - 24 * 60 * 60 * 1000),
       hostTownId: townId,
       townId,
-      locationVenue: 'Salle paroissiale',
       remindersSent: [],
       report: { fileId: 'drive-file-123', filename: 'rapport.pdf' },
       reports: [{ fileId: 'drive-file-123', filename: 'rapport.pdf' }],

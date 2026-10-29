@@ -7,7 +7,7 @@ Voici le récapitulatif des activités prévues ce mois-ci :
 {{#if activities.length}}
 {{#each activities}}
 *{{index}}.* *{{name}}*
-   📅 {{dateFormatted}} | 📍 {{locationVenue}} ({{typeLabel}})
+   📅 {{dateFormatted}} ({{typeLabel}})
 {{/each}}
 
 💡 N'hésitez pas à anticiper la préparation des ordres du jour, intervenants et logistique.

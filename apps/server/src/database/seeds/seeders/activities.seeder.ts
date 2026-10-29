@@ -94,7 +94,6 @@ export class ActivitiesSeeder {
         endDate: item.endDate,
         townId,
         hostTownId,
-        locationVenue: item.locationVenue,
         notes: item.notes,
         status: item.status,
         createdBy: creatorId,

@@ -362,7 +362,6 @@ export class ActivitiesService {
       filter.$or = [
         ...(filter.$or || []),
         { title: searchRegex },
-        { locationVenue: searchRegex },
         { notes: searchRegex },
       ];
     }
@@ -664,7 +663,6 @@ export class ActivitiesService {
       startDate,
       endDate,
       townId,
-      locationVenue: dto.locationVenue.trim(),
       notes: dto.notes?.trim(),
       hostTownId,
       includedTownIds,
@@ -786,16 +784,6 @@ export class ActivitiesService {
         newValues.townId = newTownId.toString();
         activity.townId = newTownId;
       }
-    }
-
-    if (
-      dto.locationVenue &&
-      dto.locationVenue.trim() !== activity.locationVenue
-    ) {
-      locationChanged = true;
-      previousValues.locationVenue = activity.locationVenue;
-      newValues.locationVenue = dto.locationVenue.trim();
-      activity.locationVenue = dto.locationVenue.trim();
     }
 
     // Handle activity cancellation and reopening
@@ -930,7 +918,6 @@ export class ActivitiesService {
       bodyKey = 'notifications:activityLocationChangedBody';
       bodyParams = {
         name: activity.title,
-        venue: activity.locationVenue,
       };
     } else if (activity.status === ActivityStatus.COMPLETED) {
       action = 'ACTIVITY_COMPLETED';

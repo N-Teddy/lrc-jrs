@@ -6,7 +6,7 @@ Votre activité approche à grands pas ! Elle se déroulera dans *7 jours* :
 
 📌 *Activité :* {{activityName}}
 📅 *Date :* {{startDateFormatted}}
-📍 *Lieu :* {{locationVenue}}
+📍 *Lieu :* {{townName}}
 🏷️ *Type :* {{activityTypeLabel}}
 
 ---

@@ -7,7 +7,7 @@ Here is the schedule of upcoming activities this month:
 {{#if activities.length}}
 {{#each activities}}
 *{{index}}.* *{{name}}*
-   📅 {{dateFormatted}} | 📍 {{locationVenue}} ({{typeLabel}})
+   📅 {{dateFormatted}} ({{typeLabel}})
 {{/each}}
 
 💡 Be sure to prepare your meeting agendas, speakers, and logistics well in advance.

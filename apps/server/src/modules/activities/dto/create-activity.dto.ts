@@ -1,4 +1,4 @@
-import { ActivityType } from '@jrs/shared';
+import { ActivityStatus, ActivityType } from '@jrs/shared';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsArray,
@@ -52,14 +52,6 @@ export class CreateActivityDto {
   @IsString()
   townId: string;
 
-  @ApiProperty({
-    example: 'Chapelle Mvolyé, Salle Polyvalente',
-    description: 'Specific venue description or room',
-  })
-  @IsNotEmpty()
-  @IsString()
-  locationVenue: string;
-
   @ApiPropertyOptional({
     example: 'Monthly planning and review agenda.',
     description: 'Administrative notes, details, and agenda',
@@ -85,4 +77,12 @@ export class CreateActivityDto {
   @IsArray()
   @IsString({ each: true })
   includedTownIds?: string[];
+
+  @ApiPropertyOptional({
+    enum: ActivityStatus,
+    description: 'Initial activity status (computed automatically if omitted)',
+  })
+  @IsOptional()
+  @IsEnum(ActivityStatus)
+  status?: ActivityStatus;
 }

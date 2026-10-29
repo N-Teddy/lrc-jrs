@@ -384,11 +384,11 @@ export const ActivityRemindersTab: React.FC<ActivityRemindersTabProps> = ({
 
                       <div className="flex items-center gap-2 text-xs text-[#8a726a] mt-0.5">
                         <span>{formatActivityDate(activity.startDate)}</span>
-                        {activity.locationVenue && (
+                        {activity.town?.name && (
                           <>
                             <span>•</span>
                             <span className="truncate">
-                              {activity.locationVenue}
+                              {activity.town.name}
                             </span>
                           </>
                         )}

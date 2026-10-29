@@ -712,7 +712,6 @@ export class ActivityReminderService implements OnModuleInit {
           index: index + 1,
           name: act.title,
           dateFormatted: this.formatDate(act.startDate, lang),
-          locationVenue: act.locationVenue,
           typeLabel:
             lang === 'en'
               ? ACTIVITY_LABELS_EN[act.activityType] || act.activityType
@@ -836,7 +835,7 @@ export class ActivityReminderService implements OnModuleInit {
         userName: pc.fullName,
         activityName: activity.title,
         startDateFormatted: this.formatDate(activity.startDate, lang),
-        locationVenue: activity.locationVenue,
+        townName: hostTownName,
         activityTypeLabel: typeLabel,
         checklistItems,
         customInstructions,
@@ -902,7 +901,7 @@ export class ActivityReminderService implements OnModuleInit {
             hostTownName,
             activityName: activity.title,
             startDateFormatted: this.formatDate(activity.startDate, lang),
-            locationVenue: activity.locationVenue,
+            townName: hostTownName,
             activityTypeLabel: typeLabel,
             notes: activity.notes,
             appUrl: `${appUrl}/activities/${activity._id.toString()}`,
@@ -924,6 +923,11 @@ export class ActivityReminderService implements OnModuleInit {
     const townPcs = await this.getTownCoordinators(
       activity.hostTownId || activity.townId,
     );
+
+    const town = await this.townModel
+      .findById(activity.hostTownId || activity.townId)
+      .exec();
+    const townName = town?.name || '';
 
     // 1. In-app notification
     await this.notificationsService.createNotification({
@@ -961,7 +965,7 @@ export class ActivityReminderService implements OnModuleInit {
         userName: pc.fullName,
         activityName: activity.title,
         endDateFormatted: this.formatDate(activity.endDate, lang),
-        locationVenue: activity.locationVenue,
+        townName,
         appUrl: `${appUrl}/activities/${activity._id.toString()}`,
       });
 

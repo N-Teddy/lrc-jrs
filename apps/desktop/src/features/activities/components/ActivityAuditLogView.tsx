@@ -111,18 +111,7 @@ export const ActivityAuditLogView: React.FC<ActivityAuditLogViewProps> = ({
       });
     }
 
-    // 3. Location Venue
-    if (prev.locationVenue || next.locationVenue) {
-      fields.push({
-        id: 'locationVenue',
-        label: t('activities:audit.fields.locationVenue', 'Venue / Room'),
-        prev: prev.locationVenue || '—',
-        current: next.locationVenue || '—',
-        icon: MapPin,
-      });
-    }
-
-    // 4. Town Hub
+    // 3. Town Hub
     if (prev.townId || next.townId) {
       const prevTownName = prev.townId
         ? townsMap.get(prev.townId)?.name || prev.townId

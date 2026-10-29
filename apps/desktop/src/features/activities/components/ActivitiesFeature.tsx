@@ -223,9 +223,10 @@ export const ActivitiesFeature: React.FC<ActivitiesFeatureProps> = ({
         setSelectedActivity({ ...selectedActivity, ...formData });
       }
     } else {
+      const { status: _status, changeReason: _cr, ...createPayload } = formData;
       await createActivityMutation.mutateAsync({
-        ...formData,
-        townId: formData.townId || activeTownId,
+        ...createPayload,
+        townId: createPayload.townId || activeTownId,
       });
       toast.success(
         t('activities:activityCreatedSuccess', {

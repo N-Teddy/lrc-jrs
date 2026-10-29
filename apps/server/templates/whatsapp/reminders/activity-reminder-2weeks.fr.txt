@@ -6,7 +6,7 @@ Une activité est prévue dans *2 semaines* :
 
 📌 *Activité :* {{activityName}}
 📅 *Date :* {{startDateFormatted}}
-📍 *Lieu :* {{locationVenue}}
+📍 *Lieu :* {{townName}}
 🏷️ *Type :* {{activityTypeLabel}}
 
 ---

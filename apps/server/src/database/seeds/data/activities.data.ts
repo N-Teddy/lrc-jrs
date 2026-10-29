@@ -7,7 +7,6 @@ export interface SeedActivityData {
   endDate: Date;
   townCode: string;
   hostTownCode: string;
-  locationVenue: string;
   notes?: string;
   status: ActivityStatus;
 }
@@ -171,10 +170,6 @@ function generateYearActivities(
         status = ActivityStatus.SCHEDULED;
       }
 
-      // Pick a realistic venue for the town
-      const venuesList = VENUES[townCode];
-      const locationVenue = venuesList[(activityIndex - 1) % venuesList.length];
-
       activities.push({
         title,
         activityType: template.type,
@@ -182,7 +177,6 @@ function generateYearActivities(
         endDate,
         townCode,
         hostTownCode: townCode,
-        locationVenue,
         notes: `Activité ${template.type} organisée par l'équipe JR de ${townName} pour ${monthName} ${year}.`,
         status,
       });

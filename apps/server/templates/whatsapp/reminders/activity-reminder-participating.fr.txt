@@ -6,7 +6,7 @@ Votre ville est associée à l'activité suivante{{#if hostTownName}} organisée
 
 📌 *Activité :* {{activityName}}
 📅 *Date :* {{startDateFormatted}}
-📍 *Lieu :* {{locationVenue}}
+📍 *Lieu :* {{townName}}
 🏷️ *Type :* {{activityTypeLabel}}
 {{#if notes}}
 

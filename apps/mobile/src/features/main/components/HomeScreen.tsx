@@ -171,8 +171,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             <View style={styles.heroVenueRow}>
               <MapPin size={16} weight="fill" color={colors.primary} />
               <Text style={styles.heroVenueText}>
-                {nextActivity?.locationVenue ||
-                  (isFrench ? 'Salle Polyvalente, Akwa' : 'Youth Center, Akwa')}
+                {nextActivity?.town?.name || (isFrench ? 'Douala' : 'Douala')}
               </Text>
             </View>
           </View>
