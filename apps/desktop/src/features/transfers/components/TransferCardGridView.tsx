@@ -12,6 +12,7 @@ import {
   PaginationControl,
   UserAvatar,
 } from '../../../components';
+import { formatCameroonPhone } from '../../members/utils/member-ui.utils';
 import {
   formatTransferDate,
   getDirectionDisplayInfo,
@@ -102,7 +103,7 @@ export const TransferCardGridView: React.FC<TransferCardGridViewProps> = ({
                         {item.memberName}
                       </span>
                       <span className="text-[11px] text-[#8a726a]">
-                        {item.memberPhone}
+                        {formatCameroonPhone(item.memberPhone)}
                       </span>
                     </div>
                   </div>

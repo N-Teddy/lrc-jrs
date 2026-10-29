@@ -25,17 +25,36 @@ export function getAgeCategory(age: number | null): AgeCategory {
   return 'SENIOR';
 }
 
-export function formatCameroonPhone(phone: string | undefined | null): string {
+export function formatCameroonPhone(
+  phone: string | undefined | null,
+  options?: { includeCountryCode?: boolean },
+): string {
   if (!phone) return '';
   const digits = phone.replace(/\D/g, '');
+  let localDigits = '';
   if (digits.startsWith('237') && digits.length === 12) {
-    const rest = digits.slice(3);
-    return `+237 ${rest.slice(0, 3)} ${rest.slice(3, 5)} ${rest.slice(5, 7)} ${rest.slice(7, 9)}`;
+    localDigits = digits.slice(3);
+  } else if (digits.length === 9) {
+    localDigits = digits;
   }
-  if (digits.length === 9) {
-    return `+237 ${digits.slice(0, 3)} ${digits.slice(3, 5)} ${digits.slice(5, 7)} ${digits.slice(7, 9)}`;
+
+  if (localDigits.length === 9) {
+    const formatted = `${localDigits.slice(0, 3)} ${localDigits.slice(3, 5)} ${localDigits.slice(5, 7)} ${localDigits.slice(7, 9)}`;
+    return options?.includeCountryCode ? `+237 ${formatted}` : formatted;
   }
   return phone;
+}
+
+export function formatCameroonPhoneInput(
+  val: string | undefined | null,
+): string {
+  if (!val) return '';
+  const digits = val.replace(/\D/g, '').slice(0, 9);
+  if (digits.length <= 3) return digits;
+  if (digits.length <= 5) return `${digits.slice(0, 3)} ${digits.slice(3)}`;
+  if (digits.length <= 7)
+    return `${digits.slice(0, 3)} ${digits.slice(3, 5)} ${digits.slice(5)}`;
+  return `${digits.slice(0, 3)} ${digits.slice(3, 5)} ${digits.slice(5, 7)} ${digits.slice(7, 9)}`;
 }
 
 export function getCleanDigitsForWhatsApp(

@@ -24,7 +24,10 @@ import {
   type SelectOption,
   UserAvatar,
 } from '../../../components';
-import { calculateAge } from '../../members/utils/member-ui.utils';
+import {
+  calculateAge,
+  formatCameroonPhone,
+} from '../../members/utils/member-ui.utils';
 
 interface ChangeTownPcModalProps {
   isOpen: boolean;
@@ -381,7 +384,7 @@ export const ChangeTownPcModal: React.FC<ChangeTownPcModalProps> = ({
                     </span>
                     <span className="text-[11px] text-[#8a726a]">
                       Age: {calculateAge(newPcMember.dateOfBirth) ?? '—'} •
-                      Phone: {newPcMember.phoneNumber}
+                      Phone: {formatCameroonPhone(newPcMember.phoneNumber)}
                     </span>
                   </div>
                 </div>

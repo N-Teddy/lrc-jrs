@@ -8,6 +8,7 @@ import {
   type SelectOption,
   UserAvatar,
 } from '../../../components';
+import { formatCameroonPhone } from '../../members/utils/member-ui.utils';
 
 interface InitiateTransferModalProps {
   isOpen: boolean;
@@ -41,7 +42,7 @@ export const InitiateTransferModal: React.FC<InitiateTransferModalProps> = ({
       const townName = townsMap.get(m.homeTownId)?.name || 'Hub';
       return {
         value: m.id,
-        label: `${m.fullName} (${m.phoneNumber}) - ${townName}`,
+        label: `${m.fullName} (${formatCameroonPhone(m.phoneNumber)}) - ${townName}`,
       };
     });
   }, [eligibleMembers, townsMap]);
@@ -203,7 +204,7 @@ export const InitiateTransferModal: React.FC<InitiateTransferModalProps> = ({
                     {selectedMember.fullName}
                   </span>
                   <span className="text-[11px] text-[#8a726a]">
-                    {selectedMember.phoneNumber}
+                    {formatCameroonPhone(selectedMember.phoneNumber)}
                   </span>
                 </div>
               </div>

@@ -19,6 +19,7 @@ import {
 import type React from 'react';
 import { useState } from 'react';
 import { UserAvatar } from '../../../components';
+import { formatCameroonPhone } from '../utils/member-ui.utils';
 import { EditApproveIntakeModal } from './EditApproveIntakeModal';
 
 interface PendingIntakeReviewsModalProps {
@@ -244,7 +245,7 @@ export const PendingIntakeReviewsModal: React.FC<
                         <div className="flex items-center gap-3 text-xs text-[#8a726a] flex-wrap">
                           <span className="flex items-center gap-1 font-mono text-[#57423b]">
                             <Phone size={13} />
-                            {member.phoneNumber}
+                            {formatCameroonPhone(member.phoneNumber)}
                           </span>
                           <span className="flex items-center gap-1">
                             <Calendar size={13} />

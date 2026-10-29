@@ -39,6 +39,7 @@ import {
 import type React from 'react';
 import { useEffect, useMemo, useState } from 'react';
 import { UserAvatar } from '../../../components';
+import { formatCameroonPhone } from '../../members/utils/member-ui.utils';
 import {
   formatActivityDateRange,
   getActivityTypeConfig,
@@ -1183,7 +1184,8 @@ export const ActivityAttendanceRoster: React.FC<
                             {g.guestInfo.fullName}
                           </td>
                           <td className="py-3 px-3 font-mono text-xs text-[#57423b]">
-                            {g.guestInfo.phoneNumber || '—'}
+                            {formatCameroonPhone(g.guestInfo.phoneNumber) ||
+                              '—'}
                           </td>
                           <td className="py-3 px-3 text-xs text-[#8a726a]">
                             {g.guestInfo.notes || '—'}

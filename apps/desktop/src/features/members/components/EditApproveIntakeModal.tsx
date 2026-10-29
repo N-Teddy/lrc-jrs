@@ -1,22 +1,27 @@
 import { useTranslation } from '@jrs/client-core';
 import type { ITown, IUser } from '@jrs/shared';
 import {
-  Calendar,
   Check,
   EnvelopeSimple,
   GenderFemale,
   GenderMale,
   Key,
-  MapPin,
-  Phone,
   User,
   Warning,
   X,
 } from '@phosphor-icons/react';
 import type React from 'react';
-import { useEffect, useState } from 'react';
-import { UserAvatar } from '../../../components';
-import { calculateAge } from '../utils/member-ui.utils';
+import { useEffect, useMemo, useState } from 'react';
+import {
+  CustomSelect,
+  DatePicker,
+  type SelectOption,
+  UserAvatar,
+} from '../../../components';
+import {
+  calculateAge,
+  formatCameroonPhoneInput,
+} from '../utils/member-ui.utils';
 
 export interface EditApproveIntakeModalProps {
   isOpen: boolean;
@@ -60,7 +65,7 @@ export const EditApproveIntakeModal: React.FC<EditApproveIntakeModalProps> = ({
   useEffect(() => {
     if (candidate) {
       setFullName(candidate.fullName || '');
-      setPhoneNumber(candidate.phoneNumber || '');
+      setPhoneNumber(formatCameroonPhoneInput(candidate.phoneNumber || ''));
       setEmail(candidate.email || '');
       setGender(candidate.gender || 'MALE');
       setDateOfBirth(
@@ -82,6 +87,13 @@ export const EditApproveIntakeModal: React.FC<EditApproveIntakeModalProps> = ({
       setFormError(null);
     }
   }, [candidate, availableTowns]);
+
+  const townOptions: SelectOption[] = useMemo(() => {
+    return availableTowns.map((town) => ({
+      value: town.id,
+      label: `${town.name} (${town.code})`,
+    }));
+  }, [availableTowns]);
 
   if (!isOpen || !candidate) return null;
 
@@ -133,32 +145,32 @@ export const EditApproveIntakeModal: React.FC<EditApproveIntakeModalProps> = ({
   const selectedTown = availableTowns.find((town) => town.id === townId);
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 bg-[#23201e]/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-200">
       <div
-        className="relative w-full max-w-2xl bg-white rounded-2xl border border-[#e8e1dd] shadow-2xl flex flex-col overflow-hidden max-h-[92vh] animate-in zoom-in-95 duration-150"
+        className="relative w-full max-w-[680px] my-auto bg-white rounded-xl border border-[#e8e1dd] shadow-2xl flex flex-col overflow-hidden max-h-[92vh] animate-in zoom-in-95 duration-150"
         role="dialog"
         aria-modal="true"
         aria-labelledby="edit-approve-intake-title"
       >
-        {/* Creative Top Banner Header */}
-        <div className="relative px-6 py-5 bg-gradient-to-br from-[#1b3123] via-[#24422e] to-[#2c4e37] text-white flex items-start justify-between border-b border-white/10 shrink-0">
-          <div className="flex items-center gap-4">
+        {/* Header - App Theme */}
+        <div className="p-6 pb-4 flex items-start justify-between border-b border-[#f4ece9] shrink-0">
+          <div className="flex items-center gap-3.5">
             <UserAvatar
               name={fullName || candidate.fullName}
               avatarUrl={candidate.avatarUrl}
               size="lg"
-              className="ring-2 ring-white/30 shadow-md shrink-0"
+              className="ring-2 ring-[#ffdbcf] shadow-xs shrink-0"
             />
             <div className="flex flex-col">
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-white/15 text-[#9ee3b2] border border-white/20">
+                <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#faf2ee] text-[#b85028] border border-[#ffdbcf]">
                   {t(
                     'members:intake.reviewModalBadge',
-                    'Candidate Review & Enrollment',
+                    'Intake Review & Enrollment',
                   )}
                 </span>
                 {candidate.createdAt && (
-                  <span className="text-[11px] text-white/70">
+                  <span className="text-[11px] text-[#8a726a]">
                     {t('members:intake.submitted', 'Submitted:')}{' '}
                     {new Date(candidate.createdAt).toLocaleDateString()}
                   </span>
@@ -166,14 +178,14 @@ export const EditApproveIntakeModal: React.FC<EditApproveIntakeModalProps> = ({
               </div>
               <h2
                 id="edit-approve-intake-title"
-                className="text-lg font-bold text-white mt-0.5"
+                className="text-lg font-bold text-[#1e1b19] mt-0.5"
               >
                 {t('members:intake.editProfileTitle', {
                   name: candidate.fullName,
                   defaultValue: `Review & Edit: ${candidate.fullName}`,
                 })}
               </h2>
-              <p className="text-xs text-white/80">
+              <p className="text-xs text-[#8a726a]">
                 {t(
                   'members:intake.editProfileSubtitle',
                   'Adjust profile details, reassign town if needed, and confirm admittance into the directory.',
@@ -185,10 +197,10 @@ export const EditApproveIntakeModal: React.FC<EditApproveIntakeModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors cursor-pointer shrink-0"
+            className="w-8 h-8 rounded-lg bg-[#faf2ee] hover:bg-[#f4ece9] border border-[#e8e1dd] flex items-center justify-center text-[#8a726a] hover:text-[#1e1b19] transition-colors cursor-pointer shrink-0"
             aria-label={t('common:close', 'Close')}
           >
-            <X size={18} weight="bold" />
+            <X size={18} />
           </button>
         </div>
 
@@ -198,30 +210,30 @@ export const EditApproveIntakeModal: React.FC<EditApproveIntakeModalProps> = ({
           className="overflow-y-auto flex-1 p-6 space-y-5"
         >
           {formError && (
-            <div className="p-3.5 rounded-xl bg-[#ffdad6] border border-[#ffb4a8] text-[#ba1a1a] text-xs font-semibold flex items-center gap-2.5 animate-in fade-in">
+            <div className="p-3.5 rounded-lg bg-[#ffdad6] border border-[#ffb4a8] text-[#ba1a1a] text-xs font-semibold flex items-center gap-2.5 animate-in fade-in">
               <Warning size={18} className="shrink-0" />
               <span>{formError}</span>
             </div>
           )}
 
           {/* Section 1: Candidate Identity */}
-          <div className="space-y-3">
-            <div className="flex items-center gap-2 text-xs font-bold text-[#2c4e37] uppercase tracking-wider">
-              <User size={15} weight="bold" />
-              <span>
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-[#b85028]" />
+              <span className="text-xs font-bold text-[#8a726a] uppercase tracking-wider">
                 {t('members:intake.sectionIdentity', 'Identity & Demographics')}
               </span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
               {/* Full Name */}
-              <div className="sm:col-span-2">
+              <div className="sm:col-span-2 flex flex-col gap-1.5">
                 <label
                   htmlFor="intake-full-name"
-                  className="block text-xs font-bold text-[#1e1b19] mb-1"
+                  className="text-xs font-bold text-[#1e1b19]"
                 >
                   {t('members:intake.editFullName', 'Full Name')}{' '}
-                  <span className="text-[#ba1a1a]">*</span>
+                  <span className="text-[#b85028]">*</span>
                 </label>
                 <div className="relative">
                   <User
@@ -235,25 +247,25 @@ export const EditApproveIntakeModal: React.FC<EditApproveIntakeModalProps> = ({
                     onChange={(e) => setFullName(e.target.value)}
                     placeholder="Candidate full name"
                     required
-                    className="w-full h-10 pl-9 pr-3 rounded-lg bg-[#faf8f5] border border-[#e8e1dd] text-xs font-medium text-[#1e1b19] placeholder:text-[#8a726a] outline-none focus:bg-white focus:border-[#2c4e37] focus:ring-1 focus:ring-[#2c4e37] transition-all"
+                    className="w-full h-10 pl-9 pr-3.5 rounded-md border border-[#ded5d0] bg-white text-xs font-medium text-[#1e1b19] placeholder:text-[#8a726a] outline-none focus:border-[#b85028] focus:ring-1 focus:ring-[#b85028] transition-all"
                   />
                 </div>
               </div>
 
               {/* Gender */}
-              <div>
-                <span className="block text-xs font-bold text-[#1e1b19] mb-1">
+              <div className="flex flex-col gap-1.5">
+                <span className="text-xs font-bold text-[#1e1b19]">
                   {t('members:intake.editGender', 'Gender')}{' '}
-                  <span className="text-[#ba1a1a]">*</span>
+                  <span className="text-[#b85028]">*</span>
                 </span>
                 <div className="grid grid-cols-2 gap-2 h-10">
                   <button
                     type="button"
                     onClick={() => setGender('MALE')}
-                    className={`flex items-center justify-center gap-2 rounded-lg border text-xs font-bold transition-all cursor-pointer ${
+                    className={`flex items-center justify-center gap-2 rounded-md border text-xs font-bold transition-all cursor-pointer ${
                       gender === 'MALE'
-                        ? 'bg-[#2c4e37] border-[#2c4e37] text-white shadow-xs'
-                        : 'bg-[#faf8f5] border-[#e8e1dd] text-[#57423b] hover:bg-[#faf2ee]'
+                        ? 'bg-[#fff2ee] border-[#b85028] text-[#b85028] shadow-xs'
+                        : 'bg-[#faf2ee] border-[#e8e1dd] text-[#57423b] hover:bg-[#f4ece9]'
                     }`}
                   >
                     <GenderMale size={16} weight="bold" />
@@ -262,10 +274,10 @@ export const EditApproveIntakeModal: React.FC<EditApproveIntakeModalProps> = ({
                   <button
                     type="button"
                     onClick={() => setGender('FEMALE')}
-                    className={`flex items-center justify-center gap-2 rounded-lg border text-xs font-bold transition-all cursor-pointer ${
+                    className={`flex items-center justify-center gap-2 rounded-md border text-xs font-bold transition-all cursor-pointer ${
                       gender === 'FEMALE'
-                        ? 'bg-[#b85028] border-[#b85028] text-white shadow-xs'
-                        : 'bg-[#faf8f5] border-[#e8e1dd] text-[#57423b] hover:bg-[#faf2ee]'
+                        ? 'bg-[#fff2ee] border-[#b85028] text-[#b85028] shadow-xs'
+                        : 'bg-[#faf2ee] border-[#e8e1dd] text-[#57423b] hover:bg-[#f4ece9]'
                     }`}
                   >
                     <GenderFemale size={16} weight="bold" />
@@ -274,15 +286,15 @@ export const EditApproveIntakeModal: React.FC<EditApproveIntakeModalProps> = ({
                 </div>
               </div>
 
-              {/* Date of Birth with Age Pill */}
-              <div>
-                <div className="flex items-center justify-between mb-1">
+              {/* Date of Birth with Custom DatePicker & Age Pill */}
+              <div className="flex flex-col gap-1.5">
+                <div className="flex items-center justify-between">
                   <label
                     htmlFor="intake-dob"
-                    className="block text-xs font-bold text-[#1e1b19]"
+                    className="text-xs font-bold text-[#1e1b19]"
                   >
                     {t('members:intake.editDob', 'Date of Birth')}{' '}
-                    <span className="text-[#ba1a1a]">*</span>
+                    <span className="text-[#b85028]">*</span>
                   </label>
                   {calculatedAge !== null && (
                     <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#faf2ee] text-[#b85028] border border-[#ffdbcf]">
@@ -290,30 +302,25 @@ export const EditApproveIntakeModal: React.FC<EditApproveIntakeModalProps> = ({
                     </span>
                   )}
                 </div>
-                <div className="relative">
-                  <Calendar
-                    size={16}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8a726a]"
-                  />
-                  <input
-                    id="intake-dob"
-                    type="date"
-                    value={dateOfBirth}
-                    onChange={(e) => setDateOfBirth(e.target.value)}
-                    max={todayStr}
-                    required
-                    className="w-full h-10 pl-9 pr-3 rounded-lg bg-[#faf8f5] border border-[#e8e1dd] text-xs font-medium text-[#1e1b19] outline-none focus:bg-white focus:border-[#2c4e37] focus:ring-1 focus:ring-[#2c4e37] transition-all"
-                  />
-                </div>
+                <DatePicker
+                  id="intake-dob"
+                  value={dateOfBirth}
+                  onChange={(val) => setDateOfBirth(val)}
+                  maxDate={todayStr}
+                  placeholder={t(
+                    'members:modal.selectBirthDate',
+                    'Select birth date',
+                  )}
+                />
               </div>
             </div>
           </div>
 
           {/* Section 2: Hub Assignment & Contact */}
-          <div className="space-y-3 pt-2 border-t border-[#f4ece9]">
-            <div className="flex items-center gap-2 text-xs font-bold text-[#2c4e37] uppercase tracking-wider">
-              <MapPin size={15} weight="bold" />
-              <span>
+          <div className="flex flex-col gap-3 pt-3 border-t border-[#f4ece9]">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-[#b85028]" />
+              <span className="text-xs font-bold text-[#8a726a] uppercase tracking-wider">
                 {t(
                   'members:intake.sectionAssignment',
                   'Town Assignment & Contact',
@@ -322,66 +329,62 @@ export const EditApproveIntakeModal: React.FC<EditApproveIntakeModalProps> = ({
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-              {/* Community Town Hub */}
-              <div className="sm:col-span-2">
+              {/* Community Town Custom Select */}
+              <div className="sm:col-span-2 flex flex-col gap-1.5">
                 <label
                   htmlFor="intake-town-id"
-                  className="block text-xs font-bold text-[#1e1b19] mb-1"
+                  className="text-xs font-bold text-[#1e1b19]"
                 >
-                  {t('members:intake.editTown', 'Community Hub / Town')}{' '}
-                  <span className="text-[#ba1a1a]">*</span>
+                  {t('members:intake.editTown', 'Town')}{' '}
+                  <span className="text-[#b85028]">*</span>
                 </label>
-                <div className="relative">
-                  <MapPin
-                    size={16}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8a726a]"
-                  />
-                  <select
-                    id="intake-town-id"
-                    value={townId}
-                    onChange={(e) => setTownId(e.target.value)}
-                    className="w-full h-10 pl-9 pr-8 rounded-lg bg-[#faf8f5] border border-[#e8e1dd] text-xs font-semibold text-[#1e1b19] outline-none focus:bg-white focus:border-[#2c4e37] focus:ring-1 focus:ring-[#2c4e37] cursor-pointer transition-all"
-                  >
-                    {availableTowns.map((town) => (
-                      <option key={town.id} value={town.id}>
-                        {town.name} ({town.code})
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                <CustomSelect
+                  id="intake-town-id"
+                  value={townId}
+                  onChange={(val) => setTownId(val)}
+                  options={townOptions}
+                  variant="form"
+                  placeholder={t(
+                    'members:intake.selectTownPlaceholder',
+                    'Select Town...',
+                  )}
+                />
               </div>
 
-              {/* Phone Number */}
-              <div>
+              {/* Phone Number with 6xx xx xx xx Formatter & Country Prefix */}
+              <div className="flex flex-col gap-1.5">
                 <label
                   htmlFor="intake-phone"
-                  className="block text-xs font-bold text-[#1e1b19] mb-1"
+                  className="text-xs font-bold text-[#1e1b19]"
                 >
                   {t('members:intake.editPhone', 'WhatsApp Phone Number')}{' '}
-                  <span className="text-[#ba1a1a]">*</span>
+                  <span className="text-[#b85028]">*</span>
                 </label>
-                <div className="relative">
-                  <Phone
-                    size={16}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8a726a]"
-                  />
+                <div className="flex items-center h-10 w-full bg-white rounded-md border border-[#ded5d0] focus-within:border-[#b85028] focus-within:ring-1 focus-within:ring-[#b85028] transition-all overflow-hidden">
+                  <div className="px-3 border-r border-[#e8e1dd] bg-[#faf2ee] h-full flex items-center gap-1.5 shrink-0 select-none">
+                    <span className="text-xs font-bold text-[#57423b]">
+                      🇨🇲 +237
+                    </span>
+                  </div>
                   <input
                     id="intake-phone"
                     type="tel"
                     value={phoneNumber}
-                    onChange={(e) => setPhoneNumber(e.target.value)}
-                    placeholder="6XXXXXXXX"
+                    onChange={(e) =>
+                      setPhoneNumber(formatCameroonPhoneInput(e.target.value))
+                    }
+                    placeholder="6xx xx xx xx"
                     required
-                    className="w-full h-10 pl-9 pr-3 rounded-lg bg-[#faf8f5] border border-[#e8e1dd] text-xs font-mono font-medium text-[#1e1b19] placeholder:text-[#8a726a] outline-none focus:bg-white focus:border-[#2c4e37] focus:ring-1 focus:ring-[#2c4e37] transition-all"
+                    className="flex-1 h-full px-3 text-xs font-mono font-medium text-[#1e1b19] outline-none bg-transparent placeholder:text-[#8a726a]"
                   />
                 </div>
               </div>
 
               {/* Email Address */}
-              <div>
+              <div className="flex flex-col gap-1.5">
                 <label
                   htmlFor="intake-email"
-                  className="block text-xs font-bold text-[#1e1b19] mb-1"
+                  className="text-xs font-bold text-[#1e1b19]"
                 >
                   {t('members:intake.editEmail', 'Email Address')}{' '}
                   <span className="text-[#8a726a] font-normal text-[11px]">
@@ -399,7 +402,7 @@ export const EditApproveIntakeModal: React.FC<EditApproveIntakeModalProps> = ({
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="name@example.com"
-                    className="w-full h-10 pl-9 pr-3 rounded-lg bg-[#faf8f5] border border-[#e8e1dd] text-xs font-medium text-[#1e1b19] placeholder:text-[#8a726a] outline-none focus:bg-white focus:border-[#2c4e37] focus:ring-1 focus:ring-[#2c4e37] transition-all"
+                    className="w-full h-10 pl-9 pr-3.5 rounded-md border border-[#ded5d0] bg-white text-xs font-medium text-[#1e1b19] placeholder:text-[#8a726a] outline-none focus:border-[#b85028] focus:ring-1 focus:ring-[#b85028] transition-all"
                   />
                 </div>
               </div>
@@ -408,7 +411,7 @@ export const EditApproveIntakeModal: React.FC<EditApproveIntakeModalProps> = ({
 
           {/* Applicant Note Callout (if submitted by candidate) */}
           {candidate.intakeNote && (
-            <div className="p-3.5 rounded-xl bg-[#faf2ee] border border-[#e8e1dd] text-xs text-[#57423b] flex items-start gap-2.5">
+            <div className="p-3.5 rounded-lg bg-[#faf2ee] border border-[#e8e1dd] text-xs text-[#57423b] flex items-start gap-2.5">
               <span className="font-bold text-[#b85028] shrink-0">
                 {t('members:intake.applicantNote', 'Applicant Note:')}
               </span>
@@ -417,10 +420,10 @@ export const EditApproveIntakeModal: React.FC<EditApproveIntakeModalProps> = ({
           )}
 
           {/* Section 3: Access & Verification */}
-          <div className="space-y-3 pt-2 border-t border-[#f4ece9]">
-            <div className="flex items-center gap-2 text-xs font-bold text-[#2c4e37] uppercase tracking-wider">
-              <Key size={15} weight="bold" />
-              <span>
+          <div className="flex flex-col gap-3 pt-3 border-t border-[#f4ece9]">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-[#b85028]" />
+              <span className="text-xs font-bold text-[#8a726a] uppercase tracking-wider">
                 {t('members:intake.sectionAccess', 'Security, Access & Notes')}
               </span>
             </div>
@@ -428,17 +431,17 @@ export const EditApproveIntakeModal: React.FC<EditApproveIntakeModalProps> = ({
             {/* Grant App Access Interactive Toggle Card */}
             <div
               onClick={() => setGrantAppAccess(!grantAppAccess)}
-              className={`p-3.5 rounded-xl border transition-all cursor-pointer flex items-start justify-between gap-3 select-none ${
+              className={`p-3.5 rounded-lg border transition-all cursor-pointer flex items-start justify-between gap-3 select-none ${
                 grantAppAccess
-                  ? 'bg-[#f4faf5] border-[#2c4e37]/40 ring-1 ring-[#2c4e37]'
-                  : 'bg-[#faf8f5] border-[#e8e1dd] hover:border-[#b85028]/30'
+                  ? 'bg-[#fff2ee] border-[#b85028]/50 ring-1 ring-[#b85028]/30'
+                  : 'bg-[#faf2ee] border-[#e8e1dd] hover:border-[#b85028]/30'
               }`}
             >
               <div className="flex items-start gap-3">
                 <div
                   className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
                     grantAppAccess
-                      ? 'bg-[#2c4e37] text-white'
+                      ? 'bg-[#b85028] text-white'
                       : 'bg-[#e8e1dd] text-[#8a726a]'
                   }`}
                 >
@@ -447,24 +450,18 @@ export const EditApproveIntakeModal: React.FC<EditApproveIntakeModalProps> = ({
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-bold text-[#1e1b19]">
-                      {t(
-                        'members:intake.grantAccessLabel',
-                        'Grant JRS Portal Login Access',
-                      )}
+                      {t('members:intake.grantAccessTitle', 'Grant App Access')}
                     </span>
                     <span
-                      className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                      className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
                         grantAppAccess
-                          ? 'bg-[#2c4e37] text-white'
-                          : 'bg-[#faf2ee] text-[#8a726a] border border-[#e8e1dd]'
+                          ? 'bg-[#b85028] text-white'
+                          : 'bg-[#e8e1dd] text-[#8a726a]'
                       }`}
                     >
                       {grantAppAccess
-                        ? t('members:intake.accessEnabled', 'Login Enabled')
-                        : t(
-                            'members:intake.defaultDirectoryOnly',
-                            'Default: Directory Only',
-                          )}
+                        ? t('common:enabled', 'ENABLED')
+                        : t('common:disabled', 'OFF')}
                     </span>
                   </div>
                   <p className="text-[11px] text-[#8a726a] mt-0.5 leading-relaxed">
@@ -479,7 +476,7 @@ export const EditApproveIntakeModal: React.FC<EditApproveIntakeModalProps> = ({
               {/* Toggle Switch */}
               <div
                 className={`w-11 h-6 rounded-full transition-colors flex items-center p-0.5 shrink-0 ${
-                  grantAppAccess ? 'bg-[#2c4e37]' : 'bg-[#ded5d0]'
+                  grantAppAccess ? 'bg-[#b85028]' : 'bg-[#ded5d0]'
                 }`}
               >
                 <div
@@ -491,10 +488,10 @@ export const EditApproveIntakeModal: React.FC<EditApproveIntakeModalProps> = ({
             </div>
 
             {/* Review Notes */}
-            <div>
+            <div className="flex flex-col gap-1.5">
               <label
                 htmlFor="intake-review-notes"
-                className="block text-xs font-bold text-[#1e1b19] mb-1"
+                className="text-xs font-bold text-[#1e1b19]"
               >
                 {t(
                   'members:intake.reviewNotesLabel',
@@ -513,7 +510,7 @@ export const EditApproveIntakeModal: React.FC<EditApproveIntakeModalProps> = ({
                   'members:intake.notesPlaceholder',
                   'e.g. Identity verified via WhatsApp call with candidate',
                 )}
-                className="w-full h-10 px-3 rounded-lg bg-[#faf8f5] border border-[#e8e1dd] text-xs text-[#1e1b19] placeholder:text-[#8a726a] outline-none focus:bg-white focus:border-[#2c4e37] focus:ring-1 focus:ring-[#2c4e37] transition-all"
+                className="w-full h-10 px-3.5 rounded-md border border-[#ded5d0] bg-white text-xs text-[#1e1b19] placeholder:text-[#8a726a] outline-none focus:border-[#b85028] focus:ring-1 focus:ring-[#b85028] transition-all"
               />
             </div>
           </div>
@@ -524,7 +521,7 @@ export const EditApproveIntakeModal: React.FC<EditApproveIntakeModalProps> = ({
               {selectedTown
                 ? `${t('members:intake.enrollingInto', 'Enrolling candidate into')}: `
                 : ''}
-              <strong className="text-[#2c4e37]">
+              <strong className="text-[#b85028]">
                 {selectedTown?.name || 'Selected Town'}
               </strong>
             </span>
@@ -534,7 +531,7 @@ export const EditApproveIntakeModal: React.FC<EditApproveIntakeModalProps> = ({
                 type="button"
                 onClick={onClose}
                 disabled={isSubmitting}
-                className="px-4 py-2.5 rounded-lg border border-[#e8e1dd] text-xs font-semibold text-[#8a726a] hover:bg-[#faf8f5] hover:text-[#1e1b19] transition-all cursor-pointer"
+                className="px-4 py-2 rounded-md bg-white border border-[#e8e1dd] text-xs font-bold text-[#57423b] hover:bg-[#f4ece9] transition-colors cursor-pointer"
               >
                 {t('common:cancel', 'Cancel')}
               </button>
@@ -543,7 +540,7 @@ export const EditApproveIntakeModal: React.FC<EditApproveIntakeModalProps> = ({
                 disabled={
                   isSubmitting || !fullName.trim() || !phoneNumber.trim()
                 }
-                className="px-5 py-2.5 rounded-lg bg-[#2c4e37] hover:bg-[#223d2b] text-white text-xs font-bold shadow-md transition-all cursor-pointer disabled:opacity-50 flex items-center gap-2"
+                className="px-5 py-2.5 rounded-lg bg-[#b85028] hover:bg-[#983912] text-white text-xs font-bold shadow-md transition-all cursor-pointer disabled:opacity-50 flex items-center gap-2"
               >
                 {isSubmitting ? (
                   <>

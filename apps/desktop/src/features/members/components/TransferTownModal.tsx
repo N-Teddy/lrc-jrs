@@ -18,6 +18,7 @@ import {
   type SelectOption,
   UserAvatar,
 } from '../../../components';
+import { formatCameroonPhone } from '../utils/member-ui.utils';
 
 interface TransferTownModalProps {
   isOpen: boolean;
@@ -165,7 +166,7 @@ export const TransferTownModal: React.FC<TransferTownModalProps> = ({
                 {member.fullName}
               </span>
               <span className="text-[11px] text-[#8a726a]">
-                {member.phoneNumber} • {member.role}
+                {formatCameroonPhone(member.phoneNumber)} • {member.role}
               </span>
             </div>
           </div>

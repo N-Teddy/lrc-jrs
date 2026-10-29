@@ -8,7 +8,11 @@ import {
   UserAvatar,
 } from '../../../components';
 import { DatePicker, MonthYearPicker } from '../../../components/DatePicker';
-import { calculateAge, getAgeCategory } from '../utils/member-ui.utils';
+import {
+  calculateAge,
+  formatCameroonPhoneInput,
+  getAgeCategory,
+} from '../utils/member-ui.utils';
 
 export interface MemberModalFormData {
   fullName: string;
@@ -257,10 +261,10 @@ export const MemberModalFormFields: React.FC<MemberModalFormFieldsProps> = ({
               required
               value={formData.phoneDigits}
               onChange={(e) => {
-                const cleaned = e.target.value.replace(/\D/g, '').slice(0, 9);
-                onChange('phoneDigits', cleaned);
+                const formatted = formatCameroonPhoneInput(e.target.value);
+                onChange('phoneDigits', formatted);
               }}
-              placeholder="6xx xxx xxx"
+              placeholder="6xx xx xx xx"
               className="flex-1 h-full px-3 text-xs text-[#1e1b19] outline-none bg-transparent"
             />
           </div>

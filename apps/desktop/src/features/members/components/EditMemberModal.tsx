@@ -168,21 +168,23 @@ export const EditMemberModal: React.FC<EditMemberModalProps> = ({
         payload.append('fullName', formData.fullName.trim());
         payload.append('gender', formData.gender);
         payload.append('dateOfBirth', formData.dateOfBirth);
+        const cleanDigits = formData.phoneDigits.replace(/\D/g, '');
         if (formData.integrationDate)
           payload.append('integrationDate', formData.integrationDate);
-        payload.append('phoneNumber', `+237${formData.phoneDigits}`);
+        payload.append('phoneNumber', `+237${cleanDigits}`);
         if (formData.email.trim())
           payload.append('email', formData.email.trim());
         payload.append('role', formData.role);
         payload.append('avatar', formData.avatarFile);
         await onSubmit(member.id, payload);
       } else {
+        const cleanDigits = formData.phoneDigits.replace(/\D/g, '');
         await onSubmit(member.id, {
           fullName: formData.fullName.trim(),
           gender: formData.gender,
           dateOfBirth: formData.dateOfBirth,
           integrationDate: formData.integrationDate || undefined,
-          phoneNumber: `+237${formData.phoneDigits}`,
+          phoneNumber: `+237${cleanDigits}`,
           email: formData.email.trim() ? formData.email.trim() : undefined,
           role: formData.role,
         });

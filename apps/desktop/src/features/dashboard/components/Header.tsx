@@ -15,6 +15,7 @@ import {
   NotificationBell,
   UserAvatar,
 } from '../../../components';
+import { formatCameroonPhone } from '../../members/utils/member-ui.utils';
 import { formatDashboardDate } from '../utils/dashboard.utils';
 
 interface HeaderProps {
@@ -196,7 +197,9 @@ export const Header: React.FC<HeaderProps> = ({
                     {user?.fullName}
                   </p>
                   <p className="text-[11px] text-[#8a726a] truncate">
-                    {user?.phoneNumber || user?.email}
+                    {user?.phoneNumber
+                      ? formatCameroonPhone(user.phoneNumber)
+                      : user?.email}
                   </p>
                   <div className="flex items-center gap-1.5 mt-1">
                     <span className="px-2 py-0.5 rounded bg-[#edf3ee] text-[#486b52] text-[10px] font-bold">

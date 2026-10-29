@@ -131,10 +131,18 @@ export const IntakeForm: React.FC<IntakeFormProps> = ({
     return t('header.expiresSoon');
   }, [linkInfo?.expiresAt, t]);
 
-  // Phone sanitizer
+  // Phone sanitizer with 6xx xx xx xx formatting
   const handlePhoneChange = (val: string) => {
-    const cleaned = val.replace(/[^\d+]/g, '');
-    setPhoneNumber(cleaned);
+    const digits = val.replace(/\D/g, '').slice(0, 9);
+    let formatted = digits;
+    if (digits.length > 7) {
+      formatted = `${digits.slice(0, 3)} ${digits.slice(3, 5)} ${digits.slice(5, 7)} ${digits.slice(7, 9)}`;
+    } else if (digits.length > 5) {
+      formatted = `${digits.slice(0, 3)} ${digits.slice(3, 5)} ${digits.slice(5)}`;
+    } else if (digits.length > 3) {
+      formatted = `${digits.slice(0, 3)} ${digits.slice(3)}`;
+    }
+    setPhoneNumber(formatted);
   };
 
   // Avatar Handler
@@ -689,7 +697,7 @@ export const IntakeForm: React.FC<IntakeFormProps> = ({
                     <Phone size={14} weight="bold" />
                     <span>{t('form.phoneNumber')}</span>
                   </span>
-                  <span className="font-semibold">+237 {phoneNumber}</span>
+                  <span className="font-semibold font-mono">{phoneNumber}</span>
                 </div>
 
                 {/* Email */}

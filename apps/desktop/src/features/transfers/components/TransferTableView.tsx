@@ -15,6 +15,7 @@ import {
   TableSkeleton,
   UserAvatar,
 } from '../../../components';
+import { formatCameroonPhone } from '../../members/utils/member-ui.utils';
 import {
   formatTransferDate,
   getDirectionDisplayInfo,
@@ -147,7 +148,7 @@ export const TransferTableView: React.FC<TransferTableViewProps> = ({
                         </span>
                         <div className="flex items-center gap-1.5 mt-0.5">
                           <span className="text-[11px] text-[#8a726a]">
-                            {item.memberPhone}
+                            {formatCameroonPhone(item.memberPhone)}
                           </span>
                           <span className="px-1.5 py-0.2 rounded text-[10px] font-bold bg-[#faf2ee] text-[#57423b] border border-[#e8e1dd]">
                             {item.memberRole}

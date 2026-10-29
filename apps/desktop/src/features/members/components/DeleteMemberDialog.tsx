@@ -2,6 +2,7 @@ import { useTranslation } from '@jrs/client-core';
 import type { IUser } from '@jrs/shared';
 import { Trash, Warning, X } from '@phosphor-icons/react';
 import type React from 'react';
+import { formatCameroonPhone } from '../utils/member-ui.utils';
 
 interface DeleteMemberDialogProps {
   isOpen: boolean;
@@ -69,7 +70,7 @@ export const DeleteMemberDialog: React.FC<DeleteMemberDialogProps> = ({
             <div className="flex items-center gap-2 text-[11px] text-[#8a726a]">
               <span>Role: {member.role}</span>
               <span>•</span>
-              <span>Phone: {member.phoneNumber}</span>
+              <span>Phone: {formatCameroonPhone(member.phoneNumber)}</span>
             </div>
           </div>
         </div>
