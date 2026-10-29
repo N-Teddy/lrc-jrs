@@ -162,9 +162,9 @@ export const RegionSelectorScreen: React.FC<RegionSelectorScreenProps> = ({
                   }
 
                   const subtitle = hasTown
-                    ? `${townsInRegion
+                    ? townsInRegion
                         .map((t) => `${t.name} (${t.code})`)
-                        .join(' • ')} ${t('towns:hub')}`
+                        .join(' • ')
                     : t('towns:noActiveHub');
 
                   return (
@@ -254,7 +254,7 @@ export const RegionSelectorScreen: React.FC<RegionSelectorScreenProps> = ({
                     className="group cursor-pointer"
                     onMouseEnter={(e: React.MouseEvent) => {
                       setHoveredInfo({
-                        title: `${town.name} ${t('towns:hub')} (${town.code})`,
+                        title: `${town.name} (${town.code})`,
                         subtitle: isFrench
                           ? regionConfig?.displayNameFr
                           : regionConfig?.displayNameEn,
@@ -331,7 +331,7 @@ export const RegionSelectorScreen: React.FC<RegionSelectorScreenProps> = ({
                   t('towns:activeHub')}
               </span>
               <h2 className="mt-0.5 text-xl font-bold text-[#1e1b19]">
-                {selectedTown.name} {t('towns:hub')}
+                {selectedTown.name}
               </h2>
             </div>
             <span className="rounded-md border border-[#e8e1dd] bg-[#faf2ee] px-2.5 py-1 font-mono text-xs font-bold text-[#b85028]">

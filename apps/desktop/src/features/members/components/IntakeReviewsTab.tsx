@@ -8,10 +8,8 @@ import type { IUser } from '@jrs/shared';
 import {
   ArrowsClockwise,
   Calendar,
-  Check,
   CheckCircle,
   Clock,
-  Key,
   Link,
   MagnifyingGlass,
   PencilSimple,
@@ -30,6 +28,7 @@ import {
   formatCameroonPhone,
   getCleanDigitsForWhatsApp,
 } from '../utils/member-ui.utils';
+import { EditApproveIntakeModal } from './EditApproveIntakeModal';
 
 export interface IntakeReviewsTabProps {
   activeTownId?: string;
@@ -61,24 +60,15 @@ export const IntakeReviewsTab: React.FC<IntakeReviewsTabProps> = ({
   );
   const [sortOrder, setSortOrder] = useState<'NEWEST' | 'OLDEST'>('NEWEST');
 
-  // Confirmation Drawer State
+  // Action State
   const [approvingMember, setApprovingMember] = useState<IUser | null>(null);
   const [rejectingMember, setRejectingMember] = useState<IUser | null>(null);
-  const [grantAppAccess, setGrantAppAccess] = useState(false);
   const [reviewNotes, setReviewNotes] = useState('');
   const [actionError, setActionError] = useState<string | null>(null);
   const [feedbackMessage, setFeedbackMessage] = useState<{
     type: 'success' | 'info';
     text: string;
   } | null>(null);
-
-  // Editable candidate fields for reviewer
-  const [editFullName, setEditFullName] = useState('');
-  const [editPhoneNumber, setEditPhoneNumber] = useState('');
-  const [editEmail, setEditEmail] = useState('');
-  const [editTownId, setEditTownId] = useState('');
-  const [editGender, setEditGender] = useState<'MALE' | 'FEMALE'>('MALE');
-  const [editDateOfBirth, setEditDateOfBirth] = useState('');
 
   // Filtered & Sorted Members
   const filteredMembers = useMemo(() => {
@@ -114,23 +104,6 @@ export const IntakeReviewsTab: React.FC<IntakeReviewsTabProps> = ({
   const handleStartApprove = (member: IUser) => {
     setApprovingMember(member);
     setRejectingMember(null);
-    setEditFullName(member.fullName || '');
-    setEditPhoneNumber(member.phoneNumber || '');
-    setEditEmail(member.email || '');
-    const townIdStr =
-      typeof member.homeTownId === 'object' && member.homeTownId !== null
-        ? (member.homeTownId as any)._id?.toString() ||
-          (member.homeTownId as any).id
-        : member.homeTownId?.toString() || activeTownId || '';
-    setEditTownId(townIdStr);
-    setEditGender(member.gender || 'MALE');
-    setEditDateOfBirth(
-      member.dateOfBirth
-        ? new Date(member.dateOfBirth).toISOString().split('T')[0]
-        : '',
-    );
-    setGrantAppAccess(false);
-    setReviewNotes('');
     setActionError(null);
   };
 
@@ -148,30 +121,39 @@ export const IntakeReviewsTab: React.FC<IntakeReviewsTabProps> = ({
     setActionError(null);
   };
 
-  const handleConfirmApproval = async () => {
+  const handleConfirmApproval = async (editedData: {
+    fullName: string;
+    townId: string;
+    phoneNumber: string;
+    email?: string;
+    gender: 'MALE' | 'FEMALE';
+    dateOfBirth: string;
+    grantAppAccess: boolean;
+    reviewNotes?: string;
+  }) => {
     if (!approvingMember) return;
     setActionError(null);
 
-    const targetName = editFullName.trim() || approvingMember.fullName;
+    const targetName = editedData.fullName.trim() || approvingMember.fullName;
     try {
       await reviewMutation.mutateAsync({
         memberId: approvingMember.id,
         dto: {
           action: 'APPROVE',
-          fullName: editFullName.trim() || undefined,
-          phoneNumber: editPhoneNumber.trim() || undefined,
-          email: editEmail.trim() || undefined,
-          homeTownId: editTownId || undefined,
-          gender: editGender,
-          dateOfBirth: editDateOfBirth || undefined,
-          grantAppAccess,
-          notes: reviewNotes.trim() ? reviewNotes.trim() : undefined,
+          fullName: editedData.fullName.trim() || undefined,
+          phoneNumber: editedData.phoneNumber.trim() || undefined,
+          email: editedData.email?.trim() || undefined,
+          homeTownId: editedData.townId || undefined,
+          gender: editedData.gender,
+          dateOfBirth: editedData.dateOfBirth || undefined,
+          grantAppAccess: editedData.grantAppAccess,
+          notes: editedData.reviewNotes?.trim()
+            ? editedData.reviewNotes.trim()
+            : undefined,
         },
       });
 
       setApprovingMember(null);
-      setGrantAppAccess(false);
-      setReviewNotes('');
       setFeedbackMessage({
         type: 'success',
         text: t('members:intake.approveSuccess', {
@@ -181,9 +163,12 @@ export const IntakeReviewsTab: React.FC<IntakeReviewsTabProps> = ({
       });
       setTimeout(() => setFeedbackMessage(null), 5000);
     } catch (err: any) {
-      setActionError(
+      throw new Error(
         err?.message ||
-          t('members:intake.approveError', 'Failed to approve member.'),
+          t(
+            'members:intake.approveError',
+            'Failed to approve candidate registration.',
+          ),
       );
     }
   };
@@ -632,210 +617,6 @@ export const IntakeReviewsTab: React.FC<IntakeReviewsTabProps> = ({
                   </div>
                 )}
 
-                {/* APPROVAL CONFIRMATION INLINE DRAWER */}
-                {isApproving && (
-                  <div className="p-4.5 rounded-xl bg-[#f4faf5] border border-[#a9d0b2] flex flex-col gap-3.5 animate-in fade-in slide-in-from-top-1 duration-150 mt-1">
-                    <div className="flex items-center justify-between border-b border-[#c2e9ca] pb-2.5">
-                      <span className="text-xs font-bold text-[#2c4e37] flex items-center gap-1.5">
-                        <PencilSimple size={16} weight="bold" />
-                        {t('members:intake.reviewAndApproveTitle', {
-                          name: member.fullName,
-                          defaultValue: `Review & Edit Candidate Details: "${member.fullName}"`,
-                        })}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={handleCancelAction}
-                        className="text-[#8a726a] hover:text-[#1e1b19] cursor-pointer p-1 rounded hover:bg-black/5"
-                        aria-label="Cancel"
-                      >
-                        <X size={15} />
-                      </button>
-                    </div>
-
-                    {/* Editable candidate information grid */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-xs">
-                      {/* Full Name */}
-                      <label className="block text-[11px] font-bold text-[#2c4e37]">
-                        <span className="block mb-1">
-                          {t('members:intake.editFullName', 'Full Name')} *
-                        </span>
-                        <input
-                          type="text"
-                          value={editFullName}
-                          onChange={(e) => setEditFullName(e.target.value)}
-                          placeholder="Candidate full name"
-                          className="w-full h-9 px-3 rounded-md bg-white border border-[#a9d0b2] text-xs font-normal text-[#1e1b19] placeholder:text-[#8a726a] outline-none focus:border-[#2c4e37] focus:ring-1 focus:ring-[#2c4e37]"
-                        />
-                      </label>
-
-                      {/* Community Town / Hub */}
-                      <label className="block text-[11px] font-bold text-[#2c4e37]">
-                        <span className="block mb-1">
-                          {t('members:intake.editTown', 'Community Hub / Town')}{' '}
-                          *
-                        </span>
-                        <select
-                          value={editTownId}
-                          onChange={(e) => setEditTownId(e.target.value)}
-                          className="w-full h-9 px-3 rounded-md bg-white border border-[#a9d0b2] text-xs font-normal text-[#1e1b19] outline-none focus:border-[#2c4e37] focus:ring-1 focus:ring-[#2c4e37] cursor-pointer"
-                        >
-                          {availableTowns.map((town) => (
-                            <option key={town.id} value={town.id}>
-                              {town.name} ({town.code})
-                            </option>
-                          ))}
-                        </select>
-                      </label>
-
-                      {/* Phone Number */}
-                      <label className="block text-[11px] font-bold text-[#2c4e37]">
-                        <span className="block mb-1">
-                          {t('members:intake.editPhone', 'Phone Number')} *
-                        </span>
-                        <input
-                          type="text"
-                          value={editPhoneNumber}
-                          onChange={(e) => setEditPhoneNumber(e.target.value)}
-                          placeholder="6XXXXXXXX"
-                          className="w-full h-9 px-3 rounded-md bg-white border border-[#a9d0b2] text-xs font-normal text-[#1e1b19] placeholder:text-[#8a726a] outline-none focus:border-[#2c4e37] focus:ring-1 focus:ring-[#2c4e37]"
-                        />
-                      </label>
-
-                      {/* Email */}
-                      <label className="block text-[11px] font-bold text-[#2c4e37]">
-                        <span className="block mb-1">
-                          {t('members:intake.editEmail', 'Email Address')}
-                        </span>
-                        <input
-                          type="email"
-                          value={editEmail}
-                          onChange={(e) => setEditEmail(e.target.value)}
-                          placeholder="name@example.com (optional)"
-                          className="w-full h-9 px-3 rounded-md bg-white border border-[#a9d0b2] text-xs font-normal text-[#1e1b19] placeholder:text-[#8a726a] outline-none focus:border-[#2c4e37] focus:ring-1 focus:ring-[#2c4e37]"
-                        />
-                      </label>
-
-                      {/* Gender */}
-                      <label className="block text-[11px] font-bold text-[#2c4e37]">
-                        <span className="block mb-1">
-                          {t('members:intake.editGender', 'Gender')} *
-                        </span>
-                        <select
-                          value={editGender}
-                          onChange={(e) =>
-                            setEditGender(e.target.value as 'MALE' | 'FEMALE')
-                          }
-                          className="w-full h-9 px-3 rounded-md bg-white border border-[#a9d0b2] text-xs font-normal text-[#1e1b19] outline-none focus:border-[#2c4e37] focus:ring-1 focus:ring-[#2c4e37] cursor-pointer"
-                        >
-                          <option value="MALE">
-                            {t('members:intake.filterMale', 'Male')}
-                          </option>
-                          <option value="FEMALE">
-                            {t('members:intake.filterFemale', 'Female')}
-                          </option>
-                        </select>
-                      </label>
-
-                      {/* Date of Birth */}
-                      <label className="block text-[11px] font-bold text-[#2c4e37]">
-                        <span className="block mb-1">
-                          {t('members:intake.editDob', 'Date of Birth')} *
-                        </span>
-                        <input
-                          type="date"
-                          value={editDateOfBirth}
-                          onChange={(e) => setEditDateOfBirth(e.target.value)}
-                          max={new Date().toISOString().split('T')[0]}
-                          className="w-full h-9 px-3 rounded-md bg-white border border-[#a9d0b2] text-xs font-normal text-[#1e1b19] outline-none focus:border-[#2c4e37] focus:ring-1 focus:ring-[#2c4e37]"
-                        />
-                      </label>
-                    </div>
-
-                    {/* Security policy notice */}
-                    <div className="p-3 rounded-lg bg-white border border-[#a9d0b2] flex items-start gap-2.5 text-xs text-[#57423b]">
-                      <Key
-                        size={16}
-                        className="text-[#b85028] shrink-0 mt-0.5"
-                      />
-                      <div className="flex-1 space-y-1">
-                        <label className="flex items-center gap-2 cursor-pointer font-bold select-none text-[#1e1b19]">
-                          <input
-                            type="checkbox"
-                            checked={grantAppAccess}
-                            onChange={(e) =>
-                              setGrantAppAccess(e.target.checked)
-                            }
-                            className="w-4 h-4 rounded text-[#b85028] accent-[#b85028] cursor-pointer"
-                          />
-                          <span>
-                            {t(
-                              'members:intake.grantAccessLabel',
-                              'Grant application access (Default: Unchecked)',
-                            )}
-                          </span>
-                        </label>
-                        <p className="text-[11px] text-[#8a726a] leading-tight">
-                          {t(
-                            'members:intake.grantAccessDesc',
-                            'By default, members who register through intake links are recorded in the directory only and cannot log into the JRS portal without explicit administrator authorization.',
-                          )}
-                        </p>
-                      </div>
-                    </div>
-
-                    <input
-                      type="text"
-                      value={reviewNotes}
-                      onChange={(e) => setReviewNotes(e.target.value)}
-                      placeholder={t(
-                        'members:intake.notesPlaceholder',
-                        'Optional verification note (e.g. Verified via WhatsApp call)',
-                      )}
-                      className="h-9 px-3 rounded-md bg-white border border-[#a9d0b2] text-xs text-[#1e1b19] placeholder:text-[#8a726a] outline-none focus:border-[#2c4e37] focus:ring-1 focus:ring-[#2c4e37]"
-                    />
-
-                    <div className="flex items-center justify-end gap-2 pt-0.5">
-                      <button
-                        type="button"
-                        onClick={handleCancelAction}
-                        className="px-3 py-1.5 rounded text-xs font-semibold text-[#8a726a] hover:bg-black/5 cursor-pointer"
-                      >
-                        {t('members:intake.cancel', 'Cancel')}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={handleConfirmApproval}
-                        disabled={
-                          reviewMutation.isPending ||
-                          !editFullName.trim() ||
-                          !editPhoneNumber.trim()
-                        }
-                        className="px-4 py-1.5 rounded-md bg-[#2c4e37] hover:bg-[#223d2b] text-white text-xs font-bold transition-colors cursor-pointer disabled:opacity-50 flex items-center gap-1.5 shadow-2xs"
-                      >
-                        {reviewMutation.isPending ? (
-                          <>
-                            <div className="w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-                            <span>
-                              {t('members:intake.approving', 'Approving...')}
-                            </span>
-                          </>
-                        ) : (
-                          <>
-                            <Check size={14} weight="bold" />
-                            <span>
-                              {t(
-                                'members:intake.confirmApproval',
-                                'Confirm Approval & Save Changes',
-                              )}
-                            </span>
-                          </>
-                        )}
-                      </button>
-                    </div>
-                  </div>
-                )}
-
                 {/* REJECTION CONFIRMATION INLINE DRAWER */}
                 {isRejecting && (
                   <div className="p-4 rounded-xl bg-[#ffdad6]/40 border border-[#ffb4a8] flex flex-col gap-3.5 animate-in fade-in slide-in-from-top-1 duration-150 mt-1">
@@ -908,6 +689,16 @@ export const IntakeReviewsTab: React.FC<IntakeReviewsTabProps> = ({
           })}
         </div>
       )}
+
+      {/* DEDICATED CREATIVE MODAL FOR CANDIDATE REVIEW & EDITING */}
+      <EditApproveIntakeModal
+        isOpen={Boolean(approvingMember)}
+        candidate={approvingMember}
+        availableTowns={availableTowns}
+        isSubmitting={reviewMutation.isPending}
+        onClose={() => setApprovingMember(null)}
+        onConfirm={handleConfirmApproval}
+      />
     </div>
   );
 };

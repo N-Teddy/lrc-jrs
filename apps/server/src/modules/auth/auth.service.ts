@@ -1,6 +1,7 @@
 import * as crypto from 'node:crypto';
 import { ErrorCode, UserRole } from '@jrs/shared';
 import { Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/mongoose';
 import * as bcrypt from 'bcrypt';
@@ -41,6 +42,7 @@ export class AuthService {
   constructor(
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
+    private readonly configService: ConfigService,
     private readonly whatsAppService: WhatsAppService,
     private readonly emailService: EmailService,
     private readonly notificationsService: NotificationsService,
@@ -95,13 +97,14 @@ export class AuthService {
   }
 
   private generateAccessToken(user: UserDocument): string {
+    const expiresIn = this.configService.get<string>('jwt.expiresIn') || '7d';
     return this.jwtService.sign(
       {
         sub: user._id.toString(),
         role: user.role,
         homeTownId: user.homeTownId.toString(),
       },
-      { expiresIn: '15m' },
+      { expiresIn: expiresIn as any },
     );
   }
 
@@ -174,7 +177,7 @@ export class AuthService {
     return {
       accessToken,
       refreshToken,
-      expiresIn: 900, // 15 minutes
+      expiresIn: 604800, // 7 days
       requiresPasswordChange: false,
       user: this.formatUserResponse(user),
     };
@@ -263,7 +266,7 @@ export class AuthService {
     return {
       accessToken,
       refreshToken,
-      expiresIn: 900,
+      expiresIn: 604800,
       user: this.formatUserResponse(user),
       message: 'Your permanent password has been set successfully.',
     };
@@ -322,7 +325,7 @@ export class AuthService {
     return {
       accessToken,
       refreshToken: newRawToken,
-      expiresIn: 900,
+      expiresIn: 604800,
     };
   }
 
@@ -333,7 +336,7 @@ export class AuthService {
   async logout(refreshTokenDto?: RefreshTokenDto, authHeader?: string) {
     let userId: string | null = null;
 
-    if (authHeader && authHeader.startsWith('Bearer ')) {
+    if (authHeader?.startsWith('Bearer ')) {
       const token = authHeader.substring(7);
       try {
         const decoded = this.jwtService.decode(token) as any;

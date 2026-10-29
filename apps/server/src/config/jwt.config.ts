@@ -9,6 +9,6 @@ export const jwtConfig = registerAs('jwt', () => {
   }
   return {
     secret,
-    expiresIn: process.env.JWT_EXPIRATION || '15m',
+    expiresIn: process.env.JWT_EXPIRATION || '7d',
   };
 });

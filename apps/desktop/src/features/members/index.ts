@@ -1,4 +1,5 @@
 export * from './components/DeleteMemberDialog';
+export * from './components/EditApproveIntakeModal';
 export * from './components/EditMemberModal';
 export * from './components/IntakeLinksModal';
 export * from './components/IntakeReviewsTab';
