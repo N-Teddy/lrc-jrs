@@ -7,7 +7,6 @@ import {
 } from '@phosphor-icons/react';
 import type React from 'react';
 import { useEffect, useId, useRef, useState } from 'react';
-import { useClickOutside } from '../hooks/use-click-outside';
 import { useTranslation } from '../i18n';
 import { translations } from '../i18n/translations';
 
@@ -67,6 +66,7 @@ interface PickerTriggerProps {
   displayText: string;
   hasValue: boolean;
   onClear: () => void;
+  clearLabel?: string;
   icon?: React.ReactNode;
 }
 
@@ -80,6 +80,7 @@ const PickerTrigger: React.FC<PickerTriggerProps> = ({
   displayText,
   hasValue,
   onClear,
+  clearLabel = 'Clear',
   icon,
 }) => (
   <div
@@ -95,22 +96,22 @@ const PickerTrigger: React.FC<PickerTriggerProps> = ({
         onToggle();
       }
     }}
-    className={`w-full flex items-center justify-between h-10 px-3.5 rounded-md border text-xs transition-all cursor-pointer select-none ${
+    className={`w-full flex items-center justify-between h-11 px-3.5 rounded-xl border text-xs sm:text-sm transition-all cursor-pointer select-none ${
       disabled
-        ? 'opacity-60 bg-[#f4ece9] border-[#e8e1dd] cursor-not-allowed'
+        ? 'opacity-60 bg-[#F3EFEA] border-[#E6DFD5] cursor-not-allowed'
         : isOpen
-          ? 'bg-white border-[#b85028] ring-2 ring-[#b85028]/20 shadow-xs'
-          : 'bg-[#faf2ee] hover:bg-[#f4ece9] border-[#e8e1dd] focus:bg-white focus:border-[#b85028]'
+          ? 'bg-white border-[#B85028] ring-3 ring-[#B85028]/12 shadow-xs'
+          : 'bg-white hover:border-[#C8BEB4] border-[#E0D7CE] focus:border-[#B85028] focus:ring-3 focus:ring-[#B85028]/12'
     }`}
   >
     <span
       className={`truncate font-medium ${
-        hasValue ? 'text-[#1e1b19]' : 'text-[#8a726a]'
+        hasValue ? 'text-[#23201E]' : 'text-[#A89F95]'
       }`}
     >
       {displayText}
     </span>
-    <div className="flex items-center gap-1.5 text-[#8a726a] shrink-0">
+    <div className="flex items-center gap-1.5 text-[#8C847C] shrink-0">
       {hasValue && !disabled && (
         <button
           type="button"
@@ -118,21 +119,22 @@ const PickerTrigger: React.FC<PickerTriggerProps> = ({
             e.stopPropagation();
             onClear();
           }}
-          className="p-1 rounded hover:bg-[#e8e1dd] text-[#8a726a] hover:text-[#1e1b19] transition-colors"
-          title="Clear"
+          className="p-1 rounded-md hover:bg-[#F3EFEA] text-[#8C847C] hover:text-[#23201E] transition-colors"
+          title={clearLabel}
+          aria-label={clearLabel}
         >
-          <X size={12} />
+          <X size={14} />
         </button>
       )}
       {icon ?? (
-        <CalendarBlank size={16} weight="bold" className="text-[#b85028]" />
+        <CalendarBlank size={18} weight="bold" className="text-[#B85028]" />
       )}
     </div>
   </div>
 );
 
 // ==========================================
-// DATE PICKER COMPONENT
+// DATE PICKER COMPONENT (Mobile Bottom Sheet)
 // ==========================================
 
 export interface DatePickerProps {
@@ -171,14 +173,20 @@ export const DatePicker: React.FC<DatePickerProps> = ({
   const inputId = id || generatedId;
   const [isOpen, setIsOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'days' | 'months' | 'years'>('days');
-  const containerRef = useRef<HTMLDivElement>(null);
+  const sheetRef = useRef<HTMLDivElement>(null);
+  const yearListRef = useRef<HTMLDivElement>(null);
 
-  // Default to 18 years ago for birth date convenience
+  // Year limit enforcement: never exceed current year
   const currentYear = new Date().getFullYear();
+  const maxYear = maxDate ? parseInt(maxDate.split('-')[0], 10) : currentYear;
+  const effectiveMaxYear = Math.min(maxYear, currentYear);
+
   const initialDate = value ? new Date(value) : null;
   const validInitial = initialDate && !Number.isNaN(initialDate.getTime());
   const [viewYear, setViewYear] = useState(
-    validInitial ? initialDate.getFullYear() : currentYear - 18,
+    validInitial
+      ? Math.min(initialDate.getFullYear(), effectiveMaxYear)
+      : Math.min(currentYear - 18, effectiveMaxYear),
   );
   const [viewMonth, setViewMonth] = useState(
     validInitial ? initialDate.getMonth() : 0,
@@ -192,22 +200,36 @@ export const DatePicker: React.FC<DatePickerProps> = ({
         const y = parseInt(parts[0], 10);
         const m = parseInt(parts[1], 10) - 1;
         if (!Number.isNaN(y) && !Number.isNaN(m)) {
-          setViewYear(y);
+          setViewYear(Math.min(y, effectiveMaxYear));
           setViewMonth(m);
         }
       }
     }
-  }, [value]);
+  }, [value, effectiveMaxYear]);
 
-  // Click outside to close
-  useClickOutside(
-    containerRef,
-    () => {
-      setIsOpen(false);
-      setViewMode('days');
-    },
-    isOpen,
-  );
+  // Prevent background scroll when bottom sheet is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
+
+  // Scroll to active year when year selector opens
+  useEffect(() => {
+    if (isOpen && viewMode === 'years' && yearListRef.current) {
+      const selectedEl = yearListRef.current.querySelector(
+        '[data-selected="true"]',
+      );
+      if (selectedEl) {
+        selectedEl.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      }
+    }
+  }, [isOpen, viewMode]);
 
   const handlePrevMonth = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -219,18 +241,29 @@ export const DatePicker: React.FC<DatePickerProps> = ({
     }
   };
 
+  // Check if navigating to next month is disabled because it would exceed currentYear or maxDate
+  const isNextDisabled = Boolean(
+    viewYear > effectiveMaxYear ||
+      (viewYear === effectiveMaxYear && viewMonth === 11) ||
+      (maxDate && formatDateString(viewYear, viewMonth + 1, 1) > maxDate),
+  );
+
   const handleNextMonth = (e: React.MouseEvent) => {
     e.stopPropagation();
+    if (isNextDisabled) return;
     if (viewMonth === 11) {
+      if (viewYear >= effectiveMaxYear) return;
       setViewMonth(0);
-      setViewYear((prev) => prev + 1);
+      setViewYear((prev) => Math.min(prev + 1, effectiveMaxYear));
     } else {
       setViewMonth((prev) => prev + 1);
     }
   };
 
   const handleSelectDay = (day: number) => {
+    if (viewYear > effectiveMaxYear) return;
     const formatted = formatDateString(viewYear, viewMonth, day);
+    if (maxDate && formatted > maxDate) return;
     onChange(formatted);
     setIsOpen(false);
     setViewMode('days');
@@ -251,12 +284,12 @@ export const DatePicker: React.FC<DatePickerProps> = ({
 
   // Year range for quick selector (past 80 years to current year)
   const yearOptions: number[] = [];
-  for (let y = currentYear; y >= currentYear - 80; y--) {
+  for (let y = effectiveMaxYear; y >= effectiveMaxYear - 80; y--) {
     yearOptions.push(y);
   }
 
   return (
-    <div ref={containerRef} className={`relative w-full ${className}`}>
+    <div className={`relative w-full ${className}`}>
       {/* Input Trigger */}
       <PickerTrigger
         inputId={inputId}
@@ -270,204 +303,273 @@ export const DatePicker: React.FC<DatePickerProps> = ({
         }
         hasValue={Boolean(value)}
         onClear={() => onChange('')}
+        clearLabel={t('datePicker.clear')}
       />
 
-      {/* Popover Calendar */}
+      {/* Native Mobile Bottom Sheet */}
       {isOpen && (
-        <div className="absolute top-[calc(100%+6px)] left-0 z-50 w-72 bg-white rounded-xl border border-[#e8e1dd] shadow-xl p-3.5 animate-in fade-in zoom-in-95 duration-150">
-          {/* Header */}
-          <div className="flex items-center justify-between mb-3 pb-2 border-b border-[#f4ece9]">
-            <div className="flex items-center gap-1">
+        <>
+          {/* Backdrop Scrim */}
+          <div
+            className="fixed inset-0 bg-black/40 backdrop-blur-[2px] z-50 transition-opacity animate-in fade-in duration-200"
+            onClick={() => setIsOpen(false)}
+          />
+
+          {/* Bottom Sheet Modal Container */}
+          <div
+            ref={sheetRef}
+            className="fixed inset-x-0 bottom-0 z-50 w-full max-w-lg mx-auto bg-white rounded-t-3xl shadow-[0_-8px_30px_rgba(0,0,0,0.15)] p-4 sm:p-5 border-t border-[#E8E1DD] animate-in slide-in-from-bottom duration-250 flex flex-col pb-[max(1.25rem,env(safe-area-inset-bottom))]"
+          >
+            {/* Grab Handle */}
+            <div className="w-12 h-1.5 bg-[#DCD4C8] rounded-full mx-auto mb-3 shrink-0" />
+
+            {/* Header: Clear, Title, Done */}
+            <div className="flex items-center justify-between pb-3 mb-2 border-b border-[#F4ECE9] shrink-0">
               <button
                 type="button"
-                onClick={() =>
-                  setViewMode(viewMode === 'months' ? 'days' : 'months')
-                }
-                className="px-2 py-1 rounded-md text-xs font-bold text-[#1e1b19] hover:bg-[#faf2ee] hover:text-[#b85028] transition-colors flex items-center gap-1 cursor-pointer"
+                onClick={() => {
+                  onChange('');
+                  setIsOpen(false);
+                }}
+                className="text-xs font-semibold text-[#8C847C] hover:text-[#23201E] px-2 py-1 rounded-md cursor-pointer"
               >
-                <span>{monthNames[viewMonth]}</span>
-                <CaretDown size={11} weight="bold" />
+                {t('datePicker.clear')}
               </button>
+
+              <h3 className="text-sm font-bold text-[#23201E]">
+                {t('datePicker.selectBirthDate')}
+              </h3>
+
               <button
                 type="button"
-                onClick={() =>
-                  setViewMode(viewMode === 'years' ? 'days' : 'years')
-                }
-                className="px-2 py-1 rounded-md text-xs font-bold text-[#1e1b19] hover:bg-[#faf2ee] hover:text-[#b85028] transition-colors flex items-center gap-1 cursor-pointer"
+                onClick={() => setIsOpen(false)}
+                className="text-xs font-bold text-[#B85028] hover:text-[#A44520] px-3 py-1 rounded-full bg-[#B85028]/10 cursor-pointer"
               >
-                <span>{viewYear}</span>
-                <CaretDown size={11} weight="bold" />
+                {t('datePicker.done')}
               </button>
             </div>
 
-            <div className="flex items-center gap-1">
-              <button
-                type="button"
-                onClick={handlePrevMonth}
-                className="w-7 h-7 rounded-md hover:bg-[#faf2ee] flex items-center justify-center text-[#57423b] hover:text-[#1e1b19] transition-colors cursor-pointer"
-                title={t('datePicker.prevMonth')}
-              >
-                <CaretLeft size={14} weight="bold" />
-              </button>
-              <button
-                type="button"
-                onClick={handleNextMonth}
-                className="w-7 h-7 rounded-md hover:bg-[#faf2ee] flex items-center justify-center text-[#57423b] hover:text-[#1e1b19] transition-colors cursor-pointer"
-                title={t('datePicker.nextMonth')}
-              >
-                <CaretRight size={14} weight="bold" />
-              </button>
-            </div>
-          </div>
+            {/* Selector Mode Navigation Pills: [Month Year] | [Year selector] */}
+            <div className="flex items-center justify-between mb-3 px-1">
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() =>
+                    setViewMode(viewMode === 'months' ? 'days' : 'months')
+                  }
+                  className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer flex items-center gap-1 ${
+                    viewMode === 'months'
+                      ? 'bg-[#B85028] text-white shadow-xs'
+                      : 'bg-[#FAF7F2] text-[#23201E] hover:bg-[#F3EFEA]'
+                  }`}
+                >
+                  <span>{monthNames[viewMonth]}</span>
+                  <CaretDown size={11} weight="bold" />
+                </button>
 
-          {/* VIEW: Month selector grid */}
-          {viewMode === 'months' && (
-            <div className="grid grid-cols-3 gap-1.5 py-1">
-              {monthNamesShort.map((mName, idx) => {
-                const isSelected = viewMonth === idx;
-                return (
-                  <button
-                    key={mName}
-                    type="button"
-                    onClick={() => {
-                      setViewMonth(idx);
-                      setViewMode('days');
-                    }}
-                    className={`h-9 rounded-md text-xs font-bold transition-all cursor-pointer ${
-                      isSelected
-                        ? 'bg-[#b85028] text-white shadow-xs'
-                        : 'text-[#57423b] hover:bg-[#faf2ee] hover:text-[#1e1b19]'
-                    }`}
-                  >
-                    {mName}
-                  </button>
-                );
-              })}
-            </div>
-          )}
-
-          {/* VIEW: Year selector scroll list */}
-          {viewMode === 'years' && (
-            <div className="grid grid-cols-4 gap-1.5 max-h-48 overflow-y-auto py-1 pr-1">
-              {yearOptions.map((y) => {
-                const isSelected = viewYear === y;
-                return (
-                  <button
-                    key={y}
-                    type="button"
-                    onClick={() => {
-                      setViewYear(y);
-                      setViewMode('days');
-                    }}
-                    className={`h-8 rounded-md text-xs font-semibold transition-all cursor-pointer ${
-                      isSelected
-                        ? 'bg-[#b85028] text-white font-bold shadow-xs'
-                        : 'text-[#57423b] hover:bg-[#faf2ee] hover:text-[#1e1b19]'
-                    }`}
-                  >
-                    {y}
-                  </button>
-                );
-              })}
-            </div>
-          )}
-
-          {/* VIEW: Days grid */}
-          {viewMode === 'days' && (
-            <>
-              {/* Day of Week Headers */}
-              <div className="grid grid-cols-7 gap-1 text-center mb-1">
-                {dayNamesShort.map((d) => (
-                  <div
-                    key={d}
-                    className="h-6 flex items-center justify-center text-[10px] font-bold text-[#8a726a] uppercase"
-                  >
-                    {d}
-                  </div>
-                ))}
+                <button
+                  type="button"
+                  onClick={() =>
+                    setViewMode(viewMode === 'years' ? 'days' : 'years')
+                  }
+                  className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer flex items-center gap-1 ${
+                    viewMode === 'years'
+                      ? 'bg-[#B85028] text-white shadow-xs'
+                      : 'bg-[#FAF7F2] text-[#23201E] hover:bg-[#F3EFEA]'
+                  }`}
+                >
+                  <span>{viewYear}</span>
+                  <CaretDown size={11} weight="bold" />
+                </button>
               </div>
 
-              {/* Day Cells */}
-              <div className="grid grid-cols-7 gap-1 text-center">
-                {/* Previous month filler days */}
-                {Array.from({ length: firstDayOffset }).map((_, idx) => {
-                  const dayNum = daysInPrevMonth - firstDayOffset + idx + 1;
-                  return (
-                    <div
-                      key={`prev-${idx}`}
-                      className="h-8 flex items-center justify-center text-xs text-[#c4b5af] select-none"
-                    >
-                      {dayNum}
-                    </div>
-                  );
-                })}
+              {viewMode === 'days' && (
+                <div className="flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={handlePrevMonth}
+                    className="w-8 h-8 rounded-full hover:bg-[#FAF7F2] flex items-center justify-center text-[#5C554F] hover:text-[#23201E] transition-colors cursor-pointer"
+                    title={t('datePicker.prevMonth')}
+                  >
+                    <CaretLeft size={16} weight="bold" />
+                  </button>
+                  <button
+                    type="button"
+                    disabled={isNextDisabled}
+                    onClick={handleNextMonth}
+                    className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
+                      isNextDisabled
+                        ? 'opacity-25 cursor-not-allowed text-[#C4B5AF]'
+                        : 'hover:bg-[#FAF7F2] text-[#5C554F] hover:text-[#23201E] cursor-pointer'
+                    }`}
+                    title={t('datePicker.nextMonth')}
+                  >
+                    <CaretRight size={16} weight="bold" />
+                  </button>
+                </div>
+              )}
+            </div>
 
-                {/* Current month days */}
-                {Array.from({ length: daysInCurrentMonth }).map((_, idx) => {
-                  const day = idx + 1;
-                  const dateStr = formatDateString(viewYear, viewMonth, day);
-                  const isSelected = value === dateStr;
-                  const isToday = todayStr === dateStr;
-                  const isDisabled = Boolean(
-                    (minDate && dateStr < minDate) ||
-                      (maxDate && dateStr > maxDate),
-                  );
+            {/* VIEW 1: Scrollable Year Selector (Native Mobile Scroll) */}
+            {viewMode === 'years' && (
+              <div className="space-y-2">
+                <p className="text-[11px] text-center text-[#8C847C]">
+                  {t('datePicker.scrollYearHint')}
+                </p>
+                <div
+                  ref={yearListRef}
+                  className="grid grid-cols-4 gap-2 max-h-56 overflow-y-auto overscroll-contain py-1 px-1"
+                >
+                  {yearOptions.map((y) => {
+                    const isSelected = viewYear === y;
+                    return (
+                      <button
+                        key={y}
+                        type="button"
+                        data-selected={isSelected ? 'true' : 'false'}
+                        onClick={() => {
+                          setViewYear(Math.min(y, effectiveMaxYear));
+                          setViewMode('days');
+                        }}
+                        className={`h-11 rounded-xl text-sm font-semibold transition-all flex items-center justify-center cursor-pointer ${
+                          isSelected
+                            ? 'bg-[#B85028] text-white font-bold shadow-xs'
+                            : 'bg-[#FAF7F2] hover:bg-[#F3EFEA] text-[#23201E]'
+                        }`}
+                      >
+                        {y}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
+            {/* VIEW 2: Month Grid */}
+            {viewMode === 'months' && (
+              <div className="grid grid-cols-3 gap-2 py-2">
+                {monthNamesShort.map((mName, idx) => {
+                  const isSelected = viewMonth === idx;
+                  const isMonthDisabled = Boolean(
+                    maxDate && formatDateString(viewYear, idx, 1) > maxDate,
+                  );
                   return (
                     <button
-                      key={`curr-${day}`}
+                      key={mName}
                       type="button"
-                      disabled={isDisabled}
-                      onClick={() => handleSelectDay(day)}
-                      className={`h-8 rounded-md text-xs font-medium transition-all flex items-center justify-center relative cursor-pointer ${
+                      disabled={isMonthDisabled}
+                      onClick={() => {
+                        setViewMonth(idx);
+                        setViewMode('days');
+                      }}
+                      className={`h-11 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
                         isSelected
-                          ? 'bg-[#b85028] text-white font-bold shadow-xs'
-                          : isToday
-                            ? 'text-[#b85028] font-bold bg-[#fff2ee] border border-[#ffdbcf]'
-                            : isDisabled
-                              ? 'text-[#c4b5af] cursor-not-allowed opacity-40'
-                              : 'text-[#1e1b19] hover:bg-[#faf2ee] hover:text-[#b85028]'
+                          ? 'bg-[#B85028] text-white shadow-xs'
+                          : isMonthDisabled
+                            ? 'opacity-25 cursor-not-allowed text-[#C4B5AF]'
+                            : 'bg-[#FAF7F2] text-[#5C554F] hover:bg-[#F3EFEA] hover:text-[#23201E]'
                       }`}
                     >
-                      {day}
-                      {isToday && !isSelected && (
-                        <span className="absolute bottom-1 w-1 h-1 rounded-full bg-[#b85028]" />
-                      )}
+                      {monthNames[idx]}
                     </button>
                   );
                 })}
               </div>
+            )}
 
-              {/* Bottom Quick Bar */}
-              <div className="mt-3 pt-2 border-t border-[#f4ece9] flex items-center justify-between text-[11px]">
-                <button
-                  type="button"
-                  onClick={() => {
-                    const now = new Date();
-                    setViewYear(now.getFullYear());
-                    setViewMonth(now.getMonth());
-                    handleSelectDay(now.getDate());
-                  }}
-                  className="font-bold text-[#b85028] hover:underline cursor-pointer"
-                >
-                  {t('datePicker.today')}
-                </button>
-                {value && (
+            {/* VIEW 3: Calendar Days Grid */}
+            {viewMode === 'days' && (
+              <>
+                <div className="grid grid-cols-7 gap-1 text-center mb-1">
+                  {dayNamesShort.map((d) => (
+                    <div
+                      key={d}
+                      className="h-6 flex items-center justify-center text-[10px] font-bold text-[#8C847C] uppercase"
+                    >
+                      {d}
+                    </div>
+                  ))}
+                </div>
+
+                <div className="grid grid-cols-7 gap-1 text-center">
+                  {/* Previous month filler days */}
+                  {Array.from({ length: firstDayOffset }).map((_, idx) => {
+                    const dayNum = daysInPrevMonth - firstDayOffset + idx + 1;
+                    return (
+                      <div
+                        key={`prev-${idx}`}
+                        className="h-10 flex items-center justify-center text-xs text-[#DCD4C8] select-none"
+                      >
+                        {dayNum}
+                      </div>
+                    );
+                  })}
+
+                  {/* Current month days */}
+                  {Array.from({ length: daysInCurrentMonth }).map((_, idx) => {
+                    const day = idx + 1;
+                    const dateStr = formatDateString(viewYear, viewMonth, day);
+                    const isSelected = value === dateStr;
+                    const isToday = todayStr === dateStr;
+                    const isDisabled = Boolean(
+                      (minDate && dateStr < minDate) ||
+                        (maxDate && dateStr > maxDate),
+                    );
+
+                    return (
+                      <button
+                        key={`curr-${day}`}
+                        type="button"
+                        disabled={isDisabled}
+                        onClick={() => handleSelectDay(day)}
+                        className={`h-10 rounded-xl text-xs font-semibold transition-all flex items-center justify-center relative cursor-pointer ${
+                          isSelected
+                            ? 'bg-[#B85028] text-white font-bold shadow-xs'
+                            : isToday
+                              ? 'text-[#B85028] font-bold bg-[#FFF2EE] border border-[#FFDBCF]'
+                              : isDisabled
+                                ? 'text-[#C4B5AF] cursor-not-allowed opacity-30'
+                                : 'text-[#23201E] hover:bg-[#FAF7F2] hover:text-[#B85028]'
+                        }`}
+                      >
+                        {day}
+                        {isToday && !isSelected && (
+                          <span className="absolute bottom-1 w-1 h-1 rounded-full bg-[#B85028]" />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Bottom Quick Bar: Today */}
+                <div className="mt-3 pt-2.5 border-t border-[#F4ECE9] flex items-center justify-between text-xs">
                   <button
                     type="button"
                     onClick={() => {
-                      onChange('');
-                      setIsOpen(false);
+                      const now = new Date();
+                      setViewYear(
+                        Math.min(now.getFullYear(), effectiveMaxYear),
+                      );
+                      setViewMonth(now.getMonth());
+                      handleSelectDay(now.getDate());
                     }}
-                    className="font-medium text-[#8a726a] hover:text-[#1e1b19] cursor-pointer"
+                    className="font-bold text-[#B85028] hover:underline cursor-pointer"
                   >
-                    {t('datePicker.clear')}
+                    {t('datePicker.today')}
                   </button>
-                )}
-              </div>
-            </>
-          )}
-        </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setViewMode('years')}
+                    className="font-medium text-[#8C847C] hover:text-[#23201E] cursor-pointer"
+                  >
+                    {t('datePicker.scrollYearHint')} →
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </>
       )}
     </div>
   );

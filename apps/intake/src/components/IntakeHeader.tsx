@@ -40,20 +40,20 @@ export const IntakeHeader: React.FC<IntakeHeaderProps> = ({ info }) => {
   );
 
   return (
-    <header className="relative w-full max-w-xl mx-auto pt-2 pb-2 px-4 text-center">
+    <header className="relative w-full max-w-xl mx-auto pt-1 pb-1.5 px-3 text-center">
       {/* Main Title */}
-      <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#1e1b19] mb-2">
+      <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight text-[#1e1b19] mb-1">
         {info.title || t('header.title')}
       </h1>
 
-      <p className="text-sm sm:text-base text-[#57423b] max-w-md mx-auto mb-4 leading-relaxed">
+      <p className="text-xs sm:text-sm text-[#57423b] max-w-md mx-auto mb-2.5 leading-snug">
         {t('header.subtitle')}
       </p>
 
       {/* Meta Pills: Town and Expiration */}
-      <div className="flex flex-wrap items-center justify-center gap-2 mb-4">
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-[#faf2ee] border border-[#e8e1dd] text-[#1e1b19] text-xs font-medium">
-          <MapPin weight="bold" className="w-3.5 h-3.5 text-[#b85028]" />
+      <div className="flex flex-wrap items-center justify-center gap-2 mb-3">
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#faf7f2] border border-[#e8e0d7] text-[#5c554f] text-xs font-medium shadow-2xs">
+          <MapPin weight="fill" className="w-3.5 h-3.5 text-[#b85028]" />
           <span>
             {info.town?.name || t('header.location')}{' '}
             {info.town?.code ? `(${info.town.code})` : ''}
@@ -61,10 +61,10 @@ export const IntakeHeader: React.FC<IntakeHeaderProps> = ({ info }) => {
         </div>
 
         <div
-          className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-amber-50 border border-amber-200 text-amber-900 text-xs font-medium"
-          title={`Expires on ${formattedDate}`}
+          className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 text-amber-900 text-xs font-medium border border-amber-500/20 shadow-2xs"
+          title={t('header.expiresOn', { date: formattedDate })}
         >
-          <Clock weight="bold" className="w-3.5 h-3.5 text-amber-700" />
+          <Clock weight="fill" className="w-3.5 h-3.5 text-amber-700" />
           <span>{expiryLabel}</span>
         </div>
       </div>

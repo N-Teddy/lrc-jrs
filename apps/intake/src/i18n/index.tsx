@@ -27,17 +27,11 @@ export const I18nProvider: React.FC<{ children: ReactNode }> = ({
       const saved = window.localStorage.getItem(STORAGE_KEY) as Language | null;
       if (saved === 'fr' || saved === 'en') return saved;
     }
-    // 2. Default to French for Cameroon, or English if browser preference is explicitly English
-    if (
-      typeof navigator !== 'undefined' &&
-      navigator.language?.toLowerCase().startsWith('en')
-    ) {
-      return 'en';
-    }
+    // 2. Default to French
     return 'fr';
   });
 
-  const setLanguage = (lang: Language) => {
+  const setLanguage = React.useCallback((lang: Language) => {
     setLangState(lang);
     try {
       window.localStorage.setItem(STORAGE_KEY, lang);
@@ -45,7 +39,7 @@ export const I18nProvider: React.FC<{ children: ReactNode }> = ({
     } catch {
       // ignore
     }
-  };
+  }, []);
 
   useEffect(() => {
     if (typeof document !== 'undefined') {
@@ -53,62 +47,65 @@ export const I18nProvider: React.FC<{ children: ReactNode }> = ({
     }
   }, [language]);
 
-  const t = (
-    path: string,
-    params?: Record<string, string | number>,
-  ): string => {
-    const keys = path.split('.');
-    let current: any = translations[language];
+  const t = React.useCallback(
+    (path: string, params?: Record<string, string | number>): string => {
+      const keys = path.split('.');
+      let current: any = translations[language];
 
-    for (const key of keys) {
-      if (current && typeof current === 'object' && key in current) {
-        current = current[key];
-      } else {
-        // Fallback to English
-        let fallback: any = translations.en;
-        for (const fKey of keys) {
-          if (fallback && typeof fallback === 'object' && fKey in fallback) {
-            fallback = fallback[fKey];
-          } else {
-            return path;
+      for (const key of keys) {
+        if (current && typeof current === 'object' && key in current) {
+          current = current[key];
+        } else {
+          // Fallback to English
+          let fallback: any = translations.en;
+          for (const fKey of keys) {
+            if (fallback && typeof fallback === 'object' && fKey in fallback) {
+              fallback = fallback[fKey];
+            } else {
+              return path;
+            }
           }
+          current = fallback;
+          break;
         }
-        current = fallback;
-        break;
       }
-    }
 
-    if (typeof current !== 'string') {
-      return path;
-    }
-
-    if (!params) {
-      return current;
-    }
-
-    // Handle pluralization helper if count exists
-    let text = current;
-    if (params.count !== undefined) {
-      const isPlural = Number(params.count) !== 1;
-      const pluralKey = `${keys[keys.length - 1]}_plural`;
-      const parentObj = keys
-        .slice(0, -1)
-        .reduce((acc: any, k) => acc?.[k], translations[language]);
-      if (isPlural && parentObj && typeof parentObj[pluralKey] === 'string') {
-        text = parentObj[pluralKey];
+      if (typeof current !== 'string') {
+        return path;
       }
-    }
 
-    // Replace {{param}}
-    return text.replace(/\{\{\s*(\w+)\s*\}\}/g, (_, k) => {
-      return params[k] !== undefined ? String(params[k]) : `{{${k}}}`;
-    });
-  };
+      if (!params) {
+        return current;
+      }
+
+      // Handle pluralization helper if count exists
+      let text = current;
+      if (params.count !== undefined) {
+        const isPlural = Number(params.count) !== 1;
+        const pluralKey = `${keys[keys.length - 1]}_plural`;
+        const parentObj = keys
+          .slice(0, -1)
+          .reduce((acc: any, k) => acc?.[k], translations[language]);
+        if (isPlural && parentObj && typeof parentObj[pluralKey] === 'string') {
+          text = parentObj[pluralKey];
+        }
+      }
+
+      // Replace {{param}}
+      return text.replace(/\{\{\s*(\w+)\s*\}\}/g, (_, k) => {
+        return params[k] !== undefined ? String(params[k]) : `{{${k}}}`;
+      });
+    },
+    [language],
+  );
+
+  const contextValue = React.useMemo(
+    () => ({ language, setLanguage, t }),
+    [language, setLanguage, t],
+  );
 
   return (
-    <I18nContext.Provider value={{ language, setLanguage, t }}>
-      {children}
-    </I18nContext.Provider>
+    <I18nContext.Provider value={contextValue}>{children}</I18nContext.Provider>
   );
 };
 

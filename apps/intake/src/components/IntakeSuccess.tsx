@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useTranslation } from '../i18n';
 
 interface IntakeSuccessProps {
-  referenceCode: string;
+  referenceCode?: string;
   fullName: string;
   townName?: string;
   onReset?: () => void;
@@ -15,142 +15,88 @@ export const IntakeSuccess: React.FC<IntakeSuccessProps> = ({
   townName,
   onReset,
 }) => {
-  const { t, language } = useTranslation();
+  const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(referenceCode);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2500);
+  const defaultTown = t('success.defaultTown');
+
+  const copyReference = async () => {
+    if (!referenceCode) return;
+    try {
+      await navigator.clipboard.writeText(referenceCode);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1800);
+    } catch {
+      setCopied(false);
+    }
   };
 
-  const defaultTown =
-    language === 'fr' ? 'votre zone locale' : 'your local area';
-
   return (
-    <div className="w-full max-w-lg mx-auto py-8 px-4">
-      <div className="bg-white rounded-xl border border-[#e8e1dd] p-6 sm:p-8 text-center shadow-xs relative overflow-hidden">
-        {/* Success Icon */}
-        <div className="w-16 h-16 mx-auto rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-600 mb-4 shadow-xs">
-          <CheckCircle weight="fill" className="w-9 h-9" />
-        </div>
-
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-emerald-50 text-emerald-800 text-xs font-semibold mb-2">
-          <span>{t('success.badge')}</span>
-        </div>
-
-        <h2 className="text-2xl sm:text-3xl font-extrabold text-[#1e1b19] mb-2 tracking-tight">
-          {t('success.welcome', { name: fullName })}
-        </h2>
-
-        <p className="text-xs sm:text-sm text-[#57423b] max-w-sm mx-auto mb-6 leading-relaxed">
-          {t('success.description', { town: townName || defaultTown })}
-        </p>
-
-        {/* Reference Code Card */}
-        <div className="bg-[#faf2ee] border border-[#e8e1dd] rounded-lg p-4 mb-5 text-left">
-          <div className="text-[11px] font-bold text-[#8a726a] uppercase tracking-wider mb-1">
-            {t('success.referenceCode')}
+    <div className="w-full max-w-md mx-auto py-5 sm:py-8">
+      <div className="relative overflow-hidden rounded-[28px] border border-white bg-white px-5 py-7 text-center shadow-[0_20px_60px_rgba(67,48,39,0.12)] sm:px-8 sm:py-9">
+        <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-emerald-50 to-transparent" />
+        <div className="relative">
+          <div className="w-16 h-16 mx-auto rounded-2xl bg-emerald-600 border border-emerald-500 flex items-center justify-center text-white mb-5 shadow-[0_10px_25px_rgba(5,150,105,0.22)]">
+            <CheckCircle weight="fill" className="w-9 h-9" />
           </div>
-          <div className="flex items-center justify-between gap-3">
-            <span className="font-mono text-lg sm:text-xl font-bold text-[#b85028] tracking-wider">
-              {referenceCode}
-            </span>
+
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 text-xs font-bold mb-3">
+            <span>{t('success.badge')}</span>
+          </div>
+
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-[#1e1b19] mb-2 tracking-tight text-balance">
+            {t('success.welcome', { name: fullName })}
+          </h2>
+
+          <p className="text-sm text-[#57423b] max-w-sm mx-auto mb-6 leading-relaxed text-pretty">
+            {t('success.description', { town: townName || defaultTown })}
+          </p>
+
+          {referenceCode && (
+            <div className="mb-5 rounded-2xl border border-[#E8E0D7] bg-[#FAF7F2] p-3 text-left">
+              <div className="text-[11px] font-bold uppercase tracking-[0.12em] text-[#8C847C]">
+                {t('success.referenceCode')}
+              </div>
+              <div className="mt-1 flex items-center justify-between gap-3">
+                <code className="min-w-0 truncate text-sm font-extrabold tracking-wide text-[#23201E]">
+                  {referenceCode}
+                </code>
+                <button
+                  type="button"
+                  onClick={copyReference}
+                  className="h-10 shrink-0 rounded-xl border border-[#E2D8CF] bg-white px-3 text-xs font-bold text-[#5C554F] transition-colors hover:border-[#B85028] hover:text-[#B85028]"
+                >
+                  {copied ? (
+                    <Check size={16} weight="bold" />
+                  ) : (
+                    <Copy size={16} weight="bold" />
+                  )}
+                  <span className="sr-only">
+                    {copied ? t('success.copied') : t('success.copy')}
+                  </span>
+                </button>
+              </div>
+            </div>
+          )}
+
+          <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-3.5 text-left text-xs leading-relaxed text-emerald-950 flex items-start gap-2.5 mb-5">
+            <WhatsappLogo
+              weight="fill"
+              className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5"
+            />
+            <span>{t('success.whatsappNotice')}</span>
+          </div>
+
+          {onReset && (
             <button
               type="button"
-              onClick={handleCopy}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-white border border-[#e8e1dd] hover:border-[#b85028] text-xs font-semibold text-[#1e1b19] transition-all cursor-pointer shadow-2xs"
+              onClick={onReset}
+              className="h-12 w-full rounded-xl border border-[#E6DFD5] bg-white text-sm font-bold text-[#5C554F] transition-colors hover:border-[#B85028] hover:text-[#B85028]"
             >
-              {copied ? (
-                <>
-                  <Check
-                    weight="bold"
-                    className="w-3.5 h-3.5 text-emerald-600"
-                  />
-                  <span className="text-emerald-700">
-                    {t('success.copied')}
-                  </span>
-                </>
-              ) : (
-                <>
-                  <Copy weight="bold" className="w-3.5 h-3.5 text-[#57423b]" />
-                  <span>{t('success.copy')}</span>
-                </>
-              )}
+              {t('success.submitAnother')}
             </button>
-          </div>
-          <div className="text-[11px] text-[#8a726a] mt-1.5">
-            {t('success.referenceHelper')}
-          </div>
+          )}
         </div>
-
-        {/* Steps Card */}
-        <div className="bg-white rounded-lg border border-[#e8e1dd] p-4 text-left mb-5 space-y-3.5">
-          <div className="text-xs font-bold text-[#1e1b19] uppercase tracking-wider mb-2">
-            {t('success.whatHappensNext')}
-          </div>
-
-          <div className="flex items-start gap-3">
-            <div className="w-5 h-5 rounded-md bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
-              ✓
-            </div>
-            <div>
-              <div className="text-xs font-semibold text-[#1e1b19]">
-                {t('success.step1Title')}
-              </div>
-              <div className="text-[11px] text-[#57423b]">
-                {t('success.step1Desc')}
-              </div>
-            </div>
-          </div>
-
-          <div className="flex items-start gap-3">
-            <div className="w-5 h-5 rounded-md bg-amber-100 text-amber-800 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
-              2
-            </div>
-            <div>
-              <div className="text-xs font-semibold text-[#1e1b19]">
-                {t('success.step2Title')}
-              </div>
-              <div className="text-[11px] text-[#57423b]">
-                {t('success.step2Desc')}
-              </div>
-            </div>
-          </div>
-
-          <div className="flex items-start gap-3">
-            <div className="w-5 h-5 rounded-md bg-neutral-100 text-neutral-500 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
-              3
-            </div>
-            <div>
-              <div className="text-xs font-semibold text-[#8a726a]">
-                {t('success.step3Title')}
-              </div>
-              <div className="text-[11px] text-[#8a726a]">
-                {t('success.step3Desc')}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* WhatsApp Notice */}
-        <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3 text-left text-xs text-emerald-950 flex items-center gap-2.5 mb-5">
-          <WhatsappLogo
-            weight="fill"
-            className="w-4 h-4 text-emerald-600 shrink-0"
-          />
-          <span>{t('success.whatsappNotice')}</span>
-        </div>
-
-        {onReset && (
-          <button
-            type="button"
-            onClick={onReset}
-            className="text-xs text-[#8a726a] hover:text-[#1e1b19] underline cursor-pointer"
-          >
-            {t('success.submitAnother')}
-          </button>
-        )}
       </div>
     </div>
   );
