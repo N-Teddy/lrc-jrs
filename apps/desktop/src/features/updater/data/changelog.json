@@ -1,5 +1,37 @@
 [
   {
+    "version": "0.0.3",
+    "date": "2026-10-29",
+    "releaseTitle": {
+      "en": "Intake Review Modal, Town Routing & Number Formatting",
+      "fr": "Modal de Révision d'Accueil, Villes & Formatage des Numéros"
+    },
+    "features": {
+      "en": [
+        "Candidate Review & Edit Modal: Dedicated modal with CustomSelect town assignment, custom DatePicker with age calculator, demographic editing, optional app access toggle, and audit notes.",
+        "Cameroon Phone Number Formatting: Clean 6xx xx xx xx display formatting across directory, profile, attendance, and transfer tables, with live typing format.",
+        "Interactive Town Map Direct Access: Smooth redirect to the Cameroon regional map upon sign-in with refined town selection wording."
+      ],
+      "fr": [
+        "Modal de révision des candidatures : Dialogue complet avec sélecteur de ville, calendrier avec calcul d'âge, édition des infos, accès à l'application et notes de vérification.",
+        "Formatage téléphonique Cameroun : Affichage standardisé au format 6xx xx xx xx sur tous les tableaux, profils et formulaires avec saisie en direct.",
+        "Accès direct à la carte des villes : Redirection fluide vers la carte du Cameroun dès la connexion avec libellés simplifiés."
+      ]
+    },
+    "fixes": {
+      "en": [
+        "Persistent Desktop Authentication: Dual write-through caching and 7-day token expiration keep your session active across app restarts.",
+        "Real-Time Intake Review Sync: Instant WebSocket alert sync ensuring new public applicant submissions appear in the review queue immediately.",
+        "Cleaned Up Wording: Streamlined 'Select Town' / 'Sélectionner la ville' labels and cleaner member directory tabs."
+      ],
+      "fr": [
+        "Persistance de la session : Cache double et validité de session de 7 jours pour éviter les déconnexions intempestives après fermeture.",
+        "Synchronisation temps réel : Alertes instantanées pour afficher immédiatement les nouveaux candidats dans la file de révision.",
+        "Libellés épurés : Noms simplifiés pour 'Sélectionner la ville' et suppression des mentions superflues dans l'annuaire."
+      ]
+    }
+  },
+  {
     "version": "0.0.2",
     "date": "2026-10-28",
     "releaseTitle": {
