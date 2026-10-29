@@ -133,6 +133,46 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
         </span>
       </div>
 
+      {/* Pending Intake Banner */}
+      {member.intakeStatus === 'PENDING_REVIEW' && (
+        <div className="p-4 rounded-xl bg-gradient-to-r from-[#fff2ee] via-white to-white border border-[#ffdbcf] shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-[#b85028] text-white flex items-center justify-center shrink-0 shadow-2xs">
+              <ShieldCheck size={22} weight="fill" />
+            </div>
+            <div>
+              <h4 className="text-xs font-bold text-[#1e1b19] flex items-center gap-2">
+                <span>
+                  {t(
+                    'members:intake.pendingReviewAlertTitle',
+                    'Pending Intake Submission',
+                  )}
+                </span>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#ffdad6] text-[#ba1a1a]">
+                  {t('members:intake.awaitingApproval', 'Awaiting Review')}
+                </span>
+              </h4>
+              <p className="text-[11px] text-[#8a726a]">
+                {t(
+                  'members:intake.pendingReviewAlertDesc',
+                  'This profile was submitted via self-onboarding intake and is awaiting leader review and approval.',
+                )}
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={onBack}
+            className="px-4 py-2 rounded-lg bg-[#b85028] hover:bg-[#a44520] text-white text-xs font-bold transition-all shadow-xs shrink-0 cursor-pointer flex items-center gap-1.5 self-start sm:self-auto"
+          >
+            <span>
+              {t('members:intake.goToReviewQueue', 'Go to Review Queue')}
+            </span>
+            <ArrowRight size={14} weight="bold" />
+          </button>
+        </div>
+      )}
+
       {/* 2. Hero Profile Card */}
       <section className="bg-white rounded-xl border border-[#e8e1dd] p-6 sm:p-8 shadow-xs flex flex-col xl:flex-row xl:items-center justify-between gap-6">
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">

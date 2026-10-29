@@ -6,6 +6,7 @@ import {
   ConnectedSocket,
   OnGatewayConnection,
   OnGatewayDisconnect,
+  OnGatewayInit,
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
@@ -26,7 +27,7 @@ import {
   namespace: '/notifications',
 })
 export class NotificationsGateway
-  implements OnGatewayConnection, OnGatewayDisconnect
+  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
   private readonly logger = new Logger(NotificationsGateway.name);
 
@@ -38,67 +39,82 @@ export class NotificationsGateway
     @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
   ) {}
 
+  afterInit(server: Server) {
+    server.use(async (socket, next) => {
+      try {
+        const authHeader = socket.handshake.headers.authorization;
+        const authToken = socket.handshake.auth?.token;
+        let token =
+          authToken ||
+          (authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null);
+
+        if (!token && socket.handshake.query?.token) {
+          token = String(socket.handshake.query.token);
+        }
+
+        if (!token) {
+          this.logger.warn(
+            `Socket connection rejected: No auth token provided (${socket.id})`,
+          );
+          return next(new Error('No auth token provided'));
+        }
+
+        const payload = this.jwtService.verify<{
+          sub: string;
+          role: string;
+          homeTownId: string;
+        }>(token);
+
+        if (!payload?.sub || !Types.ObjectId.isValid(payload.sub)) {
+          this.logger.warn(
+            `Socket connection rejected: Invalid JWT sub (${socket.id})`,
+          );
+          return next(new Error('Invalid JWT sub'));
+        }
+
+        const user = await this.userModel
+          .findById(new Types.ObjectId(payload.sub))
+          .exec();
+
+        if (!user) {
+          this.logger.warn(
+            `Socket connection rejected: User ${payload.sub} not found`,
+          );
+          return next(new Error('User not found'));
+        }
+
+        // Check app access & active status
+        const hasAppAccess = user.account?.hasAppAccess ?? true;
+        const isRevoked = user.account?.isAccessRevoked ?? false;
+        const status = user.account?.status ?? AccountStatus.ACTIVE;
+
+        if (!hasAppAccess || isRevoked || status === AccountStatus.REVOKED) {
+          this.logger.warn(
+            `Socket connection rejected: User ${user.id} has no app access`,
+          );
+          return next(new Error('User has no app access'));
+        }
+
+        // Attach user info to socket data
+        socket.data.userId = user.id || user._id.toString();
+        socket.data.role = user.role;
+        socket.data.homeTownId = user.homeTownId?.toString();
+
+        next();
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : String(err);
+        this.logger.warn(`Socket authentication error: ${msg}`);
+        next(new Error(msg));
+      }
+    });
+  }
+
   async handleConnection(@ConnectedSocket() client: Socket) {
     try {
-      const authHeader = client.handshake.headers.authorization;
-      const authToken = client.handshake.auth?.token;
-      let token =
-        authToken ||
-        (authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null);
-
-      if (!token && client.handshake.query?.token) {
-        token = String(client.handshake.query.token);
-      }
-
-      if (!token) {
-        this.logger.warn(
-          `Socket connection rejected: No auth token provided (${client.id})`,
-        );
+      if (!client.data?.userId) {
         client.disconnect(true);
         return;
       }
-
-      const payload = this.jwtService.verify<{
-        sub: string;
-        role: string;
-        homeTownId: string;
-      }>(token);
-      if (!payload?.sub || !Types.ObjectId.isValid(payload.sub)) {
-        this.logger.warn(
-          `Socket connection rejected: Invalid JWT sub (${client.id})`,
-        );
-        client.disconnect(true);
-        return;
-      }
-
-      const user = await this.userModel
-        .findById(new Types.ObjectId(payload.sub))
-        .exec();
-      if (!user) {
-        this.logger.warn(
-          `Socket connection rejected: User ${payload.sub} not found`,
-        );
-        client.disconnect(true);
-        return;
-      }
-
-      // Check app access & active status
-      const hasAppAccess = user.account?.hasAppAccess ?? true;
-      const isRevoked = user.account?.isAccessRevoked ?? false;
-      const status = user.account?.status ?? AccountStatus.ACTIVE;
-
-      if (!hasAppAccess || isRevoked || status === AccountStatus.REVOKED) {
-        this.logger.warn(
-          `Socket connection rejected: User ${user.id} has no app access`,
-        );
-        client.disconnect(true);
-        return;
-      }
-
-      // Attach user info to socket data
-      client.data.userId = user.id || user._id.toString();
-      client.data.role = user.role;
-      client.data.homeTownId = user.homeTownId?.toString();
 
       // Join target rooms
       const userRoom = `user:${client.data.userId}`;
@@ -112,8 +128,7 @@ export class NotificationsGateway
       );
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
-      this.logger.warn(`Socket authentication error: ${msg}`);
-      client.emit('connect_error', { message: msg });
+      this.logger.warn(`Socket connection error: ${msg}`);
       client.disconnect(true);
     }
   }

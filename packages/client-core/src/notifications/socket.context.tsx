@@ -160,6 +160,19 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
         queryClient.invalidateQueries({
           queryKey: queryKeys.notifications.unreadCount,
         });
+        if (
+          notification.action?.includes('INTAKE') ||
+          notification.action?.includes('MEMBER') ||
+          notification.resource?.entityType === 'INTAKE' ||
+          notification.resource?.entityType === 'MEMBER'
+        ) {
+          queryClient.invalidateQueries({
+            queryKey: queryKeys.registrationLinks.all,
+          });
+          queryClient.invalidateQueries({
+            queryKey: queryKeys.users.all,
+          });
+        }
 
         // 3. Notify all registered subscribers
         notificationListenersRef.current.forEach((listener) => {

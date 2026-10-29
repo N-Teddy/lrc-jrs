@@ -176,6 +176,9 @@ export function TownProvider({ children, storage }: TownProviderProps) {
       // Invalidate town-specific queries so views update instantly
       queryClient.invalidateQueries({ queryKey: queryKeys.activities.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.users.all });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.registrationLinks.all,
+      });
     },
     [http, storage, queryClient, availableTowns],
   );

@@ -1,4 +1,10 @@
-import { useTownContext, useTranslation, useWebSocket } from '@jrs/client-core';
+import {
+  queryKeys,
+  useQueryClient,
+  useTownContext,
+  useTranslation,
+  useWebSocket,
+} from '@jrs/client-core';
 import type { IAuthUser, NotificationResource } from '@jrs/shared';
 import {
   ArrowUUpLeft,
@@ -37,6 +43,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   onOpenWhatsNew,
 }) => {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
   const {
     activeTown,
     availableTowns,
@@ -134,16 +141,22 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         break;
 
       case 'MEMBER':
-      case 'INTAKE':
         setSelectedMemberId(resource.entityId || null);
-        if (resource.subTab === 'reviews' || resource.entityType === 'INTAKE') {
-          setMemberSubTab('reviews');
-        } else if (resource.subTab === 'access') {
+        if (resource.subTab === 'access') {
           setMemberSubTab('access');
         } else {
           setMemberSubTab('directory');
         }
         setActiveTab('members');
+        break;
+
+      case 'INTAKE':
+        setSelectedMemberId(null);
+        setMemberSubTab('reviews');
+        setActiveTab('members');
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.registrationLinks.all,
+        });
         break;
 
       case 'TOWN_TRANSFER':
