@@ -711,6 +711,7 @@
       "rejecting": "Rejet en cours...",
       "reject": "Rejeter",
       "approve": "Valider",
+      "editAndApprove": "Modifier et Valider",
       "cancel": "Annuler",
       "readOnlyHub": "Hub en lecture seule",
       "dob": "Date de naissance :",

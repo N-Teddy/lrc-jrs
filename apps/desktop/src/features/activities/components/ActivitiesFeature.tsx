@@ -57,7 +57,11 @@ export const ActivitiesFeature: React.FC<ActivitiesFeatureProps> = ({
   const { user } = useAuth();
   const { activeTown, activeTownId } = useTownContext();
 
-  const isProd = import.meta.env.PROD || import.meta.env.MODE === 'production';
+  const appEnv = import.meta.env.VITE_APP_ENV;
+  const isProd =
+    appEnv === 'production' ||
+    (appEnv !== 'development' &&
+      (import.meta.env.PROD || import.meta.env.MODE === 'production'));
 
   // Navigation State
   const [activeTab, setActiveTab] = useState<ActivityMainTab>(
@@ -141,7 +145,7 @@ export const ActivitiesFeature: React.FC<ActivitiesFeatureProps> = ({
       setSubView('list');
       setSelectedActivity(null);
     }
-  }, [initialSubTab, initialActivityId]);
+  }, [initialSubTab, initialActivityId, isProd]);
 
   useEffect(() => {
     if (!initialActivityId) return;

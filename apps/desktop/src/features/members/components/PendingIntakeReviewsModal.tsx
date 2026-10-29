@@ -235,6 +235,17 @@ export const PendingIntakeReviewsModal: React.FC<
                           <span className="text-sm font-bold text-[#1e1b19]">
                             {member.fullName}
                           </span>
+                          <button
+                            type="button"
+                            onClick={() => handleStartApprove(member)}
+                            className="p-1 -ml-1 rounded text-[#8a726a] hover:text-[#2c4e37] hover:bg-[#eaf4ec] transition-colors cursor-pointer"
+                            title={t(
+                              'members:intake.editProfileTooltip',
+                              'Edit candidate details before approving',
+                            )}
+                          >
+                            <PencilSimple size={13} weight="bold" />
+                          </button>
                           <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#fff2ee] text-[#b85028] border border-[#ffdbcf]">
                             {t(
                               'members:intake.pendingReview',
@@ -299,8 +310,10 @@ export const PendingIntakeReviewsModal: React.FC<
                         onClick={() => handleStartApprove(member)}
                         className="px-3.5 py-1.5 rounded-md bg-[#2c4e37] hover:bg-[#223d2b] text-white text-xs font-bold shadow-2xs transition-all cursor-pointer flex items-center gap-1.5"
                       >
-                        <Check size={14} weight="bold" />
-                        <span>{t('members:intake.approve', 'Approve')}</span>
+                        <PencilSimple size={14} weight="bold" />
+                        <span>
+                          {t('members:intake.editAndApprove', 'Edit & Approve')}
+                        </span>
                       </button>
                     </div>
                   </div>

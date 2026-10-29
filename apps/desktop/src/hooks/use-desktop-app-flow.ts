@@ -12,7 +12,7 @@ export type { AuthFlowScreenState as AuthScreenState };
 export function useDesktopAppFlow() {
   const { user, isAuthenticated, isLoading } = useAuth();
   const http = useHttp();
-  const { activeTownId, isLoadingTowns } = useTownContext();
+  const { isLoadingTowns } = useTownContext();
 
   const flow = useAuthFlowState(isAuthenticated);
 
@@ -40,14 +40,13 @@ export function useDesktopAppFlow() {
     return false;
   }, [user]);
 
-  // Only show the region selector if user explicitly clicked "Switch Region",
-  // or if they have multi-town access but no active town has been selected/restored yet.
+  // Show the map/region selector whenever user explicitly clicked "Switch Region",
+  // or on login before they have selected a town in their current session.
   const shouldShowRegionSelector = Boolean(
     isAuthenticated &&
       user &&
       hasMultiTownAccess &&
-      (flow.isSwitchingRegion ||
-        (!activeTownId && !flow.hasExplicitlySelectedTown)),
+      (flow.isSwitchingRegion || !flow.hasExplicitlySelectedTown),
   );
 
   const handleForgotPasswordClick = (id: string) => {

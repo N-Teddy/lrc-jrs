@@ -516,6 +516,20 @@ export const IntakeReviewsTab: React.FC<IntakeReviewsTabProps> = ({
                         <span className="text-sm font-bold text-[#1e1b19]">
                           {member.fullName}
                         </span>
+                        {canWrite && (
+                          <button
+                            type="button"
+                            onClick={() => handleStartApprove(member)}
+                            className="p-1 rounded text-[#8a726a] hover:text-[#b85028] hover:bg-[#faf2ee] transition-colors cursor-pointer"
+                            title={t(
+                              'members:intake.editCandidateDetails',
+                              'Edit candidate details before approving',
+                            )}
+                            aria-label="Edit candidate details"
+                          >
+                            <PencilSimple size={13} weight="bold" />
+                          </button>
+                        )}
                         <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#fff2ee] text-[#b85028] border border-[#ffdbcf]">
                           {t('members:intake.pendingReview', 'Pending Review')}
                         </span>
@@ -593,9 +607,12 @@ export const IntakeReviewsTab: React.FC<IntakeReviewsTabProps> = ({
                             ? 'bg-[#1b3123] text-white border border-[#1b3123]'
                             : 'bg-[#2c4e37] hover:bg-[#223d2b] text-white'
                         }`}
+                        title="Edit candidate profile, change town, grant app access, and approve"
                       >
-                        <Check size={14} weight="bold" />
-                        <span>{t('members:intake.approve', 'Approve')}</span>
+                        <PencilSimple size={14} weight="bold" />
+                        <span>
+                          {t('members:intake.editAndApprove', 'Edit & Approve')}
+                        </span>
                       </button>
                     </div>
                   ) : (
