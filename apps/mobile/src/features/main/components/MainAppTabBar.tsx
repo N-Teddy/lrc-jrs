@@ -334,8 +334,8 @@ export const MainAppTabBar: React.FC<MainAppTabBarProps> = ({
           setActiveTab('home');
           showToast(
             isFrench
-              ? `${pendingReviewsCount} candidatures en attente de révision`
-              : `${pendingReviewsCount} intake applications in review queue`,
+              ? `${pendingReviewsCount} fiche(s) de renseignement en attente de validation`
+              : `${pendingReviewsCount} member self-entry/entries pending verification`,
             'info',
           );
         }}

@@ -89,7 +89,7 @@ export const PendingIntakeReviewsModal: React.FC<
     } catch (err: any) {
       throw new Error(
         err?.message ||
-          t('members:intake.approveError', 'Failed to approve candidate.'),
+          t('members:intake.approveError', 'Failed to validate member entry.'),
       );
     }
   };
@@ -223,7 +223,7 @@ export const PendingIntakeReviewsModal: React.FC<
                             className="p-1 -ml-1 rounded text-[#8a726a] hover:text-[#2c4e37] hover:bg-[#eaf4ec] transition-colors cursor-pointer"
                             title={t(
                               'members:intake.editProfileTooltip',
-                              'Edit candidate details before approving',
+                              'Edit member self-entry details before approving',
                             )}
                           >
                             <PencilSimple size={13} weight="bold" />

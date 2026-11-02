@@ -89,19 +89,17 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
     try {
       await Share.share({
         message: isFrench
-          ? `Rejoignez le réseau des jeunes de ${activeTown?.name || 'Douala'} : ${intakeUrl}`
-          : `Join our youth network in ${activeTown?.name || 'Douala'}: ${intakeUrl}`,
+          ? `Renseignez votre fiche de membre pour ${activeTown?.name || 'Douala'} : ${intakeUrl}`
+          : `Fill in your member profile for ${activeTown?.name || 'Douala'}: ${intakeUrl}`,
         url: intakeUrl,
       });
       onShowToast(
-        isFrench
-          ? 'Lien d’inscription partagé !'
-          : 'Shareable Intake Link copied!',
+        isFrench ? 'Lien de la fiche partagé !' : 'Self-entry link copied!',
         'success',
       );
     } catch {
       onShowToast(
-        isFrench ? 'Lien d’inscription copié !' : 'Intake link copied!',
+        isFrench ? 'Lien de la fiche copié !' : 'Self-entry link copied!',
         'info',
       );
     }
@@ -265,7 +263,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 <ShareNetwork size={16} weight="bold" color={colors.primary} />
               </View>
               <Text style={styles.speedChipLabel}>
-                {isFrench ? 'Lien d’Inscription' : 'Share Intake Link'}
+                {isFrench ? 'Fiche de Renseignement' : 'Self-Entry Link'}
               </Text>
               <QrCode size={15} color={colors.outline} />
             </TouchableOpacity>

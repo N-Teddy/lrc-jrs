@@ -939,7 +939,10 @@ export class UsersService {
       throw new ForbiddenAppException(ErrorCode.FORBIDDEN);
     }
 
-    if (isPC && !isAP && currentTownIdStr !== currentUser.homeTownId) {
+    const rawCurrentUserTownId =
+      (currentUser.homeTownId as any)?._id?.toString() ||
+      currentUser.homeTownId?.toString();
+    if (isPC && !isAP && currentTownIdStr !== rawCurrentUserTownId) {
       throw new ForbiddenAppException(ErrorCode.FORBIDDEN);
     }
 

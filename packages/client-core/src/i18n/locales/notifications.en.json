@@ -85,11 +85,11 @@
   "memberDeletedTitle": "Member Removed",
   "memberDeletedBody": "{{name}} was removed from {{town}} by {{by}}",
 
-  "memberIntakeSubmittedTitle": "New Membership Application",
-  "memberIntakeSubmittedBody": "{{name}} submitted a registration request for {{town}}",
+  "memberIntakeSubmittedTitle": "New Member Self-Entry",
+  "memberIntakeSubmittedBody": "{{name}} submitted their member information for {{town}}",
 
-  "memberIntakeApprovedTitle": "Application Approved",
-  "memberIntakeApprovedBody": "Your application to join {{town}} has been accepted",
+  "memberIntakeApprovedTitle": "Information Validated",
+  "memberIntakeApprovedBody": "Your member information for {{town}} has been verified and recorded",
 
   "townTransferTitle": "Town Relocation",
   "townTransferBody": "{{name}} was transferred from {{fromTown}} to {{toTown}}",
@@ -124,8 +124,8 @@
   "driveFileDeletedTitle": "Vault Document Removed",
   "driveFileDeletedBody": "Document {{fileName}} was removed by {{by}}",
 
-  "memberIntakeRejectedTitle": "Application Update",
-  "memberIntakeRejectedBody": "Your application to join {{town}} has been updated",
+  "memberIntakeRejectedTitle": "Member Self-Entry Update",
+  "memberIntakeRejectedBody": "Your member information for {{town}} has been reviewed",
 
   "passwordChangedTitle": "Security Alert: Password Changed",
   "passwordChangedBody": "The password for your account was recently updated",

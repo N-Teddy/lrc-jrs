@@ -140,7 +140,10 @@ export const EditApproveIntakeModal: React.FC<EditApproveIntakeModalProps> = ({
         reviewNotes: reviewNotes.trim() || undefined,
       });
     } catch (err: any) {
-      setFormError(err?.message || 'Failed to approve candidate.');
+      setFormError(
+        err?.message ||
+          t('members:intake.approveError', 'Failed to validate member entry.'),
+      );
     }
   };
 
@@ -247,7 +250,10 @@ export const EditApproveIntakeModal: React.FC<EditApproveIntakeModalProps> = ({
                     type="text"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    placeholder="Candidate full name"
+                    placeholder={t(
+                      'members:intake.fullNamePlaceholder',
+                      'Member full name',
+                    )}
                     required
                     className="w-full h-10 pl-9 pr-3.5 rounded-md border border-[#ded5d0] bg-white text-xs font-medium text-[#1e1b19] placeholder:text-[#8a726a] outline-none focus:border-[#b85028] focus:ring-1 focus:ring-[#b85028] transition-all"
                   />
@@ -510,7 +516,7 @@ export const EditApproveIntakeModal: React.FC<EditApproveIntakeModalProps> = ({
                 onChange={(e) => setReviewNotes(e.target.value)}
                 placeholder={t(
                   'members:intake.notesPlaceholder',
-                  'e.g. Identity verified via WhatsApp call with candidate',
+                  'e.g. Identity verified via WhatsApp call with member',
                 )}
                 className="w-full h-10 px-3.5 rounded-md border border-[#ded5d0] bg-white text-xs text-[#1e1b19] placeholder:text-[#8a726a] outline-none focus:border-[#b85028] focus:ring-1 focus:ring-[#b85028] transition-all"
               />
@@ -521,7 +527,7 @@ export const EditApproveIntakeModal: React.FC<EditApproveIntakeModalProps> = ({
           <div className="pt-4 border-t border-[#f4ece9] flex flex-col sm:flex-row items-center justify-between gap-3">
             <span className="text-xs text-[#8a726a]">
               {selectedTown
-                ? `${t('members:intake.enrollingInto', 'Enrolling candidate into')}: `
+                ? `${t('members:intake.enrollingInto', 'Assigning member to')}: `
                 : ''}
               <strong className="text-[#b85028]">
                 {selectedTown?.name || 'Selected Town'}

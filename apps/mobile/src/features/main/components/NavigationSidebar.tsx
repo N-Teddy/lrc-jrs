@@ -381,14 +381,14 @@ export const NavigationSidebar: React.FC<NavigationSidebarProps> = ({
                       </View>
                     </TouchableOpacity>
 
-                    {/* Public Registration Links */}
+                    {/* Public Self-Entry Links */}
                     <TouchableOpacity
                       style={styles.navItem}
                       onPress={() =>
                         onShowToast(
                           isFrench
-                            ? 'Liens d’inscription publique actifs'
-                            : 'Public Registration Links Active',
+                            ? 'Liens d’auto-saisie actifs'
+                            : 'Public Self-Entry Links Active',
                         )
                       }
                       activeOpacity={0.75}
@@ -403,8 +403,8 @@ export const NavigationSidebar: React.FC<NavigationSidebarProps> = ({
                         </View>
                         <Text style={styles.navItemLabel}>
                           {isFrench
-                            ? 'Liens d’Inscription Publique'
-                            : 'Public Registration Links'}
+                            ? 'Liens d’Auto-Saisie'
+                            : 'Public Self-Entry Links'}
                         </Text>
                       </View>
                       <View style={styles.activeLinksBadge}>

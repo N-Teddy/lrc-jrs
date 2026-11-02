@@ -218,14 +218,12 @@ export const MoreHubOptionsSubPanel: React.FC<MoreHubOptionsSubPanelProps> = ({
               </View>
               <View style={styles.toolTexts}>
                 <Text style={styles.toolTitle}>
-                  {isFrench
-                    ? 'Validation des Inscriptions'
-                    : 'Public Intake Reviews'}
+                  {isFrench ? 'Fiches de Renseignement' : 'Member Self-Entries'}
                 </Text>
                 <Text style={styles.toolSubtitle} numberOfLines={1}>
                   {isFrench
-                    ? 'Examiner les demandes des jeunes du portail'
-                    : 'Approve or reject member applications from portal'}
+                    ? 'Vérifier et valider les fiches saisies par les membres'
+                    : 'Review and validate member self-entries'}
                 </Text>
               </View>
             </View>

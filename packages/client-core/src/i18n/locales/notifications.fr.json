@@ -85,11 +85,11 @@
   "memberDeletedTitle": "Membre retiré",
   "memberDeletedBody": "{{name}} a été retiré(e) de {{town}} par {{by}}",
 
-  "memberIntakeSubmittedTitle": "Nouvelle demande d'adhésion",
-  "memberIntakeSubmittedBody": "{{name}} a soumis une demande d'inscription pour {{town}}",
+  "memberIntakeSubmittedTitle": "Nouvelle fiche de renseignement",
+  "memberIntakeSubmittedBody": "{{name}} a renseigné sa fiche de coordonnées pour {{town}}",
 
-  "memberIntakeApprovedTitle": "Demande approuvée",
-  "memberIntakeApprovedBody": "Votre inscription pour rejoindre {{town}} a été acceptée",
+  "memberIntakeApprovedTitle": "Fiche validée",
+  "memberIntakeApprovedBody": "Votre fiche de membre pour {{town}} a été validée et enregistrée",
 
   "townTransferTitle": "Mutation de ville",
   "townTransferBody": "{{name}} a été transféré de {{fromTown}} vers {{toTown}}",
@@ -124,8 +124,8 @@
   "driveFileDeletedTitle": "Document retiré",
   "driveFileDeletedBody": "Le document {{fileName}} a été retiré par {{by}}",
 
-  "memberIntakeRejectedTitle": "Mise à jour de votre candidature",
-  "memberIntakeRejectedBody": "Votre demande pour rejoindre {{town}} a été mise à jour",
+  "memberIntakeRejectedTitle": "Mise à jour de votre fiche",
+  "memberIntakeRejectedBody": "Votre fiche de coordonnées pour {{town}} a été traitée",
 
   "passwordChangedTitle": "Alerte de sécurité : Mot de passe modifié",
   "passwordChangedBody": "Le mot de passe de votre compte a été récemment mis à jour",

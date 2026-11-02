@@ -3,10 +3,10 @@ export type Language = 'fr' | 'en';
 export const translations = {
   fr: {
     nav: {
-      tagline: "Portail d'accueil des membres",
+      tagline: 'Fiche de renseignement des membres',
     },
     header: {
-      title: "Fiche d'accueil des Membres",
+      title: 'Fiche de Renseignement des Membres',
       subtitle:
         'Veuillez renseigner vos coordonnées ci-dessous pour compléter votre profil.',
       location: 'Communauté locale',
@@ -160,10 +160,10 @@ export const translations = {
   },
   en: {
     nav: {
-      tagline: 'Member Intake Portal',
+      tagline: 'Member Self-Entry Portal',
     },
     header: {
-      title: 'Member Intake Form',
+      title: 'Member Self-Entry Form',
       subtitle:
         'Please fill in your details below to complete your fellowship profile.',
       location: 'Local Fellowship',

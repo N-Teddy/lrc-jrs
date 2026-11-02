@@ -220,9 +220,12 @@ export class RegistrationLinksService {
     }
 
     // Role check: PC cannot deactivate links for other towns
+    const rawUserTownId =
+      (currentUser.homeTownId as any)?._id?.toString() ||
+      currentUser.homeTownId?.toString();
     if (
       currentUser.role !== UserRole.AP &&
-      link.homeTownId.toString() !== currentUser.homeTownId
+      link.homeTownId.toString() !== rawUserTownId
     ) {
       throw new ForbiddenAppException(ErrorCode.FORBIDDEN);
     }
@@ -564,13 +567,16 @@ export class RegistrationLinksService {
       const memberTownIdStr =
         (member.homeTownId as any)?._id?.toString() ||
         member.homeTownId?.toString();
-      const userTownId = Types.ObjectId.isValid(currentUser.homeTownId)
-        ? currentUser.homeTownId
-        : (
-            await this.townModel
-              .findOne({ code: currentUser.homeTownId?.toUpperCase() })
-              .exec()
-          )?._id?.toString();
+      const rawUserTown =
+        (currentUser.homeTownId as any)?._id || currentUser.homeTownId;
+      const userTownId =
+        Types.ObjectId.isValid(rawUserTown) && String(rawUserTown).length === 24
+          ? rawUserTown.toString()
+          : (
+              await this.townModel
+                .findOne({ code: String(rawUserTown).toUpperCase() })
+                .exec()
+            )?._id?.toString();
 
       if (memberTownIdStr !== userTownId) {
         throw new ForbiddenAppException(ErrorCode.FORBIDDEN);
@@ -634,9 +640,18 @@ export class RegistrationLinksService {
         const resolvedTown = Types.ObjectId.isValid(dto.homeTownId)
           ? await this.townModel.findById(dto.homeTownId).exec()
           : await this.townModel
-              .findOne({ code: dto.homeTownId.toUpperCase() })
+              .findOne({ code: String(dto.homeTownId).toUpperCase() })
               .exec();
         if (resolvedTown) {
+          const currentMemberTownId =
+            (member.homeTownId as any)?._id?.toString() ||
+            member.homeTownId?.toString();
+          if (
+            currentUser.role !== UserRole.AP &&
+            resolvedTown._id.toString() !== currentMemberTownId
+          ) {
+            throw new ForbiddenAppException(ErrorCode.FORBIDDEN);
+          }
           member.homeTownId = resolvedTown._id as Types.ObjectId;
         }
       }
@@ -718,7 +733,7 @@ export class RegistrationLinksService {
 
       if (member.phoneNumber) {
         const reasonMsg = dto.notes ? `\nMotif: ${dto.notes}` : '';
-        const whatsappMsg = `Bonjour ${member.fullName},\n\nVotre demande d'adhésion pour la communauté LRC de ${townName} n'a pas pu être retenue pour le moment.${reasonMsg}\n\nPour toute question, veuillez vous rapprocher de la coordination paroissiale.`;
+        const whatsappMsg = `Bonjour ${member.fullName},\n\nVotre fiche de renseignement pour la communauté LRC de ${townName} n'a pas pu être validée pour le moment.${reasonMsg}\n\nPour toute question, veuillez vous rapprocher de la coordination paroissiale.`;
         this.whatsAppService
           .sendTextMessage(member.phoneNumber, whatsappMsg)
           .catch((err) =>

@@ -165,10 +165,7 @@ export const IntakeReviewsTab: React.FC<IntakeReviewsTabProps> = ({
     } catch (err: any) {
       throw new Error(
         err?.message ||
-          t(
-            'members:intake.approveError',
-            'Failed to approve candidate registration.',
-          ),
+          t('members:intake.approveError', 'Failed to validate member entry.'),
       );
     }
   };
@@ -216,7 +213,7 @@ export const IntakeReviewsTab: React.FC<IntakeReviewsTabProps> = ({
           <div className="flex flex-col">
             <div className="flex items-center gap-2 flex-wrap">
               <h2 className="text-base font-bold text-[#1e1b19] tracking-tight">
-                {t('members:intake.title', 'Intake Registration Review Queue')}
+                {t('members:intake.title', 'Member Self-Entry Review Queue')}
               </h2>
               <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#faf2ee] text-[#b85028] border border-[#e8e1dd]">
                 {t('members:intake.awaitingVerification', {
@@ -228,7 +225,7 @@ export const IntakeReviewsTab: React.FC<IntakeReviewsTabProps> = ({
             <p className="text-xs text-[#8a726a] max-w-2xl mt-0.5">
               {t('members:intake.subtitle', {
                 town: activeTownName,
-                defaultValue: `Prospective members who registered via self-onboarding links for ${activeTownName}. Review their credentials and approve them into the active community directory.`,
+                defaultValue: `Members who submitted their details via self-entry links for ${activeTownName}. Review their info and confirm them into the active community directory.`,
               })}
             </p>
           </div>
@@ -508,9 +505,9 @@ export const IntakeReviewsTab: React.FC<IntakeReviewsTabProps> = ({
                             className="p-1 rounded text-[#8a726a] hover:text-[#b85028] hover:bg-[#faf2ee] transition-colors cursor-pointer"
                             title={t(
                               'members:intake.editCandidateDetails',
-                              'Edit candidate details before approving',
+                              'Edit member self-entry details before approving',
                             )}
-                            aria-label="Edit candidate details"
+                            aria-label="Edit member details"
                           >
                             <PencilSimple size={13} weight="bold" />
                           </button>
@@ -592,11 +589,14 @@ export const IntakeReviewsTab: React.FC<IntakeReviewsTabProps> = ({
                             ? 'bg-[#1b3123] text-white border border-[#1b3123]'
                             : 'bg-[#2c4e37] hover:bg-[#223d2b] text-white'
                         }`}
-                        title="Edit candidate profile, change town, grant app access, and approve"
+                        title="Edit member details, change town, grant app access, and validate"
                       >
                         <PencilSimple size={14} weight="bold" />
                         <span>
-                          {t('members:intake.editAndApprove', 'Edit & Approve')}
+                          {t(
+                            'members:intake.editAndApprove',
+                            'Edit & Validate',
+                          )}
                         </span>
                       </button>
                     </div>

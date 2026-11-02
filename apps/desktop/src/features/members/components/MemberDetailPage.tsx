@@ -145,17 +145,20 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
                 <span>
                   {t(
                     'members:intake.pendingReviewAlertTitle',
-                    'Pending Intake Submission',
+                    'Pending Member Self-Entry',
                   )}
                 </span>
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#ffdad6] text-[#ba1a1a]">
-                  {t('members:intake.awaitingApproval', 'Awaiting Review')}
+                  {t(
+                    'members:intake.awaitingApproval',
+                    'Awaiting Verification',
+                  )}
                 </span>
               </h4>
               <p className="text-[11px] text-[#8a726a]">
                 {t(
                   'members:intake.pendingReviewAlertDesc',
-                  'This profile was submitted via self-onboarding intake and is awaiting leader review and approval.',
+                  'This profile was submitted via member self-entry and is awaiting leader verification.',
                 )}
               </p>
             </div>

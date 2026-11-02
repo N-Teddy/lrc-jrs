@@ -185,7 +185,7 @@ export const MembersFeature: React.FC<MembersFeatureProps> = ({
                     ? t('access:title', 'Access & Accounts Command Center')
                     : t(
                         'members:intakeReviewsTitle',
-                        'Intake Registration Reviews',
+                        'Member Self-Entry Reviews',
                       )}
               </h1>
               <p className="text-xs text-[#8a726a]">
@@ -202,7 +202,7 @@ export const MembersFeature: React.FC<MembersFeatureProps> = ({
                     : t('members:intakeReviewsSubtitle', {
                         town: activeTown ? activeTown.name : 'this Hub',
                         defaultValue:
-                          'Review and approve prospective members registered through invitation links for this Hub',
+                          'Review and verify member details submitted through self-entry links for this Hub',
                       })}
               </p>
             </div>
@@ -257,10 +257,7 @@ export const MembersFeature: React.FC<MembersFeatureProps> = ({
                   weight={activeSubTab === 'reviews' ? 'fill' : 'regular'}
                 />
                 <span>
-                  {t(
-                    'members:intakeRegistrationReview',
-                    'Intake Registration Review',
-                  )}
+                  {t('members:intakeRegistrationReview', 'Member Self-Entries')}
                 </span>
                 {pendingReviews.length > 0 && (
                   <span

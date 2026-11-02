@@ -155,7 +155,7 @@ export const IntakeLinksModal: React.FC<IntakeLinksModalProps> = ({
         err?.message ||
           t(
             'members:intakeLinks.generateError',
-            'Failed to generate registration link. Please try again.',
+            'Failed to generate self-entry link. Please try again.',
           ),
       );
     }
@@ -166,7 +166,7 @@ export const IntakeLinksModal: React.FC<IntakeLinksModalProps> = ({
       !window.confirm(
         t(
           'members:intakeLinks.deactivateConfirm',
-          'Are you sure you want to deactivate this registration link immediately? Anyone attempting to use it will no longer be able to submit their information.',
+          'Are you sure you want to deactivate this self-entry link immediately? Anyone attempting to use it will no longer be able to submit their information.',
         ),
       )
     ) {
@@ -200,7 +200,7 @@ export const IntakeLinksModal: React.FC<IntakeLinksModalProps> = ({
                 <h2 className="text-lg font-bold text-[#1e1b19]">
                   {t(
                     'members:intakeLinks.modalTitle',
-                    'Member Intake Registration Links',
+                    'Member Self-Entry Links',
                   )}
                 </h2>
                 <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-[#faf2ee] text-[#b85028] border border-[#e8e1dd]">
@@ -516,7 +516,7 @@ export const IntakeLinksModal: React.FC<IntakeLinksModalProps> = ({
                     {t('members:intakeLinks.noLinksDesc', {
                       town: activeTownName,
                       defaultValue:
-                        'Click "Create New Link" above to generate a shareable member registration link.',
+                        'Click "Create New Link" above to generate a shareable member self-entry link.',
                     })}
                   </p>
                 </div>
