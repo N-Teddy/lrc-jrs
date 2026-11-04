@@ -422,14 +422,14 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
         <div className="flex flex-col gap-3 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <span
-              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-bold border ${typeConfig.badgeBg} ${typeConfig.badgeText} ${typeConfig.badgeBorder}`}
+              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-xs text-xs font-bold border ${typeConfig.badgeBg} ${typeConfig.badgeText} ${typeConfig.badgeBorder}`}
             >
               <typeConfig.icon size={14} weight="bold" />
               <span>{typeConfig.label}</span>
             </span>
 
             <span
-              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-semibold border ${statusConfig.badgeBg} ${statusConfig.badgeText} ${statusConfig.badgeBorder}`}
+              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-xs text-xs font-semibold border ${statusConfig.badgeBg} ${statusConfig.badgeText} ${statusConfig.badgeBorder}`}
             >
               <span
                 className={`w-1.5 h-1.5 rounded-full ${statusConfig.dotColor} ${
@@ -439,13 +439,13 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
               <span>{statusConfig.label}</span>
             </span>
 
-            <span className="px-2.5 py-1 rounded-md text-xs font-mono font-bold bg-[#faf2ee] text-[#57423b] border border-[#e8e1dd]">
+            <span className="px-2.5 py-1 rounded-xs text-xs font-mono font-bold bg-[#faf2ee] text-[#57423b] border border-[#e8e1dd]">
               {activity.town?.name || activity.town?.code}{' '}
               {t('activities:detail.hub', 'Hub')}
             </span>
 
             {isParticipating && (
-              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold bg-[#edf3ee] border border-[#c2e9ca] text-[#486b52]">
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xs text-xs font-bold bg-[#edf3ee] border border-[#c2e9ca] text-[#486b52]">
                 <Buildings size={13} weight="bold" />
                 <span>
                   {t('activities:detail.interTownHost', {
@@ -460,7 +460,7 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
             )}
 
             {isLocked && (
-              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold bg-[#fff8e1] border border-[#ffe082] text-[#812901]">
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xs text-xs font-bold bg-[#fff8e1] border border-[#ffe082] text-[#812901]">
                 <Lock size={13} weight="bold" />
                 <span>
                   {t('activities:detail.attendanceSealed', 'Attendance Sealed')}

@@ -180,7 +180,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
                     'Pending Member Self-Entry',
                   )}
                 </span>
-                <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-[#ffdad6] text-[#ba1a1a]">
+                <span className="px-2 py-0.5 rounded-xs text-[10px] font-bold bg-[#ffdad6] text-[#ba1a1a]">
                   {t(
                     'members:intake.awaitingApproval',
                     'Awaiting Verification',
@@ -222,11 +222,11 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
                 {member.fullName}
               </h1>
               <span
-                className={`inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-bold border ${roleInfo.badgeBg} ${roleInfo.badgeText} ${roleInfo.border}`}
+                className={`inline-flex items-center px-2.5 py-0.5 rounded-xs text-xs font-bold border ${roleInfo.badgeBg} ${roleInfo.badgeText} ${roleInfo.border}`}
               >
                 {roleInfo.label}
               </span>
-              <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-[#f4ece9] text-[#57423b] text-xs font-mono font-bold">
+              <span className="inline-flex items-center px-2 py-0.5 rounded-xs bg-[#f4ece9] text-[#57423b] text-xs font-mono font-bold">
                 {member.homeTown?.code ?? activeTown?.code ?? 'HUB'}
               </span>
             </div>
@@ -234,7 +234,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
             <div className="flex flex-wrap items-center gap-3 text-xs text-[#8a726a]">
               {age !== null && (
                 <span
-                  className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md font-bold ${
+                  className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-xs font-bold ${
                     isEligibleJr
                       ? 'bg-[#c2e9ca] text-[#2c4e37]'
                       : 'bg-[#faf2ee] text-[#8a726a]'
@@ -476,7 +476,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
                       </span>
                       {member.isWhatsappVerified && (
                         <span
-                          className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-[#c2e9ca] text-[#2c4e37] border border-[#a9d0b2] shrink-0"
+                          className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-xs text-[10px] font-bold bg-[#c2e9ca] text-[#2c4e37] border border-[#a9d0b2] shrink-0"
                           title="WhatsApp"
                         >
                           <WhatsappLogo size={12} weight="fill" />
@@ -632,7 +632,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
                     <h3 className="text-base font-black text-[#1e1b19] tracking-tight">
                       Official Hub Registry & Passport
                     </h3>
-                    <span className="px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-[#ffdbcf]/60 text-[#812901] border border-[#ffb59c]/50">
+                    <span className="px-2.5 py-0.5 rounded-xs text-[10px] font-black uppercase tracking-wider bg-[#ffdbcf]/60 text-[#812901] border border-[#ffb59c]/50">
                       Registry Index
                     </span>
                   </div>
@@ -661,11 +661,11 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
               <div className="lg:col-span-3 p-5 rounded-lg bg-white border border-[#c2e9ca] shadow-2xs flex flex-col justify-between gap-3 relative overflow-hidden group">
                 <div className="absolute top-0 left-0 right-0 h-1 bg-[#486b52]" />
                 <div className="flex items-center justify-between gap-2">
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-wider bg-[#eef7f0] text-[#2c4e37] border border-[#c2e9ca]">
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xs text-[10px] font-black uppercase tracking-wider bg-[#eef7f0] text-[#2c4e37] border border-[#c2e9ca]">
                     <span className="w-2 h-2 rounded-full bg-[#486b52] animate-pulse" />
                     Active Jurisdiction
                   </span>
-                  <span className="text-sm font-mono font-black text-[#486b52] bg-[#eef7f0] px-2.5 py-0.5 rounded-md border border-[#c2e9ca]">
+                  <span className="text-sm font-mono font-black text-[#486b52] bg-[#eef7f0] px-2.5 py-0.5 rounded-xs border border-[#c2e9ca]">
                     {member.homeTown?.code ?? activeTown?.code ?? 'HUB'}
                   </span>
                 </div>
@@ -706,7 +706,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
               <div className="lg:col-span-3 p-5 rounded-lg bg-white border border-[#ffdbcf] shadow-2xs flex flex-col justify-between gap-3 relative overflow-hidden group">
                 <div className="absolute top-0 left-0 right-0 h-1 bg-[#b85028]" />
                 <div className="flex items-center justify-between gap-2">
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-wider bg-[#fff2ee] text-[#812901] border border-[#ffdbcf]">
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xs text-[10px] font-black uppercase tracking-wider bg-[#fff2ee] text-[#812901] border border-[#ffdbcf]">
                     <Sparkle
                       size={12}
                       weight="fill"
@@ -714,7 +714,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
                     />
                     Origin Hub
                   </span>
-                  <span className="text-sm font-mono font-black text-[#b85028] bg-[#fff2ee] px-2.5 py-0.5 rounded-md border border-[#ffdbcf]">
+                  <span className="text-sm font-mono font-black text-[#b85028] bg-[#fff2ee] px-2.5 py-0.5 rounded-xs border border-[#ffdbcf]">
                     {member.transferHistory && member.transferHistory.length > 0
                       ? townsMap.get(member.transferHistory[0].fromTownId)
                           ?.code || 'HUB'
@@ -762,7 +762,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
                 </p>
               </div>
 
-              <span className="text-xs font-bold text-[#8a726a] px-3 py-1 rounded-md bg-[#faf2ee] border border-[#e8e1dd] self-start sm:self-auto">
+              <span className="text-xs font-bold text-[#8a726a] px-3 py-1 rounded-xs bg-[#faf2ee] border border-[#e8e1dd] self-start sm:self-auto">
                 {(member.transferHistory?.length || 0) + 1} Historical Events
               </span>
             </div>
@@ -787,7 +787,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
                       <div className="p-5 rounded-lg bg-white border border-[#e8e1dd] hover:border-[#b85028]/40 shadow-2xs hover:shadow-xs transition-all flex-1 flex flex-col gap-3 group">
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <span className="px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-[#fff2ee] text-[#b85028] border border-[#ffdbcf]">
+                            <span className="px-2 py-0.5 rounded-xs text-[10px] font-black uppercase tracking-wider bg-[#fff2ee] text-[#b85028] border border-[#ffdbcf]">
                               Relocation #{transferIndex}
                             </span>
                             <div className="flex items-center gap-2 font-bold text-sm text-[#1e1b19]">
@@ -921,7 +921,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
                     </div>
                   </div>
                   <span
-                    className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-bold ${
+                    className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-xs text-xs font-bold ${
                       isRevoked
                         ? 'bg-[#ffdad6] text-[#ba1a1a]'
                         : hasAppAccess
@@ -1067,7 +1067,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
                       return (
                         <span
                           key={id}
-                          className="px-2.5 py-1 rounded-md text-[11px] font-bold bg-[#faf2ee] text-[#57423b] border border-[#e8e1dd]"
+                          className="px-2.5 py-1 rounded-xs text-[11px] font-bold bg-[#faf2ee] text-[#57423b] border border-[#e8e1dd]"
                         >
                           {town?.name || id}
                         </span>

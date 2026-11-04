@@ -164,7 +164,7 @@ export const ManageAccessModal: React.FC<ManageAccessModalProps> = ({
                 Account Status
               </span>
               <span
-                className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[11px] font-bold ${
+                className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-xs text-[11px] font-bold ${
                   isActive
                     ? 'bg-[#c2e9ca] text-[#2c4e37]'
                     : 'bg-[#ffdad6] text-[#ba1a1a]'
