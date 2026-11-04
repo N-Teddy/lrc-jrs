@@ -49,9 +49,11 @@ import { openUrl } from '@tauri-apps/plugin-opener';
 import type React from 'react';
 import { useMemo, useRef, useState } from 'react';
 import Skeleton from 'react-loading-skeleton';
+import emptyDriveImg from '../../assets/illustrations/empty-drive.jpg';
 import {
   AppSkeletonTheme,
   CustomSelect,
+  EmptyState,
   type SelectOption,
 } from '../../components';
 import {
@@ -1379,31 +1381,40 @@ export const DriveExplorerFeature: React.FC = () => {
               </div>
             </AppSkeletonTheme>
           ) : filteredReports.length === 0 ? (
-            <div className="bg-white rounded-xl border-2 border-dashed border-[#e8e1dd] p-12 text-center flex flex-col items-center justify-center gap-3">
-              <div className="w-14 h-14 rounded-full bg-[#faf2ee] text-[#8a726a] flex items-center justify-center">
-                <FolderOpen size={32} />
-              </div>
-              <div className="flex flex-col">
-                <h4 className="text-sm font-bold text-[#1e1b19]">
-                  No documents found
-                </h4>
-                <p className="text-xs text-[#8a726a] mt-0.5 max-w-sm">
-                  {searchTerm || fileTypeFilter !== 'ALL'
-                    ? 'No documents matched your active search or filter criteria.'
-                    : 'This folder is currently empty. Upload files or subfolders to get started.'}
-                </p>
-              </div>
-              {isPrivileged && (
-                <button
-                  type="button"
-                  onClick={() => handleOpenUploadModal()}
-                  className="mt-2 px-4 py-2 rounded-lg bg-[#b85028] hover:bg-[#a44520] text-white text-xs font-bold transition-all shadow-xs flex items-center gap-2 cursor-pointer"
-                >
-                  <UploadSimple size={15} weight="bold" />
-                  <span>Upload Documents Here</span>
-                </button>
-              )}
-            </div>
+            <EmptyState
+              imageSrc={emptyDriveImg}
+              imageAlt="No documents found"
+              title={
+                searchTerm || fileTypeFilter !== 'ALL'
+                  ? 'No documents matched your criteria'
+                  : 'This folder is currently empty'
+              }
+              description={
+                searchTerm || fileTypeFilter !== 'ALL'
+                  ? 'Try adjusting your search terms or clearing the file type filter.'
+                  : 'Upload reports, guidelines, or resource files to populate this vault.'
+              }
+              primaryAction={
+                isPrivileged
+                  ? {
+                      label: 'Upload Documents',
+                      icon: <UploadSimple size={15} weight="bold" />,
+                      onClick: () => handleOpenUploadModal(),
+                    }
+                  : undefined
+              }
+              secondaryAction={
+                searchTerm || fileTypeFilter !== 'ALL'
+                  ? {
+                      label: 'Reset Filters',
+                      onClick: () => {
+                        setSearchTerm('');
+                        setFileTypeFilter('ALL');
+                      },
+                    }
+                  : undefined
+              }
+            />
           ) : viewMode === 'grid' ? (
             /* Mode 1: Grid Cards View */
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">

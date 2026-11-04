@@ -2,6 +2,7 @@ export * from './ComingSoonModal';
 export * from './CustomSelect';
 export * from './DatePeriodFilter';
 export * from './DatePicker';
+export * from './EmptyState';
 export * from './LanguageToggle';
 export * from './notifications/NotificationBell';
 export * from './PaginationControl';

@@ -14,7 +14,7 @@ import {
 import { ActivityStatus, ActivityType, type IActivity } from '@jrs/shared';
 import { Bell, CalendarBlank, CircleNotch } from '@phosphor-icons/react';
 import type React from 'react';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ComingSoonModal } from '../../../components';
 import { ActivityAttendanceRoster } from './ActivityAttendanceRoster';
 import { ActivityAuditLogView } from './ActivityAuditLogView';
@@ -258,7 +258,11 @@ export const ActivitiesFeature: React.FC<ActivitiesFeatureProps> = ({
     setPage(1);
   };
 
-  const activities = activitiesData?.items || [];
+  const rawActivities: IActivity[] = activitiesData?.items || [];
+  const activities = useMemo<IActivity[]>(() => {
+    if (statusFilter === 'all') return rawActivities;
+    return rawActivities.filter((a) => a.status === statusFilter);
+  }, [rawActivities, statusFilter]);
   const total = activitiesData?.total || 0;
 
   const currentActivity = selectedActivity

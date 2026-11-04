@@ -14,7 +14,6 @@ import {
   ArrowRight,
   ArrowsLeftRight,
   Bell,
-  BellSlash,
   Buildings,
   CalendarCheck,
   CaretRight,
@@ -34,6 +33,7 @@ import {
 import { AnimatePresence, motion } from 'motion/react';
 import type React from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import emptyNotificationsImg from '../../assets/illustrations/empty-notifications.jpg';
 
 // Safe native desktop notification trigger for Tauri
 async function triggerNativeDesktopNotification(title: string, body: string) {
@@ -480,17 +480,14 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({
                 </div>
               ) : notifications.length === 0 ? (
                 /* Empty State */
-                <div className="py-12 px-6 text-center flex flex-col items-center justify-center">
-                  <div className="w-12 h-12 rounded-lg bg-[#fff5f0] border border-[#ffd8cb] flex items-center justify-center text-[#b85028] mb-2.5 shadow-2xs">
-                    {activeTab === 'unread' ? (
-                      <CheckCircle
-                        size={24}
-                        weight="fill"
-                        className="text-[#486b52]"
-                      />
-                    ) : (
-                      <BellSlash size={24} weight="duotone" />
-                    )}
+                <div className="py-10 px-6 text-center flex flex-col items-center justify-center">
+                  <div className="w-20 h-20 rounded-2xl bg-[#faf2ee]/70 p-1.5 flex items-center justify-center mb-3">
+                    <img
+                      src={emptyNotificationsImg}
+                      alt="No notifications"
+                      className="w-full h-full object-contain rounded-xl select-none pointer-events-none drop-shadow-2xs"
+                      loading="lazy"
+                    />
                   </div>
                   <h4 className="text-sm font-bold text-[#1e1b19]">
                     {activeTab === 'unread'

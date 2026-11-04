@@ -10,11 +10,11 @@ import {
   PencilSimple,
   Phone,
   Trash,
-  User,
 } from '@phosphor-icons/react';
 import type React from 'react';
 import { useEffect, useRef, useState } from 'react';
-import { CardGridSkeleton, UserAvatar } from '../../../components';
+import emptyMembersImg from '../../../assets/illustrations/empty-members.jpg';
+import { CardGridSkeleton, EmptyState, UserAvatar } from '../../../components';
 import {
   calculateAge,
   formatCameroonPhone,
@@ -85,17 +85,15 @@ export const MemberCardGridView: React.FC<MemberCardGridViewProps> = ({
 
   if (members.length === 0) {
     return (
-      <div className="bg-white rounded-xl border border-[#e8e1dd] shadow-xs p-12 flex flex-col items-center justify-center text-center min-h-[320px]">
-        <div className="w-14 h-14 rounded-xl bg-[#faf2ee] border border-[#e8e1dd] flex items-center justify-center text-[#8a726a] mb-4">
-          <User size={28} weight="duotone" />
-        </div>
-        <h3 className="text-base font-bold text-[#1e1b19] mb-1">
-          {t('members:table.noMembersFound')}
-        </h3>
-        <p className="text-xs text-[#8a726a] max-w-sm">
-          {t('members:filters.searchPlaceholder')}
-        </p>
-      </div>
+      <EmptyState
+        imageSrc={emptyMembersImg}
+        imageAlt="No members"
+        title={t('members:table.noMembersFound', 'No members found')}
+        description={t(
+          'members:filters.searchPlaceholder',
+          'Search by name, phone, or filter by role and hub jurisdiction.',
+        )}
+      />
     );
   }
 

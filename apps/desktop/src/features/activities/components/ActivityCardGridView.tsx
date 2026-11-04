@@ -15,7 +15,12 @@ import {
 } from '@phosphor-icons/react';
 import type React from 'react';
 import { useState } from 'react';
-import { CardGridSkeleton, PaginationControl } from '../../../components';
+import emptyActivitiesImg from '../../../assets/illustrations/empty-activities.jpg';
+import {
+  CardGridSkeleton,
+  EmptyState,
+  PaginationControl,
+} from '../../../components';
 import {
   formatActivityDateRange,
   getActivityStatusConfig,
@@ -102,17 +107,15 @@ export const ActivityCardGridView: React.FC<ActivityCardGridViewProps> = ({
 
   if (activities.length === 0) {
     return (
-      <div className="bg-white rounded-md border border-[#e8e1dd] shadow-xs p-12 flex flex-col items-center justify-center text-center min-h-[320px]">
-        <div className="w-14 h-14 rounded-md bg-[#faf2ee] border border-[#e8e1dd] flex items-center justify-center text-[#8a726a] mb-4">
-          <CalendarBlank size={28} weight="duotone" />
-        </div>
-        <h3 className="text-base font-bold text-[#1e1b19] mb-1">
-          {t('activities:table.empty')}
-        </h3>
-        <p className="text-xs text-[#8a726a] max-w-sm">
-          {t('activities:filters.searchPlaceholder')}
-        </p>
-      </div>
+      <EmptyState
+        imageSrc={emptyActivitiesImg}
+        imageAlt="No activities"
+        title={t('activities:table.empty', 'No activities found')}
+        description={t(
+          'activities:filters.searchPlaceholder',
+          'Try adjusting your search query, status filters, or date range.',
+        )}
+      />
     );
   }
 
