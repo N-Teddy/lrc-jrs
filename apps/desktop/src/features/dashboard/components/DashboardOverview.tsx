@@ -92,7 +92,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
         <img
           src={constructionComingSoonSvg}
           alt={t('dashboard:comingSoonBadge', 'Still in Construction')}
-          className="h-36 sm:h-44 md:h-52 lg:h-60 max-h-[28vh] w-auto object-contain select-none pointer-events-none drop-shadow-sm transition-transform duration-300 hover:scale-[1.01]"
+          className="h-48 sm:h-56 md:h-68 lg:h-80 xl:h-92 max-h-[38vh] w-auto object-contain select-none pointer-events-none drop-shadow-sm transition-transform duration-300 hover:scale-[1.01]"
         />
       </div>
 

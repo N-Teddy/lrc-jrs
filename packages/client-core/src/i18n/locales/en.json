@@ -968,7 +968,7 @@
       "batchInvite": "Batch Invite"
     },
     "table": {
-      "member": "Member & Hub",
+      "member": "Member",
       "credentials": "Login Identifier & Email",
       "role": "Role",
       "status": "Portal Status",

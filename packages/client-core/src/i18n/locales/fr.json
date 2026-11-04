@@ -967,7 +967,7 @@
       "batchInvite": "Inviter en Masse"
     },
     "table": {
-      "member": "Membre & Centre",
+      "member": "Membre",
       "credentials": "Identifiant & Email",
       "role": "Rôle",
       "status": "Statut Portail",

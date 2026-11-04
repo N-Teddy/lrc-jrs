@@ -157,7 +157,7 @@ export const AccountsDirectoryTable: React.FC<AccountsDirectoryTableProps> = ({
           <thead>
             <tr className="bg-[#faf2ee] border-b border-[#e8e1dd] text-[11px] font-bold text-[#8a726a] uppercase tracking-wider">
               <th className="py-3.5 px-6">
-                {t('access:table.member') || 'Member & Hub'}
+                {t('access:table.member') || 'Member'}
               </th>
               <th className="py-3.5 px-6">
                 {t('access:table.credentials') || 'Login Identifier & Email'}
@@ -216,14 +216,6 @@ export const AccountsDirectoryTable: React.FC<AccountsDirectoryTableProps> = ({
                         >
                           {m.fullName}
                         </span>
-                        <div className="flex items-center gap-1.5 mt-0.5">
-                          <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-[#f4ece9] text-[#57423b]">
-                            {m.homeTown?.code ?? 'HUB'}
-                          </span>
-                          <span className="text-[11px] text-[#8a726a] truncate">
-                            {m.homeTown?.name}
-                          </span>
-                        </div>
                       </div>
                     </div>
                   </td>
