@@ -20,7 +20,6 @@ import {
   ArrowSquareOut,
   ArrowsClockwise,
   CalendarBlank,
-  CaretDown,
   CaretRight,
   CircleNotch,
   CloudArrowUp,
@@ -34,7 +33,6 @@ import {
   Folder,
   FolderOpen,
   FolderPlus,
-  FolderSimple,
   FolderSimplePlus,
   HardDrives,
   ListBullets,
@@ -88,7 +86,6 @@ export const DriveExplorerFeature: React.FC = () => {
   // Selected folder ('ALL' = entire vault, or folder ID)
   const [selectedFolderId, setSelectedFolderId] = useState<string>('ALL');
   const [searchTerm, setSearchTerm] = useState('');
-  const [folderSearchTerm, setFolderSearchTerm] = useState('');
   const [fileTypeFilter, setFileTypeFilter] = useState<
     'ALL' | 'PDF' | 'DOC' | 'SHEET' | 'IMAGE'
   >('ALL');
@@ -96,14 +93,10 @@ export const DriveExplorerFeature: React.FC = () => {
     'date_desc' | 'date_asc' | 'name_asc' | 'size_desc'
   >('date_desc');
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
+  const [includeSubfolders, setIncludeSubfolders] = useState<boolean>(false);
 
   const [previewFile, setPreviewFile] = useState<IDriveFilePreview | null>(
     null,
-  );
-
-  // Expanded tree nodes
-  const [expandedFolderIds, setExpandedFolderIds] = useState<Set<string>>(
-    new Set(['root', 'ALL']),
   );
 
   // Drag and drop state
@@ -345,19 +338,38 @@ export const DriveExplorerFeature: React.FC = () => {
     });
   }, [treeRoots, folders]);
 
-  // Direct subfolders of the currently selected folder
-  const directSubfolders: IDriveFolderOption[] = useMemo(() => {
-    if (selectedFolderId === 'ALL') {
-      return folders.filter(
+  // Identify the root vault folder (mock-root, root, or folders[0])
+  const rootFolder = useMemo(() => {
+    return (
+      folders.find(
         (f) =>
           !f.parentId ||
           f.parentId === 'root' ||
           f.parentId === 'mock-root' ||
-          f.id === folders[0]?.id,
-      );
+          f.id === 'mock-root' ||
+          f.id === 'root',
+      ) || folders[0]
+    );
+  }, [folders]);
+
+  // Direct subfolders of the currently selected folder
+  const directSubfolders: IDriveFolderOption[] = useMemo(() => {
+    if (
+      selectedFolderId === 'ALL' ||
+      (rootFolder && selectedFolderId === rootFolder.id)
+    ) {
+      return folders.filter((f) => {
+        if (rootFolder && f.id === rootFolder.id) return false;
+        return (
+          !f.parentId ||
+          f.parentId === 'root' ||
+          f.parentId === 'mock-root' ||
+          (rootFolder && f.parentId === rootFolder.id)
+        );
+      });
     }
     return folders.filter((f) => f.parentId === selectedFolderId);
-  }, [selectedFolderId, folders]);
+  }, [selectedFolderId, folders, rootFolder]);
 
   // Count documents in each folder (direct or descendant)
   const folderCounts = useMemo(() => {
@@ -383,23 +395,39 @@ export const DriveExplorerFeature: React.FC = () => {
   };
 
   // Determine allowed folder IDs for selected filter
-  // When clicking a parent folder, targetFolderIds contains the parent AND ALL ITS DESCENDANT CHILD FOLDERS
   const targetFolderIds = useMemo(() => {
-    if (selectedFolderId === 'ALL') return null;
-    const set = new Set<string>([selectedFolderId]);
-    const descendants = allFolderDescendantsMap.get(selectedFolderId);
-    if (descendants) {
-      for (const d of descendants) {
-        set.add(d);
-      }
+    if (
+      selectedFolderId === 'ALL' ||
+      (rootFolder && selectedFolderId === rootFolder.id)
+    ) {
+      return null;
     }
-    return set;
-  }, [selectedFolderId, allFolderDescendantsMap]);
+    if (searchTerm.trim() || includeSubfolders) {
+      const set = new Set<string>([selectedFolderId]);
+      const descendants = allFolderDescendantsMap.get(selectedFolderId);
+      if (descendants) {
+        for (const d of descendants) {
+          set.add(d);
+        }
+      }
+      return set;
+    }
+    return new Set<string>([selectedFolderId]);
+  }, [
+    selectedFolderId,
+    rootFolder,
+    allFolderDescendantsMap,
+    searchTerm,
+    includeSubfolders,
+  ]);
 
   // Breadcrumb Trail for selected folder
   const breadcrumbTrail = useMemo(() => {
-    if (selectedFolderId === 'ALL') {
-      return [{ id: 'ALL', name: 'Drive Vault' }];
+    if (
+      selectedFolderId === 'ALL' ||
+      (rootFolder && selectedFolderId === rootFolder.id)
+    ) {
+      return [{ id: 'ALL', name: t('drive:documentVault', 'Drive Vault') }];
     }
     const trail: { id: string; name: string }[] = [];
     let currId: string | undefined = selectedFolderId;
@@ -409,6 +437,7 @@ export const DriveExplorerFeature: React.FC = () => {
       currId &&
       currId !== 'root' &&
       currId !== 'mock-root' &&
+      currId !== rootFolder?.id &&
       !visited.has(currId)
     ) {
       visited.add(currId);
@@ -420,9 +449,12 @@ export const DriveExplorerFeature: React.FC = () => {
         break;
       }
     }
-    trail.unshift({ id: 'ALL', name: 'Drive Vault' });
+    trail.unshift({
+      id: 'ALL',
+      name: t('drive:documentVault', 'Drive Vault'),
+    });
     return trail;
-  }, [selectedFolderId, folderDetailMap]);
+  }, [selectedFolderId, folderDetailMap, rootFolder, t]);
 
   // Filtered and sorted reports
   const filteredReports = useMemo(() => {
@@ -516,20 +548,6 @@ export const DriveExplorerFeature: React.FC = () => {
   const currentFolderSizeBytes = useMemo(() => {
     return filteredReports.reduce((acc, curr) => acc + (curr.fileSize || 0), 0);
   }, [filteredReports]);
-
-  // Toggle tree node expansion
-  const toggleFolderExpand = (folderId: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    setExpandedFolderIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(folderId)) {
-        next.delete(folderId);
-      } else {
-        next.add(folderId);
-      }
-      return next;
-    });
-  };
 
   // Helper to open file preview
   const handlePreview = (rep: IDriveFileVaultItem) => {
@@ -737,11 +755,6 @@ export const DriveExplorerFeature: React.FC = () => {
           name,
           parentId: folderParentIdInput || undefined,
         });
-        if (folderParentIdInput) {
-          setExpandedFolderIds((prev) =>
-            new Set(prev).add(folderParentIdInput),
-          );
-        }
         if (created?.id) {
           setSelectedFolderId(created.id);
         }
@@ -804,161 +817,6 @@ export const DriveExplorerFeature: React.FC = () => {
     } finally {
       setIsDeletingFile(false);
     }
-  };
-
-  // Recursive tree node renderer
-  const renderTreeNode = (node: IFolderTreeNode) => {
-    const isSelected = selectedFolderId === node.id;
-    const isExpanded = expandedFolderIds.has(node.id);
-    const hasChildren = node.children && node.children.length > 0;
-    const isRootNode =
-      node.id === 'root' ||
-      node.id === 'mock-root' ||
-      node.id === folders[0]?.id;
-    const totalCount = getAggregatedDocumentCount(node.id);
-
-    // Filter tree nodes if folder search is active
-    if (folderSearchTerm.trim()) {
-      const matchSearch = node.name
-        .toLowerCase()
-        .includes(folderSearchTerm.toLowerCase());
-      const hasMatchingChild = flattenFolderTree(node.children).some((c) =>
-        c.name.toLowerCase().includes(folderSearchTerm.toLowerCase()),
-      );
-      if (!matchSearch && !hasMatchingChild) {
-        return null;
-      }
-    }
-
-    return (
-      <div key={node.id} className="flex flex-col group/tree">
-        <div
-          style={{ paddingLeft: `${node.level * 14 + 8}px` }}
-          className={`flex items-center justify-between py-1.5 pr-2 rounded-lg text-xs font-semibold transition-all select-none cursor-pointer ${
-            isSelected
-              ? 'bg-[#b85028] text-white shadow-xs'
-              : 'hover:bg-[#faf2ee] text-[#57423b]'
-          }`}
-          onClick={() => setSelectedFolderId(node.id)}
-          title={node.path || node.name}
-        >
-          <div className="flex items-center gap-1.5 min-w-0 flex-1">
-            {/* Expand / Collapse Chevron */}
-            {hasChildren ? (
-              <button
-                type="button"
-                onClick={(e) => toggleFolderExpand(node.id, e)}
-                className={`p-1 rounded hover:bg-black/10 transition-transform cursor-pointer shrink-0 ${
-                  isSelected ? 'text-white' : 'text-[#8a726a]'
-                }`}
-                title={isExpanded ? 'Collapse subfolders' : 'Expand subfolders'}
-              >
-                {isExpanded ? (
-                  <CaretDown size={12} weight="bold" />
-                ) : (
-                  <CaretRight size={12} weight="bold" />
-                )}
-              </button>
-            ) : (
-              <span className="w-5 shrink-0" />
-            )}
-
-            {/* Folder Icon */}
-            {isSelected || isExpanded ? (
-              <FolderOpen
-                size={16}
-                weight="fill"
-                className={`shrink-0 ${isSelected ? 'text-white' : 'text-[#b85028]'}`}
-              />
-            ) : (
-              <Folder
-                size={16}
-                weight="bold"
-                className={`shrink-0 ${isSelected ? 'text-white' : 'text-[#8a726a]'}`}
-              />
-            )}
-            <span className="truncate">{node.name}</span>
-          </div>
-
-          {/* Action buttons (Rename, Add Subfolder, Delete) & Count */}
-          <div className="flex items-center gap-1 shrink-0 ml-1">
-            {isPrivileged && (
-              <div className="opacity-0 group-hover/tree:opacity-100 transition-opacity flex items-center gap-0.5">
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleOpenCreateFolderModal(node.id);
-                  }}
-                  className={`p-1 rounded hover:bg-black/15 transition-colors cursor-pointer ${
-                    isSelected
-                      ? 'text-white'
-                      : 'text-[#8a726a] hover:text-[#b85028]'
-                  }`}
-                  title="Create subfolder inside this folder"
-                >
-                  <FolderPlus size={13} weight="bold" />
-                </button>
-
-                {!isRootNode && (
-                  <>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleOpenRenameFolderModal(node);
-                      }}
-                      className={`p-1 rounded hover:bg-black/15 transition-colors cursor-pointer ${
-                        isSelected
-                          ? 'text-white'
-                          : 'text-[#8a726a] hover:text-[#1e1b19]'
-                      }`}
-                      title="Rename folder"
-                    >
-                      <PencilSimple size={13} weight="bold" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setDeleteFolderTarget(node);
-                      }}
-                      className={`p-1 rounded hover:bg-black/15 transition-colors cursor-pointer ${
-                        isSelected
-                          ? 'text-white'
-                          : 'text-[#8a726a] hover:text-[#ba1a1a]'
-                      }`}
-                      title="Delete folder"
-                    >
-                      <Trash size={13} weight="bold" />
-                    </button>
-                  </>
-                )}
-              </div>
-            )}
-
-            {totalCount > 0 && (
-              <span
-                className={`text-[10px] px-1.5 py-0.5 rounded-full shrink-0 font-bold ${
-                  isSelected
-                    ? 'bg-white/20 text-white'
-                    : 'bg-[#faf2ee] text-[#8a726a] border border-[#e8e1dd]'
-                }`}
-              >
-                {totalCount}
-              </span>
-            )}
-          </div>
-        </div>
-
-        {/* Recursive Children with Connected Indentation */}
-        {hasChildren && isExpanded && (
-          <div className="flex flex-col border-l-2 border-[#e8e1dd] ml-4.5 my-0.5 pl-1">
-            {node.children.map((child) => renderTreeNode(child))}
-          </div>
-        )}
-      </div>
-    );
   };
 
   return (
@@ -1080,209 +938,234 @@ export const DriveExplorerFeature: React.FC = () => {
         </div>
       </div>
 
-      {/* 2. Main Two-Column Split Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* Left Column: Folder Directory Hierarchy */}
-        <div className="lg:col-span-4 bg-white rounded-xl border border-[#e8e1dd] shadow-xs p-4 flex flex-col gap-3 sticky top-4">
-          <div className="flex items-center justify-between pb-2 border-b border-[#f4ece9]">
-            <div className="flex items-center gap-2">
-              <FolderSimple
-                size={18}
-                weight="fill"
-                className="text-[#b85028]"
-              />
-              <h3 className="text-xs font-bold text-[#1e1b19] uppercase tracking-wider">
-                Directory Hierarchy
-              </h3>
-            </div>
+      {/* 2. Full-Width Folder & Document Explorer Workspace */}
+      <div
+        onDragOver={(e) => {
+          e.preventDefault();
+          setIsDraggingOver(true);
+        }}
+        onDragLeave={() => setIsDraggingOver(false)}
+        onDrop={(e) => {
+          e.preventDefault();
+          setIsDraggingOver(false);
+          if (e.dataTransfer.files) {
+            handleDropFiles(Array.from(e.dataTransfer.files));
+          }
+        }}
+        className={`w-full flex flex-col gap-5 relative rounded-xl transition-all ${
+          isDraggingOver
+            ? 'ring-2 ring-[#b85028] ring-dashed bg-[#fff8f5]/60 p-2'
+            : ''
+        }`}
+      >
+        {/* Navigation & Breadcrumb Header Bar */}
+        <div className="bg-white rounded-xl border border-[#e8e1dd] shadow-xs p-3.5 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          {/* Left: Up button + Breadcrumb Trail */}
+          <div className="flex items-center gap-2 flex-wrap min-w-0">
+            {selectedFolderId !== 'ALL' && (
+              <button
+                type="button"
+                onClick={() => {
+                  const current = folderDetailMap.get(selectedFolderId);
+                  if (
+                    current?.parentId &&
+                    current.parentId !== 'root' &&
+                    current.parentId !== 'mock-root' &&
+                    current.parentId !== rootFolder?.id
+                  ) {
+                    setSelectedFolderId(current.parentId);
+                  } else {
+                    setSelectedFolderId('ALL');
+                  }
+                }}
+                className="h-8 px-2.5 rounded-lg bg-[#faf2ee] hover:bg-[#b85028] text-[#57423b] hover:text-white border border-[#e8e1dd] text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shrink-0 shadow-2xs"
+                title={t('drive:upOneLevel', 'Up')}
+              >
+                <ArrowLeft size={13} weight="bold" />
+                <span>{t('drive:upOneLevel', 'Up')}</span>
+              </button>
+            )}
+
+            {/* Breadcrumb Trail */}
+            <nav className="flex items-center gap-1 flex-wrap text-xs font-semibold">
+              {breadcrumbTrail.map((crumb, idx) => {
+                const isLast = idx === breadcrumbTrail.length - 1;
+                const isRootCrumb = idx === 0;
+
+                return (
+                  <div key={crumb.id} className="flex items-center gap-1">
+                    {idx > 0 && (
+                      <CaretRight
+                        size={12}
+                        weight="bold"
+                        className="text-[#cfc4be] shrink-0"
+                      />
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => setSelectedFolderId(crumb.id)}
+                      className={`px-2 py-1 rounded-md transition-all flex items-center gap-1.5 cursor-pointer ${
+                        isLast
+                          ? 'bg-[#fff2ee] text-[#b85028] font-black border border-[#ffdbcf]'
+                          : 'text-[#57423b] hover:text-[#b85028] hover:bg-[#faf2ee]'
+                      }`}
+                    >
+                      {isRootCrumb ? (
+                        <HardDrives
+                          size={14}
+                          weight={isLast ? 'fill' : 'bold'}
+                          className="shrink-0"
+                        />
+                      ) : (
+                        <Folder
+                          size={14}
+                          weight={isLast ? 'fill' : 'bold'}
+                          className="shrink-0"
+                        />
+                      )}
+                      <span className="truncate max-w-[180px]">
+                        {crumb.name}
+                      </span>
+                    </button>
+                  </div>
+                );
+              })}
+            </nav>
+          </div>
+
+          {/* Right: Quick actions for current folder */}
+          <div className="flex items-center gap-2 shrink-0">
             {isPrivileged && (
-              <button
-                type="button"
-                onClick={() => handleOpenCreateFolderModal()}
-                className="p-1 rounded text-[#8a726a] hover:text-[#b85028] hover:bg-[#faf2ee] transition-colors cursor-pointer"
-                title="Add Root Folder"
-              >
-                <FolderPlus size={16} weight="bold" />
-              </button>
-            )}
-          </div>
+              <>
+                <button
+                  type="button"
+                  onClick={() => handleOpenCreateFolderModal()}
+                  className="h-8 px-2.5 rounded-lg bg-white hover:bg-[#faf2ee] border border-[#e8e1dd] text-[#57423b] text-xs font-bold transition-all shadow-2xs flex items-center gap-1.5 cursor-pointer"
+                  title={t('drive:newFolder', 'New Folder')}
+                >
+                  <FolderSimplePlus
+                    size={14}
+                    weight="bold"
+                    className="text-[#b85028]"
+                  />
+                  <span>{t('drive:newFolder', 'New Folder')}</span>
+                </button>
 
-          {/* Quick search folders */}
-          <div className="relative">
-            <MagnifyingGlass
-              size={14}
-              className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[#8a726a]"
-            />
-            <input
-              type="text"
-              value={folderSearchTerm}
-              onChange={(e) => setFolderSearchTerm(e.target.value)}
-              placeholder="Find folder..."
-              className="w-full h-8 pl-8 pr-7 rounded-md bg-[#faf2ee] border border-[#e8e1dd] text-xs text-[#1e1b19] placeholder:text-[#8a726a] outline-none focus:border-[#b85028]"
-            />
-            {folderSearchTerm && (
-              <button
-                type="button"
-                onClick={() => setFolderSearchTerm('')}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-[#8a726a] hover:text-[#1e1b19]"
-              >
-                <X size={12} />
-              </button>
-            )}
-          </div>
-
-          {/* Root "All Documents" Item */}
-          <div
-            onClick={() => setSelectedFolderId('ALL')}
-            className={`flex items-center justify-between p-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-              selectedFolderId === 'ALL'
-                ? 'bg-[#b85028] text-white shadow-xs'
-                : 'bg-[#faf2ee] text-[#57423b] hover:bg-[#f4ece9]'
-            }`}
-          >
-            <div className="flex items-center gap-2">
-              <HardDrives
-                size={16}
-                weight={selectedFolderId === 'ALL' ? 'fill' : 'regular'}
-              />
-              <span>All Vault Documents</span>
-            </div>
-            <span
-              className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                selectedFolderId === 'ALL'
-                  ? 'bg-white/20 text-white'
-                  : 'bg-white text-[#8a726a] border border-[#e8e1dd]'
-              }`}
-            >
-              {allReports.length}
-            </span>
-          </div>
-
-          {/* Tree Structure */}
-          <div className="flex flex-col gap-1 max-h-[520px] overflow-y-auto pr-1">
-            {isFoldersLoading ? (
-              <AppSkeletonTheme>
-                <div className="flex flex-col gap-2 p-2">
-                  <Skeleton height={28} borderRadius={6} />
-                  <Skeleton height={28} borderRadius={6} />
-                  <Skeleton height={28} borderRadius={6} />
-                </div>
-              </AppSkeletonTheme>
-            ) : treeRoots.length === 0 ? (
-              <p className="text-xs text-[#8a726a] text-center py-6">
-                No folders created yet.
-              </p>
-            ) : (
-              treeRoots.map((root) => renderTreeNode(root))
+                <button
+                  type="button"
+                  onClick={() => handleOpenUploadModal()}
+                  className="h-8 px-3 rounded-lg bg-[#b85028] hover:bg-[#a44520] text-white text-xs font-bold transition-all shadow-2xs flex items-center gap-1.5 cursor-pointer"
+                  title={t('drive:uploadDocuments', 'Upload Documents')}
+                >
+                  <CloudArrowUp size={15} weight="bold" />
+                  <span>{t('common:upload', 'Upload')}</span>
+                </button>
+              </>
             )}
           </div>
         </div>
 
-        {/* Right Column: Dynamic Workspace */}
-        <div
-          onDragOver={(e) => {
-            e.preventDefault();
-            setIsDraggingOver(true);
-          }}
-          onDragLeave={() => setIsDraggingOver(false)}
-          onDrop={(e) => {
-            e.preventDefault();
-            setIsDraggingOver(false);
-            if (e.dataTransfer.files) {
-              handleDropFiles(Array.from(e.dataTransfer.files));
-            }
-          }}
-          className={`lg:col-span-8 flex flex-col gap-4 relative rounded-xl transition-all ${
-            isDraggingOver
-              ? 'ring-2 ring-[#b85028] ring-dashed bg-[#fff8f5]/60 p-2'
-              : ''
-          }`}
-        >
-          {/* Breadcrumb Path & Folder Header */}
-          <div className="bg-white rounded-xl border border-[#e8e1dd] shadow-xs p-4 flex flex-col gap-3">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              {/* Breadcrumb Trail */}
-              <div className="flex items-center gap-1.5 flex-wrap text-xs">
-                {breadcrumbTrail.map((crumb, idx) => {
-                  const isLast = idx === breadcrumbTrail.length - 1;
-                  return (
-                    <div key={crumb.id} className="flex items-center gap-1.5">
-                      {idx > 0 && (
-                        <span className="text-[#cfc4be] font-bold">/</span>
-                      )}
-                      <button
-                        type="button"
-                        onClick={() => setSelectedFolderId(crumb.id)}
-                        className={`font-bold transition-colors cursor-pointer ${
-                          isLast
-                            ? 'text-[#b85028]'
-                            : 'text-[#8a726a] hover:text-[#1e1b19]'
-                        }`}
-                      >
-                        {crumb.name}
-                      </button>
-                    </div>
-                  );
-                })}
+        {/* Folders Section (Rendered when subfolders exist in this directory or loading) */}
+        {isFoldersLoading ? (
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center gap-2">
+              <Folder size={16} weight="fill" className="text-[#b85028]" />
+              <h3 className="text-xs font-bold text-[#1e1b19] uppercase tracking-wider">
+                {t('drive:folders', 'Folders')}
+              </h3>
+            </div>
+            <AppSkeletonTheme>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3.5">
+                {[1, 2, 3, 4].map((i) => (
+                  <Skeleton key={i} height={64} borderRadius={12} />
+                ))}
               </div>
-
-              {/* Up One Level Button if nested */}
-              {selectedFolderId !== 'ALL' && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    const current = folderDetailMap.get(selectedFolderId);
-                    if (current?.parentId && current.parentId !== 'root') {
-                      setSelectedFolderId(current.parentId);
-                    } else {
-                      setSelectedFolderId('ALL');
-                    }
-                  }}
-                  className="px-2.5 py-1 rounded-md bg-[#faf2ee] hover:bg-[#f4ece9] border border-[#e8e1dd] text-xs font-bold text-[#57423b] flex items-center gap-1.5 cursor-pointer"
-                >
-                  <ArrowLeft size={13} weight="bold" />
-                  <span>Up One Level</span>
-                </button>
-              )}
+            </AppSkeletonTheme>
+          </div>
+        ) : directSubfolders.length > 0 ? (
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Folder size={16} weight="fill" className="text-[#b85028]" />
+                <h3 className="text-xs font-bold text-[#1e1b19] uppercase tracking-wider">
+                  {t('drive:folders', 'Folders')}
+                </h3>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#faf2ee] text-[#57423b] border border-[#e8e1dd]">
+                  {directSubfolders.length}
+                </span>
+              </div>
             </div>
 
-            {/* Subfolders Quick-Access Strip (if current folder has subfolders) */}
-            {directSubfolders.length > 0 && (
-              <div className="flex flex-col gap-2 pt-3 border-t border-[#f4ece9]">
-                <span className="text-[10px] font-bold text-[#8a726a] uppercase tracking-wider">
-                  Subfolders ({directSubfolders.length})
-                </span>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-                  {directSubfolders.map((sub) => {
-                    const count = getAggregatedDocumentCount(sub.id);
-                    return (
-                      <div
-                        key={sub.id}
-                        onClick={() => setSelectedFolderId(sub.id)}
-                        className="p-2.5 rounded-lg border border-[#e8e1dd] bg-[#faf2ee]/70 hover:bg-[#fff2ee] hover:border-[#ffdbcf] transition-all flex items-center justify-between gap-2 cursor-pointer group"
-                      >
-                        <div className="flex items-center gap-2 min-w-0">
-                          <Folder
-                            size={16}
-                            weight="fill"
-                            className="text-[#b85028] shrink-0 group-hover:scale-105 transition-transform"
-                          />
-                          <span className="text-xs font-bold text-[#1e1b19] truncate">
-                            {sub.name}
-                          </span>
-                        </div>
-                        <span className="text-[10px] font-bold text-[#8a726a] shrink-0">
-                          {count}
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3.5">
+              {directSubfolders.map((sub) => {
+                const count = getAggregatedDocumentCount(sub.id);
+                return (
+                  <div
+                    key={sub.id}
+                    onClick={() => setSelectedFolderId(sub.id)}
+                    className="group relative flex items-center justify-between p-3.5 rounded-xl border border-[#e8e1dd] bg-white hover:border-[#b85028]/40 hover:shadow-md transition-all cursor-pointer select-none"
+                  >
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                      <div className="w-10 h-10 rounded-lg bg-[#fff2ee] border border-[#ffdbcf] text-[#b85028] flex items-center justify-center shrink-0 group-hover:bg-[#b85028] group-hover:text-white transition-colors shadow-2xs">
+                        <FolderOpen size={20} weight="fill" />
+                      </div>
+                      <div className="flex flex-col min-w-0">
+                        <span className="text-xs font-bold text-[#1e1b19] group-hover:text-[#b85028] transition-colors truncate">
+                          {sub.name}
+                        </span>
+                        <span className="text-[11px] text-[#8a726a]">
+                          {count > 0
+                            ? count === 1
+                              ? t('drive:itemCount_one', '1 file')
+                              : t('drive:itemCount_other', '{{count}} files', {
+                                  count,
+                                })
+                            : t('drive:empty', 'Empty')}
                         </span>
                       </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-          </div>
+                    </div>
 
-          {/* Search, Filter & View Controls */}
+                    {isPrivileged && (
+                      <div
+                        onClick={(e) => e.stopPropagation()}
+                        className="flex items-center gap-0.5 shrink-0 ml-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <button
+                          type="button"
+                          onClick={() => handleOpenCreateFolderModal(sub.id)}
+                          className="p-1 rounded text-[#8a726a] hover:text-[#b85028] hover:bg-[#faf2ee] transition-colors cursor-pointer"
+                          title="Add subfolder"
+                        >
+                          <FolderPlus size={13} weight="bold" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleOpenRenameFolderModal(sub)}
+                          className="p-1 rounded text-[#8a726a] hover:text-[#1e1b19] hover:bg-[#faf2ee] transition-colors cursor-pointer"
+                          title="Rename folder"
+                        >
+                          <PencilSimple size={13} weight="bold" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setDeleteFolderTarget(sub)}
+                          className="p-1 rounded text-[#8a726a] hover:text-[#ba1a1a] hover:bg-[#fff0ed] transition-colors cursor-pointer"
+                          title="Delete folder"
+                        >
+                          <Trash size={13} weight="bold" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ) : null}
+
+        {/* Files Section */}
+        <div className="flex flex-col gap-3">
+          {/* Section Toolbar */}
           <div className="bg-white rounded-xl border border-[#e8e1dd] shadow-xs p-3.5 flex flex-col md:flex-row md:items-center justify-between gap-3">
             {/* Search Input */}
             <div className="relative flex-1">
@@ -1294,7 +1177,10 @@ export const DriveExplorerFeature: React.FC = () => {
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Search documents by name, author, activity..."
+                placeholder={t(
+                  'drive:filters.searchPlaceholder',
+                  'Search documents by name, author, activity...',
+                )}
                 className="w-full h-9 pl-9 pr-8 rounded-lg bg-[#faf2ee] border border-[#e8e1dd] text-xs text-[#1e1b19] placeholder:text-[#8a726a] outline-none focus:border-[#b85028]"
               />
               {searchTerm && (
@@ -1329,6 +1215,21 @@ export const DriveExplorerFeature: React.FC = () => {
                   ),
                 )}
               </div>
+
+              {/* Include Subfolders Checkbox (when inside a folder that has subfolders) */}
+              {selectedFolderId !== 'ALL' && directSubfolders.length > 0 && (
+                <label className="flex items-center gap-1.5 text-xs text-[#57423b] font-semibold cursor-pointer select-none px-2 py-1 rounded-lg bg-[#faf2ee] border border-[#e8e1dd]">
+                  <input
+                    type="checkbox"
+                    checked={includeSubfolders}
+                    onChange={(e) => setIncludeSubfolders(e.target.checked)}
+                    className="rounded border-[#e8e1dd] text-[#b85028] focus:ring-[#b85028]"
+                  />
+                  <span className="text-[11px]">
+                    {t('drive:includeSubfolders', 'Include subfolder files')}
+                  </span>
+                </label>
+              )}
 
               {/* Sort By */}
               <select
@@ -1398,17 +1299,50 @@ export const DriveExplorerFeature: React.FC = () => {
                   },
                 }}
               />
+            ) : directSubfolders.length > 0 ? (
+              /* Inline friendly empty note when subfolders are present */
+              <div className="bg-white rounded-xl border border-[#e8e1dd] p-8 text-center flex flex-col items-center justify-center gap-2">
+                <div className="w-10 h-10 rounded-full bg-[#faf2ee] text-[#8a726a] flex items-center justify-center">
+                  <FolderOpen size={22} weight="duotone" />
+                </div>
+                <h4 className="text-xs font-bold text-[#1e1b19]">
+                  {t(
+                    'drive:noDirectFiles',
+                    'No documents directly in this folder',
+                  )}
+                </h4>
+                <p className="text-[11px] text-[#8a726a] max-w-sm">
+                  {t(
+                    'drive:noDirectFilesDesc',
+                    'Navigate into one of the subfolders above to view its files, or upload a document here.',
+                  )}
+                </p>
+                {isPrivileged && (
+                  <button
+                    type="button"
+                    onClick={() => handleOpenUploadModal()}
+                    className="mt-2 h-8 px-3.5 rounded-lg bg-[#b85028] hover:bg-[#a44520] text-white text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <UploadSimple size={14} weight="bold" />
+                    <span>{t('drive:uploadHere', 'Upload Document Here')}</span>
+                  </button>
+                )}
+              </div>
             ) : (
+              /* Full EmptyState when folder has no subfolders and no files */
               <EmptyState
                 size="lg"
                 imageSrc={emptyDriveImg}
                 imageAlt="No documents found"
-                title="This folder is currently empty"
-                description="Upload documents or notes to populate this folder."
+                title={t('drive:emptyFolder', 'This folder is currently empty')}
+                description={t(
+                  'drive:emptyFolderDesc',
+                  'Upload documents or notes to populate this folder.',
+                )}
                 primaryAction={
                   isPrivileged
                     ? {
-                        label: 'Upload Documents',
+                        label: t('drive:uploadDocuments', 'Upload Documents'),
                         icon: <UploadSimple size={15} weight="bold" />,
                         onClick: () => handleOpenUploadModal(),
                       }

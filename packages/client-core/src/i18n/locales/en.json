@@ -1172,7 +1172,21 @@
       "fileSize": "Size: {{size}}",
       "date": "Date: {{date}}",
       "activity": "Linked Activity"
-    }
+    },
+    "folders": "Folders",
+    "documents": "Documents",
+    "upOneLevel": "Up",
+    "newFolder": "New Folder",
+    "itemCount_one": "1 file",
+    "itemCount_other": "{{count}} files",
+    "empty": "Empty",
+    "emptyFolder": "This folder is currently empty",
+    "emptyFolderDesc": "Upload documents or notes to populate this folder.",
+    "noDirectFiles": "No documents directly in this folder",
+    "noDirectFilesDesc": "Navigate into one of the subfolders above to view its files, or upload a document here.",
+    "uploadHere": "Upload Document Here",
+    "uploadDocuments": "Upload Documents",
+    "includeSubfolders": "Include subfolder files"
   },
   "crash": {
     "badge": "Application Error",

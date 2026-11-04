@@ -1167,7 +1167,21 @@
       "fileSize": "Taille : {{size}}",
       "date": "Date : {{date}}",
       "activity": "Activité associée"
-    }
+    },
+    "folders": "Dossiers",
+    "documents": "Documents",
+    "upOneLevel": "Parent",
+    "newFolder": "Nouveau dossier",
+    "itemCount_one": "1 fichier",
+    "itemCount_other": "{{count}} fichiers",
+    "empty": "Vide",
+    "emptyFolder": "Ce dossier est actuellement vide",
+    "emptyFolderDesc": "Téléversez des documents ou des notes pour alimenter ce dossier.",
+    "noDirectFiles": "Aucun document directement dans ce dossier",
+    "noDirectFilesDesc": "Accédez à l'un des sous-dossiers ci-dessus pour consulter ses fichiers, ou téléversez un document ici.",
+    "uploadHere": "Téléverser un document ici",
+    "uploadDocuments": "Téléverser des documents",
+    "includeSubfolders": "Inclure les fichiers des sous-dossiers"
   },
   "crash": {
     "badge": "Erreur d'application",
