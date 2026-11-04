@@ -5,11 +5,13 @@ import {
   ArrowRight,
   Check,
   Copy,
+  DotsThreeVertical,
   Eye,
+  Phone,
   ShieldCheck,
 } from '@phosphor-icons/react';
 import type React from 'react';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import emptyTransfersImg from '../../../assets/illustrations/empty-transfers.jpg';
 import {
   EmptyState,
@@ -54,7 +56,29 @@ export const TransferTableView: React.FC<TransferTableViewProps> = ({
 }) => {
   const { t } = useTranslation(['transfers', 'common']);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
   const totalPages = Math.ceil(total / limit) || 1;
+
+  useEffect(() => {
+    if (!openMenuId) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setOpenMenuId(null);
+      }
+    };
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setOpenMenuId(null);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [openMenuId]);
 
   const handleCopyPhone = (id: string, phone: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -175,13 +199,12 @@ export const TransferTableView: React.FC<TransferTableViewProps> = ({
                         <span className="font-bold text-[#1e1b19] truncate group-hover:text-[#b85028] transition-colors">
                           {item.memberName}
                         </span>
-                        <div className="flex items-center gap-1.5 mt-0.5">
-                          <span className="text-[11px] text-[#8a726a]">
-                            {formatCameroonPhone(item.memberPhone)}
-                          </span>
-                          <span className="px-1.5 py-0.2 rounded text-[10px] font-bold bg-[#faf2ee] text-[#57423b] border border-[#e8e1dd]">
-                            {item.memberRole}
-                          </span>
+                        <div className="flex items-center gap-1 mt-0.5 text-[11px] text-[#8a726a]">
+                          <Phone
+                            size={11}
+                            className="shrink-0 text-[#8a726a]"
+                          />
+                          <span>{formatCameroonPhone(item.memberPhone)}</span>
                         </div>
                       </div>
                     </div>
@@ -190,26 +213,18 @@ export const TransferTableView: React.FC<TransferTableViewProps> = ({
                   {/* 2. Relocation Route */}
                   <td className="py-3.5 px-4">
                     <div className="flex flex-col gap-1.5">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="px-2 py-0.5 rounded-md text-xs font-bold bg-[#faf2ee] border border-[#e8e1dd] text-[#1e1b19]">
-                          {fromTown?.name || 'Origin'}{' '}
-                          <span className="text-[10px] font-mono text-[#8a726a]">
-                            ({fromTown?.code || '—'})
-                          </span>
-                        </span>
-                        <div className="w-4 h-4 rounded-full bg-[#fff2ee] text-[#b85028] flex items-center justify-center shrink-0">
-                          <ArrowRight size={10} weight="bold" />
-                        </div>
-                        <span className="px-2 py-0.5 rounded-md text-xs font-bold bg-[#faf2ee] border border-[#e8e1dd] text-[#1e1b19]">
-                          {toTown?.name || 'Destination'}{' '}
-                          <span className="text-[10px] font-mono text-[#8a726a]">
-                            ({toTown?.code || '—'})
-                          </span>
-                        </span>
+                      <div className="flex items-center gap-1.5 text-xs font-semibold text-[#1e1b19]">
+                        <span>{fromTown?.name || 'Origin'}</span>
+                        <ArrowRight
+                          size={11}
+                          weight="bold"
+                          className="text-[#b85028] shrink-0"
+                        />
+                        <span>{toTown?.name || 'Destination'}</span>
                       </div>
                       <div>
                         <span
-                          className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border ${badge.bgClass} ${badge.textClass} ${badge.borderClass}`}
+                          className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold border ${badge.bgClass} ${badge.textClass} ${badge.borderClass}`}
                         >
                           {badge.label}
                         </span>
@@ -223,79 +238,91 @@ export const TransferTableView: React.FC<TransferTableViewProps> = ({
                       <div className="w-6 h-6 rounded-md bg-[#fff2ee] text-[#b85028] flex items-center justify-center shrink-0">
                         <ShieldCheck size={14} weight="bold" />
                       </div>
-                      <div className="flex flex-col">
-                        <span className="font-semibold text-[#1e1b19]">
-                          {item.transferredBy}
-                        </span>
-                        <span className="text-[10px] text-[#8a726a]">
-                          {t(
-                            'transfers:table.authorizedSignOff',
-                            'Authorized Sign-off',
-                          )}
-                        </span>
-                      </div>
+                      <span className="font-semibold text-xs text-[#1e1b19]">
+                        {item.transferredBy}
+                      </span>
                     </div>
                   </td>
 
                   {/* 4. Effective Date */}
-                  <td className="py-3.5 px-4 whitespace-nowrap">
-                    <div className="flex flex-col">
-                      <span className="font-bold text-[#1e1b19]">
-                        {formattedDate}
-                      </span>
-                      <span className="text-[10px] text-[#8a726a]">
-                        {t('transfers:table.transferLedger', 'Transfer Ledger')}
-                      </span>
-                    </div>
+                  <td className="py-3.5 px-4 whitespace-nowrap text-xs">
+                    <span className="font-semibold text-[#1e1b19]">
+                      {formattedDate}
+                    </span>
                   </td>
 
                   {/* 5. Relocation Reason */}
                   <td className="py-3.5 px-4 max-w-xs">
                     {item.reason ? (
-                      <p className="text-xs text-[#57423b] line-clamp-2 italic bg-[#faf2ee]/50 px-2 py-1 rounded border border-[#f4ece9]">
+                      <p className="text-xs text-[#57423b] line-clamp-2 italic">
                         &ldquo;{item.reason}&rdquo;
                       </p>
                     ) : (
-                      <span className="text-xs text-[#8a726a] italic">
-                        {t(
-                          'transfers:table.standardTransfer',
-                          'Standard community transfer',
-                        )}
-                      </span>
+                      <span className="text-xs text-[#8a726a]">—</span>
                     )}
                   </td>
 
                   {/* 6. Actions */}
-                  <td className="py-3.5 px-4 text-right">
-                    <div className="flex items-center justify-end gap-1">
+                  <td
+                    className="py-3.5 px-4 text-right"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <div
+                      className={`relative inline-flex items-center justify-end ${
+                        openMenuId === item.id ? 'z-30' : ''
+                      }`}
+                      ref={openMenuId === item.id ? menuRef : undefined}
+                    >
                       <button
                         type="button"
-                        onClick={(e) =>
-                          handleCopyPhone(item.id, item.memberPhone, e)
+                        onClick={() =>
+                          setOpenMenuId(openMenuId === item.id ? null : item.id)
                         }
-                        title={t(
-                          'transfers:table.copyPhone',
-                          'Copy Member Phone',
-                        )}
-                        className="w-7 h-7 rounded-md hover:bg-[#faf2ee] flex items-center justify-center text-[#8a726a] hover:text-[#b85028] transition-colors cursor-pointer"
+                        className="w-7 h-7 rounded-md text-[#8a726a] hover:text-[#1e1b19] hover:bg-[#faf2ee] flex items-center justify-center transition-colors cursor-pointer"
+                        title={t('common:actions', 'Actions')}
                       >
-                        {copiedId === item.id ? (
-                          <Check size={16} className="text-[#486b52]" />
-                        ) : (
-                          <Copy size={16} />
-                        )}
+                        <DotsThreeVertical size={16} weight="bold" />
                       </button>
-                      <button
-                        type="button"
-                        onClick={() => onViewMember(item.memberId)}
-                        title={t(
-                          'transfers:table.viewProfile',
-                          'View Member Profile & Relocation Ledger',
-                        )}
-                        className="w-7 h-7 rounded-md hover:bg-[#faf2ee] flex items-center justify-center text-[#8a726a] hover:text-[#b85028] transition-colors cursor-pointer"
-                      >
-                        <Eye size={16} />
-                      </button>
+
+                      {openMenuId === item.id && (
+                        <div className="absolute right-0 top-full mt-1 w-44 bg-white rounded-md border border-[#e8e1dd] shadow-lg py-1 z-40 flex flex-col animate-in fade-in zoom-in-95 duration-100 text-left">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setOpenMenuId(null);
+                              onViewMember(item.memberId);
+                            }}
+                            className="w-full px-3 py-2 text-left text-xs text-[#1e1b19] hover:bg-[#faf2ee] flex items-center gap-2 font-medium cursor-pointer"
+                          >
+                            <Eye size={15} className="text-[#8a726a]" />
+                            <span>
+                              {t('transfers:card.viewMember', 'View Profile')}
+                            </span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              handleCopyPhone(item.id, item.memberPhone, e);
+                              setOpenMenuId(null);
+                            }}
+                            className="w-full px-3 py-2 text-left text-xs text-[#1e1b19] hover:bg-[#faf2ee] flex items-center gap-2 font-medium cursor-pointer"
+                          >
+                            {copiedId === item.id ? (
+                              <>
+                                <Check size={15} className="text-[#486b52]" />
+                                <span className="text-[#486b52]">Copied!</span>
+                              </>
+                            ) : (
+                              <>
+                                <Copy size={15} className="text-[#8a726a]" />
+                                <span>
+                                  {t('transfers:table.copyPhone', 'Copy Phone')}
+                                </span>
+                              </>
+                            )}
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </td>
                 </tr>
