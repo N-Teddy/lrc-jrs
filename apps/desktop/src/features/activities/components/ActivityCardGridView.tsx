@@ -313,16 +313,27 @@ export const ActivityCardGridView: React.FC<ActivityCardGridViewProps> = ({
                     </span>
                   </div>
 
-                  <div className="flex items-center gap-1.5 truncate text-[#8a726a]">
-                    <MapPin
-                      size={13}
-                      weight="fill"
-                      className="text-[#486b52] shrink-0"
-                    />
-                    <span className="truncate">
-                      {activity.town?.name || 'Local'} Hub
-                    </span>
-                  </div>
+                  {activity.locationVenue ? (
+                    <div className="flex items-center gap-1.5 truncate text-[#8a726a]">
+                      <MapPin
+                        size={13}
+                        weight="fill"
+                        className="text-[#486b52] shrink-0"
+                      />
+                      <span className="truncate">{activity.locationVenue}</span>
+                    </div>
+                  ) : !isHostTown ? (
+                    <div className="flex items-center gap-1.5 truncate text-[#8a726a]">
+                      <MapPin
+                        size={13}
+                        weight="fill"
+                        className="text-[#486b52] shrink-0"
+                      />
+                      <span className="truncate">
+                        {activity.hostTown?.name || activity.town?.name} Hub
+                      </span>
+                    </div>
+                  ) : null}
                 </div>
 
                 {/* Turnout Pill - Clickable to open Activity Details */}

@@ -91,7 +91,7 @@ export const ActivityActionMenu: React.FC<ActivityActionMenuProps> = ({
         <div
           className={`absolute ${align === 'right' ? 'right-0' : 'left-0'} ${
             openUpwards ? 'bottom-full mb-1.5' : 'top-full mt-1'
-          } w-44 bg-white rounded-xl border border-[#e8e1dd] shadow-xl py-1 z-40 flex flex-col animate-in fade-in zoom-in-95 duration-100`}
+          } w-max min-w-[200px] whitespace-nowrap bg-white rounded-xl border border-[#e8e1dd] shadow-xl py-1 z-40 flex flex-col animate-in fade-in zoom-in-95 duration-100 text-left`}
           onMouseLeave={onClose}
         >
           {/* Activity Details Action */}
@@ -101,7 +101,7 @@ export const ActivityActionMenu: React.FC<ActivityActionMenuProps> = ({
               onClose();
               onViewDetails(activity);
             }}
-            className="w-full px-3 py-1.5 text-left text-xs text-[#1e1b19] hover:bg-[#faf2ee] flex items-center gap-2 font-medium cursor-pointer"
+            className="w-full px-3 py-1.5 text-left text-xs text-[#1e1b19] hover:bg-[#faf2ee] flex items-center gap-2 font-medium cursor-pointer whitespace-nowrap"
           >
             <Eye size={14} weight="bold" className="text-[#b85028]" />
             <span>{t('activities:card.details', 'Details')}</span>
@@ -115,7 +115,7 @@ export const ActivityActionMenu: React.FC<ActivityActionMenuProps> = ({
                 onClose();
                 onViewPreparation(activity);
               }}
-              className="w-full px-3 py-1.5 text-left text-xs text-[#1e1b19] hover:bg-[#faf2ee] flex items-center gap-2 font-medium cursor-pointer"
+              className="w-full px-3 py-1.5 text-left text-xs text-[#1e1b19] hover:bg-[#faf2ee] flex items-center gap-2 font-medium cursor-pointer whitespace-nowrap"
             >
               <ListChecks size={14} weight="bold" className="text-[#486b52]" />
               <span>
@@ -134,7 +134,7 @@ export const ActivityActionMenu: React.FC<ActivityActionMenuProps> = ({
                 onClose();
                 onEditActivity(activity);
               }}
-              className="w-full px-3 py-1.5 text-left text-xs text-[#1e1b19] hover:bg-[#faf2ee] flex items-center gap-2 font-medium cursor-pointer"
+              className="w-full px-3 py-1.5 text-left text-xs text-[#1e1b19] hover:bg-[#faf2ee] flex items-center gap-2 font-medium cursor-pointer whitespace-nowrap"
             >
               <PencilSimple size={14} weight="bold" />
               <span>
@@ -153,7 +153,7 @@ export const ActivityActionMenu: React.FC<ActivityActionMenuProps> = ({
                   onClose();
                   onCancelActivity(activity);
                 }}
-                className="w-full px-3 py-1.5 text-left text-xs text-[#ba1a1a] hover:bg-[#ffdad6] flex items-center gap-2 font-medium cursor-pointer"
+                className="w-full px-3 py-1.5 text-left text-xs text-[#ba1a1a] hover:bg-[#ffdad6] flex items-center gap-2 font-medium cursor-pointer whitespace-nowrap"
               >
                 <XCircle size={14} weight="bold" />
                 <span>
@@ -169,7 +169,7 @@ export const ActivityActionMenu: React.FC<ActivityActionMenuProps> = ({
                 onClose();
                 onUndoCancelActivity(activity);
               }}
-              className="w-full px-3 py-1.5 text-left text-xs text-[#486b52] hover:bg-[#edf3ee] flex items-center gap-2 font-medium cursor-pointer"
+              className="w-full px-3 py-1.5 text-left text-xs text-[#486b52] hover:bg-[#edf3ee] flex items-center gap-2 font-medium cursor-pointer whitespace-nowrap"
             >
               <ArrowCounterClockwise size={14} weight="bold" />
               <span>
@@ -184,7 +184,7 @@ export const ActivityActionMenu: React.FC<ActivityActionMenuProps> = ({
               onClose();
               onViewHistory(activity);
             }}
-            className="w-full px-3 py-1.5 text-left text-xs text-[#1e1b19] hover:bg-[#faf2ee] flex items-center gap-2 font-medium cursor-pointer"
+            className="w-full px-3 py-1.5 text-left text-xs text-[#1e1b19] hover:bg-[#faf2ee] flex items-center gap-2 font-medium cursor-pointer whitespace-nowrap"
           >
             <ClockCounterClockwise size={14} weight="bold" />
             <span>
@@ -205,7 +205,7 @@ export const ActivityActionMenu: React.FC<ActivityActionMenuProps> = ({
                   onClose();
                   onDeleteActivity(activity);
                 }}
-                className="w-full px-3 py-1.5 text-left text-xs text-[#ba1a1a] hover:bg-[#ffdad6] flex items-center gap-2 font-semibold cursor-pointer border-t border-[#f4ece9] mt-0.5"
+                className="w-full px-3 py-1.5 text-left text-xs text-[#ba1a1a] hover:bg-[#ffdad6] flex items-center gap-2 font-semibold cursor-pointer border-t border-[#f4ece9] mt-0.5 whitespace-nowrap"
               >
                 <Trash size={14} weight="bold" />
                 <span>{t('activities:actions.delete')}</span>

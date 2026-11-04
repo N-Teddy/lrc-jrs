@@ -9,6 +9,7 @@ import {
   Bell,
   Buildings,
   CalendarBlank,
+  Clock,
   Plus,
 } from '@phosphor-icons/react';
 import type React from 'react';
@@ -235,11 +236,6 @@ export const ActivityTableView: React.FC<ActivityTableViewProps> = ({
                         >
                           {activity.title}
                         </button>
-                        {activity.notes && (
-                          <span className="text-[11px] text-[#8a726a] line-clamp-1 mt-0.5">
-                            {activity.notes}
-                          </span>
-                        )}
                         {isParticipating && (
                           <div className="flex items-center mt-1">
                             <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold border bg-[#edf3ee] text-[#486b52] border-[#c2e9ca]">
@@ -274,7 +270,7 @@ export const ActivityTableView: React.FC<ActivityTableViewProps> = ({
                   {/* Type */}
                   <td className="py-3.5 px-3">
                     <span
-                      className={`inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold border ${typeConfig.badgeBg} ${typeConfig.badgeText} ${typeConfig.badgeBorder}`}
+                      className={`inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-bold border ${typeConfig.badgeBg} ${typeConfig.badgeText} ${typeConfig.badgeBorder}`}
                     >
                       {typeConfig.label}
                     </span>
@@ -292,6 +288,7 @@ export const ActivityTableView: React.FC<ActivityTableViewProps> = ({
                         <span>{dateInfo.dateRange}</span>
                       </div>
                       <div className="flex items-center gap-1.5 text-[11px] text-[#8a726a]">
+                        <Clock size={13} className="text-[#8a726a] shrink-0" />
                         <span>{dateInfo.timeRange}</span>
                         {dateInfo.isMultiDay && (
                           <span className="px-1.5 py-0.2 rounded bg-[#faf2ee] border border-[#e8e1dd] text-[10px] font-bold uppercase text-[#57423b]">
@@ -306,7 +303,7 @@ export const ActivityTableView: React.FC<ActivityTableViewProps> = ({
                   <td className="py-3.5 px-3">
                     <div className="flex flex-col gap-1 items-start">
                       <span
-                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold border ${statusConfig.badgeBg} ${statusConfig.badgeText} ${statusConfig.badgeBorder}`}
+                        className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-bold border ${statusConfig.badgeBg} ${statusConfig.badgeText} ${statusConfig.badgeBorder}`}
                       >
                         <span
                           className={`w-1.5 h-1.5 rounded-full ${statusConfig.dotColor} ${
