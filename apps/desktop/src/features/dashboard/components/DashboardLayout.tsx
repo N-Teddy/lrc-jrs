@@ -277,7 +277,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             }}
             className={`w-full ${
               activeTab === 'dashboard'
-                ? 'flex-1 flex flex-col justify-center min-h-0'
+                ? 'flex-1 flex flex-col justify-center items-center min-h-0 h-full'
                 : ''
             }`}
           >

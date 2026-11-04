@@ -56,98 +56,82 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   const quickNavItems: Array<{
     tab: DashboardTabId;
     label: string;
-    description: string;
     icon: React.ReactNode;
     color: string;
   }> = [
     {
       tab: 'members',
-      label: t('dashboard:goToMembers', 'Members Directory'),
-      description: t('navigation:members', 'Members'),
+      label: t('navigation:members', 'Members'),
       icon: <Users size={18} weight="duotone" />,
       color: 'hover:border-[#b85028] hover:text-[#b85028]',
     },
     {
       tab: 'activities',
-      label: t('dashboard:goToActivities', 'Activities & Calendar'),
-      description: t('navigation:activities', 'Activities & Calendar'),
+      label: t('navigation:activities', 'Activities & Calendar'),
       icon: <CalendarDots size={18} weight="duotone" />,
       color: 'hover:border-[#486b52] hover:text-[#486b52]',
     },
     {
       tab: 'access',
-      label: t('dashboard:goToIntake', 'Intake Submissions'),
-      description: t('navigation:access', 'Access & Accounts'),
+      label: t('navigation:access', 'Intake Submissions'),
       icon: <ShieldCheck size={18} weight="duotone" />,
       color: 'hover:border-[#b85028] hover:text-[#b85028]',
     },
     {
       tab: 'reports',
-      label: t('dashboard:goToDrive', 'Document Vault'),
-      description: t('navigation:reports', 'Reports'),
+      label: t('navigation:reports', 'Document Vault'),
       icon: <FolderOpen size={18} weight="duotone" />,
       color: 'hover:border-[#486b52] hover:text-[#486b52]',
     },
   ];
 
   return (
-    <div className="w-full h-full flex flex-col items-center justify-center py-2 animate-in fade-in duration-300 min-h-0 select-none">
-      {/* Large Vector Illustration - Responsively constrained to viewport height */}
+    <div className="w-full my-auto flex flex-col items-center justify-center animate-in fade-in duration-300 min-h-0 select-none py-1">
+      {/* Large Vector Illustration - Scaled responsively to viewport */}
       <div className="relative flex items-center justify-center my-1 shrink-0">
         <img
           src={constructionComingSoonSvg}
           alt={t('dashboard:comingSoonBadge', 'Still in Construction')}
-          className="h-36 sm:h-44 md:h-52 lg:h-60 max-h-[26vh] w-auto object-contain select-none pointer-events-none drop-shadow-sm transition-transform duration-300 hover:scale-[1.01]"
+          className="h-36 sm:h-44 md:h-52 lg:h-60 max-h-[28vh] w-auto object-contain select-none pointer-events-none drop-shadow-sm transition-transform duration-300 hover:scale-[1.01]"
         />
       </div>
 
       {/* In-Development Badge */}
-      <div className="inline-flex items-center gap-1.5 bg-[#ffdbcf]/60 text-[#812901] px-3 py-1 rounded-full text-xs font-bold mb-1.5 border border-[#ffb59c]/50 shadow-2xs shrink-0">
+      <div className="inline-flex items-center gap-1.5 bg-[#ffdbcf]/60 text-[#812901] px-3.5 py-1 rounded-full text-xs font-bold mb-2 border border-[#ffb59c]/50 shadow-2xs shrink-0">
         <Sparkle size={13} weight="fill" className="text-[#b85028]" />
         <span>{t('dashboard:comingSoonBadge', 'Still in Construction')}</span>
       </div>
 
       {/* Main Title */}
-      <h1 className="text-lg sm:text-xl md:text-2xl font-extrabold text-[#1e1b19] tracking-tight mb-1 text-center shrink-0">
+      <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-[#1e1b19] tracking-tight mb-1 text-center shrink-0">
         {t('dashboard:comingSoonTitle', 'Dashboard Analytics In Development')}
       </h1>
 
-      {/* Punchy 1-Sentence Description */}
-      <p className="text-xs sm:text-sm text-[#57423b] text-center max-w-md leading-relaxed mb-3 sm:mb-4 px-4 shrink-0">
+      {/* Short, Punchy 1-Sentence Description */}
+      <p className="text-xs sm:text-sm text-[#57423b] text-center max-w-md leading-relaxed mb-4 px-4 shrink-0">
         {t(
           'dashboard:comingSoonDesc',
-          'Community summaries, attendance trends, and key performance metrics are currently being assembled for this workspace.',
+          'Hub analytics and community metrics are in active development.',
         )}
       </p>
 
-      {/* Quick Access Navigation Buttons (Row of 4 on md/lg displays) */}
-      <div className="w-full max-w-3xl px-4 mb-2 shrink-0">
-        <p className="text-[10px] font-bold uppercase tracking-wider text-[#8a726a] text-center mb-2">
-          {t(
-            'dashboard:quickActionsTitle',
-            'Quick Navigation to Active Modules',
-          )}
-        </p>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
+      {/* Quick Access Navigation Buttons without header text */}
+      <div className="w-full max-w-2xl px-4 mb-2 shrink-0">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5">
           {quickNavItems.map((item) => (
             <button
               key={item.tab}
               type="button"
               onClick={() => onSelectTab(item.tab)}
-              className={`group flex items-center justify-between p-2.5 rounded-xl bg-white border border-[#e8e1dd] text-left transition-all duration-150 shadow-2xs hover:shadow-xs cursor-pointer ${item.color}`}
+              className={`group flex items-center justify-between px-3 py-2.5 rounded-xl bg-white border border-[#e8e1dd] text-left transition-all duration-150 shadow-2xs hover:shadow-xs cursor-pointer ${item.color}`}
             >
-              <div className="flex items-center gap-2.5 min-w-0">
-                <div className="w-8 h-8 rounded-lg bg-[#faf2ee] border border-[#e8e1dd] flex items-center justify-center text-[#57423b] group-hover:text-inherit shrink-0 transition-colors">
+              <div className="flex items-center gap-2 min-w-0">
+                <div className="w-7 h-7 rounded-lg bg-[#faf2ee] border border-[#e8e1dd] flex items-center justify-center text-[#57423b] group-hover:text-inherit shrink-0 transition-colors">
                   {item.icon}
                 </div>
-                <div className="truncate">
-                  <span className="block text-xs font-bold text-[#1e1b19] group-hover:text-inherit transition-colors truncate">
-                    {item.label}
-                  </span>
-                  <span className="block text-[10px] text-[#8a726a] truncate">
-                    {item.description}
-                  </span>
-                </div>
+                <span className="text-xs font-bold text-[#1e1b19] group-hover:text-inherit transition-colors truncate">
+                  {item.label}
+                </span>
               </div>
               <ArrowRight
                 size={12}
@@ -161,7 +145,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
 
       {/* Dev-Only Error Page Review Section */}
       {import.meta.env.DEV && (
-        <div className="mt-2 flex flex-col items-center gap-1 shrink-0">
+        <div className="mt-2.5 flex flex-col items-center gap-1 shrink-0">
           <div className="flex flex-wrap items-center justify-center gap-2">
             <button
               type="button"
