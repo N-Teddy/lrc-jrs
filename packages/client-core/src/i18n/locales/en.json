@@ -382,7 +382,24 @@
       "trackAttendance": "Track Attendance",
       "viewHistory": "History ({{count}})",
       "edit": "Edit",
-      "delete": "Delete"
+      "delete": "Delete",
+      "attendancePending": "Attendance Pending",
+      "attendees": "Attendees",
+      "attendee": "Attendee"
+    },
+    "calendar": {
+      "activitySingle": "Activity",
+      "activityPlural": "Activities",
+      "today": "Today",
+      "days": {
+        "sun": "Sun",
+        "mon": "Mon",
+        "tue": "Tue",
+        "wed": "Wed",
+        "thu": "Thu",
+        "fri": "Fri",
+        "sat": "Sat"
+      }
     },
     "timingNotice": {
       "notStarted": "This activity has not started yet. Attendance tracking is locked until the scheduled start time.",

@@ -1,4 +1,4 @@
-import { useTownContext } from '@jrs/client-core';
+import { useTownContext, useTranslation } from '@jrs/client-core';
 import type { IActivity } from '@jrs/shared';
 import {
   CaretLeft,
@@ -26,8 +26,6 @@ interface ActivityCalendarViewProps {
   onEditActivity: (activity: IActivity) => void;
 }
 
-const DAYS_OF_WEEK = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-
 const pad = (n: number) => n.toString().padStart(2, '0');
 const formatLocalDateKey = (d: Date) =>
   `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
@@ -41,6 +39,7 @@ export const ActivityCalendarView: React.FC<ActivityCalendarViewProps> = ({
   onViewDetails,
   onEditActivity,
 }) => {
+  const { t, i18n } = useTranslation();
   const { canWrite } = useTownContext();
   const [currentDate, setCurrentDate] = useState(() => {
     const year = selectedYear ?? 2026;
@@ -71,7 +70,24 @@ export const ActivityCalendarView: React.FC<ActivityCalendarViewProps> = ({
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
 
-  const monthName = currentDate.toLocaleString('default', { month: 'long' });
+  const monthNameRaw = currentDate.toLocaleString(i18n.language || 'default', {
+    month: 'long',
+  });
+  const monthName =
+    monthNameRaw.charAt(0).toUpperCase() + monthNameRaw.slice(1);
+
+  const daysOfWeek = useMemo(
+    () => [
+      t('activities:calendar.days.sun', 'Sun'),
+      t('activities:calendar.days.mon', 'Mon'),
+      t('activities:calendar.days.tue', 'Tue'),
+      t('activities:calendar.days.wed', 'Wed'),
+      t('activities:calendar.days.thu', 'Thu'),
+      t('activities:calendar.days.fri', 'Fri'),
+      t('activities:calendar.days.sat', 'Sat'),
+    ],
+    [t],
+  );
 
   const handlePrevMonth = () => {
     const newDate = new Date(year, month - 1, 1);
@@ -173,9 +189,11 @@ export const ActivityCalendarView: React.FC<ActivityCalendarViewProps> = ({
           <h2 className="text-lg font-extrabold text-[#1e1b19] tracking-tight">
             {monthName} {year}
           </h2>
-          <span className="px-2 py-0.5 rounded-full bg-white border border-[#e8e1dd] text-[11px] font-bold text-[#b85028]">
+          <span className="px-2 py-0.5 rounded bg-white border border-[#e8e1dd] text-[11px] font-bold text-[#b85028]">
             {activities.length}{' '}
-            {activities.length === 1 ? 'Activity' : 'Activities'}
+            {activities.length === 1
+              ? t('activities:calendar.activitySingle', 'Activity')
+              : t('activities:calendar.activityPlural', 'Activities')}
           </span>
         </div>
 
@@ -185,7 +203,7 @@ export const ActivityCalendarView: React.FC<ActivityCalendarViewProps> = ({
             onClick={handleToday}
             className="px-3 py-1.5 rounded-md bg-white border border-[#e8e1dd] text-xs font-bold text-[#1e1b19] hover:bg-[#faf2ee] transition-colors cursor-pointer"
           >
-            Today
+            {t('activities:calendar.today', 'Today')}
           </button>
           <div className="flex items-center gap-1">
             <button
@@ -210,7 +228,7 @@ export const ActivityCalendarView: React.FC<ActivityCalendarViewProps> = ({
 
       {/* Weekday Labels */}
       <div className="grid grid-cols-7 border-b border-[#e8e1dd] bg-[#faf2ee]/50 text-center text-[11px] font-bold uppercase tracking-wider text-[#8a726a]">
-        {DAYS_OF_WEEK.map((day) => (
+        {daysOfWeek.map((day) => (
           <div
             key={day}
             className="py-2.5 border-r last:border-r-0 border-[#e8e1dd]"
@@ -261,7 +279,7 @@ export const ActivityCalendarView: React.FC<ActivityCalendarViewProps> = ({
               {/* Day Activities List */}
               <div className="flex flex-col gap-1 overflow-y-auto max-h-[85px] overflow-x-hidden [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
                 {dayActivities.map((act) => {
-                  const typeConfig = getActivityTypeConfig(act.activityType);
+                  const typeConfig = getActivityTypeConfig(act.activityType, t);
                   const time = formatActivityTime(act.startDate);
 
                   return (
@@ -269,8 +287,8 @@ export const ActivityCalendarView: React.FC<ActivityCalendarViewProps> = ({
                       key={act.id}
                       type="button"
                       onClick={() => setActiveActivityModal(act)}
-                      className={`w-full text-left p-1 rounded-md text-[11px] font-semibold border truncate transition-colors cursor-pointer flex items-center gap-1 ${typeConfig.badgeBg} ${typeConfig.badgeText} ${typeConfig.badgeBorder} hover:brightness-95 hover:border-[#b85028]/80 shadow-2xs`}
-                      title={`${act.title} (${time})`}
+                      className={`w-full text-left p-1 rounded text-[11px] font-semibold border truncate transition-colors cursor-pointer flex items-center gap-1 ${typeConfig.badgeBg} ${typeConfig.badgeText} ${typeConfig.badgeBorder} hover:brightness-95 hover:border-[#b85028]/80 shadow-2xs`}
+                      title={`${typeConfig.label}: ${act.title} (${time})`}
                     >
                       <span className="shrink-0 font-mono text-[10px] opacity-80">
                         {time}
@@ -286,78 +304,93 @@ export const ActivityCalendarView: React.FC<ActivityCalendarViewProps> = ({
       </div>
 
       {/* Activity Details Popover / Modal on Click */}
-      {activeActivityModal && (
-        <div className="fixed inset-0 z-50 bg-[#1e1b19]/40 backdrop-blur-[1px] flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl border border-[#e8e1dd] shadow-xl max-w-md w-full p-6 flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-150">
-            <div className="flex items-start justify-between gap-3">
-              <div className="flex flex-col gap-1">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-[#b85028]">
-                  {activeActivityModal.activityType}
-                </span>
-                <h3 className="text-base font-bold text-[#1e1b19] leading-snug">
-                  {activeActivityModal.title}
-                </h3>
+      {activeActivityModal &&
+        (() => {
+          const modalTypeConfig = getActivityTypeConfig(
+            activeActivityModal.activityType,
+            t,
+          );
+          const ModalTypeIcon = modalTypeConfig.icon;
+          return (
+            <div className="fixed inset-0 z-50 bg-[#1e1b19]/40 backdrop-blur-[1px] flex items-center justify-center p-4">
+              <div className="bg-white rounded-xl border border-[#e8e1dd] shadow-xl max-w-md w-full p-6 flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-150">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex flex-col gap-1.5">
+                    <span
+                      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold border w-fit ${modalTypeConfig.badgeBg} ${modalTypeConfig.badgeText} ${modalTypeConfig.badgeBorder}`}
+                    >
+                      <ModalTypeIcon size={12} weight="bold" />
+                      <span>{modalTypeConfig.label}</span>
+                    </span>
+                    <h3 className="text-base font-bold text-[#1e1b19] leading-snug">
+                      {activeActivityModal.title}
+                    </h3>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setActiveActivityModal(null)}
+                    className="p-1 rounded-md hover:bg-[#faf2ee] text-[#8a726a] hover:text-[#1e1b19] cursor-pointer"
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                {activeActivityModal.notes && (
+                  <p className="text-xs text-[#57423b] bg-[#faf2ee] p-3 rounded-md border border-[#e8e1dd]">
+                    {activeActivityModal.notes}
+                  </p>
+                )}
+
+                <div className="flex flex-col gap-2 text-xs text-[#1e1b19]">
+                  <div className="flex items-center gap-2">
+                    <Clock size={16} weight="bold" className="text-[#b85028]" />
+                    <span>
+                      {new Date(activeActivityModal.startDate).toLocaleString()}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <MapPin
+                      size={16}
+                      weight="fill"
+                      className="text-[#486b52]"
+                    />
+                    <span>{activeActivityModal.town?.name || 'Local'} Hub</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 pt-3 border-t border-[#e8e1dd]">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const act = activeActivityModal;
+                      setActiveActivityModal(null);
+                      onViewDetails(act);
+                    }}
+                    className="flex-1 py-2 px-3 rounded-md bg-[#b85028] text-white hover:bg-[#a44520] font-bold text-xs shadow-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                  >
+                    <Eye size={16} weight="bold" />
+                    <span>{t('activities:card.details', 'Details')}</span>
+                  </button>
+
+                  {canWrite && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const act = activeActivityModal;
+                        setActiveActivityModal(null);
+                        onEditActivity(act);
+                      }}
+                      className="py-2 px-3 rounded-md bg-[#faf2ee] border border-[#e8e1dd] text-[#57423b] hover:text-[#1e1b19] font-bold text-xs transition-colors cursor-pointer flex items-center gap-1"
+                    >
+                      <PencilSimple size={15} weight="bold" />
+                      <span>{t('common:edit', 'Edit')}</span>
+                    </button>
+                  )}
+                </div>
               </div>
-              <button
-                type="button"
-                onClick={() => setActiveActivityModal(null)}
-                className="p-1 rounded-md hover:bg-[#faf2ee] text-[#8a726a] hover:text-[#1e1b19] cursor-pointer"
-              >
-                ✕
-              </button>
             </div>
-
-            {activeActivityModal.notes && (
-              <p className="text-xs text-[#57423b] bg-[#faf2ee] p-3 rounded-md border border-[#e8e1dd]">
-                {activeActivityModal.notes}
-              </p>
-            )}
-
-            <div className="flex flex-col gap-2 text-xs text-[#1e1b19]">
-              <div className="flex items-center gap-2">
-                <Clock size={16} weight="bold" className="text-[#b85028]" />
-                <span>
-                  {new Date(activeActivityModal.startDate).toLocaleString()}
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <MapPin size={16} weight="fill" className="text-[#486b52]" />
-                <span>{activeActivityModal.town?.name || 'Local'} Hub</span>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2 pt-3 border-t border-[#e8e1dd]">
-              <button
-                type="button"
-                onClick={() => {
-                  const act = activeActivityModal;
-                  setActiveActivityModal(null);
-                  onViewDetails(act);
-                }}
-                className="flex-1 py-2 px-3 rounded-md bg-[#b85028] text-white hover:bg-[#a44520] font-bold text-xs shadow-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
-              >
-                <Eye size={16} weight="bold" />
-                <span>Details</span>
-              </button>
-
-              {canWrite && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    const act = activeActivityModal;
-                    setActiveActivityModal(null);
-                    onEditActivity(act);
-                  }}
-                  className="py-2 px-3 rounded-md bg-[#faf2ee] border border-[#e8e1dd] text-[#57423b] hover:text-[#1e1b19] font-bold text-xs transition-colors cursor-pointer flex items-center gap-1"
-                >
-                  <PencilSimple size={15} weight="bold" />
-                  <span>Edit</span>
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+          );
+        })()}
     </div>
   );
 };

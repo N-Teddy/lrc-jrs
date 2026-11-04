@@ -224,11 +224,11 @@ export const ActivityTableView: React.FC<ActivityTableViewProps> = ({
                 >
                   {/* Activity & Agenda */}
                   <td className="py-3.5 px-4">
-                    <div className="flex items-start gap-3">
-                      <div className="w-9 h-9 rounded-xl bg-[#faf2ee] border border-[#e8e1dd] flex items-center justify-center text-[#b85028] mt-0.5 shrink-0 shadow-2xs">
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-md bg-[#faf2ee] border border-[#e8e1dd] flex items-center justify-center text-[#b85028] shrink-0 shadow-2xs">
                         <TypeIcon size={18} weight="duotone" />
                       </div>
-                      <div className="flex flex-col min-w-0 max-w-sm">
+                      <div className="flex flex-col justify-center min-w-0 max-w-sm">
                         <button
                           type="button"
                           onClick={() => onViewDetails(activity)}
@@ -270,7 +270,7 @@ export const ActivityTableView: React.FC<ActivityTableViewProps> = ({
                   {/* Type */}
                   <td className="py-3.5 px-3">
                     <span
-                      className={`inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-bold border ${typeConfig.badgeBg} ${typeConfig.badgeText} ${typeConfig.badgeBorder}`}
+                      className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold border ${typeConfig.badgeBg} ${typeConfig.badgeText} ${typeConfig.badgeBorder}`}
                     >
                       {typeConfig.label}
                     </span>
@@ -303,7 +303,7 @@ export const ActivityTableView: React.FC<ActivityTableViewProps> = ({
                   <td className="py-3.5 px-3">
                     <div className="flex flex-col gap-1 items-start">
                       <span
-                        className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-bold border ${statusConfig.badgeBg} ${statusConfig.badgeText} ${statusConfig.badgeBorder}`}
+                        className={`inline-flex items-center gap-1.5 px-1.5 py-0.5 rounded text-[10px] font-semibold border ${statusConfig.badgeBg} ${statusConfig.badgeText} ${statusConfig.badgeBorder}`}
                       >
                         <span
                           className={`w-1.5 h-1.5 rounded-full ${statusConfig.dotColor} ${

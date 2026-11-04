@@ -6,11 +6,11 @@ import {
 import { ActivityStatus, type IActivity } from '@jrs/shared';
 import {
   ArrowCounterClockwise,
+  ArrowRight,
   Bell,
   Buildings,
   CalendarBlank,
-  Eye,
-  MapPin,
+  Clock,
   PencilSimple,
   Plus,
   UserCheck,
@@ -191,11 +191,12 @@ export const ActivityCardGridView: React.FC<ActivityCardGridViewProps> = ({
           return (
             <div
               key={activity.id}
-              className="bg-white rounded-md border border-[#e8e1dd] hover:border-[#b85028]/40 hover:shadow-md transition-all duration-200 p-4 flex flex-col justify-between gap-3 group"
+              onClick={() => onViewDetails(activity)}
+              className="bg-white rounded-md border border-[#e8e1dd] hover:border-[#b85028]/40 hover:shadow-md transition-all duration-200 p-4 flex flex-col justify-between gap-3 group cursor-pointer"
             >
               {/* Header: Type, Status & Dropdown */}
               <div className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-1.5 min-w-0">
+                <div className="flex items-center gap-1.5 min-w-0 flex-wrap">
                   <span
                     className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold border truncate ${typeConfig.badgeBg} ${typeConfig.badgeText} ${typeConfig.badgeBorder}`}
                   >
@@ -244,29 +245,31 @@ export const ActivityCardGridView: React.FC<ActivityCardGridViewProps> = ({
                   ) : null}
                 </div>
 
-                <ActivityActionMenu
-                  activity={activity}
-                  isOpen={openMenuId === activity.id}
-                  onToggle={() =>
-                    setOpenMenuId(
-                      openMenuId === activity.id ? null : activity.id,
-                    )
-                  }
-                  onClose={() => setOpenMenuId(null)}
-                  onViewDetails={onViewDetails}
-                  onViewPreparation={onViewPreparation}
-                  onEditActivity={onEditActivity}
-                  onViewHistory={onViewHistory}
-                  onCancelActivity={handleCancelActivity}
-                  onUndoCancelActivity={handleUndoCancel}
-                  onDeleteActivity={onDeleteActivity}
-                  isPrivileged={isPrivileged}
-                />
+                <div onClick={(e) => e.stopPropagation()}>
+                  <ActivityActionMenu
+                    activity={activity}
+                    isOpen={openMenuId === activity.id}
+                    onToggle={() =>
+                      setOpenMenuId(
+                        openMenuId === activity.id ? null : activity.id,
+                      )
+                    }
+                    onClose={() => setOpenMenuId(null)}
+                    onViewDetails={onViewDetails}
+                    onViewPreparation={onViewPreparation}
+                    onEditActivity={onEditActivity}
+                    onViewHistory={onViewHistory}
+                    onCancelActivity={handleCancelActivity}
+                    onUndoCancelActivity={handleUndoCancel}
+                    onDeleteActivity={onDeleteActivity}
+                    isPrivileged={isPrivileged}
+                  />
+                </div>
               </div>
 
               {/* Title & Metadata */}
-              <div className="flex flex-col gap-1.5">
-                <h3 className="font-bold text-sm text-[#1e1b19] group-hover:text-[#b85028] transition-colors leading-snug line-clamp-1">
+              <div className="flex flex-col gap-2">
+                <h3 className="font-bold text-sm text-[#1e1b19] group-hover:text-[#b85028] transition-colors leading-snug line-clamp-2">
                   {activity.title}
                 </h3>
 
@@ -298,94 +301,79 @@ export const ActivityCardGridView: React.FC<ActivityCardGridViewProps> = ({
                     </div>
                   )}
 
-                <div className="flex flex-col gap-1 text-[11px] text-[#57423b]">
-                  <div className="flex items-center gap-1.5 truncate">
-                    <CalendarBlank
-                      size={13}
-                      weight="bold"
-                      className="text-[#b85028] shrink-0"
-                    />
-                    <span className="font-semibold text-[#1e1b19]">
-                      {dateInfo.dateRange}
-                    </span>
-                    <span className="text-[#8a726a]">
-                      · {dateInfo.timeRange}
-                    </span>
-                  </div>
-
-                  {activity.locationVenue ? (
-                    <div className="flex items-center gap-1.5 truncate text-[#8a726a]">
-                      <MapPin
-                        size={13}
-                        weight="fill"
-                        className="text-[#486b52] shrink-0"
-                      />
-                      <span className="truncate">{activity.locationVenue}</span>
-                    </div>
-                  ) : !isHostTown ? (
-                    <div className="flex items-center gap-1.5 truncate text-[#8a726a]">
-                      <MapPin
-                        size={13}
-                        weight="fill"
-                        className="text-[#486b52] shrink-0"
-                      />
-                      <span className="truncate">
-                        {activity.hostTown?.name || activity.town?.name} Hub
-                      </span>
-                    </div>
-                  ) : null}
-                </div>
-
-                {/* Turnout Pill - Clickable to open Activity Details */}
-                <button
-                  type="button"
-                  onClick={() => onViewDetails(activity)}
-                  className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-md bg-[#faf6f4] hover:bg-[#f4ede9] border border-[#f2ebe7] hover:border-[#b85028]/30 text-[11px] mt-0.5 cursor-pointer transition-colors text-left"
-                  title="Click to view full activity & attendance details"
-                >
-                  <div className="flex items-center gap-1.5">
-                    <UserCheck
-                      size={14}
-                      weight="bold"
-                      className="text-[#486b52]"
-                    />
-                    <span className="font-bold text-[#1e1b19]">
-                      {turnoutStats.total > 0
-                        ? `${turnoutStats.total} Attendees`
-                        : 'Attendance Pending'}
-                    </span>
-                  </div>
-                  <span className="text-[10px] text-[#8a726a]">
-                    {turnoutStats.total > 0
-                      ? `${turnoutStats.members} mbrs · ${turnoutStats.guests} gst`
-                      : 'Not recorded'}
+                <div className="flex items-center gap-1.5 text-xs text-[#57423b]">
+                  <CalendarBlank
+                    size={14}
+                    weight="bold"
+                    className="text-[#b85028] shrink-0"
+                  />
+                  <span className="font-semibold text-[#1e1b19]">
+                    {dateInfo.dateRange}
                   </span>
-                </button>
+                  <span className="text-[#d8cfca]">·</span>
+                  <Clock size={13} className="text-[#8a726a] shrink-0" />
+                  <span className="text-[#8a726a]">{dateInfo.timeRange}</span>
+                </div>
               </div>
 
               {/* Bottom Actions Footer */}
-              <div className="flex items-center gap-1.5 pt-2 border-t border-[#f4ece9]">
-                <button
-                  type="button"
-                  onClick={() => onViewDetails(activity)}
-                  className="flex-1 h-8 px-2.5 rounded-md bg-[#b85028] text-white hover:bg-[#a44520] font-bold text-xs shadow-2xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
-                >
-                  <Eye size={14} weight="bold" />
-                  <span className="truncate">
-                    {t('activities:card.details', 'Details')}
-                  </span>
-                </button>
+              <div className="flex items-center justify-between pt-2.5 border-t border-[#f4ece9] mt-auto gap-2">
+                <div className="flex items-center gap-1.5 text-xs min-w-0">
+                  <UserCheck
+                    size={15}
+                    weight="bold"
+                    className={
+                      turnoutStats.total > 0
+                        ? 'text-[#486b52] shrink-0'
+                        : 'text-[#8a726a] shrink-0'
+                    }
+                  />
+                  {turnoutStats.total > 0 ? (
+                    <span className="text-[11px] font-medium text-[#1e1b19] truncate">
+                      <span className="font-bold">{turnoutStats.total}</span>{' '}
+                      {turnoutStats.total === 1
+                        ? t('activities:card.attendee', 'Attendee')
+                        : t('activities:card.attendees', 'Attendees')}
+                      <span className="text-[#8a726a] font-normal ml-1">
+                        ({turnoutStats.members}m · {turnoutStats.guests}g)
+                      </span>
+                    </span>
+                  ) : (
+                    <span className="text-[11px] text-[#8a726a] truncate">
+                      {t(
+                        'activities:card.attendancePending',
+                        'Attendance Pending',
+                      )}
+                    </span>
+                  )}
+                </div>
 
-                {canWrite && (
+                <div className="flex items-center gap-1 shrink-0">
+                  {canWrite && (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onEditActivity(activity);
+                      }}
+                      className="w-7 h-7 rounded text-[#8a726a] hover:text-[#1e1b19] hover:bg-[#faf2ee] flex items-center justify-center transition-colors cursor-pointer"
+                      title={t('common:edit', 'Edit')}
+                    >
+                      <PencilSimple size={14} weight="bold" />
+                    </button>
+                  )}
                   <button
                     type="button"
-                    onClick={() => onEditActivity(activity)}
-                    className="w-8 h-8 rounded-md bg-[#faf2ee] border border-[#e8e1dd] hover:bg-white text-[#57423b] hover:text-[#1e1b19] flex items-center justify-center transition-colors cursor-pointer shrink-0"
-                    title="Edit or Reschedule"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onViewDetails(activity);
+                    }}
+                    className="h-7 px-2.5 rounded bg-[#faf2ee] hover:bg-[#b85028] text-[#b85028] hover:text-white border border-[#e8d5cc] font-semibold text-xs transition-colors flex items-center gap-1 cursor-pointer"
                   >
-                    <PencilSimple size={14} weight="bold" />
+                    <span>{t('activities:card.details', 'Details')}</span>
+                    <ArrowRight size={12} weight="bold" />
                   </button>
-                )}
+                </div>
               </div>
             </div>
           );

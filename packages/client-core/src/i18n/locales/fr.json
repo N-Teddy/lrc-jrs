@@ -384,7 +384,24 @@
       "trackAttendance": "Pointer les Présences",
       "viewHistory": "Historique ({{count}})",
       "edit": "Modifier",
-      "delete": "Supprimer"
+      "delete": "Supprimer",
+      "attendancePending": "Présences en attente",
+      "attendees": "Participants",
+      "attendee": "Participant"
+    },
+    "calendar": {
+      "activitySingle": "Activité",
+      "activityPlural": "Activités",
+      "today": "Aujourd'hui",
+      "days": {
+        "sun": "Dim",
+        "mon": "Lun",
+        "tue": "Mar",
+        "wed": "Mer",
+        "thu": "Jeu",
+        "fri": "Ven",
+        "sat": "Sam"
+      }
     },
     "timingNotice": {
       "notStarted": "Cette activité n'a pas encore débuté. La prise des présences est verrouillée jusqu'à l'heure officielle de début.",
