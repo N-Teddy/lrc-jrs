@@ -2,13 +2,14 @@ import { useTranslation } from '@jrs/client-core';
 import type { ITown } from '@jrs/shared';
 import {
   ArrowRight,
-  ArrowsLeftRight,
   CalendarBlank,
   ChatCircleText,
 } from '@phosphor-icons/react';
 import type React from 'react';
+import emptyTransfersImg from '../../../assets/illustrations/empty-transfers.jpg';
 import {
   CardGridSkeleton,
+  EmptyState,
   PaginationControl,
   UserAvatar,
 } from '../../../components';
@@ -52,20 +53,15 @@ export const TransferCardGridView: React.FC<TransferCardGridViewProps> = ({
 
   if (transfers.length === 0) {
     return (
-      <div className="bg-white rounded-xl border border-[#e8e1dd] shadow-xs p-12 flex flex-col items-center justify-center text-center min-h-[320px]">
-        <div className="w-14 h-14 rounded-lg bg-[#faf2ee] border border-[#e8e1dd] flex items-center justify-center text-[#8a726a] mb-4">
-          <ArrowsLeftRight size={28} weight="duotone" />
-        </div>
-        <h3 className="text-base font-bold text-[#1e1b19] mb-1">
-          {t('transfers:table.noRecords', 'No Relocation Records Found')}
-        </h3>
-        <p className="text-xs text-[#8a726a] max-w-sm">
-          {t(
-            'transfers:table.noRecordsDesc',
-            'No member town transfers match the active search or filters.',
-          )}
-        </p>
-      </div>
+      <EmptyState
+        imageSrc={emptyTransfersImg}
+        imageAlt="No transfer records"
+        title={t('transfers:table.noRecords', 'No Relocation Records Found')}
+        description={t(
+          'transfers:table.noRecordsDesc',
+          'No member town transfers match the active search or filters.',
+        )}
+      />
     );
   }
 

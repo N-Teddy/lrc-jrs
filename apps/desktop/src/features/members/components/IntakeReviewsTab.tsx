@@ -22,7 +22,8 @@ import {
 } from '@phosphor-icons/react';
 import type React from 'react';
 import { useMemo, useState } from 'react';
-import { UserAvatar } from '../../../components';
+import emptyIntakeImg from '../../../assets/illustrations/empty-intake.jpg';
+import { EmptyState, UserAvatar } from '../../../components';
 import {
   calculateAge,
   formatCameroonPhone,
@@ -410,64 +411,50 @@ export const IntakeReviewsTab: React.FC<IntakeReviewsTabProps> = ({
         </div>
       ) : pendingMembers.length === 0 ? (
         /* Empty State: Zero pending reviews */
-        <div className="bg-white rounded-xl border border-[#e8e1dd] p-12 text-center flex flex-col items-center shadow-xs">
-          <div className="w-14 h-14 rounded-full bg-[#c2e9ca]/40 text-[#2c4e37] flex items-center justify-center mb-3.5 shadow-2xs">
-            <CheckCircle size={32} weight="fill" />
-          </div>
-          <h3 className="text-base font-bold text-[#1e1b19] mb-1">
-            {t(
-              'members:intake.allCaughtUpTitle',
-              'All Caught Up! No Submissions Pending Review',
-            )}
-          </h3>
-          <p className="text-xs text-[#8a726a] max-w-md mb-6 leading-relaxed">
-            {t('members:intake.allCaughtUpDesc', {
-              town: activeTownName,
-              defaultValue: `All prospective members who registered through your intake invitation links for ${activeTownName} have been processed and admitted into the community directory.`,
-            })}
-          </p>
-          {onOpenIntakeLinksModal && (
-            <button
-              type="button"
-              onClick={onOpenIntakeLinksModal}
-              className="px-4 py-2 rounded-md bg-[#faf2ee] hover:bg-[#f4ece9] text-xs font-bold text-[#57423b] border border-[#e8e1dd] transition-all cursor-pointer flex items-center gap-2 shadow-2xs"
-            >
-              <Link size={16} weight="bold" />
-              <span>
-                {t('members:intake.shareLinks', 'Share & Manage Intake Links')}
-              </span>
-            </button>
+        <EmptyState
+          imageSrc={emptyIntakeImg}
+          imageAlt="No pending submissions"
+          title={t(
+            'members:intake.allCaughtUpTitle',
+            'All Caught Up! No Submissions Pending Review',
           )}
-        </div>
+          description={t('members:intake.allCaughtUpDesc', {
+            town: activeTownName,
+            defaultValue: `All prospective members who registered through your intake invitation links for ${activeTownName} have been processed and admitted into the community directory.`,
+          })}
+          primaryAction={
+            onOpenIntakeLinksModal
+              ? {
+                  label: t(
+                    'members:intake.shareLinks',
+                    'Share & Manage Intake Links',
+                  ),
+                  icon: <Link size={16} weight="bold" />,
+                  onClick: onOpenIntakeLinksModal,
+                }
+              : undefined
+          }
+        />
       ) : filteredMembers.length === 0 ? (
         /* Empty State: Search filter has no matches */
-        <div className="bg-white rounded-xl border border-[#e8e1dd] p-10 text-center flex flex-col items-center shadow-xs">
-          <div className="w-12 h-12 rounded-lg bg-[#faf2ee] text-[#8a726a] flex items-center justify-center mb-3">
-            <MagnifyingGlass size={24} weight="bold" />
-          </div>
-          <h3 className="text-sm font-bold text-[#1e1b19] mb-1">
-            {t(
-              'members:intake.noMatchesTitle',
-              'No submissions matched your criteria',
-            )}
-          </h3>
-          <p className="text-xs text-[#8a726a] max-w-sm mb-4">
-            {t(
-              'members:intake.noMatchesDesc',
-              'Try adjusting your search query or reset the gender filter.',
-            )}
-          </p>
-          <button
-            type="button"
-            onClick={() => {
+        <EmptyState
+          icon={<MagnifyingGlass size={24} weight="bold" />}
+          title={t(
+            'members:intake.noMatchesTitle',
+            'No submissions matched your criteria',
+          )}
+          description={t(
+            'members:intake.noMatchesDesc',
+            'Try adjusting your search query or reset the gender filter.',
+          )}
+          secondaryAction={{
+            label: t('members:intake.clearFilters', 'Clear Filters'),
+            onClick: () => {
               setSearchQuery('');
               setGenderFilter('ALL');
-            }}
-            className="px-3.5 py-1.5 rounded-md bg-[#faf2ee] hover:bg-[#f4ece9] text-xs font-bold text-[#1e1b19] border border-[#e8e1dd] transition-colors cursor-pointer"
-          >
-            {t('members:intake.clearFilters', 'Clear Filters')}
-          </button>
-        </div>
+            },
+          }}
+        />
       ) : (
         /* Review Submissions Cards */
         <div className="flex flex-col gap-3.5">

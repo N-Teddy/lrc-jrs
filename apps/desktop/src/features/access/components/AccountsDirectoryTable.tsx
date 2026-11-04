@@ -10,12 +10,13 @@ import {
   Key,
   Phone,
   Prohibit,
-  ShieldCheck,
   User,
 } from '@phosphor-icons/react';
 import type React from 'react';
 import { useEffect, useRef, useState } from 'react';
+import emptyAccessSvg from '../../../assets/illustrations/empty-access.svg';
 import {
+  EmptyState,
   PaginationControl,
   TableSkeleton,
   UserAvatar,
@@ -101,19 +102,18 @@ export const AccountsDirectoryTable: React.FC<AccountsDirectoryTableProps> = ({
 
   if (members.length === 0) {
     return (
-      <div className="bg-white rounded-xl border border-[#e8e1dd] shadow-xs p-12 flex flex-col items-center justify-center text-center min-h-[360px]">
-        <div className="w-14 h-14 rounded-lg bg-[#faf2ee] border border-[#e8e1dd] flex items-center justify-center text-[#8a726a] mb-4">
-          <ShieldCheck size={28} weight="duotone" />
-        </div>
-        <h3 className="text-base font-bold text-[#1e1b19] mb-1">
-          {t('access:table.noAccounts') ||
-            'No accounts found matching criteria'}
-        </h3>
-        <p className="text-xs text-[#8a726a] max-w-sm">
-          Try clearing filters or search terms to inspect member portal
-          accounts.
-        </p>
-      </div>
+      <EmptyState
+        imageSrc={emptyAccessSvg}
+        imageAlt="No accounts found"
+        title={t(
+          'access:table.noAccounts',
+          'No accounts found matching criteria',
+        )}
+        description={t(
+          'access:table.noAccountsDesc',
+          'Try adjusting your role or status filter to see user accounts.',
+        )}
+      />
     );
   }
 
