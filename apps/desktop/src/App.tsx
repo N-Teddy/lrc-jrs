@@ -1,5 +1,5 @@
 import { CoreProviders, useTranslation } from '@jrs/client-core';
-import { ToastContainer } from './components';
+import { ErrorBoundary, ToastContainer } from './components';
 import {
   FirstTimeSetupScreen,
   ForgotPasswordScreen,
@@ -141,7 +141,7 @@ function AppContent() {
 
   return (
     <>
-      {renderScreenContent()}
+      <ErrorBoundary>{renderScreenContent()}</ErrorBoundary>
 
       <SessionTerminatedModal
         isOpen={isSessionTerminated}

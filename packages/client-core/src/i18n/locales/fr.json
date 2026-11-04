@@ -253,6 +253,14 @@
       "noRemoteRelease": "Aucune version en ligne trouvée. La compilation est peut-être en cours sur GitHub, ou vous êtes déjà à jour."
     },
     "reservedWorkspace": "Espace réservé initialisé",
+    "comingSoonTitle": "Tableau de Bord & Métriques en Construction",
+    "comingSoonBadge": "En cours de construction",
+    "comingSoonDesc": "Les bilans communautaires, tendances d'assiduité et indicateurs clés sont en cours d'assemblage pour cet espace.",
+    "quickActionsTitle": "Accès direct aux modules actifs",
+    "goToMembers": "Annuaire des membres",
+    "goToActivities": "Activités & Calendrier",
+    "goToIntake": "Fiches d'auto-saisie",
+    "goToDrive": "Coffre de documents",
     "pristineTitle": "Espace de travail prêt",
     "pristineDesc": "L'environnement pour le centre de {{hub}} est actif. Cette zone est l'espace dédié aux registres des jeunes, activités et notes.",
     "assigned": "votre centre assigné",
@@ -1137,5 +1145,18 @@
       "date": "Date : {{date}}",
       "activity": "Activité associée"
     }
+  },
+  "crash": {
+    "badge": "Erreur d'application",
+    "title": "Une erreur inattendue est survenue",
+    "description": "L'application a rencontré une erreur d'exécution. Vos données enregistrées restent en sécurité.",
+    "reload": "Redémarrer l'application",
+    "returnHome": "Retourner à la connexion",
+    "technicalDetails": "Diagnostic technique",
+    "hideDetails": "Masquer le diagnostic",
+    "copyDetails": "Copier les détails",
+    "copied": "Copié dans le presse-papiers",
+    "errorName": "Erreur",
+    "errorLocation": "Pile du composant"
   }
 }

@@ -254,6 +254,14 @@
       "noRemoteRelease": "No online release found. The build may still be compiling on GitHub, or you are already up to date."
     },
     "reservedWorkspace": "Reserved Workspace Initialized",
+    "comingSoonTitle": "Dashboard Analytics In Development",
+    "comingSoonBadge": "Still in Construction",
+    "comingSoonDesc": "Community summaries, attendance trends, and key performance metrics are currently being assembled for this workspace.",
+    "quickActionsTitle": "Quick Navigation to Active Modules",
+    "goToMembers": "Members Directory",
+    "goToActivities": "Activities & Calendar",
+    "goToIntake": "Intake Submissions",
+    "goToDrive": "Document Vault",
     "pristineTitle": "Workspace Ready",
     "pristineDesc": "The application shell for {{hub}} is active. This core viewport serves as the dedicated space for youth registries, activities, and notes.",
     "assigned": "your assigned",
@@ -1142,5 +1150,18 @@
       "date": "Date: {{date}}",
       "activity": "Linked Activity"
     }
+  },
+  "crash": {
+    "badge": "Application Error",
+    "title": "Something went wrong",
+    "description": "The application encountered an unexpected runtime error. Your recorded data remains safe.",
+    "reload": "Reload Application",
+    "returnHome": "Return to Sign-In",
+    "technicalDetails": "Technical Diagnostics",
+    "hideDetails": "Hide Diagnostics",
+    "copyDetails": "Copy Diagnostics",
+    "copied": "Copied to clipboard",
+    "errorName": "Error",
+    "errorLocation": "Component Stack"
   }
 }

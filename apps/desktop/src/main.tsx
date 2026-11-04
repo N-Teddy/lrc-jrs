@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
+import { ErrorBoundary } from './components';
 import './index.css';
 
 // Ensure process.env and NODE_ENV are explicitly available in desktop runtime
@@ -16,6 +17,8 @@ if (typeof window !== 'undefined') {
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
-    <App />
+    <ErrorBoundary>
+      <App />
+    </ErrorBoundary>
   </React.StrictMode>,
 );
