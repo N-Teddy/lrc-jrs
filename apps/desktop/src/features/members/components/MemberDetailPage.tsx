@@ -1,10 +1,11 @@
 import {
+  useAuth,
   useMemberDetailQuery,
   useTownContext,
   useTownsQuery,
   useTranslation,
 } from '@jrs/client-core';
-import type { IUser } from '@jrs/shared';
+import { type IUser, UserRole } from '@jrs/shared';
 import {
   ArrowLeft,
   ArrowRight,
@@ -12,7 +13,7 @@ import {
   Buildings,
   CalendarCheck,
   Certificate,
-  ChatCircleText,
+  Check,
   CheckCircle,
   Copy,
   Crown,
@@ -25,9 +26,10 @@ import {
   Swap,
   Trash,
   User,
+  WhatsappLogo,
 } from '@phosphor-icons/react';
 import type React from 'react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { MemberDetailSkeleton, UserAvatar } from '../../../components';
 import { ChangeTownPcModal } from '../../access/components/ChangeTownPcModal';
 import {
@@ -59,6 +61,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
   initialTab,
 }) => {
   const { t } = useTranslation();
+  const { user } = useAuth();
   const { activeTown, canWrite } = useTownContext();
   const { data: member, isLoading, error } = useMemberDetailQuery(memberId);
   const { data: towns = [] } = useTownsQuery();
@@ -67,10 +70,31 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
     'identity' | 'transfers' | 'attendance' | 'access'
   >(initialTab ?? 'identity');
   const [copiedEmail, setCopiedEmail] = useState(false);
+  const [copiedPhone, setCopiedPhone] = useState(false);
   const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
   const [isChangePcOpen, setIsChangePcOpen] = useState(false);
 
   const townsMap = useMemo(() => new Map(towns.map((t) => [t.id, t])), [towns]);
+
+  const hasAppAccess = member?.account?.hasAppAccess ?? false;
+  const isRevoked = member?.account?.isAccessRevoked ?? false;
+
+  // Auto-switch away from access tab if member doesn't have app access
+  useEffect(() => {
+    if (!hasAppAccess && activeDetailTab === 'access') {
+      setActiveDetailTab('identity');
+    }
+  }, [hasAppAccess, activeDetailTab]);
+
+  // Evaluate permissions: AP has full access across all hubs;
+  // PC can only manage members currently residing in their own assigned hub.
+  const isAp = isCurrentUserAp || user?.role === UserRole.AP;
+  const memberTownId = member?.homeTownId || member?.homeTown?.id;
+  const userTownId = user?.homeTownId;
+  const isMemberInUserTown = Boolean(
+    memberTownId && userTownId && String(memberTownId) === String(userTownId),
+  );
+  const canManageMember = isAp || (isMemberInUserTown && canWrite);
 
   if (isLoading) {
     return <MemberDetailSkeleton />;
@@ -101,17 +125,25 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
 
   const age = calculateAge(member.dateOfBirth);
   const roleInfo = getRoleDisplayInfo(member.role);
-  const formattedPhone = formatCameroonPhone(member.phoneNumber);
+  const formattedPhone = formatCameroonPhone(member.phoneNumber, {
+    includeCountryCode: true,
+  });
   const cleanDigits = getCleanDigitsForWhatsApp(member.phoneNumber);
   const isEligibleJr = member.isJr ?? (age !== null && age >= 18 && age <= 30);
-  const hasAppAccess = member.account?.hasAppAccess ?? false;
-  const isRevoked = member.account?.isAccessRevoked ?? false;
 
   const handleCopyEmail = () => {
     if (member.email) {
       navigator.clipboard.writeText(member.email);
       setCopiedEmail(true);
       setTimeout(() => setCopiedEmail(false), 1500);
+    }
+  };
+
+  const handleCopyPhone = () => {
+    if (member.phoneNumber) {
+      navigator.clipboard.writeText(member.phoneNumber);
+      setCopiedPhone(true);
+      setTimeout(() => setCopiedPhone(false), 1500);
     }
   };
 
@@ -238,13 +270,13 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
               rel="noreferrer"
               className="flex items-center gap-2 px-3.5 py-2 rounded-md bg-[#c2e9ca] hover:bg-[#a9d0b2] text-[#2c4e37] text-xs font-bold transition-colors cursor-pointer shadow-2xs"
             >
-              <ChatCircleText size={18} weight="fill" />
+              <WhatsappLogo size={18} weight="fill" />
               <span>WhatsApp</span>
             </a>
           )}
 
           {/* Edit Profile */}
-          {canWrite && (
+          {canManageMember && (
             <button
               type="button"
               onClick={() => onEdit(member)}
@@ -256,7 +288,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
           )}
 
           {/* Transfer Hub */}
-          {canWrite && (
+          {canManageMember && (
             <button
               type="button"
               onClick={() => setIsTransferModalOpen(true)}
@@ -272,7 +304,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
           )}
 
           {/* Manage Access */}
-          {canWrite && (
+          {canManageMember && (
             <button
               type="button"
               onClick={() => onManageAccess(member)}
@@ -283,8 +315,8 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
             </button>
           )}
 
-          {/* Deactivate (AP Only & canWrite) */}
-          {canWrite && isCurrentUserAp && onDelete && (
+          {/* Deactivate (AP Only & canManageMember) */}
+          {canManageMember && isAp && onDelete && (
             <button
               type="button"
               onClick={() => onDelete(member)}
@@ -347,21 +379,23 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
           <span>{t('members:detail.tabAttendance')}</span>
         </button>
 
-        <button
-          type="button"
-          onClick={() => setActiveDetailTab('access')}
-          className={`flex items-center justify-center min-w-[140px] gap-2 px-4 py-2 rounded-md text-xs font-bold transition-all cursor-pointer ${
-            activeDetailTab === 'access'
-              ? 'bg-white text-[#b85028] shadow-xs border border-[#e8e1dd]'
-              : 'text-[#8a726a] hover:text-[#57423b] hover:bg-[#f4ece9] border border-transparent'
-          }`}
-        >
-          <ShieldCheck
-            size={18}
-            weight={activeDetailTab === 'access' ? 'fill' : 'regular'}
-          />
-          <span>Access & Account</span>
-        </button>
+        {hasAppAccess && (
+          <button
+            type="button"
+            onClick={() => setActiveDetailTab('access')}
+            className={`flex items-center justify-center min-w-[140px] gap-2 px-4 py-2 rounded-md text-xs font-bold transition-all cursor-pointer ${
+              activeDetailTab === 'access'
+                ? 'bg-white text-[#b85028] shadow-xs border border-[#e8e1dd]'
+                : 'text-[#8a726a] hover:text-[#57423b] hover:bg-[#f4ece9] border border-transparent'
+            }`}
+          >
+            <ShieldCheck
+              size={18}
+              weight={activeDetailTab === 'access' ? 'fill' : 'regular'}
+            />
+            <span>Access & Account</span>
+          </button>
+        )}
       </div>
 
       {/* 4. Tab 1: Personal Identity & Credentials */}
@@ -433,11 +467,46 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
 
                 <div className="p-3.5 rounded-lg bg-[#faf2ee] border border-[#e8e1dd] flex flex-col gap-1">
                   <span className="text-[#8a726a] font-medium">
-                    Phone (WhatsApp Line)
+                    {t('members:table.phone', 'Phone')}
                   </span>
-                  <span className="font-mono font-bold text-[#1e1b19] text-sm">
-                    {formattedPhone || '—'}
-                  </span>
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <span className="font-mono font-bold text-[#1e1b19] text-sm truncate">
+                        {formattedPhone || '—'}
+                      </span>
+                      {member.isWhatsappVerified && (
+                        <span
+                          className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-[#c2e9ca] text-[#2c4e37] border border-[#a9d0b2] shrink-0"
+                          title="WhatsApp"
+                        >
+                          <WhatsappLogo size={12} weight="fill" />
+                          <span>WhatsApp</span>
+                        </span>
+                      )}
+                    </div>
+                    {member.phoneNumber && (
+                      <button
+                        type="button"
+                        onClick={handleCopyPhone}
+                        className="text-[#8a726a] hover:text-[#b85028] transition-colors cursor-pointer shrink-0"
+                        title={
+                          copiedPhone
+                            ? t('common:copied', 'Copied!')
+                            : t('members:detail.copyPhone', 'Copy phone')
+                        }
+                      >
+                        {copiedPhone ? (
+                          <Check
+                            size={14}
+                            className="text-[#486b52]"
+                            weight="bold"
+                          />
+                        ) : (
+                          <Copy size={14} />
+                        )}
+                      </button>
+                    )}
+                  </div>
                 </div>
 
                 <div className="p-3.5 rounded-lg bg-[#faf2ee] border border-[#e8e1dd] flex flex-col gap-1">
@@ -464,18 +533,6 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
                     )}
                   </div>
                 </div>
-              </div>
-
-              {/* Transfer & Community Notes */}
-              <div className="p-4 rounded-lg bg-[#faf2ee] border border-[#e8e1dd] flex flex-col gap-2">
-                <span className="text-xs font-bold text-[#1e1b19]">
-                  Official Community Standing
-                </span>
-                <p className="text-xs text-[#57423b] leading-relaxed">
-                  Member registered in good standing under Inter-Hub Youth
-                  Community guidelines. Eligible for community circles, regional
-                  gatherings, and program cohorts.
-                </p>
               </div>
             </div>
           </div>
@@ -538,7 +595,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
                   </div>
                 </div>
 
-                {canWrite && (
+                {canManageMember && (
                   <button
                     type="button"
                     onClick={() => onManageAccess(member)}
@@ -586,7 +643,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
                 </div>
               </div>
 
-              {canWrite && (
+              {canManageMember && (
                 <button
                   type="button"
                   onClick={() => setIsTransferModalOpen(true)}
@@ -842,7 +899,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
       )}
 
       {/* 7. Tab 4: Account Access & Security */}
-      {activeDetailTab === 'access' && (
+      {hasAppAccess && activeDetailTab === 'access' && (
         <div className="flex flex-col gap-6 animate-in fade-in duration-200">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Account Credentials & Status */}
@@ -941,7 +998,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
                   </div>
                 </div>
 
-                {canWrite && (
+                {canManageMember && (
                   <div className="flex items-center gap-3 pt-3 border-t border-[#f4ece9]">
                     <button
                       type="button"
@@ -973,7 +1030,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
                         </p>
                       </div>
                     </div>
-                    {canWrite && (
+                    {canManageMember && (
                       <button
                         type="button"
                         onClick={() => setIsChangePcOpen(true)}

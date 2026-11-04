@@ -25,12 +25,13 @@ import {
   XCircle,
 } from '@phosphor-icons/react';
 import type React from 'react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import emptyAttendanceSvg from '../../../assets/illustrations/empty-attendance.svg';
 import {
   CustomSelect,
   DatePeriodFilter,
   EmptyState,
+  PaginationControl,
   type SelectOption,
 } from '../../../components';
 import { getActivityTypeConfig } from '../../activities/utils/activity-ui.utils';
@@ -39,6 +40,8 @@ import { getCleanDigitsForWhatsApp } from '../utils/member-ui.utils';
 interface MemberAttendanceHistoryTabProps {
   member: IUser;
 }
+
+const PAGE_SIZE = 10;
 
 function getEngagementConfig(level: MemberEngagementLevel) {
   switch (level) {
@@ -169,6 +172,9 @@ export const MemberAttendanceHistoryTab: React.FC<
   const [filterYear, setFilterYear] = useState<number | undefined>(undefined);
   const [filterMonth, setFilterMonth] = useState<number | undefined>(undefined);
 
+  // Pagination state
+  const [page, setPage] = useState(1);
+
   // Available years dynamically derived from history items
   const availableYears = useMemo(() => {
     const yearsSet = new Set<number>([2026, 2025, 2024]);
@@ -289,6 +295,20 @@ export const MemberAttendanceHistoryTab: React.FC<
     filterMonth,
   ]);
 
+  const totalPages = Math.ceil(filteredItems.length / PAGE_SIZE) || 1;
+
+  // Auto-clamp page if filter results decrease
+  useEffect(() => {
+    if (page > totalPages) {
+      setPage(1);
+    }
+  }, [page, totalPages]);
+
+  const paginatedItems = useMemo(() => {
+    const startIndex = (page - 1) * PAGE_SIZE;
+    return filteredItems.slice(startIndex, startIndex + PAGE_SIZE);
+  }, [filteredItems, page]);
+
   const hasActiveFilters =
     Boolean(searchQuery.trim()) ||
     statusFilter !== 'ALL' ||
@@ -304,6 +324,7 @@ export const MemberAttendanceHistoryTab: React.FC<
     setSelectedHubFilter(null);
     setFilterYear(undefined);
     setFilterMonth(undefined);
+    setPage(1);
   };
 
   const cleanDigits = getCleanDigitsForWhatsApp(member.phoneNumber);
@@ -571,14 +592,20 @@ export const MemberAttendanceHistoryTab: React.FC<
           <input
             type="text"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setPage(1);
+            }}
             placeholder="Search gathering by title, venue..."
             className="bg-transparent text-xs text-[#1e1b19] placeholder:text-[#8a726a] outline-none w-full pr-6"
           />
           {searchQuery && (
             <button
               type="button"
-              onClick={() => setSearchQuery('')}
+              onClick={() => {
+                setSearchQuery('');
+                setPage(1);
+              }}
               className="absolute right-2.5 text-[#8a726a] hover:text-[#1e1b19] p-0.5 cursor-pointer"
               title="Clear search"
             >
@@ -592,7 +619,10 @@ export const MemberAttendanceHistoryTab: React.FC<
           {/* Status CustomSelect Filter */}
           <CustomSelect<string>
             value={statusFilter}
-            onChange={(val) => setStatusFilter(val as 'ALL' | AttendanceStatus)}
+            onChange={(val) => {
+              setStatusFilter(val as 'ALL' | AttendanceStatus);
+              setPage(1);
+            }}
             options={statusOptions}
             size="md"
             className="w-36"
@@ -601,9 +631,10 @@ export const MemberAttendanceHistoryTab: React.FC<
           {/* Scope CustomSelect Filter */}
           <CustomSelect<string>
             value={scopeFilter}
-            onChange={(val) =>
-              setScopeFilter(val as 'ALL' | 'HOME' | 'EXTERNAL')
-            }
+            onChange={(val) => {
+              setScopeFilter(val as 'ALL' | 'HOME' | 'EXTERNAL');
+              setPage(1);
+            }}
             options={scopeOptions}
             size="md"
             className="w-36"
@@ -616,6 +647,7 @@ export const MemberAttendanceHistoryTab: React.FC<
             onPeriodChange={(y, m) => {
               setFilterYear(y);
               setFilterMonth(m);
+              setPage(1);
             }}
             availableYears={availableYears}
             size="md"
@@ -718,7 +750,7 @@ export const MemberAttendanceHistoryTab: React.FC<
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#f4ece9]">
-                {filteredItems.map((item: IMemberAttendanceHistoryItem) => {
+                {paginatedItems.map((item: IMemberAttendanceHistoryItem) => {
                   const typeConfig = getActivityTypeConfig(
                     item.activityType as ActivityType,
                   );
@@ -797,11 +829,8 @@ export const MemberAttendanceHistoryTab: React.FC<
                       <td className="py-4 px-6">
                         <div className="flex flex-col gap-1">
                           <div className="flex items-center gap-1.5">
-                            <span className="px-1.5 py-0.5 rounded bg-[#f4ece9] text-[#57423b] text-[10px] font-mono font-bold">
-                              {item.townCode}
-                            </span>
                             <span className="font-medium text-[#1e1b19]">
-                              {item.townName}
+                              {item.townName || item.townCode}
                             </span>
                             {item.isExternal && (
                               <span className="px-1.5 py-0.5 rounded-full bg-[#ffdbcf] text-[#812901] text-[9px] font-bold uppercase tracking-wider">
@@ -846,6 +875,23 @@ export const MemberAttendanceHistoryTab: React.FC<
                 })}
               </tbody>
             </table>
+          </div>
+        )}
+
+        {/* Attendance Pagination Footer */}
+        {filteredItems.length > 0 && (
+          <div className="p-4 bg-[#faf2ee]/70 border-t border-[#e8e1dd] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#8a726a]">
+            <div>
+              Showing {(page - 1) * PAGE_SIZE + 1} to{' '}
+              {Math.min(page * PAGE_SIZE, filteredItems.length)} of{' '}
+              {filteredItems.length} records
+            </div>
+            <PaginationControl
+              page={page}
+              totalPages={totalPages}
+              onPageChange={setPage}
+              variant="white"
+            />
           </div>
         )}
       </div>
