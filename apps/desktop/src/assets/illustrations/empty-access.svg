@@ -6,7 +6,7 @@
       <stop offset="60%" stop-color="#FAF2EE" stop-opacity="0.8"/>
       <stop offset="100%" stop-color="#FAF2EE" stop-opacity="0"/>
     </radialGradient>
-    
+
     <!-- Shield Gradient -->
     <linearGradient id="shieldGrad" x1="20%" y1="0%" x2="80%" y2="100%">
       <stop offset="0%" stop-color="#C85A30"/>
@@ -63,17 +63,17 @@
 
   <!-- Central Shield of Governance & Role Authority -->
   <g filter="url(#cardShadow)">
-    <path d="M185 82C185 82 225 80 248 95C248 152 228 198 185 224C142 198 122 152 122 95C145 80 185 82 185 82Z" 
-          fill="url(#shieldGrad)" 
-          stroke="#FFFFFF" 
+    <path d="M185 82C185 82 225 80 248 95C248 152 228 198 185 224C142 198 122 152 122 95C145 80 185 82 185 82Z"
+          fill="url(#shieldGrad)"
+          stroke="#FFFFFF"
           stroke-width="3"/>
-    
+
     <!-- Inner Shield Accent Line -->
-    <path d="M185 92C185 92 218 90 236 103C236 149 220 186 185 208C150 186 134 149 134 103C152 90 185 92 185 92Z" 
-          stroke="#FFB59C" 
-          stroke-width="1.5" 
+    <path d="M185 92C185 92 218 90 236 103C236 149 220 186 185 208C150 186 134 149 134 103C152 90 185 92 185 92Z"
+          stroke="#FFB59C"
+          stroke-width="1.5"
           stroke-dasharray="3 3"
-          fill="none" 
+          fill="none"
           opacity="0.7"/>
 
     <!-- Keyhole / Padlock Motif on Shield -->
@@ -102,3 +102,4 @@
   <circle cx="215" cy="245" r="4.5" fill="#C2E9CA"/>
   <circle cx="245" cy="120" r="3" fill="#E8E1DD"/>
 </svg>
+

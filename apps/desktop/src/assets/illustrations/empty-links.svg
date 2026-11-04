@@ -1,0 +1,98 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 240" fill="none">
+  <defs>
+    <!-- Background glow -->
+    <radialGradient id="lnk-glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FFDBCF" stop-opacity="0.5"/>
+      <stop offset="60%" stop-color="#FAF2EE" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#FAF2EE" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Card gradient -->
+    <linearGradient id="lnk-card-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="100%" stop-color="#FCFAF8"/>
+    </linearGradient>
+
+    <!-- Terracotta gradient -->
+    <linearGradient id="lnk-terra" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#B85028"/>
+      <stop offset="100%" stop-color="#983912"/>
+    </linearGradient>
+
+    <!-- Sage gradient -->
+    <linearGradient id="lnk-sage" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#486B52"/>
+      <stop offset="100%" stop-color="#2C4E37"/>
+    </linearGradient>
+
+    <!-- Drop Shadows -->
+    <filter id="lnk-shadow-main" x="-10%" y="-10%" width="125%" height="130%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#57423B" flood-opacity="0.12"/>
+    </filter>
+    <filter id="lnk-shadow-sub" x="-15%" y="-15%" width="135%" height="140%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#57423B" flood-opacity="0.08"/>
+    </filter>
+  </defs>
+
+  <!-- Ambient Glow -->
+  <ellipse cx="160" cy="120" rx="130" ry="90" fill="url(#lnk-glow)"/>
+
+  <!-- Floor shadow -->
+  <ellipse cx="160" cy="195" rx="100" ry="14" fill="#57423B" fill-opacity="0.04"/>
+
+  <!-- Main Link Card -->
+  <g transform="translate(75, 52)" filter="url(#lnk-shadow-main)">
+    <rect x="0" y="0" width="170" height="125" rx="18" fill="url(#lnk-card-bg)" stroke="#E8E1DD" stroke-width="1.5"/>
+
+    <!-- URL Bar Strip -->
+    <rect x="15" y="16" width="140" height="28" rx="8" fill="#FAF2EE" stroke="#E8E1DD" stroke-width="1"/>
+    <!-- Chain link icon in URL bar -->
+    <g transform="translate(26, 23)">
+      <path d="M4 8C3 7 3 5 4 4C5 3 7 3 8 4L10 6C11 7 11 9 10 10" stroke="#B85028" stroke-width="1.8" stroke-linecap="round"/>
+      <path d="M8 4L4 8" stroke="#B85028" stroke-width="1.8" stroke-linecap="round"/>
+      <path d="M8 4C9 5 9 7 8 8C7 9 5 9 4 8L2 6C1 5 1 3 2 2" stroke="#B85028" stroke-width="1.8" stroke-linecap="round"/>
+    </g>
+    <rect x="42" y="27" width="70" height="6" rx="3" fill="#1E1B19" fill-opacity="0.75"/>
+    <circle cx="140" cy="30" r="4" fill="#486B52"/>
+
+    <!-- Share Token representation -->
+    <g transform="translate(18, 58)">
+      <rect x="0" y="0" width="134" height="48" rx="10" fill="#FFFFFF" stroke="#E8E1DD" stroke-width="1"/>
+      <rect x="12" y="12" width="75" height="7" rx="3.5" fill="#1E1B19" fill-opacity="0.8"/>
+      <rect x="12" y="26" width="45" height="5" rx="2.5" fill="#8A726A" fill-opacity="0.5"/>
+      <!-- QR code mini preview -->
+      <rect x="98" y="10" width="24" height="28" rx="4" fill="#FAF2EE"/>
+      <rect x="103" y="15" width="6" height="6" fill="#1E1B19"/>
+      <rect x="111" y="15" width="6" height="6" fill="#1E1B19"/>
+      <rect x="103" y="23" width="6" height="6" fill="#1E1B19"/>
+      <rect x="111" y="23" width="6" height="6" fill="#B85028"/>
+    </g>
+  </g>
+
+  <!-- Floating Chain Link Badge Top-Right -->
+  <g transform="translate(215, 38)" filter="url(#lnk-shadow-sub)">
+    <circle cx="22" cy="22" r="22" fill="url(#lnk-terra)"/>
+    <g transform="translate(11, 11)" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round">
+      <path d="M13 9L15 7C17 5 17 2 15 0.5C13 -1 10 -1 8 0.5L6 2.5"/>
+      <path d="M9 13L7 15C5 17 2 17 0.5 15C-1 13 -1 10 0.5 8L2.5 6"/>
+      <path d="M6 16L16 6"/>
+    </g>
+  </g>
+
+  <!-- Floating Share Pill Bottom-Left -->
+  <g transform="translate(45, 145)" filter="url(#lnk-shadow-sub)">
+    <rect x="0" y="0" width="80" height="28" rx="14" fill="#FFFFFF" stroke="#E8E1DD" stroke-width="1.5"/>
+    <circle cx="14" cy="14" r="5" fill="#486B52"/>
+    <rect x="26" y="11" width="42" height="6" rx="3" fill="#1E1B19" fill-opacity="0.75"/>
+  </g>
+
+  <!-- Decorative Sparkles -->
+  <g transform="translate(50, 40)">
+    <path d="M0 5C2.5 5 5 2.5 5 0C5 2.5 7.5 5 10 5C7.5 5 5 7.5 5 10C5 7.5 2.5 5 0 5Z" fill="#B85028" fill-opacity="0.4"/>
+  </g>
+  <g transform="translate(265, 135)">
+    <path d="M0 6C3 6 6 3 6 0C6 3 9 6 12 6C9 6 6 9 6 12C6 9 3 6 0 6Z" fill="#486B52" fill-opacity="0.4"/>
+  </g>
+  <circle cx="255" cy="85" r="3" fill="#E2845E" fill-opacity="0.3"/>
+</svg>
+

@@ -21,6 +21,8 @@ import {
 import { openUrl } from '@tauri-apps/plugin-opener';
 import type React from 'react';
 import { useState } from 'react';
+import emptyLinksSvg from '../../../assets/illustrations/empty-links.svg';
+import { EmptyState } from '../../../components';
 
 interface IntakeLinksModalProps {
   isOpen: boolean;
@@ -504,22 +506,20 @@ export const IntakeLinksModal: React.FC<IntakeLinksModalProps> = ({
                   </span>
                 </div>
               ) : links.length === 0 ? (
-                <div className="py-12 text-center text-xs text-[#8a726a] flex flex-col items-center gap-2 border border-dashed border-[#e8e1dd] rounded-xl p-8">
-                  <Link size={32} className="text-[#8a726a]/50" />
-                  <p className="font-bold text-[#57423b]">
-                    {t(
-                      'members:intakeLinks.noLinksTitle',
-                      'No invitation links yet',
-                    )}
-                  </p>
-                  <p className="max-w-xs text-[#8a726a]">
-                    {t('members:intakeLinks.noLinksDesc', {
-                      town: activeTownName,
-                      defaultValue:
-                        'Click "Create New Link" above to generate a shareable member self-entry link.',
-                    })}
-                  </p>
-                </div>
+                <EmptyState
+                  size="sm"
+                  imageSrc={emptyLinksSvg}
+                  imageAlt="No invitation links"
+                  title={t(
+                    'members:intakeLinks.noLinksTitle',
+                    'No invitation links yet',
+                  )}
+                  description={t('members:intakeLinks.noLinksDesc', {
+                    town: activeTownName,
+                    defaultValue:
+                      'Click "Create New Link" above to generate a shareable member self-entry link.',
+                  })}
+                />
               ) : (
                 <div className="flex flex-col gap-3">
                   {links.map((link) => {

@@ -17,6 +17,7 @@ export interface EmptyStateProps {
   secondaryAction?: EmptyStateAction;
   className?: string;
   imageSize?: 'sm' | 'md' | 'lg';
+  size?: 'sm' | 'md' | 'lg';
 }
 
 export const EmptyState: React.FC<EmptyStateProps> = ({
@@ -28,21 +29,26 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
   primaryAction,
   secondaryAction,
   className = '',
-  imageSize = 'md',
+  imageSize,
+  size = 'md',
 }) => {
+  const resolvedSize = imageSize || size;
   const sizeClasses = {
     sm: 'w-24 h-24 sm:w-28 sm:h-28',
     md: 'w-36 h-36 sm:w-44 sm:h-44',
     lg: 'w-48 h-48 sm:w-56 sm:h-56',
   };
 
+  const containerPadding =
+    resolvedSize === 'sm' ? 'p-6 min-h-[220px]' : 'p-8 sm:p-12 min-h-[340px]';
+
   return (
     <div
-      className={`bg-white rounded-xl border border-[#e8e1dd] shadow-xs p-8 sm:p-12 flex flex-col items-center justify-center text-center min-h-[340px] animate-in fade-in duration-200 ${className}`}
+      className={`bg-white rounded-xl border border-[#e8e1dd] shadow-xs flex flex-col items-center justify-center text-center animate-in fade-in duration-200 ${containerPadding} ${className}`}
     >
       {imageSrc ? (
         <div
-          className={`relative mb-4 flex items-center justify-center overflow-hidden rounded-2xl bg-[#faf2ee]/70 p-2 ${sizeClasses[imageSize]}`}
+          className={`relative mb-4 flex items-center justify-center overflow-hidden rounded-2xl bg-[#faf2ee]/70 p-2 ${sizeClasses[resolvedSize]}`}
         >
           <img
             src={imageSrc}

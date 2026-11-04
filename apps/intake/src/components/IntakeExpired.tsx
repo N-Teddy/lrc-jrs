@@ -1,10 +1,7 @@
 import type { IRegistrationLinkPublicInfo } from '@jrs/shared';
-import {
-  ChatTeardropDots,
-  HourglassMedium,
-  MapPin,
-} from '@phosphor-icons/react';
+import { ChatTeardropDots, MapPin } from '@phosphor-icons/react';
 import React from 'react';
+import emptyExpiredLinkSvg from '../assets/empty-expired-link.svg';
 import { useTranslation } from '../i18n';
 
 interface IntakeExpiredProps {
@@ -23,9 +20,13 @@ export const IntakeExpired: React.FC<IntakeExpiredProps> = ({
       <div className="relative overflow-hidden bg-white rounded-[28px] border border-white px-5 py-7 text-center shadow-[0_20px_60px_rgba(67,48,39,0.12)] sm:px-8 sm:py-9">
         <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-amber-50 to-transparent" />
         <div className="relative">
-          {/* Icon */}
-          <div className="w-16 h-16 mx-auto rounded-2xl bg-amber-100 border border-amber-200 flex items-center justify-center text-amber-800 mb-5 shadow-sm">
-            <HourglassMedium weight="duotone" className="w-7 h-7" />
+          {/* Illustration */}
+          <div className="w-36 h-28 mx-auto mb-3 flex items-center justify-center">
+            <img
+              src={emptyExpiredLinkSvg}
+              alt={t('expired.title')}
+              className="w-full h-full object-contain"
+            />
           </div>
 
           <h2 className="text-2xl sm:text-3xl font-extrabold text-[#1e1b19] mb-2 tracking-tight text-balance">

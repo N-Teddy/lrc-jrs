@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 200" fill="none">
+  <defs>
+    <!-- Background Glow -->
+    <radialGradient id="exp-glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FFDBCF" stop-opacity="0.6"/>
+      <stop offset="60%" stop-color="#FAF2EE" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#FAF2EE" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Terracotta Gradient -->
+    <linearGradient id="exp-terra" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#B85028"/>
+      <stop offset="100%" stop-color="#983912"/>
+    </linearGradient>
+
+    <!-- Warm Amber Gradient -->
+    <linearGradient id="exp-amber" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E2845E"/>
+      <stop offset="100%" stop-color="#C86D43"/>
+    </linearGradient>
+
+    <!-- Shadow -->
+    <filter id="exp-shadow" x="-15%" y="-15%" width="130%" height="135%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#57423B" flood-opacity="0.12"/>
+    </filter>
+  </defs>
+
+  <!-- Ambient Glow -->
+  <ellipse cx="140" cy="100" rx="120" ry="75" fill="url(#exp-glow)"/>
+
+  <!-- Base Shadow -->
+  <ellipse cx="140" cy="165" rx="80" ry="12" fill="#57423B" fill-opacity="0.05"/>
+
+  <!-- Center Card -->
+  <g transform="translate(65, 30)" filter="url(#exp-shadow)">
+    <rect x="0" y="0" width="150" height="120" rx="20" fill="#FFFFFF" stroke="#E8E1DD" stroke-width="1.5"/>
+
+    <!-- Soft header background -->
+    <path d="M0 20C0 8.95431 8.95431 0 20 0H130C141.046 0 150 8.95431 150 20V32H0V20Z" fill="#FAF2EE"/>
+
+    <!-- Central Hourglass / Expired Time Dial -->
+    <g transform="translate(75, 68)">
+      <!-- Circle backdrop -->
+      <circle cx="0" cy="0" r="28" fill="#FFF8F5" stroke="#FFDBCF" stroke-width="1.5"/>
+
+      <!-- Modern Stylized Hourglass -->
+      <path d="M-10 -16H10M-10 16H10" stroke="#983912" stroke-width="2.5" stroke-linecap="round"/>
+      <path d="M-8 -15L8 15M8 -15L-8 15" stroke="#E8E1DD" stroke-width="1.5"/>
+      <path d="M-7 -15C-7 -6 7 -6 7 -15ZM7 15C7 6 -7 6 -7 15Z" fill="url(#exp-terra)"/>
+
+      <!-- Sand trickling dot -->
+      <circle cx="0" cy="0" r="1.5" fill="#E2845E"/>
+    </g>
+
+    <!-- Disconnected Link / Token Badges -->
+    <g transform="translate(22, 62)">
+      <circle cx="10" cy="10" r="10" fill="#FAF2EE" stroke="#E8E1DD" stroke-width="1"/>
+      <path d="M7 10L13 10" stroke="#8A726A" stroke-width="1.5" stroke-linecap="round"/>
+    </g>
+    <g transform="translate(108, 62)">
+      <circle cx="10" cy="10" r="10" fill="#FAF2EE" stroke="#E8E1DD" stroke-width="1"/>
+      <path d="M7 10L13 10" stroke="#8A726A" stroke-width="1.5" stroke-linecap="round"/>
+    </g>
+
+    <!-- Bottom status bar -->
+    <rect x="35" y="102" width="80" height="6" rx="3" fill="#E8E1DD"/>
+  </g>
+
+  <!-- Floating Badge: Unlinked Chain Symbol -->
+  <g transform="translate(195, 32)" filter="url(#exp-shadow)">
+    <circle cx="18" cy="18" r="18" fill="url(#exp-amber)"/>
+    <g transform="translate(10, 10)" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round">
+      <path d="M4 12L2 14C0.5 15.5 0.5 17.5 2 19C3.5 20.5 5.5 20.5 7 19L9 17"/>
+      <path d="M12 4L14 2C15.5 0.5 17.5 0.5 19 2C20.5 3.5 20.5 5.5 19 7L17 9"/>
+      <line x1="6" y1="6" x2="14" y2="14" stroke-dasharray="2 2"/>
+    </g>
+  </g>
+
+  <!-- Decorative Sparkles -->
+  <g transform="translate(45, 35)">
+    <path d="M0 5C2.5 5 5 2.5 5 0C5 2.5 7.5 5 10 5C7.5 5 5 7.5 5 10C5 7.5 2.5 5 0 5Z" fill="#B85028" fill-opacity="0.4"/>
+  </g>
+  <g transform="translate(225, 135)">
+    <path d="M0 5C2.5 5 5 2.5 5 0C5 2.5 7.5 5 10 5C7.5 5 5 7.5 5 10C5 7.5 2.5 5 0 5Z" fill="#E2845E" fill-opacity="0.5"/>
+  </g>
+  <circle cx="48" cy="130" r="3" fill="#8A726A" fill-opacity="0.25"/>
+</svg>
+

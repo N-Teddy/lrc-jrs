@@ -7,7 +7,6 @@ import {
 import { calculateAge, type IUser } from '@jrs/shared';
 import {
   Calendar,
-  CheckCircle,
   Clock,
   PencilSimple,
   Phone,
@@ -18,7 +17,8 @@ import {
 } from '@phosphor-icons/react';
 import type React from 'react';
 import { useState } from 'react';
-import { UserAvatar } from '../../../components';
+import emptyIntakeJpg from '../../../assets/illustrations/empty-intake.jpg';
+import { EmptyState, UserAvatar } from '../../../components';
 import { formatCameroonPhone } from '../utils/member-ui.utils';
 import { EditApproveIntakeModal } from './EditApproveIntakeModal';
 
@@ -175,25 +175,19 @@ export const PendingIntakeReviewsModal: React.FC<
               </span>
             </div>
           ) : pendingMembers.length === 0 ? (
-            <div className="py-14 text-center text-xs text-[#8a726a] flex flex-col items-center gap-3 border border-dashed border-[#e8e1dd] rounded-xl p-8 bg-[#fdfcfb]">
-              <div className="w-12 h-12 rounded-full bg-[#c2e9ca]/40 text-[#2c4e37] flex items-center justify-center">
-                <CheckCircle size={28} weight="fill" />
-              </div>
-              <div className="space-y-1">
-                <p className="text-sm font-bold text-[#1e1b19]">
-                  {t(
-                    'members:intake.allCaughtUpTitle',
-                    'No Submissions Pending Review',
-                  )}
-                </p>
-                <p className="text-[#8a726a] max-w-sm">
-                  {t('members:intake.allCaughtUpDesc', {
-                    town: activeTownName,
-                    defaultValue: `All prospective members who registered through your intake invitation links for ${activeTownName} have been processed and admitted into the community directory.`,
-                  })}
-                </p>
-              </div>
-            </div>
+            <EmptyState
+              size="sm"
+              imageSrc={emptyIntakeJpg}
+              imageAlt="No pending submissions"
+              title={t(
+                'members:intake.allCaughtUpTitle',
+                'No Submissions Pending Review',
+              )}
+              description={t('members:intake.allCaughtUpDesc', {
+                town: activeTownName,
+                defaultValue: `All prospective members who registered through your intake invitation links for ${activeTownName} have been processed and admitted into the community directory.`,
+              })}
+            />
           ) : (
             <div className="flex flex-col gap-3">
               {pendingMembers.map((member) => {

@@ -1,0 +1,121 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 240" fill="none">
+  <defs>
+    <!-- Background glow -->
+    <radialGradient id="rem-glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FFDBCF" stop-opacity="0.45"/>
+      <stop offset="60%" stop-color="#FAF2EE" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#FAF2EE" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Card gradient -->
+    <linearGradient id="rem-card-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="100%" stop-color="#FCFAF8"/>
+    </linearGradient>
+
+    <!-- Terracotta gradient -->
+    <linearGradient id="rem-terra" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#B85028"/>
+      <stop offset="100%" stop-color="#983912"/>
+    </linearGradient>
+
+    <!-- Sage gradient -->
+    <linearGradient id="rem-sage" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#486B52"/>
+      <stop offset="100%" stop-color="#2C4E37"/>
+    </linearGradient>
+
+    <!-- Drop Shadows -->
+    <filter id="rem-shadow-main" x="-10%" y="-10%" width="125%" height="130%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#57423B" flood-opacity="0.12"/>
+    </filter>
+    <filter id="rem-shadow-sub" x="-15%" y="-15%" width="135%" height="140%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#57423B" flood-opacity="0.08"/>
+    </filter>
+  </defs>
+
+  <!-- Ambient Glow -->
+  <ellipse cx="160" cy="120" rx="130" ry="90" fill="url(#rem-glow)"/>
+
+  <!-- Subtle floor shadow -->
+  <ellipse cx="160" cy="195" rx="100" ry="14" fill="#57423B" fill-opacity="0.04"/>
+
+  <!-- Back Layer: Checklist Notepad Sheet -->
+  <g transform="rotate(5 180 115)" filter="url(#rem-shadow-sub)">
+    <rect x="110" y="45" width="125" height="135" rx="14" fill="#FFFFFF" stroke="#E8E1DD" stroke-width="1.5"/>
+    <!-- Top binder loops -->
+    <rect x="130" y="38" width="6" height="14" rx="3" fill="#8A726A" fill-opacity="0.3"/>
+    <rect x="155" y="38" width="6" height="14" rx="3" fill="#8A726A" fill-opacity="0.3"/>
+    <rect x="180" y="38" width="6" height="14" rx="3" fill="#8A726A" fill-opacity="0.3"/>
+    <rect x="205" y="38" width="6" height="14" rx="3" fill="#8A726A" fill-opacity="0.3"/>
+
+    <!-- Checklist items inside sheet -->
+    <g transform="translate(126, 65)">
+      <circle cx="8" cy="8" r="7" fill="#C2E9CA" fill-opacity="0.6"/>
+      <path d="M5.5 8L7.5 10L11 6" stroke="#2C4E37" stroke-width="1.5" stroke-linecap="round"/>
+      <rect x="22" y="5" width="65" height="6" rx="3" fill="#1E1B19" fill-opacity="0.6"/>
+
+      <circle cx="8" cy="28" r="7" fill="#FAF2EE" stroke="#E8E1DD" stroke-width="1.5"/>
+      <rect x="22" y="25" width="55" height="6" rx="3" fill="#8A726A" fill-opacity="0.4"/>
+
+      <circle cx="8" cy="48" r="7" fill="#FAF2EE" stroke="#E8E1DD" stroke-width="1.5"/>
+      <rect x="22" y="45" width="70" height="6" rx="3" fill="#8A726A" fill-opacity="0.4"/>
+
+      <circle cx="8" cy="68" r="7" fill="#FAF2EE" stroke="#E8E1DD" stroke-width="1.5"/>
+      <rect x="22" y="65" width="45" height="6" rx="3" fill="#8A726A" fill-opacity="0.4"/>
+    </g>
+  </g>
+
+  <!-- Front Layer: Notification Chime / Modern Alert Bell & Schedule Capsule -->
+  <g transform="translate(60, 52)" filter="url(#rem-shadow-main)">
+    <rect x="0" y="0" width="125" height="125" rx="18" fill="url(#rem-card-bg)" stroke="#E8E1DD" stroke-width="1.5"/>
+
+    <!-- Circle badge behind bell -->
+    <circle cx="62.5" cy="55" r="32" fill="#FAF2EE"/>
+
+    <!-- Modern Secular Chime Bell Icon in Terracotta -->
+    <g transform="translate(42.5, 34)">
+      <!-- Bell top loop -->
+      <path d="M17 5C17 3.34 18.34 2 20 2C21.66 2 23 3.34 23 5" stroke="#983912" stroke-width="2.5" stroke-linecap="round"/>
+      <!-- Bell body -->
+      <path d="M8 30C10 30 11 25 11 18C11 13 15 9 20 9C25 9 29 13 29 18C29 25 30 30 32 30H8Z" fill="url(#rem-terra)"/>
+      <!-- Bell bottom rim -->
+      <rect x="6" y="28" width="28" height="4" rx="2" fill="#983912"/>
+      <!-- Bell clapper -->
+      <path d="M17 32C17 33.66 18.34 35 20 35C21.66 35 23 33.66 23 32H17Z" fill="#E2845E"/>
+    </g>
+
+    <!-- Schedule Status Pill in Card Footer -->
+    <g transform="translate(14, 94)">
+      <rect x="0" y="0" width="97" height="18" rx="9" fill="#F4ECE9"/>
+      <circle cx="10" cy="9" r="4" fill="#B85028"/>
+      <rect x="20" y="6.5" width="62" height="5" rx="2.5" fill="#1E1B19" fill-opacity="0.75"/>
+    </g>
+  </g>
+
+  <!-- Floating Alert Chime Sound Waves -->
+  <g transform="translate(180, 58)">
+    <path d="M10 8C14 12 14 18 10 22" stroke="#E2845E" stroke-width="2.5" stroke-linecap="round"/>
+    <path d="M17 3C24 9 24 27 17 33" stroke="#B85028" stroke-width="2.5" stroke-linecap="round" stroke-opacity="0.6"/>
+  </g>
+
+  <!-- Floating Clock Indicator Pill -->
+  <g transform="translate(195, 140)" filter="url(#rem-shadow-sub)">
+    <rect x="0" y="0" width="75" height="30" rx="15" fill="#FFFFFF" stroke="#E8E1DD" stroke-width="1.5"/>
+    <!-- Mini clock -->
+    <circle cx="15" cy="15" r="7" stroke="#486B52" stroke-width="1.5" fill="#C2E9CA" fill-opacity="0.3"/>
+    <path d="M15 11.5V15L17.5 16.5" stroke="#2C4E37" stroke-width="1.5" stroke-linecap="round"/>
+    <rect x="28" y="12" width="35" height="6" rx="3" fill="#1E1B19" fill-opacity="0.7"/>
+  </g>
+
+  <!-- Decorative Sparkles & Dots -->
+  <g transform="translate(48, 40)">
+    <path d="M0 5C2.5 5 5 2.5 5 0C5 2.5 7.5 5 10 5C7.5 5 5 7.5 5 10C5 7.5 2.5 5 0 5Z" fill="#B85028" fill-opacity="0.4"/>
+  </g>
+  <g transform="translate(260, 110)">
+    <path d="M0 6C3 6 6 3 6 0C6 3 9 6 12 6C9 6 6 9 6 12C6 9 3 6 0 6Z" fill="#486B52" fill-opacity="0.4"/>
+  </g>
+  <circle cx="55" cy="170" r="3" fill="#E2845E" fill-opacity="0.3"/>
+  <circle cx="270" cy="70" r="2.5" fill="#B85028" fill-opacity="0.3"/>
+</svg>
+

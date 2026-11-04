@@ -12,7 +12,6 @@ import { ActivityStatus, ActivityType, type IChecklistItem } from '@jrs/shared';
 import {
   ArrowRight,
   Bell,
-  CalendarCheck,
   Check,
   ClockCountdown,
   Lightning,
@@ -24,6 +23,8 @@ import {
 } from '@phosphor-icons/react';
 import type React from 'react';
 import { useEffect, useState } from 'react';
+import emptyRemindersSvg from '../../../assets/illustrations/empty-reminders.svg';
+import { EmptyState } from '../../../components';
 import {
   formatActivityDate,
   getActivityTypeConfig,
@@ -308,7 +309,7 @@ export const ActivityRemindersTab: React.FC<ActivityRemindersTabProps> = ({
 
           <span className="text-xs font-bold text-[#8a726a] px-2.5 py-1 bg-white border border-[#e8e1dd] rounded-md">
             {upcomingActivities.length}{' '}
-            {t('activities:table.activity', 'Scheduled Gatherings')}
+            {t('activities:table.activity', 'Scheduled Activities')}
           </span>
         </div>
 
@@ -317,19 +318,19 @@ export const ActivityRemindersTab: React.FC<ActivityRemindersTabProps> = ({
             {t('common:loading', 'Loading activities...')}
           </div>
         ) : upcomingActivities.length === 0 ? (
-          <div className="p-8 text-center flex flex-col items-center justify-center gap-2 text-[#8a726a]">
-            <CalendarCheck
-              size={32}
-              weight="light"
-              className="text-[#8a726a]/50"
-            />
-            <p className="text-xs font-medium">
-              {t(
-                'activities:reminders.noUpcomingActivities',
-                'No upcoming activities scheduled for this hub.',
-              )}
-            </p>
-          </div>
+          <EmptyState
+            size="sm"
+            imageSrc={emptyRemindersSvg}
+            imageAlt="No upcoming activities"
+            title={t(
+              'activities:reminders.noUpcomingActivitiesTitle',
+              'No Upcoming Activities',
+            )}
+            description={t(
+              'activities:reminders.noUpcomingActivities',
+              'No upcoming activities scheduled for this hub.',
+            )}
+          />
         ) : (
           <div className="divide-y divide-[#f2ebe7]">
             {upcomingActivities.slice(0, 5).map((activity) => {

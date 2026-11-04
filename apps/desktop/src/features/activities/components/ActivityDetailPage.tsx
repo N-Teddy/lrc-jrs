@@ -39,7 +39,6 @@ import {
   Plus,
   Trash,
   UserCheck,
-  Users,
   WarningCircle,
   X,
   XCircle,
@@ -49,7 +48,10 @@ import type React from 'react';
 import { useEffect, useMemo, useState } from 'react';
 
 import Skeleton from 'react-loading-skeleton';
-import { AppSkeletonTheme, UserAvatar } from '../../../components';
+import emptyAttendanceSvg from '../../../assets/illustrations/empty-attendance.svg';
+import emptyDriveJpg from '../../../assets/illustrations/empty-drive.jpg';
+import emptyTimelineSvg from '../../../assets/illustrations/empty-timeline.svg';
+import { AppSkeletonTheme, EmptyState, UserAvatar } from '../../../components';
 import { formatCameroonPhone } from '../../members/utils/member-ui.utils';
 import {
   formatActivityDate,
@@ -1097,16 +1099,16 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
                 </div>
               </AppSkeletonTheme>
             ) : filteredAttendees.length === 0 ? (
-              <div className="p-12 text-center flex flex-col items-center justify-center text-xs text-[#8a726a] border border-[#e8e1dd] rounded-xl bg-[#faf2ee]/30">
-                <Users size={32} className="text-[#b85028]/60 mb-2" />
-                <span className="font-bold text-[#1e1b19]">
-                  {t(
-                    'activities:detail.attendanceTab.noAttendeesTitle',
-                    'No Attendees Recorded',
-                  )}
-                </span>
-                <span className="mt-1 text-[11px]">
-                  {search
+              <EmptyState
+                size="sm"
+                imageSrc={emptyAttendanceSvg}
+                imageAlt="No attendees recorded"
+                title={t(
+                  'activities:detail.attendanceTab.noAttendeesTitle',
+                  'No Attendees Recorded',
+                )}
+                description={
+                  search
                     ? t(
                         'activities:detail.attendanceTab.noSearchMatches',
                         'No attendees match your search query.',
@@ -1114,9 +1116,9 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
                     : t(
                         'activities:detail.attendanceTab.noAttendeesRecorded',
                         'No members or guests have been recorded as present for this activity yet.',
-                      )}
-                </span>
-              </div>
+                      )
+                }
+              />
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {filteredAttendees.map((att) => {
@@ -1424,38 +1426,30 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
               ))}
             </div>
           ) : (
-            <div className="p-12 rounded-xl border-2 border-dashed border-[#e8e1dd] flex flex-col items-center justify-center text-center gap-3 bg-[#faf2ee]/20">
-              <div className="w-12 h-12 rounded-lg bg-[#faf2ee] text-[#b85028] flex items-center justify-center">
-                <CloudArrowUp size={24} weight="duotone" />
-              </div>
-              <h4 className="text-sm font-bold text-[#1e1b19]">
-                {t(
-                  'activities:detail.reportsTab.noReportsTitle',
-                  'No Reports Attached Yet',
-                )}
-              </h4>
-              <p className="text-xs text-[#8a726a] max-w-sm">
-                {t(
-                  'activities:detail.reportsTab.noReportsDesc',
-                  'This activity has concluded. Hub coordinators can upload session minutes, attendance summaries, photos, or meeting notes directly to Google Drive.',
-                )}
-              </p>
-              {isPrivileged && (
-                <button
-                  type="button"
-                  onClick={() => setIsReportModalOpen(true)}
-                  className="mt-2 px-5 py-2.5 rounded-md bg-[#b85028] hover:bg-[#a44520] text-xs font-bold text-white transition-all shadow-xs cursor-pointer flex items-center gap-2"
-                >
-                  <Plus size={16} weight="bold" />
-                  <span>
-                    {t(
-                      'activities:detail.reportsTab.uploadActivityReports',
-                      'Upload Activity Reports',
-                    )}
-                  </span>
-                </button>
+            <EmptyState
+              size="sm"
+              imageSrc={emptyDriveJpg}
+              imageAlt="No reports attached"
+              title={t(
+                'activities:detail.reportsTab.noReportsTitle',
+                'No Reports Attached Yet',
               )}
-            </div>
+              description={t(
+                'activities:detail.reportsTab.noReportsDesc',
+                'This activity has concluded. Hub coordinators can upload session minutes, attendance summaries, photos, or meeting notes directly to Google Drive.',
+              )}
+              primaryAction={
+                isPrivileged
+                  ? {
+                      label: t(
+                        'activities:detail.reportsTab.uploadActivityReports',
+                        'Upload Activity Reports',
+                      ),
+                      onClick: () => setIsReportModalOpen(true),
+                    }
+                  : undefined
+              }
+            />
           )}
         </div>
       )}
@@ -1478,12 +1472,16 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
           </h3>
 
           {history.length === 0 ? (
-            <p className="text-xs text-[#8a726a] italic p-6 text-center">
-              {t(
+            <EmptyState
+              size="sm"
+              imageSrc={emptyTimelineSvg}
+              imageAlt="No modifications recorded"
+              title={t('activities:noHistory', 'No modifications recorded.')}
+              description={t(
                 'activities:detail.historyTab.empty',
                 'No modifications recorded. This activity has remained in its initial configuration.',
               )}
-            </p>
+            />
           ) : (
             <div className="divide-y divide-[#f4ece9] border border-[#e8e1dd] rounded-lg overflow-hidden">
               {history.map((log) => (

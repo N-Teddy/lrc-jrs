@@ -10,12 +10,13 @@ import {
   LockOpen,
   MapPin,
   PencilSimple,
-  ShieldCheck,
   Tag,
   User,
 } from '@phosphor-icons/react';
 import type React from 'react';
 import { useMemo, useState } from 'react';
+import emptyTimelineSvg from '../../../assets/illustrations/empty-timeline.svg';
+import { EmptyState } from '../../../components';
 import {
   formatActivityDate,
   getActivityTypeConfig,
@@ -404,19 +405,17 @@ export const ActivityAuditLogView: React.FC<ActivityAuditLogViewProps> = ({
 
       {/* 4. Timeline View */}
       {filteredHistory.length === 0 ? (
-        <div className="bg-white rounded-xl border border-[#e8e1dd] shadow-xs p-12 text-center flex flex-col items-center justify-center">
-          <div className="w-12 h-12 rounded-xl bg-[#faf2ee] border border-[#e8e1dd] flex items-center justify-center text-[#8a726a] mb-3">
-            <ShieldCheck size={24} weight="duotone" />
-          </div>
-          <h3 className="text-sm font-bold text-[#1e1b19] mb-1">
-            {t('activities:noHistory', 'No modifications recorded.')}
-          </h3>
-          <p className="text-xs text-[#8a726a]">
-            {t(
+        <div className="bg-white rounded-xl border border-[#e8e1dd] shadow-xs">
+          <EmptyState
+            size="md"
+            imageSrc={emptyTimelineSvg}
+            imageAlt="No modifications recorded"
+            title={t('activities:noHistory', 'No modifications recorded.')}
+            description={t(
               'activities:audit.emptyStateDesc',
-              'This gathering follows its original schedule and venue baseline.',
+              'This activity follows its original schedule and venue baseline.',
             )}
-          </p>
+          />
         </div>
       ) : (
         <div className="flex flex-col">

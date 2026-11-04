@@ -11,7 +11,6 @@ import {
 } from '@jrs/shared';
 import {
   ArrowCounterClockwise,
-  CalendarBlank,
   CalendarCheck,
   ChatCircleText,
   CheckCircle,
@@ -27,9 +26,11 @@ import {
 } from '@phosphor-icons/react';
 import type React from 'react';
 import { useMemo, useState } from 'react';
+import emptyAttendanceSvg from '../../../assets/illustrations/empty-attendance.svg';
 import {
   CustomSelect,
   DatePeriodFilter,
+  EmptyState,
   type SelectOption,
 } from '../../../components';
 import { getActivityTypeConfig } from '../../activities/utils/activity-ui.utils';
@@ -665,30 +666,45 @@ export const MemberAttendanceHistoryTab: React.FC<
         </div>
 
         {filteredItems.length === 0 ? (
-          <div className="p-12 text-center flex flex-col items-center">
-            <div className="w-12 h-12 rounded-xl bg-[#faf2ee] text-[#8a726a] flex items-center justify-center mb-3">
-              <CalendarBlank size={24} />
-            </div>
-            <h4 className="text-sm font-bold text-[#1e1b19] mb-1">
-              {hasActiveFilters
+          <EmptyState
+            size="md"
+            imageSrc={emptyAttendanceSvg}
+            imageAlt={
+              hasActiveFilters
                 ? 'No matching attendance records'
-                : 'No gathering records found'}
-            </h4>
-            <p className="text-xs text-[#8a726a] max-w-sm mb-4">
-              {hasActiveFilters
-                ? 'Try adjusting your search keywords, status filter, or hub scope.'
-                : 'This member has not yet had attendance logged for community gatherings.'}
-            </p>
-            {hasActiveFilters && (
-              <button
-                type="button"
-                onClick={handleClearFilters}
-                className="px-4 py-2 rounded-lg bg-[#faf2ee] hover:bg-[#f4ece9] text-xs font-bold text-[#b85028] transition-colors cursor-pointer"
-              >
-                Clear all filters
-              </button>
-            )}
-          </div>
+                : 'No attendance records'
+            }
+            title={
+              hasActiveFilters
+                ? t(
+                    'members:detail.attendance.noFilterMatches',
+                    'No matching attendance records',
+                  )
+                : t(
+                    'members:detail.attendance.emptyTitle',
+                    'No attendance records found',
+                  )
+            }
+            description={
+              hasActiveFilters
+                ? t(
+                    'members:detail.attendance.noFilterMatchesDesc',
+                    'Try adjusting your search keywords, status filter, or hub scope.',
+                  )
+                : t(
+                    'members:detail.attendance.emptyDesc',
+                    'This member has not yet had attendance logged for community activities.',
+                  )
+            }
+            primaryAction={
+              hasActiveFilters
+                ? {
+                    label: t('common:clearFilters', 'Clear all filters'),
+                    onClick: handleClearFilters,
+                  }
+                : undefined
+            }
+          />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs border-collapse">

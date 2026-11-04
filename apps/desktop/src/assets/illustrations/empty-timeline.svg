@@ -1,0 +1,105 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 240" fill="none">
+  <defs>
+    <!-- Background glow -->
+    <radialGradient id="time-glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#C2E9CA" stop-opacity="0.4"/>
+      <stop offset="50%" stop-color="#FAF2EE" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#FAF2EE" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Card gradient -->
+    <linearGradient id="time-card-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="100%" stop-color="#FBF9F7"/>
+    </linearGradient>
+
+    <!-- Terracotta gradient -->
+    <linearGradient id="time-terra" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#B85028"/>
+      <stop offset="100%" stop-color="#983912"/>
+    </linearGradient>
+
+    <!-- Sage gradient -->
+    <linearGradient id="time-sage" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#486B52"/>
+      <stop offset="100%" stop-color="#2C4E37"/>
+    </linearGradient>
+
+    <!-- Drop Shadows -->
+    <filter id="time-shadow-main" x="-10%" y="-10%" width="125%" height="130%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#57423B" flood-opacity="0.12"/>
+    </filter>
+    <filter id="time-shadow-sub" x="-15%" y="-15%" width="135%" height="140%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#57423B" flood-opacity="0.08"/>
+    </filter>
+  </defs>
+
+  <!-- Ambient Glow -->
+  <ellipse cx="160" cy="120" rx="130" ry="90" fill="url(#time-glow)"/>
+
+  <!-- Floor shadow -->
+  <ellipse cx="160" cy="195" rx="100" ry="14" fill="#57423B" fill-opacity="0.04"/>
+
+  <!-- Main Timeline Card -->
+  <g transform="translate(70, 48)" filter="url(#time-shadow-main)">
+    <rect x="0" y="0" width="180" height="135" rx="18" fill="url(#time-card-bg)" stroke="#E8E1DD" stroke-width="1.5"/>
+
+    <!-- Header bar -->
+    <path d="M0 18C0 8.05888 8.05888 0 18 0H162C171.941 0 180 8.05888 180 18V30H0V18Z" fill="#FAF2EE"/>
+    <circle cx="16" cy="15" r="4" fill="#B85028" fill-opacity="0.8"/>
+    <circle cx="28" cy="15" r="4" fill="#486B52" fill-opacity="0.8"/>
+    <circle cx="40" cy="15" r="4" fill="#8A726A" fill-opacity="0.4"/>
+    <rect x="115" y="12" width="48" height="6" rx="3" fill="#8A726A" fill-opacity="0.3"/>
+
+    <!-- Vertical Timeline Line -->
+    <line x1="32" y1="45" x2="32" y2="118" stroke="#E8E1DD" stroke-width="2" stroke-dasharray="3 3"/>
+
+    <!-- Timeline Checkpoint 1 (Baseline Initial State) -->
+    <g transform="translate(23, 44)">
+      <circle cx="9" cy="9" r="8" fill="url(#time-sage)"/>
+      <circle cx="9" cy="9" r="3.5" fill="#FFFFFF"/>
+      <rect x="25" y="4" width="75" height="6" rx="3" fill="#1E1B19" fill-opacity="0.8"/>
+      <rect x="25" y="13" width="45" height="5" rx="2.5" fill="#486B52" fill-opacity="0.7"/>
+    </g>
+
+    <!-- Timeline Checkpoint 2 (Unchanged Status Point) -->
+    <g transform="translate(23, 76)">
+      <circle cx="9" cy="9" r="6" fill="#FFFFFF" stroke="#486B52" stroke-width="2"/>
+      <circle cx="9" cy="9" r="2.5" fill="#486B52"/>
+      <rect x="25" y="4" width="90" height="6" rx="3" fill="#1E1B19" fill-opacity="0.7"/>
+      <rect x="25" y="13" width="60" height="5" rx="2.5" fill="#8A726A" fill-opacity="0.5"/>
+    </g>
+
+    <!-- Timeline Checkpoint 3 (Verified Seal) -->
+    <g transform="translate(23, 106)">
+      <circle cx="9" cy="9" r="6" fill="#FAF2EE" stroke="#E8E1DD" stroke-width="2"/>
+      <rect x="25" y="6" width="65" height="5" rx="2.5" fill="#8A726A" fill-opacity="0.4"/>
+    </g>
+  </g>
+
+  <!-- Floating Shield of Integrity / Verified Badge -->
+  <g transform="translate(210, 40)" filter="url(#time-shadow-sub)">
+    <circle cx="24" cy="24" r="24" fill="#FFFFFF" stroke="#E8E1DD" stroke-width="1.5"/>
+    <!-- Shield shape -->
+    <path d="M24 13L33 17V24C33 29.5 29 33.5 24 35C19 33.5 15 29.5 15 24V17L24 13Z" fill="url(#time-sage)"/>
+    <path d="M20.5 24L23 26.5L27.5 21.5" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+  <!-- Floating Pill: "Verified Baseline" -->
+  <g transform="translate(40, 140)" filter="url(#time-shadow-sub)">
+    <rect x="0" y="0" width="85" height="30" rx="15" fill="#FFFFFF" stroke="#E8E1DD" stroke-width="1.5"/>
+    <circle cx="15" cy="15" r="5" fill="#B85028"/>
+    <rect x="27" y="12" width="44" height="6" rx="3" fill="#1E1B19" fill-opacity="0.75"/>
+  </g>
+
+  <!-- Decorative Sparkles & Accents -->
+  <g transform="translate(45, 35)">
+    <path d="M0 6C3 6 6 3 6 0C6 3 9 6 12 6C9 6 6 9 6 12C6 9 3 6 0 6Z" fill="#B85028" fill-opacity="0.4"/>
+  </g>
+  <g transform="translate(265, 155)">
+    <path d="M0 5C2.5 5 5 2.5 5 0C5 2.5 7.5 5 10 5C7.5 5 5 7.5 5 10C5 7.5 2.5 5 0 5Z" fill="#486B52" fill-opacity="0.4"/>
+  </g>
+  <circle cx="65" cy="100" r="2.5" fill="#8A726A" fill-opacity="0.3"/>
+  <circle cx="255" cy="105" r="3" fill="#E2845E" fill-opacity="0.3"/>
+</svg>
+
