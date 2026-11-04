@@ -414,7 +414,7 @@ export const MemberAttendanceHistoryTab: React.FC<
           {engagement && (
             <div className="flex items-center gap-1.5">
               <span
-                className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold border ${engagement.badgeBg} ${engagement.badgeText} ${engagement.borderColor}`}
+                className={`inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-bold border ${engagement.badgeBg} ${engagement.badgeText} ${engagement.borderColor}`}
               >
                 {engagement.label}
               </span>
@@ -441,7 +441,7 @@ export const MemberAttendanceHistoryTab: React.FC<
           </div>
 
           <div className="flex items-center gap-2 text-[11px] font-medium">
-            <span className="inline-flex items-center gap-1 text-[#ba1a1a] bg-[#ffdad6]/60 px-1.5 py-0.5 rounded-full">
+            <span className="inline-flex items-center gap-1 text-[#ba1a1a] bg-[#ffdad6]/60 px-1.5 py-0.5 rounded-md">
               <XCircle size={12} weight="bold" />
               <span>{history.totalAbsent} Absent</span>
             </span>
@@ -675,7 +675,7 @@ export const MemberAttendanceHistoryTab: React.FC<
             <h3 className="text-sm font-bold text-[#1e1b19]">
               Gathering Attendance Records
             </h3>
-            <span className="px-2 py-0.5 rounded-full bg-[#faf2ee] text-[#8a726a] text-xs font-bold font-mono">
+            <span className="px-2 py-0.5 rounded-md bg-[#faf2ee] text-[#8a726a] text-xs font-bold font-mono">
               {filteredItems.length} of {history.items.length}
             </span>
           </div>
@@ -833,7 +833,7 @@ export const MemberAttendanceHistoryTab: React.FC<
                               {item.townName || item.townCode}
                             </span>
                             {item.isExternal && (
-                              <span className="px-1.5 py-0.5 rounded-full bg-[#ffdbcf] text-[#812901] text-[9px] font-bold uppercase tracking-wider">
+                              <span className="px-1.5 py-0.5 rounded-md bg-[#ffdbcf] text-[#812901] text-[9px] font-bold uppercase tracking-wider">
                                 External Hub
                               </span>
                             )}
@@ -850,7 +850,7 @@ export const MemberAttendanceHistoryTab: React.FC<
                       {/* Check-In Time */}
                       <td className="py-4 px-6 whitespace-nowrap">
                         {formattedCheckIn ? (
-                          <span className="inline-flex items-center gap-1 font-mono text-[11px] font-bold text-[#486b52] bg-[#c2e9ca]/40 px-2 py-0.5 rounded">
+                          <span className="inline-flex items-center gap-1 font-mono text-[11px] font-bold text-[#486b52] bg-[#c2e9ca]/40 px-2 py-0.5 rounded-md">
                             <CheckCircle size={12} weight="fill" />
                             <span>{formattedCheckIn}</span>
                           </span>
@@ -864,7 +864,7 @@ export const MemberAttendanceHistoryTab: React.FC<
                       {/* Status Badge */}
                       <td className="py-4 px-6 whitespace-nowrap text-right">
                         <span
-                          className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${statusBadge.bg} ${statusBadge.text} ${statusBadge.border}`}
+                          className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-bold border ${statusBadge.bg} ${statusBadge.text} ${statusBadge.border}`}
                         >
                           <StatusIcon size={14} weight="bold" />
                           <span>{statusBadge.label}</span>

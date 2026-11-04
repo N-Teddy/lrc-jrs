@@ -84,7 +84,7 @@ export const MemberModalFormFields: React.FC<MemberModalFormFieldsProps> = ({
               {t('members:modal.avatarTitle', 'Member Profile Picture')}
             </span>
             {formData.avatarFile && (
-              <span className="text-[10px] font-bold text-[#2c4e37] bg-[#c2e9ca] px-2 py-0.2 rounded-full">
+              <span className="text-[10px] font-bold text-[#2c4e37] bg-[#c2e9ca] px-2 py-0.5 rounded-md">
                 {t('members:modal.avatarNewSelected', 'New Photo Selected')}
               </span>
             )}
@@ -202,7 +202,7 @@ export const MemberModalFormFields: React.FC<MemberModalFormFieldsProps> = ({
               <span className="text-[#b85028]">*</span>
             </label>
             {age !== null && (
-              <span className="text-[10px] font-bold text-[#b85028] bg-[#fff2ee] px-2 py-0.5 rounded-full border border-[#ffdbcf]">
+              <span className="text-[10px] font-bold text-[#b85028] bg-[#fff2ee] px-2 py-0.5 rounded-md border border-[#ffdbcf]">
                 {age} yrs • {ageCat}
               </span>
             )}
