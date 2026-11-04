@@ -424,10 +424,10 @@ export const IntakeReviewsTab: React.FC<IntakeReviewsTabProps> = ({
             'members:intake.allCaughtUpTitle',
             'All Caught Up! No Submissions Pending Review',
           )}
-          description={t('members:intake.allCaughtUpDesc', {
-            town: activeTownName,
-            defaultValue: `All prospective members who registered through your intake invitation links for ${activeTownName} have been processed and admitted into the community directory.`,
-          })}
+          description={t(
+            'members:intake.allCaughtUpDescShort',
+            'All member submissions for this hub have been verified.',
+          )}
           primaryAction={
             onOpenIntakeLinksModal
               ? {
@@ -444,14 +444,16 @@ export const IntakeReviewsTab: React.FC<IntakeReviewsTabProps> = ({
       ) : filteredMembers.length === 0 ? (
         /* Empty State: Search filter has no matches (Filtered Empty State) */
         <EmptyState
-          icon={<MagnifyingGlass size={26} weight="bold" />}
+          size="lg"
+          imageSrc={emptyIntakeSvg}
+          imageAlt="No submissions match criteria"
           title={t(
             'members:intake.noMatchesTitle',
             'No submissions matched your criteria',
           )}
           description={t(
-            'members:intake.noMatchesDesc',
-            'Try adjusting your search query or reset the gender filter.',
+            'members:intake.noMatchesDescShort',
+            'Try adjusting your search query or gender filter.',
           )}
           primaryAction={{
             label: t('members:intake.clearFilters', 'Clear Filters'),

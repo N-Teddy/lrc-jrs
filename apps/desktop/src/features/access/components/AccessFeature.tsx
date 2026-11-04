@@ -40,9 +40,7 @@ export const AccessFeature: React.FC<AccessFeatureProps> = ({
 
   // Filters State
   const [search, setSearch] = useState('');
-  const [selectedTownId, setSelectedTownId] = useState<string | null>(
-    activeTownId || null,
-  );
+  const selectedTownId = activeTownId || null;
   const [stateFilter, setStateFilter] = useState<AccountStateFilter>('ALL');
   const [roleFilter, setRoleFilter] = useState<string>('ALL');
   const [page, setPage] = useState(1);
@@ -231,12 +229,6 @@ export const AccessFeature: React.FC<AccessFeatureProps> = ({
       <AccessFilterToolbar
         search={search}
         onSearchChange={setSearch}
-        selectedTownId={selectedTownId}
-        onTownChange={(tId) => {
-          setSelectedTownId(tId);
-          setPage(1);
-        }}
-        availableTowns={availableTowns}
         stateFilter={stateFilter}
         onStateFilterChange={(st) => {
           setStateFilter(st);

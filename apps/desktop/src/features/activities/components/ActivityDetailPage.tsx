@@ -1115,7 +1115,7 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
                       )
                     : t(
                         'activities:detail.attendanceTab.noAttendeesRecorded',
-                        'No members or guests have been recorded as present for this activity yet.',
+                        'No attendees recorded for this activity yet.',
                       )
                 }
               />
@@ -1436,7 +1436,7 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
               )}
               description={t(
                 'activities:detail.reportsTab.noReportsDesc',
-                'This activity has concluded. Hub coordinators can upload session minutes, attendance summaries, photos, or meeting notes directly to Google Drive.',
+                'No session minutes or reports attached yet.',
               )}
               primaryAction={
                 isPrivileged
@@ -1479,7 +1479,7 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
               title={t('activities:noHistory', 'No modifications recorded.')}
               description={t(
                 'activities:detail.historyTab.empty',
-                'No modifications recorded. This activity has remained in its initial configuration.',
+                'This activity follows its initial configuration.',
               )}
             />
           ) : (

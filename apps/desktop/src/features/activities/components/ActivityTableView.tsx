@@ -9,7 +9,6 @@ import {
   Bell,
   Buildings,
   CalendarBlank,
-  MagnifyingGlass,
   Plus,
 } from '@phosphor-icons/react';
 import type React from 'react';
@@ -123,14 +122,16 @@ export const ActivityTableView: React.FC<ActivityTableViewProps> = ({
     if (hasActiveFilters) {
       return (
         <EmptyState
-          icon={<MagnifyingGlass size={26} weight="bold" />}
+          size="lg"
+          imageSrc={emptyActivitiesImg}
+          imageAlt="No activities match filters"
           title={t(
             'activities:filters.noMatchesTitle',
             'No activities match your filters',
           )}
           description={t(
-            'activities:filters.noMatchesDesc',
-            'Try adjusting your search query, status filters, or date range.',
+            'activities:filters.noMatchesDescShort',
+            'Try adjusting your search terms or filters.',
           )}
           primaryAction={
             onClearFilters
@@ -152,8 +153,8 @@ export const ActivityTableView: React.FC<ActivityTableViewProps> = ({
         imageAlt="No activities"
         title={t('activities:table.empty', 'No activities scheduled yet')}
         description={t(
-          'activities:table.emptyDesc',
-          'Plan and schedule community gatherings, workshops, or meetings for this hub.',
+          'activities:table.emptyDescShort',
+          'No scheduled activities in this hub yet.',
         )}
         primaryAction={
           isPrivileged && onPlanActivity

@@ -21,11 +21,11 @@ export const IntakeExpired: React.FC<IntakeExpiredProps> = ({
         <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-amber-50 to-transparent" />
         <div className="relative">
           {/* Illustration */}
-          <div className="w-36 h-28 mx-auto mb-3 flex items-center justify-center">
+          <div className="w-48 h-36 mx-auto mb-4 flex items-center justify-center">
             <img
               src={emptyExpiredLinkSvg}
               alt={t('expired.title')}
-              className="w-full h-full object-contain"
+              className="w-full h-full object-contain drop-shadow-sm"
             />
           </div>
 

@@ -514,11 +514,10 @@ export const IntakeLinksModal: React.FC<IntakeLinksModalProps> = ({
                     'members:intakeLinks.noLinksTitle',
                     'No invitation links yet',
                   )}
-                  description={t('members:intakeLinks.noLinksDesc', {
-                    town: activeTownName,
-                    defaultValue:
-                      'Click "Create New Link" above to generate a shareable member self-entry link.',
-                  })}
+                  description={t(
+                    'members:intakeLinks.noLinksDescShort',
+                    'Create a new link to invite prospective members.',
+                  )}
                 />
               ) : (
                 <div className="flex flex-col gap-3">

@@ -174,7 +174,8 @@ export const ActivityCalendarView: React.FC<ActivityCalendarViewProps> = ({
             {monthName} {year}
           </h2>
           <span className="px-2 py-0.5 rounded-full bg-white border border-[#e8e1dd] text-[11px] font-bold text-[#b85028]">
-            {activities.length} Gathering{activities.length === 1 ? '' : 's'}
+            {activities.length}{' '}
+            {activities.length === 1 ? 'Activity' : 'Activities'}
           </span>
         </div>
 

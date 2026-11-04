@@ -405,18 +405,16 @@ export const ActivityAuditLogView: React.FC<ActivityAuditLogViewProps> = ({
 
       {/* 4. Timeline View */}
       {filteredHistory.length === 0 ? (
-        <div className="bg-white rounded-xl border border-[#e8e1dd] shadow-xs">
-          <EmptyState
-            size="md"
-            imageSrc={emptyTimelineSvg}
-            imageAlt="No modifications recorded"
-            title={t('activities:noHistory', 'No modifications recorded.')}
-            description={t(
-              'activities:audit.emptyStateDesc',
-              'This activity follows its original schedule and venue baseline.',
-            )}
-          />
-        </div>
+        <EmptyState
+          size="md"
+          imageSrc={emptyTimelineSvg}
+          imageAlt="No modifications recorded"
+          title={t('activities:noHistory', 'No modifications recorded.')}
+          description={t(
+            'activities:audit.emptyStateDesc',
+            'This activity follows its original schedule baseline.',
+          )}
+        />
       ) : (
         <div className="flex flex-col">
           {filteredHistory.map((log, index) => {

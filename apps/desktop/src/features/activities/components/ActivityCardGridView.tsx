@@ -10,7 +10,6 @@ import {
   Buildings,
   CalendarBlank,
   Eye,
-  MagnifyingGlass,
   MapPin,
   PencilSimple,
   Plus,
@@ -118,14 +117,16 @@ export const ActivityCardGridView: React.FC<ActivityCardGridViewProps> = ({
     if (hasActiveFilters) {
       return (
         <EmptyState
-          icon={<MagnifyingGlass size={26} weight="bold" />}
+          size="lg"
+          imageSrc={emptyActivitiesImg}
+          imageAlt="No activities match filters"
           title={t(
             'activities:filters.noMatchesTitle',
             'No activities match your filters',
           )}
           description={t(
-            'activities:filters.noMatchesDesc',
-            'Try adjusting your search query, status filters, or date range.',
+            'activities:filters.noMatchesDescShort',
+            'Try adjusting your search terms or filters.',
           )}
           primaryAction={
             onClearFilters
@@ -147,8 +148,8 @@ export const ActivityCardGridView: React.FC<ActivityCardGridViewProps> = ({
         imageAlt="No activities"
         title={t('activities:table.empty', 'No activities scheduled yet')}
         description={t(
-          'activities:table.emptyDesc',
-          'Plan and schedule community gatherings, workshops, or meetings for this hub.',
+          'activities:table.emptyDescShort',
+          'No scheduled activities in this hub yet.',
         )}
         primaryAction={
           isPrivileged && onPlanActivity

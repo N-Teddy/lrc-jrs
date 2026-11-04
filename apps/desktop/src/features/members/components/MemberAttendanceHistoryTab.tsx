@@ -689,11 +689,11 @@ export const MemberAttendanceHistoryTab: React.FC<
               hasActiveFilters
                 ? t(
                     'members:detail.attendance.noFilterMatchesDesc',
-                    'Try adjusting your search keywords, status filter, or hub scope.',
+                    'Try adjusting your search keywords or filters.',
                   )
                 : t(
                     'members:detail.attendance.emptyDesc',
-                    'This member has not yet had attendance logged for community activities.',
+                    'No attendance records logged for this member yet.',
                   )
             }
             primaryAction={

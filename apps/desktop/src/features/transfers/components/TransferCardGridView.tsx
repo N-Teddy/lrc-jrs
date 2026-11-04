@@ -5,7 +5,6 @@ import {
   ArrowRight,
   CalendarBlank,
   ChatCircleText,
-  MagnifyingGlass,
 } from '@phosphor-icons/react';
 import type React from 'react';
 import emptyTransfersImg from '../../../assets/illustrations/empty-transfers.jpg';
@@ -61,14 +60,16 @@ export const TransferCardGridView: React.FC<TransferCardGridViewProps> = ({
     if (hasActiveFilters) {
       return (
         <EmptyState
-          icon={<MagnifyingGlass size={26} weight="bold" />}
+          size="lg"
+          imageSrc={emptyTransfersImg}
+          imageAlt="No relocation records match filters"
           title={t(
             'transfers:table.noFilterMatches',
             'No relocation records match your filters',
           )}
           description={t(
             'transfers:table.noFilterMatchesDesc',
-            'Try adjusting your search keywords, hub scope, or transfer direction.',
+            'Try adjusting your search terms or filters.',
           )}
           primaryAction={
             onClearFilters
@@ -91,7 +92,7 @@ export const TransferCardGridView: React.FC<TransferCardGridViewProps> = ({
         title={t('transfers:table.noRecords', 'No Relocation Records Yet')}
         description={t(
           'transfers:table.noRecordsDesc',
-          'Inter-hub jurisdiction relocations and town transfers will be logged here.',
+          'No relocation records logged for this hub yet.',
         )}
       />
     );

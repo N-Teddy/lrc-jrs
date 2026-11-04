@@ -1384,9 +1384,11 @@ export const DriveExplorerFeature: React.FC = () => {
           ) : filteredReports.length === 0 ? (
             searchTerm || fileTypeFilter !== 'ALL' ? (
               <EmptyState
-                icon={<MagnifyingGlass size={26} weight="bold" />}
+                size="lg"
+                imageSrc={emptyDriveImg}
+                imageAlt="No documents match filters"
                 title="No documents matched your criteria"
-                description="Try adjusting your search terms or clearing the file type filter."
+                description="Try adjusting your search terms or filters."
                 primaryAction={{
                   label: 'Reset Filters',
                   icon: <ArrowCounterClockwise size={15} weight="bold" />,
@@ -1402,7 +1404,7 @@ export const DriveExplorerFeature: React.FC = () => {
                 imageSrc={emptyDriveImg}
                 imageAlt="No documents found"
                 title="This folder is currently empty"
-                description="Upload reports, guidelines, or resource files to populate this vault."
+                description="Upload documents or notes to populate this folder."
                 primaryAction={
                   isPrivileged
                     ? {

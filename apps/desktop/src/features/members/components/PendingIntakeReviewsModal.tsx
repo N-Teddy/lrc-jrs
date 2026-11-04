@@ -183,10 +183,10 @@ export const PendingIntakeReviewsModal: React.FC<
                 'members:intake.allCaughtUpTitle',
                 'No Submissions Pending Review',
               )}
-              description={t('members:intake.allCaughtUpDesc', {
-                town: activeTownName,
-                defaultValue: `All prospective members who registered through your intake invitation links for ${activeTownName} have been processed and admitted into the community directory.`,
-              })}
+              description={t(
+                'members:intake.allCaughtUpDescShort',
+                'All member submissions for this hub have been processed.',
+              )}
             />
           ) : (
             <div className="flex flex-col gap-3">

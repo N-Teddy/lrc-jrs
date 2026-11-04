@@ -9,7 +9,6 @@ import {
   EnvelopeSimple,
   Globe,
   Key,
-  MagnifyingGlass,
   Phone,
   Prohibit,
   User,
@@ -110,14 +109,16 @@ export const AccountsDirectoryTable: React.FC<AccountsDirectoryTableProps> = ({
     if (hasActiveFilters) {
       return (
         <EmptyState
-          icon={<MagnifyingGlass size={26} weight="bold" />}
+          size="lg"
+          imageSrc={emptyAccessSvg}
+          imageAlt="No accounts match filters"
           title={t(
             'access:table.noFilterMatches',
             'No accounts found matching criteria',
           )}
           description={t(
             'access:table.noFilterMatchesDesc',
-            'Try adjusting your role or status filter to see user accounts.',
+            'Try adjusting your search query or filters.',
           )}
           primaryAction={
             onClearFilters
@@ -143,7 +144,7 @@ export const AccountsDirectoryTable: React.FC<AccountsDirectoryTableProps> = ({
         )}
         description={t(
           'access:table.noAccountsDesc',
-          'Users granted login credentials or portal roles will be listed here.',
+          'No authenticated accounts in this hub yet.',
         )}
       />
     );
@@ -151,7 +152,7 @@ export const AccountsDirectoryTable: React.FC<AccountsDirectoryTableProps> = ({
 
   return (
     <div className="bg-white rounded-xl border border-[#e8e1dd] shadow-xs flex flex-col overflow-hidden">
-      <div className="overflow-x-auto min-h-[340px]">
+      <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-[#faf2ee] border-b border-[#e8e1dd] text-[11px] font-bold text-[#8a726a] uppercase tracking-wider">

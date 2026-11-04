@@ -6,7 +6,6 @@ import {
   Copy,
   Eye,
   Key,
-  MagnifyingGlass,
   PencilSimple,
   Trash,
   UserPlus,
@@ -90,14 +89,16 @@ export const MemberTableView: React.FC<MemberTableViewProps> = ({
     if (hasActiveFilters) {
       return (
         <EmptyState
-          icon={<MagnifyingGlass size={26} weight="bold" />}
+          size="lg"
+          imageSrc={emptyMembersImg}
+          imageAlt="No members match filters"
           title={t(
             'members:table.noFilterMatches',
-            'No members match your search or filters',
+            'No members match your filters',
           )}
           description={t(
             'members:table.noFilterMatchesDesc',
-            'Try adjusting your search query, clearing the role filter, or expanding the jurisdiction.',
+            'Try adjusting your search query or filters.',
           )}
           primaryAction={
             onClearFilters
@@ -123,7 +124,7 @@ export const MemberTableView: React.FC<MemberTableViewProps> = ({
         )}
         description={t(
           'members:table.directoryEmptyDesc',
-          'Begin populating your local hub directory by registering members or distributing self-entry intake links.',
+          'No members registered in this hub yet.',
         )}
         primaryAction={
           onRegisterMember
