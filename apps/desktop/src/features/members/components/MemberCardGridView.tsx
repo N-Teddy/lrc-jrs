@@ -1,15 +1,18 @@
 import { useTranslation } from '@jrs/client-core';
 import type { IUser } from '@jrs/shared';
 import {
+  ArrowCounterClockwise,
   ArrowRight,
   Cake,
   ChatCircleText,
   DotsThreeVertical,
   EnvelopeSimple,
   Key,
+  MagnifyingGlass,
   PencilSimple,
   Phone,
   Trash,
+  UserPlus,
 } from '@phosphor-icons/react';
 import type React from 'react';
 import { useEffect, useRef, useState } from 'react';
@@ -34,6 +37,9 @@ interface MemberCardGridViewProps {
   onManageAccess: (member: IUser) => void;
   onDeleteMember?: (member: IUser) => void;
   isCurrentUserAp: boolean;
+  hasActiveFilters?: boolean;
+  onClearFilters?: () => void;
+  onRegisterMember?: () => void;
 }
 
 export const MemberCardGridView: React.FC<MemberCardGridViewProps> = ({
@@ -48,6 +54,9 @@ export const MemberCardGridView: React.FC<MemberCardGridViewProps> = ({
   onManageAccess,
   onDeleteMember,
   isCurrentUserAp,
+  hasActiveFilters = false,
+  onClearFilters,
+  onRegisterMember,
 }) => {
   const { t } = useTranslation();
   const totalPages = Math.ceil(total / limit) || 1;
@@ -84,15 +93,56 @@ export const MemberCardGridView: React.FC<MemberCardGridViewProps> = ({
   }
 
   if (members.length === 0) {
+    if (hasActiveFilters) {
+      return (
+        <EmptyState
+          icon={<MagnifyingGlass size={26} weight="bold" />}
+          title={t(
+            'members:table.noFilterMatches',
+            'No members match your search or filters',
+          )}
+          description={t(
+            'members:table.noFilterMatchesDesc',
+            'Try adjusting your search query, clearing the role filter, or expanding the jurisdiction.',
+          )}
+          primaryAction={
+            onClearFilters
+              ? {
+                  label: t('common:clearFilters', 'Clear all filters'),
+                  icon: <ArrowCounterClockwise size={15} weight="bold" />,
+                  onClick: onClearFilters,
+                }
+              : undefined
+          }
+        />
+      );
+    }
+
     return (
       <EmptyState
+        size="lg"
         imageSrc={emptyMembersImg}
         imageAlt="No members"
-        title={t('members:table.noMembersFound', 'No members found')}
-        description={t(
-          'members:filters.searchPlaceholder',
-          'Search by name, phone, or filter by role and hub jurisdiction.',
+        title={t(
+          'members:table.directoryEmpty',
+          'Community directory is empty',
         )}
+        description={t(
+          'members:table.directoryEmptyDesc',
+          'Begin populating your local hub directory by registering members or distributing self-entry intake links.',
+        )}
+        primaryAction={
+          onRegisterMember
+            ? {
+                label: t(
+                  'members:actions.registerMember',
+                  'Register First Member',
+                ),
+                icon: <UserPlus size={16} weight="bold" />,
+                onClick: onRegisterMember,
+              }
+            : undefined
+        }
       />
     );
   }

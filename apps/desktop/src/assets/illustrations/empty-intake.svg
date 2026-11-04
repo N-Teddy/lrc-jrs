@@ -1,0 +1,123 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 240" fill="none">
+  <defs>
+    <!-- Background Glow -->
+    <radialGradient id="int-glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FFDBCF" stop-opacity="0.45"/>
+      <stop offset="60%" stop-color="#FAF2EE" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#FAF2EE" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Board Gradient -->
+    <linearGradient id="int-board" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="100%" stop-color="#FAF2EE"/>
+    </linearGradient>
+
+    <!-- Terracotta Gradient -->
+    <linearGradient id="int-terra" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#B85028"/>
+      <stop offset="100%" stop-color="#983912"/>
+    </linearGradient>
+
+    <!-- Sage Gradient -->
+    <linearGradient id="int-sage" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#486B52"/>
+      <stop offset="100%" stop-color="#2C4E37"/>
+    </linearGradient>
+
+    <!-- Drop Shadows -->
+    <filter id="int-shadow-main" x="-10%" y="-10%" width="125%" height="130%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#57423B" flood-opacity="0.12"/>
+    </filter>
+    <filter id="int-shadow-sub" x="-15%" y="-15%" width="135%" height="140%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#57423B" flood-opacity="0.08"/>
+    </filter>
+  </defs>
+
+  <!-- Ambient Glow -->
+  <ellipse cx="160" cy="120" rx="130" ry="90" fill="url(#int-glow)"/>
+
+  <!-- Floor Shadow -->
+  <ellipse cx="160" cy="195" rx="100" ry="14" fill="#57423B" fill-opacity="0.04"/>
+
+  <!-- Main Registration Clipboard -->
+  <g transform="translate(100, 36)" filter="url(#int-shadow-main)">
+    <!-- Clipboard wood/board backplate -->
+    <rect x="0" y="0" width="120" height="150" rx="16" fill="#F4ECE9" stroke="#E8E1DD" stroke-width="1.5"/>
+
+    <!-- Paper sheet -->
+    <rect x="8" y="14" width="104" height="128" rx="10" fill="#FFFFFF" stroke="#E8E1DD" stroke-width="1"/>
+
+    <!-- Top Metallic Clip -->
+    <g transform="translate(38, -6)">
+      <rect x="0" y="0" width="44" height="16" rx="5" fill="#E8E1DD"/>
+      <rect x="4" y="2" width="36" height="12" rx="3.5" fill="#B85028"/>
+      <!-- Clip hole -->
+      <circle cx="22" cy="7" r="2.5" fill="#FFFFFF"/>
+    </g>
+
+    <!-- Form Header Line -->
+    <rect x="20" y="28" width="55" height="7" rx="3.5" fill="#1E1B19" fill-opacity="0.8"/>
+    <rect x="20" y="39" width="35" height="4" rx="2" fill="#8A726A" fill-opacity="0.4"/>
+
+    <!-- Form Field Rows with Checks -->
+    <g transform="translate(20, 52)">
+      <!-- Row 1 -->
+      <circle cx="5" cy="5" r="4.5" fill="#C2E9CA"/>
+      <path d="M3.5 5L4.5 6L6.5 4" stroke="#2C4E37" stroke-width="1.2" stroke-linecap="round"/>
+      <rect x="15" y="2" width="60" height="5" rx="2.5" fill="#1E1B19" fill-opacity="0.7"/>
+
+      <!-- Row 2 -->
+      <circle cx="5" cy="19" r="4.5" fill="#C2E9CA"/>
+      <path d="M3.5 19L4.5 20L6.5 18" stroke="#2C4E37" stroke-width="1.2" stroke-linecap="round"/>
+      <rect x="15" y="16" width="50" height="5" rx="2.5" fill="#1E1B19" fill-opacity="0.7"/>
+
+      <!-- Row 3 -->
+      <circle cx="5" cy="33" r="4.5" fill="#C2E9CA"/>
+      <path d="M3.5 33L4.5 34L6.5 32" stroke="#2C4E37" stroke-width="1.2" stroke-linecap="round"/>
+      <rect x="15" y="30" width="65" height="5" rx="2.5" fill="#1E1B19" fill-opacity="0.7"/>
+
+      <!-- Row 4 -->
+      <circle cx="5" cy="47" r="4.5" fill="#C2E9CA"/>
+      <path d="M3.5 47L4.5 48L6.5 46" stroke="#2C4E37" stroke-width="1.2" stroke-linecap="round"/>
+      <rect x="15" y="44" width="45" height="5" rx="2.5" fill="#8A726A" fill-opacity="0.5"/>
+    </g>
+
+    <!-- Bottom verification seal stamp -->
+    <g transform="translate(56, 108)">
+      <rect x="0" y="0" width="44" height="20" rx="6" fill="#C2E9CA" fill-opacity="0.35" stroke="#486B52" stroke-width="1"/>
+      <rect x="8" y="7" width="28" height="5" rx="2.5" fill="#2C4E37"/>
+    </g>
+  </g>
+
+  <!-- Left Layer: Member ID Card -->
+  <g transform="rotate(-8 60 110)" filter="url(#int-shadow-sub)">
+    <rect x="42" y="75" width="85" height="56" rx="10" fill="#FFFFFF" stroke="#E8E1DD" stroke-width="1.5"/>
+    <!-- Top accent band -->
+    <path d="M42 85C42 79.4772 46.4772 75 52 75H117C122.523 75 127 79.4772 127 85V88H42V85Z" fill="url(#int-terra)"/>
+    <!-- Avatar circle -->
+    <circle cx="60" cy="106" r="10" fill="#FAF2EE" stroke="#E8E1DD" stroke-width="1"/>
+    <circle cx="60" cy="103" r="4" fill="#8A726A" fill-opacity="0.6"/>
+    <path d="M54 113C54 110 57 108 60 108C63 108 66 110 66 113" stroke="#8A726A" stroke-width="1.5" stroke-linecap="round"/>
+    <!-- Data lines -->
+    <rect x="76" y="98" width="40" height="5" rx="2.5" fill="#1E1B19" fill-opacity="0.75"/>
+    <rect x="76" y="107" width="28" height="4" rx="2" fill="#8A726A" fill-opacity="0.5"/>
+  </g>
+
+  <!-- Floating All Caught Up Verification Badge Top-Right -->
+  <g transform="translate(205, 50)" filter="url(#int-shadow-sub)">
+    <circle cx="22" cy="22" r="22" fill="url(#int-sage)"/>
+    <path d="M14 22L19 27L29 16" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+  <!-- Floating Sparkles & Particles -->
+  <g transform="translate(65, 30)">
+    <path d="M0 6C3 6 6 3 6 0C6 3 9 6 12 6C9 6 6 9 6 12C6 9 3 6 0 6Z" fill="#B85028" fill-opacity="0.5"/>
+  </g>
+  <g transform="translate(245, 135)">
+    <path d="M0 5C2.5 5 5 2.5 5 0C5 2.5 7.5 5 10 5C7.5 5 5 7.5 5 10C5 7.5 2.5 5 0 5Z" fill="#E2845E" fill-opacity="0.5"/>
+  </g>
+  <circle cx="75" cy="155" r="3" fill="#486B52" fill-opacity="0.3"/>
+  <circle cx="235" cy="170" r="3" fill="#B85028" fill-opacity="0.3"/>
+</svg>
+

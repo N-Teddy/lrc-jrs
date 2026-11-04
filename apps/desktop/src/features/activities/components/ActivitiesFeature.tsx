@@ -258,6 +258,13 @@ export const ActivitiesFeature: React.FC<ActivitiesFeatureProps> = ({
     setPage(1);
   };
 
+  const hasActiveFilters = Boolean(
+    search.trim() ||
+      activityTypeFilter !== 'all' ||
+      statusFilter !== 'all' ||
+      month !== undefined,
+  );
+
   const rawActivities: IActivity[] = activitiesData?.items || [];
   const activities = useMemo<IActivity[]>(() => {
     if (statusFilter === 'all') return rawActivities;
@@ -452,6 +459,9 @@ export const ActivitiesFeature: React.FC<ActivitiesFeatureProps> = ({
                   onViewHistory={handleViewHistory}
                   onDeleteActivity={(act) => setDeletingActivity(act)}
                   isPrivileged={isPrivileged}
+                  hasActiveFilters={hasActiveFilters}
+                  onClearFilters={handleClearFilters}
+                  onPlanActivity={handleOpenCreateModal}
                 />
               ) : viewMode === 'grid' ? (
                 <ActivityCardGridView
@@ -467,6 +477,9 @@ export const ActivitiesFeature: React.FC<ActivitiesFeatureProps> = ({
                   onViewHistory={handleViewHistory}
                   onDeleteActivity={(act) => setDeletingActivity(act)}
                   isPrivileged={isPrivileged}
+                  hasActiveFilters={hasActiveFilters}
+                  onClearFilters={handleClearFilters}
+                  onPlanActivity={handleOpenCreateModal}
                 />
               ) : (
                 <ActivityCalendarView

@@ -17,7 +17,7 @@ import {
 } from '@phosphor-icons/react';
 import type React from 'react';
 import { useState } from 'react';
-import emptyIntakeJpg from '../../../assets/illustrations/empty-intake.jpg';
+import emptyIntakeSvg from '../../../assets/illustrations/empty-intake.svg';
 import { EmptyState, UserAvatar } from '../../../components';
 import { formatCameroonPhone } from '../utils/member-ui.utils';
 import { EditApproveIntakeModal } from './EditApproveIntakeModal';
@@ -177,7 +177,7 @@ export const PendingIntakeReviewsModal: React.FC<
           ) : pendingMembers.length === 0 ? (
             <EmptyState
               size="sm"
-              imageSrc={emptyIntakeJpg}
+              imageSrc={emptyIntakeSvg}
               imageAlt="No pending submissions"
               title={t(
                 'members:intake.allCaughtUpTitle',

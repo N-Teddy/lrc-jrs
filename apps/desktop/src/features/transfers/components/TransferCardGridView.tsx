@@ -1,9 +1,11 @@
 import { useTranslation } from '@jrs/client-core';
 import type { ITown } from '@jrs/shared';
 import {
+  ArrowCounterClockwise,
   ArrowRight,
   CalendarBlank,
   ChatCircleText,
+  MagnifyingGlass,
 } from '@phosphor-icons/react';
 import type React from 'react';
 import emptyTransfersImg from '../../../assets/illustrations/empty-transfers.jpg';
@@ -31,6 +33,8 @@ interface TransferCardGridViewProps {
   onViewMember: (memberId: string) => void;
   activeTownId?: string;
   townsMap: Map<string, ITown>;
+  hasActiveFilters?: boolean;
+  onClearFilters?: () => void;
 }
 
 export const TransferCardGridView: React.FC<TransferCardGridViewProps> = ({
@@ -43,6 +47,8 @@ export const TransferCardGridView: React.FC<TransferCardGridViewProps> = ({
   onViewMember,
   activeTownId,
   townsMap,
+  hasActiveFilters = false,
+  onClearFilters,
 }) => {
   const { t } = useTranslation(['transfers', 'common']);
   const totalPages = Math.ceil(total / limit) || 1;
@@ -52,14 +58,40 @@ export const TransferCardGridView: React.FC<TransferCardGridViewProps> = ({
   }
 
   if (transfers.length === 0) {
+    if (hasActiveFilters) {
+      return (
+        <EmptyState
+          icon={<MagnifyingGlass size={26} weight="bold" />}
+          title={t(
+            'transfers:table.noFilterMatches',
+            'No relocation records match your filters',
+          )}
+          description={t(
+            'transfers:table.noFilterMatchesDesc',
+            'Try adjusting your search keywords, hub scope, or transfer direction.',
+          )}
+          primaryAction={
+            onClearFilters
+              ? {
+                  label: t('common:clearFilters', 'Clear all filters'),
+                  icon: <ArrowCounterClockwise size={15} weight="bold" />,
+                  onClick: onClearFilters,
+                }
+              : undefined
+          }
+        />
+      );
+    }
+
     return (
       <EmptyState
+        size="lg"
         imageSrc={emptyTransfersImg}
         imageAlt="No transfer records"
-        title={t('transfers:table.noRecords', 'No Relocation Records Found')}
+        title={t('transfers:table.noRecords', 'No Relocation Records Yet')}
         description={t(
           'transfers:table.noRecordsDesc',
-          'No member town transfers match the active search or filters.',
+          'Inter-hub jurisdiction relocations and town transfers will be logged here.',
         )}
       />
     );

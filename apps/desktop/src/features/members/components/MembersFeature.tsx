@@ -162,6 +162,17 @@ export const MembersFeature: React.FC<MembersFeatureProps> = ({
   const members = membersData?.items ?? [];
   const total = membersData?.total ?? members.length;
 
+  const handleClearFilters = () => {
+    setSearch('');
+    setRoleFilter('all');
+    setIsJrOnly(false);
+    setPage(1);
+  };
+
+  const hasActiveFilters = Boolean(
+    search.trim() || roleFilter !== 'all' || isJrOnly,
+  );
+
   return (
     <div className="w-full flex flex-col gap-6">
       {selectedMemberId ? (
@@ -326,6 +337,9 @@ export const MembersFeature: React.FC<MembersFeatureProps> = ({
                     isCurrentUserAp ? (m) => setDeletingMember(m) : undefined
                   }
                   isCurrentUserAp={isCurrentUserAp}
+                  hasActiveFilters={hasActiveFilters}
+                  onClearFilters={handleClearFilters}
+                  onRegisterMember={() => setIsRegisterModalOpen(true)}
                 />
               ) : (
                 <MemberCardGridView
@@ -342,6 +356,9 @@ export const MembersFeature: React.FC<MembersFeatureProps> = ({
                     isCurrentUserAp ? (m) => setDeletingMember(m) : undefined
                   }
                   isCurrentUserAp={isCurrentUserAp}
+                  hasActiveFilters={hasActiveFilters}
+                  onClearFilters={handleClearFilters}
+                  onRegisterMember={() => setIsRegisterModalOpen(true)}
                 />
               )}
 

@@ -64,6 +64,17 @@ export const TransfersFeature: React.FC = () => {
   const [page, setPage] = useState(1);
   const limit = viewMode === 'grid' ? 12 : 10;
 
+  const hasActiveFilters = Boolean(
+    search.trim() || townFilter !== 'ALL' || directionFilter !== 'ALL',
+  );
+
+  const handleClearFilters = () => {
+    setSearch('');
+    setTownFilter('ALL');
+    setDirectionFilter('ALL');
+    setPage(1);
+  };
+
   // Modals State
   const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
   const [editingMember, setEditingMember] = useState<IUser | null>(null);
@@ -319,6 +330,8 @@ export const TransfersFeature: React.FC = () => {
           onViewMember={(id) => setSelectedMemberId(id)}
           activeTownId={activeTownId}
           townsMap={townsMap}
+          hasActiveFilters={hasActiveFilters}
+          onClearFilters={handleClearFilters}
         />
       ) : (
         <TransferCardGridView
@@ -331,6 +344,8 @@ export const TransfersFeature: React.FC = () => {
           onViewMember={(id) => setSelectedMemberId(id)}
           activeTownId={activeTownId}
           townsMap={townsMap}
+          hasActiveFilters={hasActiveFilters}
+          onClearFilters={handleClearFilters}
         />
       )}
 

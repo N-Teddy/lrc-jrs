@@ -1,6 +1,7 @@
 import { useTranslation } from '@jrs/client-core';
 import type { ITown, IUser } from '@jrs/shared';
 import {
+  ArrowCounterClockwise,
   ChatCircleText,
   ClockCountdown,
   Crown,
@@ -8,6 +9,7 @@ import {
   EnvelopeSimple,
   Globe,
   Key,
+  MagnifyingGlass,
   Phone,
   Prohibit,
   User,
@@ -40,6 +42,8 @@ interface AccountsDirectoryTableProps {
   onViewMemberDetail: (memberId: string) => void;
   availableTowns: ITown[];
   isCurrentUserAp: boolean;
+  hasActiveFilters?: boolean;
+  onClearFilters?: () => void;
 }
 
 export const AccountsDirectoryTable: React.FC<AccountsDirectoryTableProps> = ({
@@ -55,6 +59,8 @@ export const AccountsDirectoryTable: React.FC<AccountsDirectoryTableProps> = ({
   onViewMemberDetail,
   availableTowns,
   isCurrentUserAp,
+  hasActiveFilters = false,
+  onClearFilters,
 }) => {
   const { t } = useTranslation(['access', 'members', 'common']);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
@@ -101,17 +107,43 @@ export const AccountsDirectoryTable: React.FC<AccountsDirectoryTableProps> = ({
   }
 
   if (members.length === 0) {
+    if (hasActiveFilters) {
+      return (
+        <EmptyState
+          icon={<MagnifyingGlass size={26} weight="bold" />}
+          title={t(
+            'access:table.noFilterMatches',
+            'No accounts found matching criteria',
+          )}
+          description={t(
+            'access:table.noFilterMatchesDesc',
+            'Try adjusting your role or status filter to see user accounts.',
+          )}
+          primaryAction={
+            onClearFilters
+              ? {
+                  label: t('common:clearFilters', 'Clear all filters'),
+                  icon: <ArrowCounterClockwise size={15} weight="bold" />,
+                  onClick: onClearFilters,
+                }
+              : undefined
+          }
+        />
+      );
+    }
+
     return (
       <EmptyState
+        size="lg"
         imageSrc={emptyAccessSvg}
         imageAlt="No accounts found"
         title={t(
           'access:table.noAccounts',
-          'No accounts found matching criteria',
+          'No authenticated accounts in this scope',
         )}
         description={t(
           'access:table.noAccountsDesc',
-          'Try adjusting your role or status filter to see user accounts.',
+          'Users granted login credentials or portal roles will be listed here.',
         )}
       />
     );

@@ -48,6 +48,17 @@ export const AccessFeature: React.FC<AccessFeatureProps> = ({
   const [page, setPage] = useState(1);
   const limit = 10;
 
+  const hasActiveFilters = Boolean(
+    search.trim() || roleFilter !== 'ALL' || stateFilter !== 'ALL',
+  );
+
+  const handleClearFilters = () => {
+    setSearch('');
+    setRoleFilter('ALL');
+    setStateFilter('ALL');
+    setPage(1);
+  };
+
   // Modals State
   const [accessMember, setAccessMember] = useState<IUser | null>(null);
   const [scopeMember, setScopeMember] = useState<IUser | null>(null);
@@ -261,6 +272,8 @@ export const AccessFeature: React.FC<AccessFeatureProps> = ({
         onViewMemberDetail={(id) => setSelectedMemberDetailId(id)}
         availableTowns={availableTowns}
         isCurrentUserAp={isCurrentUserAp}
+        hasActiveFilters={hasActiveFilters}
+        onClearFilters={handleClearFilters}
       />
 
       {/* 5. Modals */}

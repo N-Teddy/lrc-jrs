@@ -6,6 +6,7 @@ import {
 } from '@jrs/client-core';
 import type { IUser } from '@jrs/shared';
 import {
+  ArrowCounterClockwise,
   ArrowsClockwise,
   Calendar,
   CheckCircle,
@@ -22,7 +23,7 @@ import {
 } from '@phosphor-icons/react';
 import type React from 'react';
 import { useMemo, useState } from 'react';
-import emptyIntakeImg from '../../../assets/illustrations/empty-intake.jpg';
+import emptyIntakeSvg from '../../../assets/illustrations/empty-intake.svg';
 import { EmptyState, UserAvatar } from '../../../components';
 import {
   calculateAge,
@@ -234,7 +235,7 @@ export const IntakeReviewsTab: React.FC<IntakeReviewsTabProps> = ({
 
         {/* Action Controls */}
         <div className="flex items-center gap-2 shrink-0 self-start md:self-auto">
-          {onOpenIntakeLinksModal && (
+          {onOpenIntakeLinksModal && pendingMembers.length > 0 && (
             <button
               type="button"
               onClick={onOpenIntakeLinksModal}
@@ -303,103 +304,105 @@ export const IntakeReviewsTab: React.FC<IntakeReviewsTabProps> = ({
         </div>
       )}
 
-      {/* 3. Filter & Search Toolbar */}
-      <div className="bg-white rounded-xl border border-[#e8e1dd] shadow-xs p-3.5 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-        {/* Search Input */}
-        <div className="relative flex items-center gap-2.5 px-3.5 h-9 rounded-md bg-[#faf2ee] border border-[#e8e1dd] focus-within:ring-2 focus-within:ring-[#b85028]/20 focus-within:border-[#b85028] focus-within:bg-white transition-all w-full sm:w-80 md:w-96">
-          <MagnifyingGlass
-            size={16}
-            className="text-[#8a726a] shrink-0"
-            weight="bold"
-          />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder={t(
-              'members:intake.searchPlaceholder',
-              'Search applicants by name, phone, or note...',
+      {/* 3. Filter & Search Toolbar (Only rendered when there are submissions to filter) */}
+      {pendingMembers.length > 0 && (
+        <div className="bg-white rounded-xl border border-[#e8e1dd] shadow-xs p-3.5 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+          {/* Search Input */}
+          <div className="relative flex items-center gap-2.5 px-3.5 h-9 rounded-md bg-[#faf2ee] border border-[#e8e1dd] focus-within:ring-2 focus-within:ring-[#b85028]/20 focus-within:border-[#b85028] focus-within:bg-white transition-all w-full sm:w-80 md:w-96">
+            <MagnifyingGlass
+              size={16}
+              className="text-[#8a726a] shrink-0"
+              weight="bold"
+            />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder={t(
+                'members:intake.searchPlaceholder',
+                'Search applicants by name, phone, or note...',
+              )}
+              className="bg-transparent text-xs text-[#1e1b19] placeholder:text-[#8a726a] outline-none w-full pr-6"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery('')}
+                className="absolute right-2 text-[#8a726a] hover:text-[#1e1b19] p-0.5 cursor-pointer"
+                title="Clear search"
+              >
+                <X size={14} weight="bold" />
+              </button>
             )}
-            className="bg-transparent text-xs text-[#1e1b19] placeholder:text-[#8a726a] outline-none w-full pr-6"
-          />
-          {searchQuery && (
-            <button
-              type="button"
-              onClick={() => setSearchQuery('')}
-              className="absolute right-2 text-[#8a726a] hover:text-[#1e1b19] p-0.5 cursor-pointer"
-              title="Clear search"
-            >
-              <X size={14} weight="bold" />
-            </button>
-          )}
-        </div>
-
-        {/* Gender & Sort Controls */}
-        <div className="flex items-center gap-2 flex-wrap justify-between sm:justify-end">
-          {/* Gender Filter Pills */}
-          <div className="flex items-center p-1 bg-[#faf2ee] rounded-md border border-[#e8e1dd] text-xs font-semibold text-[#8a726a]">
-            <button
-              type="button"
-              onClick={() => setGenderFilter('ALL')}
-              className={`px-2.5 py-1 rounded transition-all cursor-pointer ${
-                genderFilter === 'ALL'
-                  ? 'bg-white text-[#b85028] shadow-xs font-bold'
-                  : 'hover:text-[#1e1b19]'
-              }`}
-            >
-              {t('members:intake.filterAll', 'All')}
-            </button>
-            <button
-              type="button"
-              onClick={() => setGenderFilter('MALE')}
-              className={`px-2.5 py-1 rounded transition-all cursor-pointer ${
-                genderFilter === 'MALE'
-                  ? 'bg-white text-[#b85028] shadow-xs font-bold'
-                  : 'hover:text-[#1e1b19]'
-              }`}
-            >
-              {t('members:intake.filterMale', 'Male')}
-            </button>
-            <button
-              type="button"
-              onClick={() => setGenderFilter('FEMALE')}
-              className={`px-2.5 py-1 rounded transition-all cursor-pointer ${
-                genderFilter === 'FEMALE'
-                  ? 'bg-white text-[#b85028] shadow-xs font-bold'
-                  : 'hover:text-[#1e1b19]'
-              }`}
-            >
-              {t('members:intake.filterFemale', 'Female')}
-            </button>
           </div>
 
-          {/* Sort Order Selector */}
-          <div className="flex items-center p-1 bg-[#faf2ee] rounded-md border border-[#e8e1dd] text-xs font-semibold text-[#8a726a]">
-            <button
-              type="button"
-              onClick={() => setSortOrder('NEWEST')}
-              className={`px-2.5 py-1 rounded transition-all cursor-pointer ${
-                sortOrder === 'NEWEST'
-                  ? 'bg-white text-[#b85028] shadow-xs font-bold'
-                  : 'hover:text-[#1e1b19]'
-              }`}
-            >
-              {t('members:intake.sortNewest', 'Newest')}
-            </button>
-            <button
-              type="button"
-              onClick={() => setSortOrder('OLDEST')}
-              className={`px-2.5 py-1 rounded transition-all cursor-pointer ${
-                sortOrder === 'OLDEST'
-                  ? 'bg-white text-[#b85028] shadow-xs font-bold'
-                  : 'hover:text-[#1e1b19]'
-              }`}
-            >
-              {t('members:intake.sortOldest', 'Oldest')}
-            </button>
+          {/* Gender & Sort Controls */}
+          <div className="flex items-center gap-2 flex-wrap justify-between sm:justify-end">
+            {/* Gender Filter Pills */}
+            <div className="flex items-center p-1 bg-[#faf2ee] rounded-md border border-[#e8e1dd] text-xs font-semibold text-[#8a726a]">
+              <button
+                type="button"
+                onClick={() => setGenderFilter('ALL')}
+                className={`px-2.5 py-1 rounded transition-all cursor-pointer ${
+                  genderFilter === 'ALL'
+                    ? 'bg-white text-[#b85028] shadow-xs font-bold'
+                    : 'hover:text-[#1e1b19]'
+                }`}
+              >
+                {t('members:intake.filterAll', 'All')}
+              </button>
+              <button
+                type="button"
+                onClick={() => setGenderFilter('MALE')}
+                className={`px-2.5 py-1 rounded transition-all cursor-pointer ${
+                  genderFilter === 'MALE'
+                    ? 'bg-white text-[#b85028] shadow-xs font-bold'
+                    : 'hover:text-[#1e1b19]'
+                }`}
+              >
+                {t('members:intake.filterMale', 'Male')}
+              </button>
+              <button
+                type="button"
+                onClick={() => setGenderFilter('FEMALE')}
+                className={`px-2.5 py-1 rounded transition-all cursor-pointer ${
+                  genderFilter === 'FEMALE'
+                    ? 'bg-white text-[#b85028] shadow-xs font-bold'
+                    : 'hover:text-[#1e1b19]'
+                }`}
+              >
+                {t('members:intake.filterFemale', 'Female')}
+              </button>
+            </div>
+
+            {/* Sort Order Selector */}
+            <div className="flex items-center p-1 bg-[#faf2ee] rounded-md border border-[#e8e1dd] text-xs font-semibold text-[#8a726a]">
+              <button
+                type="button"
+                onClick={() => setSortOrder('NEWEST')}
+                className={`px-2.5 py-1 rounded transition-all cursor-pointer ${
+                  sortOrder === 'NEWEST'
+                    ? 'bg-white text-[#b85028] shadow-xs font-bold'
+                    : 'hover:text-[#1e1b19]'
+                }`}
+              >
+                {t('members:intake.sortNewest', 'Newest')}
+              </button>
+              <button
+                type="button"
+                onClick={() => setSortOrder('OLDEST')}
+                className={`px-2.5 py-1 rounded transition-all cursor-pointer ${
+                  sortOrder === 'OLDEST'
+                    ? 'bg-white text-[#b85028] shadow-xs font-bold'
+                    : 'hover:text-[#1e1b19]'
+                }`}
+              >
+                {t('members:intake.sortOldest', 'Oldest')}
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* 4. Submissions List View */}
       {isLoading ? (
@@ -410,10 +413,13 @@ export const IntakeReviewsTab: React.FC<IntakeReviewsTabProps> = ({
           </span>
         </div>
       ) : pendingMembers.length === 0 ? (
-        /* Empty State: Zero pending reviews */
+        /* Empty State: Zero pending reviews (True Zero State) */
         <EmptyState
-          imageSrc={emptyIntakeImg}
+          size="lg"
+          imageSrc={emptyIntakeSvg}
           imageAlt="No pending submissions"
+          badge={t('members:intake.allCaughtUpBadge', 'All Caught Up')}
+          badgeVariant="sage"
           title={t(
             'members:intake.allCaughtUpTitle',
             'All Caught Up! No Submissions Pending Review',
@@ -436,9 +442,9 @@ export const IntakeReviewsTab: React.FC<IntakeReviewsTabProps> = ({
           }
         />
       ) : filteredMembers.length === 0 ? (
-        /* Empty State: Search filter has no matches */
+        /* Empty State: Search filter has no matches (Filtered Empty State) */
         <EmptyState
-          icon={<MagnifyingGlass size={24} weight="bold" />}
+          icon={<MagnifyingGlass size={26} weight="bold" />}
           title={t(
             'members:intake.noMatchesTitle',
             'No submissions matched your criteria',
@@ -447,8 +453,9 @@ export const IntakeReviewsTab: React.FC<IntakeReviewsTabProps> = ({
             'members:intake.noMatchesDesc',
             'Try adjusting your search query or reset the gender filter.',
           )}
-          secondaryAction={{
+          primaryAction={{
             label: t('members:intake.clearFilters', 'Clear Filters'),
+            icon: <ArrowCounterClockwise size={15} weight="bold" />,
             onClick: () => {
               setSearchQuery('');
               setGenderFilter('ALL');

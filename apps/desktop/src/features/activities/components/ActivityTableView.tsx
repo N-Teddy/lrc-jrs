@@ -4,7 +4,14 @@ import {
   useUpdateActivityMutation,
 } from '@jrs/client-core';
 import { ActivityStatus, type IActivity } from '@jrs/shared';
-import { Bell, Buildings, CalendarBlank } from '@phosphor-icons/react';
+import {
+  ArrowCounterClockwise,
+  Bell,
+  Buildings,
+  CalendarBlank,
+  MagnifyingGlass,
+  Plus,
+} from '@phosphor-icons/react';
 import type React from 'react';
 import { useState } from 'react';
 import emptyActivitiesImg from '../../../assets/illustrations/empty-activities.jpg';
@@ -33,6 +40,9 @@ interface ActivityTableViewProps {
   onViewHistory: (activity: IActivity) => void;
   onDeleteActivity?: (activity: IActivity) => void;
   isPrivileged: boolean;
+  hasActiveFilters?: boolean;
+  onClearFilters?: () => void;
+  onPlanActivity?: () => void;
 }
 
 export const ActivityTableView: React.FC<ActivityTableViewProps> = ({
@@ -48,6 +58,9 @@ export const ActivityTableView: React.FC<ActivityTableViewProps> = ({
   onViewHistory,
   onDeleteActivity,
   isPrivileged,
+  hasActiveFilters = false,
+  onClearFilters,
+  onPlanActivity,
 }) => {
   const { t } = useTranslation();
   const { activeTownId } = useTownContext();
@@ -107,15 +120,53 @@ export const ActivityTableView: React.FC<ActivityTableViewProps> = ({
   }
 
   if (activities.length === 0) {
+    if (hasActiveFilters) {
+      return (
+        <EmptyState
+          icon={<MagnifyingGlass size={26} weight="bold" />}
+          title={t(
+            'activities:filters.noMatchesTitle',
+            'No activities match your filters',
+          )}
+          description={t(
+            'activities:filters.noMatchesDesc',
+            'Try adjusting your search query, status filters, or date range.',
+          )}
+          primaryAction={
+            onClearFilters
+              ? {
+                  label: t('common:clearFilters', 'Clear all filters'),
+                  icon: <ArrowCounterClockwise size={15} weight="bold" />,
+                  onClick: onClearFilters,
+                }
+              : undefined
+          }
+        />
+      );
+    }
+
     return (
       <EmptyState
+        size="lg"
         imageSrc={emptyActivitiesImg}
         imageAlt="No activities"
-        title={t('activities:table.empty', 'No activities found')}
+        title={t('activities:table.empty', 'No activities scheduled yet')}
         description={t(
-          'activities:filters.searchPlaceholder',
-          'Try adjusting your search query, status filters, or date range.',
+          'activities:table.emptyDesc',
+          'Plan and schedule community gatherings, workshops, or meetings for this hub.',
         )}
+        primaryAction={
+          isPrivileged && onPlanActivity
+            ? {
+                label: t(
+                  'activities:actions.newActivity',
+                  'Plan First Activity',
+                ),
+                icon: <Plus size={16} weight="bold" />,
+                onClick: onPlanActivity,
+              }
+            : undefined
+        }
       />
     );
   }

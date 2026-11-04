@@ -15,6 +15,7 @@ import {
 } from '@jrs/client-core';
 import { type IActivity, UserRole } from '@jrs/shared';
 import {
+  ArrowCounterClockwise,
   ArrowLeft,
   ArrowSquareOut,
   ArrowsClockwise,
@@ -1381,40 +1382,38 @@ export const DriveExplorerFeature: React.FC = () => {
               </div>
             </AppSkeletonTheme>
           ) : filteredReports.length === 0 ? (
-            <EmptyState
-              imageSrc={emptyDriveImg}
-              imageAlt="No documents found"
-              title={
-                searchTerm || fileTypeFilter !== 'ALL'
-                  ? 'No documents matched your criteria'
-                  : 'This folder is currently empty'
-              }
-              description={
-                searchTerm || fileTypeFilter !== 'ALL'
-                  ? 'Try adjusting your search terms or clearing the file type filter.'
-                  : 'Upload reports, guidelines, or resource files to populate this vault.'
-              }
-              primaryAction={
-                isPrivileged
-                  ? {
-                      label: 'Upload Documents',
-                      icon: <UploadSimple size={15} weight="bold" />,
-                      onClick: () => handleOpenUploadModal(),
-                    }
-                  : undefined
-              }
-              secondaryAction={
-                searchTerm || fileTypeFilter !== 'ALL'
-                  ? {
-                      label: 'Reset Filters',
-                      onClick: () => {
-                        setSearchTerm('');
-                        setFileTypeFilter('ALL');
-                      },
-                    }
-                  : undefined
-              }
-            />
+            searchTerm || fileTypeFilter !== 'ALL' ? (
+              <EmptyState
+                icon={<MagnifyingGlass size={26} weight="bold" />}
+                title="No documents matched your criteria"
+                description="Try adjusting your search terms or clearing the file type filter."
+                primaryAction={{
+                  label: 'Reset Filters',
+                  icon: <ArrowCounterClockwise size={15} weight="bold" />,
+                  onClick: () => {
+                    setSearchTerm('');
+                    setFileTypeFilter('ALL');
+                  },
+                }}
+              />
+            ) : (
+              <EmptyState
+                size="lg"
+                imageSrc={emptyDriveImg}
+                imageAlt="No documents found"
+                title="This folder is currently empty"
+                description="Upload reports, guidelines, or resource files to populate this vault."
+                primaryAction={
+                  isPrivileged
+                    ? {
+                        label: 'Upload Documents',
+                        icon: <UploadSimple size={15} weight="bold" />,
+                        onClick: () => handleOpenUploadModal(),
+                      }
+                    : undefined
+                }
+              />
+            )
           ) : viewMode === 'grid' ? (
             /* Mode 1: Grid Cards View */
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
