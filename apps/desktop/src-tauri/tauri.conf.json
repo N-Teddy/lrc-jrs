@@ -41,6 +41,11 @@
       "endpoints": [
         "https://github.com/N-Teddy/lrc-jrs/releases/latest/download/latest.json"
       ]
+    },
+    "deep-link": {
+      "desktop": {
+        "schemes": ["lrc", "lrc-jrs"]
+      }
     }
   }
 }

@@ -29,6 +29,7 @@ function AppContent() {
     recoveryIdentifier,
     recoveryChannel,
     resetToken,
+    deepLinkCode,
     isSessionTerminated,
     shouldShowRegionSelector,
     handleTownSelected,
@@ -112,6 +113,7 @@ function AppContent() {
         <VerifyOtpScreen
           identifier={recoveryIdentifier}
           channel={recoveryChannel}
+          initialCode={deepLinkCode || undefined}
           onBackToChangeContact={handleBackToChangeContact}
           onCodeVerified={handleCodeVerified}
         />

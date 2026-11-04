@@ -164,15 +164,20 @@ export class EmailService implements OnModuleInit, NotificationStrategy {
       fullName: string;
       code: string;
       expiresInMinutes: number;
+      loginUrl?: string;
       logoUrl?: string;
     },
   ): Promise<boolean> {
     const host =
       this.configService.get<string>('APP_URL') || 'http://localhost:3000';
     const logoUrl = data.logoUrl || `${host}/uploads/branding/logo.png`;
+    const loginUrl =
+      data.loginUrl ||
+      `lrc-jrs://reset-password?code=${encodeURIComponent(data.code)}&email=${encodeURIComponent(to)}`;
     const html = TemplateLoaderUtil.render('emails/password-reset.hbs', {
       ...data,
       logoUrl,
+      loginUrl,
     });
 
     return this.sendEmail({
@@ -198,9 +203,12 @@ export class EmailService implements OnModuleInit, NotificationStrategy {
     const host =
       this.configService.get<string>('APP_URL') || 'http://localhost:3000';
     const logoUrl = data.logoUrl || `${host}/uploads/branding/logo.png`;
+    const loginUrl =
+      data.loginUrl || `lrc-jrs://login?email=${encodeURIComponent(to)}`;
     const html = TemplateLoaderUtil.render('emails/temporary-password.hbs', {
       ...data,
       logoUrl,
+      loginUrl,
     });
 
     return this.sendEmail({
