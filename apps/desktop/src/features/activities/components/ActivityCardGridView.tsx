@@ -267,21 +267,23 @@ export const ActivityCardGridView: React.FC<ActivityCardGridViewProps> = ({
                 </div>
               </div>
 
-              {/* Title & Metadata */}
+              {/* Metadata */}
               <div className="flex flex-col gap-2">
-                <h3 className="font-bold text-sm text-[#1e1b19] group-hover:text-[#b85028] transition-colors leading-snug line-clamp-2">
-                  {activity.title}
-                </h3>
-
                 {isParticipating && (
                   <div className="flex items-center">
                     <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold border bg-[#edf3ee] text-[#486b52] border-[#c2e9ca]">
                       <Buildings size={11} weight="bold" />
                       <span>
-                        Inter-villes · Hôte:{' '}
-                        {activity.hostTown?.name ||
-                          activity.town?.name ||
-                          'Autre'}
+                        {t(
+                          'activities:detail.interTownHost',
+                          'Inter-Town · Host: {{host}}',
+                          {
+                            host:
+                              activity.hostTown?.name ||
+                              activity.town?.name ||
+                              t('activities:detail.otherHost', 'Other'),
+                          },
+                        )}
                       </span>
                     </span>
                   </div>
@@ -294,8 +296,14 @@ export const ActivityCardGridView: React.FC<ActivityCardGridViewProps> = ({
                         <span>
                           +{activity.includedTownIds?.length}{' '}
                           {activity.includedTownIds?.length === 1
-                            ? 'ville participante'
-                            : 'villes participantes'}
+                            ? t(
+                                'activities:interTown.singleTown',
+                                'participating city',
+                              )
+                            : t(
+                                'activities:interTown.multipleTowns',
+                                'participating cities',
+                              )}
                         </span>
                       </span>
                     </div>
@@ -333,9 +341,16 @@ export const ActivityCardGridView: React.FC<ActivityCardGridViewProps> = ({
                       <span className="font-bold">{turnoutStats.total}</span>{' '}
                       {turnoutStats.total === 1
                         ? t('activities:card.attendee', 'Attendee')
-                        : t('activities:card.attendees', 'Attendees')}
-                      <span className="text-[#8a726a] font-normal ml-1">
-                        ({turnoutStats.members}m · {turnoutStats.guests}g)
+                        : t('activities:card.attendees', 'Attendees')}{' '}
+                      <span className="text-[#8a726a] font-normal">
+                        {t(
+                          'activities:card.attendanceBreakdown',
+                          '({{members}}m · {{guests}}g)',
+                          {
+                            members: turnoutStats.members,
+                            guests: turnoutStats.guests,
+                          },
+                        )}
                       </span>
                     </span>
                   ) : (

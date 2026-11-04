@@ -385,7 +385,13 @@
       "delete": "Delete",
       "attendancePending": "Attendance Pending",
       "attendees": "Attendees",
-      "attendee": "Attendee"
+      "attendee": "Attendee",
+      "attendanceBreakdown": "({{members}}m · {{guests}}g)"
+    },
+    "interTown": {
+      "hostBanner": "Inter-city · Host: {{town}}",
+      "singleTown": "participating city",
+      "multipleTowns": "participating cities"
     },
     "calendar": {
       "activitySingle": "Activity",

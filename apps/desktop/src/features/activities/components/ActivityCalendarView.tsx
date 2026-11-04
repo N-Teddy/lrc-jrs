@@ -1,6 +1,7 @@
 import { useTownContext, useTranslation } from '@jrs/client-core';
 import type { IActivity } from '@jrs/shared';
 import {
+  Buildings,
   CaretLeft,
   CaretRight,
   Clock,
@@ -40,7 +41,7 @@ export const ActivityCalendarView: React.FC<ActivityCalendarViewProps> = ({
   onEditActivity,
 }) => {
   const { t, i18n } = useTranslation();
-  const { canWrite } = useTownContext();
+  const { canWrite, activeTownId } = useTownContext();
   const [currentDate, setCurrentDate] = useState(() => {
     const year = selectedYear ?? 2026;
     const month =
@@ -311,17 +312,67 @@ export const ActivityCalendarView: React.FC<ActivityCalendarViewProps> = ({
             t,
           );
           const ModalTypeIcon = modalTypeConfig.icon;
+          const isHostTown =
+            !activeTownId ||
+            activeTownId ===
+              (activeActivityModal.hostTownId || activeActivityModal.townId);
+          const isParticipating = Boolean(
+            activeTownId &&
+              !isHostTown &&
+              activeActivityModal.includedTownIds?.includes(activeTownId),
+          );
           return (
             <div className="fixed inset-0 z-50 bg-[#1e1b19]/40 backdrop-blur-[1px] flex items-center justify-center p-4">
               <div className="bg-white rounded-xl border border-[#e8e1dd] shadow-xl max-w-md w-full p-6 flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-150">
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex flex-col gap-1.5">
-                    <span
-                      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold border w-fit ${modalTypeConfig.badgeBg} ${modalTypeConfig.badgeText} ${modalTypeConfig.badgeBorder}`}
-                    >
-                      <ModalTypeIcon size={12} weight="bold" />
-                      <span>{modalTypeConfig.label}</span>
-                    </span>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span
+                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold border w-fit ${modalTypeConfig.badgeBg} ${modalTypeConfig.badgeText} ${modalTypeConfig.badgeBorder}`}
+                      >
+                        <ModalTypeIcon size={12} weight="bold" />
+                        <span>{modalTypeConfig.label}</span>
+                      </span>
+
+                      {/* Inter-villes / Participating Towns Chip */}
+                      {isParticipating && (
+                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold border bg-[#edf3ee] text-[#486b52] border-[#c2e9ca]">
+                          <Buildings size={11} weight="bold" />
+                          <span>
+                            {t(
+                              'activities:detail.interTownHost',
+                              'Inter-Town · Host: {{host}}',
+                              {
+                                host:
+                                  activeActivityModal.hostTown?.name ||
+                                  activeActivityModal.town?.name ||
+                                  t('activities:detail.otherHost', 'Other'),
+                              },
+                            )}
+                          </span>
+                        </span>
+                      )}
+                      {!isParticipating &&
+                        (activeActivityModal.includedTownIds?.length ?? 0) >
+                          0 && (
+                          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium border bg-[#faf2ee] text-[#b85028] border-[#e8e1dd]">
+                            <Buildings size={11} weight="duotone" />
+                            <span>
+                              +{activeActivityModal.includedTownIds?.length}{' '}
+                              {activeActivityModal.includedTownIds?.length === 1
+                                ? t(
+                                    'activities:interTown.singleTown',
+                                    'participating city',
+                                  )
+                                : t(
+                                    'activities:interTown.multipleTowns',
+                                    'participating cities',
+                                  )}
+                            </span>
+                          </span>
+                        )}
+                    </div>
+
                     <h3 className="text-base font-bold text-[#1e1b19] leading-snug">
                       {activeActivityModal.title}
                     </h3>

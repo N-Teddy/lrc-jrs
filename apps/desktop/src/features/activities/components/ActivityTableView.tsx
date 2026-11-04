@@ -241,10 +241,16 @@ export const ActivityTableView: React.FC<ActivityTableViewProps> = ({
                             <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold border bg-[#edf3ee] text-[#486b52] border-[#c2e9ca]">
                               <Buildings size={11} weight="bold" />
                               <span>
-                                Inter-villes · Hôte:{' '}
-                                {activity.hostTown?.name ||
-                                  activity.town?.name ||
-                                  'Autre'}
+                                {t(
+                                  'activities:detail.interTownHost',
+                                  'Inter-Town · Host: {{host}}',
+                                  {
+                                    host:
+                                      activity.hostTown?.name ||
+                                      activity.town?.name ||
+                                      t('activities:detail.otherHost', 'Other'),
+                                  },
+                                )}
                               </span>
                             </span>
                           </div>
@@ -257,8 +263,14 @@ export const ActivityTableView: React.FC<ActivityTableViewProps> = ({
                                 <span>
                                   +{activity.includedTownIds?.length}{' '}
                                   {activity.includedTownIds?.length === 1
-                                    ? 'ville participante'
-                                    : 'villes participantes'}
+                                    ? t(
+                                        'activities:interTown.singleTown',
+                                        'participating city',
+                                      )
+                                    : t(
+                                        'activities:interTown.multipleTowns',
+                                        'participating cities',
+                                      )}
                                 </span>
                               </span>
                             </div>

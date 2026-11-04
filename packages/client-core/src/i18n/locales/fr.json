@@ -387,7 +387,13 @@
       "delete": "Supprimer",
       "attendancePending": "Présences en attente",
       "attendees": "Participants",
-      "attendee": "Participant"
+      "attendee": "Participant",
+      "attendanceBreakdown": "({{members}}m · {{guests}}i)"
+    },
+    "interTown": {
+      "hostBanner": "Inter-villes · Hôte : {{town}}",
+      "singleTown": "ville participante",
+      "multipleTowns": "villes participantes"
     },
     "calendar": {
       "activitySingle": "Activité",
