@@ -6,10 +6,11 @@ import {
   useWebSocket,
 } from '@jrs/client-core';
 import type { IAuthUser, NotificationResource } from '@jrs/shared';
-import { ArrowUUpLeft, Buildings } from '@phosphor-icons/react';
+import { ArrowUUpLeft, Bug, Buildings } from '@phosphor-icons/react';
 import { motion } from 'motion/react';
 import type React from 'react';
 import { useState } from 'react';
+import { AppCrashFallback } from '../../../components';
 import { APP_VERSION } from '../../../constants/version';
 import { ActivitiesFeature } from '../../activities';
 import { ChangePasswordModal } from '../../auth';
@@ -64,6 +65,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 
   // Resource Navigation Deep-link States
   const [memberSubTab, setMemberSubTab] = useState<MemberSubTab>('directory');
+  const [showDevErrorPreview, setShowDevErrorPreview] = useState(false);
   const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
   const [activitySubTab, setActivitySubTab] = useState<
     | 'schedule'
@@ -345,8 +347,19 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             })}
           </div>
 
-          {/* Right: Build & Edition Metadata */}
+          {/* Right: Build & Edition Metadata + Dev Review Link */}
           <div className="flex items-center gap-2 font-mono text-[11px] text-[#8a726a] shrink-0">
+            {import.meta.env.DEV && (
+              <button
+                type="button"
+                onClick={() => setShowDevErrorPreview(true)}
+                className="px-2 py-0.5 rounded-md bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 font-sans text-[10px] font-bold transition-colors cursor-pointer flex items-center gap-1 mr-1"
+                title="Developer Only: Preview Crash & Error Screen"
+              >
+                <Bug size={12} weight="bold" />
+                <span>DEV: Review Error Page</span>
+              </button>
+            )}
             <span className="px-2 py-0.5 rounded-md bg-[#faf2ee] border border-[#e8e1dd] text-[#57423b] font-bold">
               v{APP_VERSION}
             </span>
@@ -370,6 +383,24 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         isOpen={isChangePasswordOpen}
         onClose={closeChangePassword}
       />
+
+      {/* 6. Dev-Only Error Page Preview Overlay */}
+      {showDevErrorPreview && (
+        <div className="fixed inset-0 z-50 bg-[#fff8f5] overflow-y-auto">
+          <AppCrashFallback
+            error={
+              new Error(
+                'DevSimulationError: Testing the application crash error page and diagnostics.',
+              )
+            }
+            errorInfo={{
+              componentStack:
+                '    at DashboardLayout (DashboardLayout.tsx:372)\n    at AppContent (App.tsx:144)',
+            }}
+            onReset={() => setShowDevErrorPreview(false)}
+          />
+        </div>
+      )}
     </div>
   );
 };

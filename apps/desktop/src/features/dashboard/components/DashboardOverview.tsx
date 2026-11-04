@@ -1,16 +1,19 @@
-import { useTownContext, useTranslation } from '@jrs/client-core';
+import { useTranslation } from '@jrs/client-core';
 import type { IAuthUser } from '@jrs/shared';
 import {
   ArrowRight,
+  Bug,
   CalendarDots,
-  CheckCircle,
   FolderOpen,
   ShieldCheck,
   Sparkle,
   Users,
+  Warning,
 } from '@phosphor-icons/react';
 import type React from 'react';
+import { useState } from 'react';
 import constructionComingSoonSvg from '../../../assets/illustrations/construction-coming-soon.svg';
+import { AppCrashFallback } from '../../../components/AppCrashFallback';
 import type { DashboardTabId } from '../hooks/use-dashboard-layout';
 
 interface DashboardOverviewProps {
@@ -19,11 +22,36 @@ interface DashboardOverviewProps {
 }
 
 export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
-  user,
   onSelectTab,
 }) => {
   const { t } = useTranslation();
-  const { activeTown } = useTownContext();
+  const [isPreviewingError, setIsPreviewingError] = useState(false);
+  const [triggerRealCrash, setTriggerRealCrash] = useState(false);
+
+  // If testing real crash in dev mode, throw an unhandled runtime error for ErrorBoundary
+  if (triggerRealCrash) {
+    throw new Error(
+      'DevSimulationError: Unhandled runtime error triggered to verify React ErrorBoundary.',
+    );
+  }
+
+  // If previewing the error page directly
+  if (isPreviewingError) {
+    return (
+      <AppCrashFallback
+        error={
+          new Error(
+            'DevSimulationError: Testing the application crash error page and diagnostics.',
+          )
+        }
+        errorInfo={{
+          componentStack:
+            '    at DashboardOverview (DashboardOverview.tsx:32)\n    at DashboardLayout (DashboardLayout.tsx:298)\n    at AppContent (App.tsx:144)',
+        }}
+        onReset={() => setIsPreviewingError(false)}
+      />
+    );
+  }
 
   const quickNavItems: Array<{
     tab: DashboardTabId;
@@ -64,19 +92,6 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
 
   return (
     <div className="w-full flex flex-col items-center justify-center py-6 sm:py-10 animate-in fade-in duration-300">
-      {/* Top Ambient Scope Pill */}
-      <div className="flex items-center gap-2.5 bg-[#faf2ee] border border-[#e8e1dd] px-4 py-1.5 rounded-full text-xs mb-4 shadow-2xs">
-        <span className="w-2 h-2 rounded-full bg-[#486b52] animate-pulse" />
-        <span className="font-bold text-[#1e1b19]">
-          {activeTown
-            ? `${activeTown.name} (${activeTown.code})`
-            : t('towns:activeHub', 'Active Hub')}
-        </span>
-        <span className="text-[#8a726a] font-mono text-[11px]">
-          #LRC-JRS-PORTAL
-        </span>
-      </div>
-
       {/* Large Vector Illustration - Seamless on warm canvas */}
       <div className="relative flex items-center justify-center my-2">
         <img
@@ -106,7 +121,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
       </p>
 
       {/* Quick Access Navigation Buttons */}
-      <div className="w-full max-w-2xl px-4 mb-8">
+      <div className="w-full max-w-2xl px-4 mb-4">
         <p className="text-[11px] font-bold uppercase tracking-wider text-[#8a726a] text-center mb-3">
           {t(
             'dashboard:quickActionsTitle',
@@ -144,16 +159,35 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
         </div>
       </div>
 
-      {/* Bottom Session Details */}
-      <div className="flex items-center gap-2 text-xs text-[#8a726a] bg-white/70 backdrop-blur-xs px-4 py-2 rounded-lg border border-[#e8e1dd]/80 shadow-2xs">
-        <CheckCircle size={15} weight="fill" className="text-[#486b52]" />
-        <span>
-          {t('dashboard:signedInAs', {
-            name: user.fullName,
-            role: user.role,
-          })}
-        </span>
-      </div>
+      {/* Dev-Only Error Page Review Section */}
+      {import.meta.env.DEV && (
+        <div className="mt-6 flex flex-col items-center gap-2">
+          <div className="flex flex-wrap items-center justify-center gap-2.5">
+            <button
+              type="button"
+              onClick={() => setIsPreviewingError(true)}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 text-xs font-semibold transition-all cursor-pointer shadow-2xs"
+              title="Preview the application crash screen without unmounting state"
+            >
+              <Bug size={14} weight="bold" className="text-amber-700" />
+              <span>Review Error Page</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setTriggerRealCrash(true)}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-900 border border-red-300 text-xs font-semibold transition-all cursor-pointer shadow-2xs"
+              title="Throw an actual unhandled exception to test the root ErrorBoundary"
+            >
+              <Warning size={14} weight="bold" className="text-red-700" />
+              <span>Simulate Real Crash</span>
+            </button>
+          </div>
+          <span className="text-[10px] text-[#8a726a] font-mono">
+            Visible in development only
+          </span>
+        </div>
+      )}
     </div>
   );
 };
