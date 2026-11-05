@@ -903,7 +903,15 @@
       "accessHelper": "Un mot de passe temporaire à usage unique sera généré et envoyé immédiatement par WhatsApp et Email. Si décoché, le membre reste enregistré hors-ligne uniquement.",
       "submitting": "Enregistrement...",
       "saving": "Sauvegarde des modifications...",
-      "saveChanges": "Enregistrer les Modifications"
+      "saveChanges": "Enregistrer les Modifications",
+      "yearsShort": "ans",
+      "defaultMemberName": "Membre",
+      "emailPlaceholder": "membre@exemple.com",
+      "errorImageSize": "La taille de l'image doit être inférieure à 5 Mo",
+      "errorFullNameRequired": "Le nom complet est obligatoire.",
+      "errorDobRequired": "La date de naissance est obligatoire.",
+      "errorInvalidPhone": "Veuillez saisir un numéro de téléphone camerounais valide à 9 chiffres.",
+      "errorUpdateFailed": "Échec de la mise à jour du membre."
     },
     "detail": {
       "backToMembers": "Retour aux Membres",

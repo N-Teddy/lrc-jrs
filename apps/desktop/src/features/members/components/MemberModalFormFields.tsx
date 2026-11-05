@@ -138,15 +138,17 @@ export const MemberModalFormFields: React.FC<MemberModalFormFieldsProps> = ({
       </div>
 
       {/* Row 1: Full Name & Gender */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
         <div className="flex flex-col gap-1.5">
-          <label
-            htmlFor="member-fullName"
-            className="text-xs font-bold text-[#1e1b19]"
-          >
-            {t('members:modal.fullName')}{' '}
-            <span className="text-[#b85028]">*</span>
-          </label>
+          <div className="flex items-center justify-between h-5">
+            <label
+              htmlFor="member-fullName"
+              className="text-xs font-bold text-[#1e1b19]"
+            >
+              {t('members:modal.fullName', 'Full Name')}{' '}
+              <span className="text-[#b85028]">*</span>
+            </label>
+          </div>
           <input
             id="member-fullName"
             type="text"
@@ -154,15 +156,20 @@ export const MemberModalFormFields: React.FC<MemberModalFormFieldsProps> = ({
             value={formData.fullName}
             onChange={(e) => onChange('fullName', e.target.value)}
             className="h-10 w-full bg-[#faf2ee] focus:bg-white text-xs text-[#1e1b19] px-3.5 rounded-md border border-[#e8e1dd] focus:border-[#b85028] outline-none transition-all"
-            placeholder="e.g. John Doe"
+            placeholder={t(
+              'members:modal.fullNamePlaceholder',
+              "e.g. Samuel Eto'o Junior",
+            )}
           />
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <span className="text-xs font-bold text-[#1e1b19]">
-            {t('members:modal.gender', 'Gender')}{' '}
-            <span className="text-[#b85028]">*</span>
-          </span>
+          <div className="flex items-center justify-between h-5">
+            <span className="text-xs font-bold text-[#1e1b19]">
+              {t('members:modal.gender', 'Gender')}{' '}
+              <span className="text-[#b85028]">*</span>
+            </span>
+          </div>
           <div className="grid grid-cols-2 gap-2 h-10">
             <button
               type="button"
@@ -190,10 +197,10 @@ export const MemberModalFormFields: React.FC<MemberModalFormFieldsProps> = ({
         </div>
       </div>
 
-      {/* Row 2: Date of Birth & Integration Date */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      {/* Row 2: Date of Birth & Integration Date (Always on the same horizontal row) */}
+      <div className="grid grid-cols-2 gap-4 items-start">
         <div className="flex flex-col gap-1.5">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between h-5">
             <label
               htmlFor="member-dob"
               className="text-xs font-bold text-[#1e1b19]"
@@ -203,7 +210,7 @@ export const MemberModalFormFields: React.FC<MemberModalFormFieldsProps> = ({
             </label>
             {age !== null && (
               <span className="text-[10px] font-bold text-[#b85028] bg-[#fff2ee] px-2 py-0.5 rounded-xs border border-[#ffdbcf]">
-                {age} yrs • {ageCat}
+                {age} {t('members:modal.yearsShort', 'yrs')} • {ageCat}
               </span>
             )}
           </div>
@@ -217,15 +224,17 @@ export const MemberModalFormFields: React.FC<MemberModalFormFieldsProps> = ({
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label
-            htmlFor="member-integrationDate"
-            className="text-xs font-bold text-[#1e1b19]"
-          >
-            {t(
-              'members:modal.integrationDateOptional',
-              'Integration Date (Optional)',
-            )}
-          </label>
+          <div className="flex items-center justify-between h-5">
+            <label
+              htmlFor="member-integrationDate"
+              className="text-xs font-bold text-[#1e1b19]"
+            >
+              {t(
+                'members:modal.integrationDateOptional',
+                'Integration Date (Optional)',
+              )}
+            </label>
+          </div>
           <DatePicker
             id="member-integrationDate"
             value={formData.integrationDate}
@@ -239,18 +248,20 @@ export const MemberModalFormFields: React.FC<MemberModalFormFieldsProps> = ({
       </div>
 
       {/* Row 3: Phone Number & Email */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
         <div className="flex flex-col gap-1.5">
-          <label
-            htmlFor="member-phone"
-            className="text-xs font-bold text-[#1e1b19]"
-          >
-            {t(
-              'members:modal.phoneNumber',
-              'Phone Number (WhatsApp Preferred)',
-            )}{' '}
-            <span className="text-[#b85028]">*</span>
-          </label>
+          <div className="flex items-center justify-between h-5">
+            <label
+              htmlFor="member-phone"
+              className="text-xs font-bold text-[#1e1b19]"
+            >
+              {t(
+                'members:modal.phoneNumber',
+                'Phone Number (WhatsApp Preferred)',
+              )}{' '}
+              <span className="text-[#b85028]">*</span>
+            </label>
+          </div>
           <div className="flex items-center h-10 w-full bg-[#faf2ee] rounded-md border border-[#e8e1dd] focus-within:border-[#b85028] focus-within:bg-white transition-all overflow-hidden">
             <div className="px-3 border-r border-[#e8e1dd] bg-[#f4ece9] h-full flex items-center gap-1.5 shrink-0 select-none">
               <span className="text-xs font-bold text-[#57423b]">🇨🇲 +237</span>
@@ -271,21 +282,26 @@ export const MemberModalFormFields: React.FC<MemberModalFormFieldsProps> = ({
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label
-            htmlFor="member-email"
-            className="text-xs font-bold text-[#1e1b19]"
-          >
-            {t(
-              'members:modal.emailAddressOptional',
-              'Email Address (Optional)',
-            )}
-          </label>
+          <div className="flex items-center justify-between h-5">
+            <label
+              htmlFor="member-email"
+              className="text-xs font-bold text-[#1e1b19]"
+            >
+              {t(
+                'members:modal.emailAddressOptional',
+                'Email Address (Optional)',
+              )}
+            </label>
+          </div>
           <input
             id="member-email"
             type="email"
             value={formData.email}
             onChange={(e) => onChange('email', e.target.value)}
-            placeholder="member@example.com"
+            placeholder={t(
+              'members:modal.emailPlaceholder',
+              'member@example.com',
+            )}
             className="h-10 w-full bg-[#faf2ee] focus:bg-white text-xs text-[#1e1b19] px-3.5 rounded-md border border-[#e8e1dd] focus:border-[#b85028] outline-none transition-all"
           />
         </div>

@@ -904,7 +904,15 @@
       "accessHelper": "A single-use temporary password will be generated and dispatched immediately via WhatsApp and Email. If unchecked, the member remains in the offline registry only.",
       "submitting": "Registering...",
       "saving": "Saving changes...",
-      "saveChanges": "Save Changes"
+      "saveChanges": "Save Changes",
+      "yearsShort": "yrs",
+      "defaultMemberName": "Member",
+      "emailPlaceholder": "member@example.com",
+      "errorImageSize": "Image size must be less than 5MB",
+      "errorFullNameRequired": "Full name is required.",
+      "errorDobRequired": "Date of birth is required.",
+      "errorInvalidPhone": "Please enter a valid 9-digit Cameroonian telephone number.",
+      "errorUpdateFailed": "Failed to update member."
     },
     "detail": {
       "backToMembers": "Back to Members",

@@ -121,7 +121,9 @@ export const EditMemberModal: React.FC<EditMemberModalProps> = ({
     const file = e.target.files?.[0];
     if (file) {
       if (file.size > 5 * 1024 * 1024) {
-        setErrorMsg('Image size must be less than 5MB');
+        setErrorMsg(
+          t('members:modal.errorImageSize', 'Image size must be less than 5MB'),
+        );
         return;
       }
       const url = URL.createObjectURL(file);
@@ -150,15 +152,24 @@ export const EditMemberModal: React.FC<EditMemberModalProps> = ({
     setErrorMsg(null);
 
     if (!formData.fullName.trim()) {
-      setErrorMsg('Full name is required.');
+      setErrorMsg(
+        t('members:modal.errorFullNameRequired', 'Full name is required.'),
+      );
       return;
     }
     if (!formData.dateOfBirth) {
-      setErrorMsg('Date of birth is required.');
+      setErrorMsg(
+        t('members:modal.errorDobRequired', 'Date of birth is required.'),
+      );
       return;
     }
     if (formData.phoneDigits.length < 9) {
-      setErrorMsg('Please enter a valid 9-digit Cameroonian telephone number.');
+      setErrorMsg(
+        t(
+          'members:modal.errorInvalidPhone',
+          'Please enter a valid 9-digit Cameroonian telephone number.',
+        ),
+      );
       return;
     }
 
@@ -194,7 +205,7 @@ export const EditMemberModal: React.FC<EditMemberModalProps> = ({
       setErrorMsg(
         err?.response?.data?.message ||
           err?.message ||
-          'Failed to update member.',
+          t('members:modal.errorUpdateFailed', 'Failed to update member.'),
       );
     }
   };
