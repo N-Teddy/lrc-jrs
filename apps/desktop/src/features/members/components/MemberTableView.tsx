@@ -2,7 +2,6 @@ import { useTownContext, useTranslation } from '@jrs/client-core';
 import type { IUser } from '@jrs/shared';
 import {
   ArrowCounterClockwise,
-  CalendarCheck,
   ChatCircleText,
   Check,
   Copy,
@@ -377,27 +376,6 @@ export const MemberTableView: React.FC<MemberTableViewProps> = ({
                             <Eye size={15} className="text-[#8a726a]" />
                             <span>
                               {t('members:table.viewProfile', 'View Profile')}
-                            </span>
-                          </button>
-
-                          {/* Attendance History */}
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setOpenMenuId(null);
-                              onViewMember(m.id, 'attendance');
-                            }}
-                            className="w-full px-3 py-2 text-left text-xs text-[#1e1b19] hover:bg-[#faf2ee] flex items-center gap-2 font-medium cursor-pointer"
-                          >
-                            <CalendarCheck
-                              size={15}
-                              className="text-[#8a726a]"
-                            />
-                            <span>
-                              {t(
-                                'members:table.attendanceHistory',
-                                'Attendance History',
-                              )}
                             </span>
                           </button>
 

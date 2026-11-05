@@ -1,4 +1,4 @@
-import { useTranslation } from '@jrs/client-core';
+import { useMembersQuery, useTranslation } from '@jrs/client-core';
 import type { IUser } from '@jrs/shared';
 import {
   ChatCircleText,
@@ -11,14 +11,15 @@ import {
   X,
 } from '@phosphor-icons/react';
 import type React from 'react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { UserAvatar } from '../../../components';
 import { formatCameroonPhone } from '../../members/utils/member-ui.utils';
 
 interface BatchInviteModalProps {
   isOpen: boolean;
   onClose: () => void;
-  offlineMembers: IUser[];
+  offlineMembers?: IUser[];
+  activeTownId?: string;
   onBatchInvite: (
     memberIds: string[],
     channel: 'whatsapp' | 'email',
@@ -28,28 +29,68 @@ interface BatchInviteModalProps {
 export const BatchInviteModal: React.FC<BatchInviteModalProps> = ({
   isOpen,
   onClose,
-  offlineMembers,
+  offlineMembers = [],
+  activeTownId,
   onBatchInvite,
 }) => {
   const { t } = useTranslation(['access', 'common']);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [channel, setChannel] = useState<'whatsapp' | 'email'>('whatsapp');
   const [isSending, setIsSending] = useState(false);
+
+  // Debounce search input to avoid spamming server queries
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery.trim());
+    }, 200);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // Query backend directly when searching
+  const { data: serverSearchResults, isLoading: isSearchLoading } =
+    useMembersQuery(
+      debouncedSearch
+        ? {
+            search: debouncedSearch,
+            townId: activeTownId || undefined,
+            hasAppAccess: false,
+            limit: 100,
+          }
+        : undefined,
+    );
+
+  // Combine base offlineMembers with server search results, deduplicating by ID
+  const allKnownMembers = useMemo(() => {
+    const map = new Map<string, IUser>();
+    for (const m of offlineMembers) {
+      map.set(m.id, m);
+    }
+    if (serverSearchResults?.items) {
+      for (const m of serverSearchResults.items) {
+        if (!m.account?.hasAppAccess) {
+          map.set(m.id, m);
+        }
+      }
+    }
+    return Array.from(map.values());
+  }, [offlineMembers, serverSearchResults?.items]);
 
   // Filter members dynamically based on search query
   const filteredMembers = useMemo(() => {
     if (!searchQuery.trim()) return offlineMembers;
     const q = searchQuery.toLowerCase().trim();
-    return offlineMembers.filter((m) => {
-      const nameMatch = m.fullName.toLowerCase().includes(q);
-      const phoneMatch = m.phoneNumber?.toLowerCase().includes(q);
+    return allKnownMembers.filter((m) => {
+      const nameMatch = (m.fullName ?? '').toLowerCase().includes(q);
+      const phoneMatch = (m.phoneNumber ?? '').toLowerCase().includes(q);
+      const emailMatch = (m.email ?? '').toLowerCase().includes(q);
       const townMatch =
-        m.homeTown?.name?.toLowerCase().includes(q) ||
-        m.homeTown?.code?.toLowerCase().includes(q);
-      return nameMatch || phoneMatch || townMatch;
+        (m.homeTown?.name ?? '').toLowerCase().includes(q) ||
+        (m.homeTown?.code ?? '').toLowerCase().includes(q);
+      return nameMatch || phoneMatch || emailMatch || townMatch;
     });
-  }, [offlineMembers, searchQuery]);
+  }, [allKnownMembers, offlineMembers, searchQuery]);
 
   if (!isOpen) return null;
 
@@ -95,13 +136,13 @@ export const BatchInviteModal: React.FC<BatchInviteModalProps> = ({
       onClick={onClose}
     >
       <div
-        className="w-full max-w-2xl bg-white rounded-xl border border-[#e8e1dd] shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+        className="w-full max-w-3xl bg-white rounded-xl border border-[#e8e1dd]/80 shadow-2xl overflow-hidden flex flex-col h-[85vh] max-h-[780px]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="p-6 border-b border-[#f4ece9] flex items-start justify-between">
+        <div className="p-6 pb-4 border-b border-[#f4ece9] flex items-start justify-between shrink-0 bg-gradient-to-r from-white via-white to-[#faf2ee]">
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-lg bg-[#fff2ee] border border-[#ffdbcf] text-[#b85028] flex items-center justify-center shrink-0">
+            <div className="w-11 h-11 rounded-lg bg-[#fff2ee] border border-[#ffdbcf] text-[#b85028] flex items-center justify-center shrink-0 shadow-2xs">
               <PaperPlaneTilt size={24} weight="duotone" />
             </div>
             <div>
@@ -122,14 +163,14 @@ export const BatchInviteModal: React.FC<BatchInviteModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="w-8 h-8 rounded-md bg-[#faf2ee] hover:bg-[#f4ece9] border border-[#e8e1dd] flex items-center justify-center text-[#8a726a] hover:text-[#1e1b19] cursor-pointer"
+            className="w-8 h-8 rounded-md bg-[#faf2ee] hover:bg-[#f4ece9] border border-[#e8e1dd]/80 flex items-center justify-center text-[#8a726a] hover:text-[#1e1b19] cursor-pointer transition-colors"
           >
             <X size={16} />
           </button>
         </div>
 
         {/* Channel Selector */}
-        <div className="px-6 py-3.5 bg-[#faf2ee] border-b border-[#e8e1dd] flex flex-col gap-2">
+        <div className="px-6 py-3 bg-[#faf2ee]/70 border-b border-[#f4ece9] flex flex-col gap-2 shrink-0">
           <span className="text-[11px] font-bold text-[#8a726a] uppercase tracking-wider">
             {t('access:modals.selectChannel', 'Dispatch Channel')}
           </span>
@@ -140,7 +181,7 @@ export const BatchInviteModal: React.FC<BatchInviteModalProps> = ({
               className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-md border text-xs font-bold transition-all cursor-pointer ${
                 channel === 'whatsapp'
                   ? 'bg-[#c2e9ca] text-[#2c4e37] border-[#a9d0b2] shadow-xs'
-                  : 'bg-white text-[#8a726a] border-[#e8e1dd] hover:bg-[#f4ece9]'
+                  : 'bg-white text-[#8a726a] border-[#e8e1dd]/80 hover:bg-[#f4ece9]'
               }`}
             >
               <ChatCircleText size={16} weight="fill" />
@@ -152,7 +193,7 @@ export const BatchInviteModal: React.FC<BatchInviteModalProps> = ({
               className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-md border text-xs font-bold transition-all cursor-pointer ${
                 channel === 'email'
                   ? 'bg-[#fff2ee] text-[#b85028] border-[#ffdbcf] shadow-xs'
-                  : 'bg-white text-[#8a726a] border-[#e8e1dd] hover:bg-[#f4ece9]'
+                  : 'bg-white text-[#8a726a] border-[#e8e1dd]/80 hover:bg-[#f4ece9]'
               }`}
             >
               <EnvelopeSimple size={16} weight="fill" />
@@ -162,10 +203,10 @@ export const BatchInviteModal: React.FC<BatchInviteModalProps> = ({
         </div>
 
         {/* Search Bar & Batch Filter Controls */}
-        <div className="px-6 pt-4 pb-2 flex flex-col gap-3">
+        <div className="px-6 pt-4 pb-2 flex flex-col gap-3 shrink-0">
           <div className="relative flex items-center">
             <MagnifyingGlass
-              size={16}
+              size={18}
               className="absolute left-3.5 text-[#8a726a] pointer-events-none"
             />
             <input
@@ -176,15 +217,15 @@ export const BatchInviteModal: React.FC<BatchInviteModalProps> = ({
                 'access:modals.searchMembersPlaceholder',
                 'Search offline members by name, phone number, or hub...',
               )}
-              className="w-full pl-9 pr-9 py-2 rounded-lg bg-[#faf2ee] focus:bg-white border border-[#e8e1dd] focus:border-[#b85028] focus:ring-2 focus:ring-[#b85028]/20 text-xs font-medium text-[#1e1b19] placeholder:text-[#8a726a] transition-all"
+              className="w-full h-11 pl-10 pr-10 rounded-lg bg-[#faf2ee]/70 focus:bg-white border border-[#e8e1dd]/80 focus:border-[#b85028] focus:ring-2 focus:ring-[#b85028]/15 text-xs sm:text-sm font-medium text-[#1e1b19] placeholder:text-[#8a726a] transition-all outline-none"
             />
             {searchQuery && (
               <button
                 type="button"
                 onClick={() => setSearchQuery('')}
-                className="absolute right-3 text-[#8a726a] hover:text-[#1e1b19] p-0.5 rounded cursor-pointer"
+                className="absolute right-3 text-[#8a726a] hover:text-[#1e1b19] p-1 rounded cursor-pointer transition-colors"
               >
-                <X size={14} />
+                <X size={15} />
               </button>
             )}
           </div>
@@ -196,9 +237,13 @@ export const BatchInviteModal: React.FC<BatchInviteModalProps> = ({
               </span>
               <span className="text-[#b09e97]">•</span>
               <span className="text-[#8a726a]">
-                {filteredMembers.length === offlineMembers.length
-                  ? `${offlineMembers.length} offline members`
-                  : `Showing ${filteredMembers.length} of ${offlineMembers.length}`}
+                {isSearchLoading ? (
+                  <span>Searching directory...</span>
+                ) : filteredMembers.length === offlineMembers.length ? (
+                  `${offlineMembers.length} offline members`
+                ) : (
+                  `Showing ${filteredMembers.length} members`
+                )}
               </span>
             </div>
             {filteredMembers.length > 0 && (
@@ -225,16 +270,16 @@ export const BatchInviteModal: React.FC<BatchInviteModalProps> = ({
 
         {/* Members Selection List */}
         <div className="px-6 py-2 flex-1 overflow-y-auto min-h-0">
-          <div className="flex flex-col gap-2 max-h-[340px] pr-1">
-            {offlineMembers.length === 0 ? (
-              <div className="py-12 text-center text-xs text-[#8a726a]">
+          <div className="flex flex-col gap-2 min-h-[340px] pr-1">
+            {offlineMembers.length === 0 && !searchQuery.trim() ? (
+              <div className="py-16 text-center text-xs text-[#8a726a]">
                 {t(
                   'access:modals.allMembersOnboarded',
                   'All members in this hub already have platform access credentials granted!',
                 )}
               </div>
             ) : filteredMembers.length === 0 ? (
-              <div className="py-12 text-center text-xs text-[#8a726a]">
+              <div className="py-16 text-center text-xs text-[#8a726a]">
                 No offline members match "{searchQuery}".
               </div>
             ) : (
@@ -247,7 +292,7 @@ export const BatchInviteModal: React.FC<BatchInviteModalProps> = ({
                     className={`p-3 rounded-lg border flex items-center justify-between transition-all cursor-pointer ${
                       isSelected
                         ? 'bg-[#fff8f5] border-[#b85028] shadow-2xs'
-                        : 'bg-white border-[#e8e1dd] hover:bg-[#faf2ee]'
+                        : 'bg-white border-[#f0eae7] hover:border-[#b85028]/40 hover:bg-[#faf2ee]/50'
                     }`}
                   >
                     <div className="flex items-center gap-3 min-w-0">
@@ -274,7 +319,7 @@ export const BatchInviteModal: React.FC<BatchInviteModalProps> = ({
                         </div>
                       </div>
                     </div>
-                    <span className="px-2 py-0.5 rounded-xs text-[10px] font-mono font-bold bg-[#faf2ee] text-[#57423b] border border-[#e8e1dd] shrink-0">
+                    <span className="px-2 py-0.5 rounded-xs text-[10px] font-mono font-bold bg-[#faf2ee] text-[#57423b] border border-[#e8e1dd]/70 shrink-0">
                       {m.homeTown?.code ?? 'HUB'}
                     </span>
                   </div>
@@ -285,7 +330,7 @@ export const BatchInviteModal: React.FC<BatchInviteModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="p-4 bg-[#faf2ee] border-t border-[#e8e1dd] flex items-center justify-between">
+        <div className="p-4 bg-[#faf2ee]/80 border-t border-[#f4ece9] flex items-center justify-between shrink-0">
           <span className="text-xs text-[#8a726a]">
             Temporary code expires in 48h
           </span>
@@ -293,7 +338,7 @@ export const BatchInviteModal: React.FC<BatchInviteModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-md bg-white border border-[#e8e1dd] text-xs font-bold text-[#57423b] hover:bg-[#f4ece9] cursor-pointer"
+              className="px-4 py-2 rounded-md bg-white border border-[#e8e1dd]/80 text-xs font-bold text-[#57423b] hover:bg-[#f4ece9] cursor-pointer transition-colors"
             >
               {t('common:cancel')}
             </button>
@@ -301,7 +346,7 @@ export const BatchInviteModal: React.FC<BatchInviteModalProps> = ({
               type="button"
               disabled={isSending || selectedIds.length === 0}
               onClick={handleSend}
-              className="px-5 py-2 rounded-md bg-[#b85028] hover:bg-[#a44520] text-white text-xs font-bold transition-all shadow-xs disabled:opacity-50 flex items-center gap-2 cursor-pointer"
+              className="px-5 py-2 rounded-md bg-[#b85028] hover:bg-[#a44520] text-white text-xs font-bold transition-all shadow-xs disabled:opacity-50 flex items-center gap-2 cursor-pointer active:scale-[0.98]"
             >
               <PaperPlaneTilt size={15} weight="bold" />
               <span>

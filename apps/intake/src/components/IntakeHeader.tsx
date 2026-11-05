@@ -68,16 +68,6 @@ export const IntakeHeader: React.FC<IntakeHeaderProps> = ({ info }) => {
           <span>{expiryLabel}</span>
         </div>
       </div>
-
-      {/* Custom Welcome Message if any */}
-      {info.customMessage && (
-        <div className="bg-white border border-[#e8e1dd] rounded-lg p-3.5 mb-4 text-left text-xs sm:text-sm text-[#57423b] shadow-xs relative">
-          <div className="text-[11px] font-bold text-[#b85028] uppercase tracking-wider mb-1 flex items-center gap-1">
-            <span>{t('header.noteFromCoordinator')}</span>
-          </div>
-          <p className="italic text-[#1e1b19]">"{info.customMessage}"</p>
-        </div>
-      )}
     </header>
   );
 };

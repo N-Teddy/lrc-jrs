@@ -1,8 +1,7 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsDateString,
   IsInt,
-  IsNotEmpty,
   IsOptional,
   IsString,
   Max,
@@ -10,13 +9,14 @@ import {
 } from 'class-validator';
 
 export class CreateRegistrationLinkDto {
-  @ApiProperty({
+  @ApiPropertyOptional({
     example: 'LRC JRS Douala - October Intake',
-    description: 'Title or purpose of the registration link',
+    description:
+      'Title or purpose of the registration link (auto-generated if omitted)',
   })
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
-  title: string;
+  title?: string;
 
   @ApiPropertyOptional({
     example: '6ac68720ccf60d46db9f8bfe',

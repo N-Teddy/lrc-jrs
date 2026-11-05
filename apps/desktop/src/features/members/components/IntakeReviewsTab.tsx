@@ -235,20 +235,6 @@ export const IntakeReviewsTab: React.FC<IntakeReviewsTabProps> = ({
 
         {/* Action Controls */}
         <div className="flex items-center gap-2 shrink-0 self-start md:self-auto">
-          {onOpenIntakeLinksModal && pendingMembers.length > 0 && (
-            <button
-              type="button"
-              onClick={onOpenIntakeLinksModal}
-              className="h-9 px-3.5 rounded-md bg-[#faf2ee] hover:bg-[#f4ece9] text-[#57423b] border border-[#e8e1dd] text-xs font-bold transition-all shadow-2xs flex items-center gap-1.5 cursor-pointer"
-              title="Manage and copy member invitation links"
-            >
-              <Link size={16} weight="bold" />
-              <span>
-                {t('members:intake.manageLinks', 'Manage Intake Links')}
-              </span>
-            </button>
-          )}
-
           <button
             type="button"
             onClick={() => refetch()}

@@ -4,7 +4,6 @@ import {
   ArrowCounterClockwise,
   ArrowRight,
   Cake,
-  CalendarCheck,
   ChatCircleText,
   DotsThreeVertical,
   EnvelopeSimple,
@@ -210,27 +209,6 @@ export const MemberCardGridView: React.FC<MemberCardGridViewProps> = ({
 
                     {openMenuId === m.id && (
                       <div className="absolute right-0 top-full mt-1 w-44 bg-white rounded-lg border border-[#e8e1dd] shadow-lg py-1 z-30 flex flex-col animate-in fade-in zoom-in-95 duration-100">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setOpenMenuId(null);
-                            onViewMember(m.id, 'attendance');
-                          }}
-                          className="w-full px-3 py-1.5 text-left text-xs text-[#1e1b19] hover:bg-[#faf2ee] flex items-center gap-2 font-medium cursor-pointer"
-                        >
-                          <CalendarCheck
-                            size={14}
-                            weight="bold"
-                            className="text-[#8a726a]"
-                          />
-                          <span>
-                            {t(
-                              'members:table.attendanceHistory',
-                              'Attendance History',
-                            )}
-                          </span>
-                        </button>
-
                         <button
                           type="button"
                           onClick={() => {

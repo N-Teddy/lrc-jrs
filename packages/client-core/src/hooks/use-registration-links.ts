@@ -4,7 +4,7 @@ import { useHttp } from '../context/http.context';
 import { queryKeys } from '../query/query-keys';
 
 export interface ICreateRegistrationLinkDto {
-  title: string;
+  title?: string;
   homeTownId?: string;
   expiresInHours?: number;
   expiresAt?: string;

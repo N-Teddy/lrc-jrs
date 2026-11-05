@@ -6,7 +6,7 @@ import type {
 import type { HttpClient } from '../client';
 
 export interface ICreateRegistrationLinkDto {
-  title: string;
+  title?: string;
   homeTownId?: string;
   expiresInHours?: number;
   expiresAt?: string;

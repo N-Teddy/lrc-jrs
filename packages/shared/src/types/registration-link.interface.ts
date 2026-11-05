@@ -48,3 +48,12 @@ export interface IPublicMemberRegistrationDto {
   intakeNote?: string;
   homeTownId?: string;
 }
+
+export interface ICreateRegistrationLinkDto {
+  title?: string;
+  homeTownId?: string;
+  expiresInHours?: number;
+  expiresAt?: string;
+  maxUses?: number;
+  customMessage?: string;
+}

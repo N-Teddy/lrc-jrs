@@ -291,6 +291,7 @@ export const AccessFeature: React.FC<AccessFeatureProps> = ({
         isOpen={isBatchInviteOpen}
         onClose={() => setIsBatchInviteOpen(false)}
         offlineMembers={offlineMembers}
+        activeTownId={selectedTownId || undefined}
         onBatchInvite={handleBatchInvite}
       />
 
