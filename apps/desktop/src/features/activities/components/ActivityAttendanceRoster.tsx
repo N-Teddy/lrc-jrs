@@ -491,8 +491,11 @@ export const ActivityAttendanceRoster: React.FC<
       setSaveSuccessMsg('Attendance recorded and synchronized successfully.');
       setTimeout(() => setSaveSuccessMsg(null), 4000);
     } catch (err: any) {
+      const serverMsg = Array.isArray(err?.response?.data?.message)
+        ? err.response.data.message.join(', ')
+        : err?.response?.data?.message || err?.message;
       setSaveErrorMsg(
-        err?.message ||
+        serverMsg ||
           'Failed to record attendance. Please check that the activity has started.',
       );
     }
