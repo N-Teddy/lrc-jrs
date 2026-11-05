@@ -144,9 +144,12 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
   );
   const isDayOfActivityOrLater = todayDay.getTime() >= startDay.getTime();
   const isCancelled = activity.status === ActivityStatus.CANCELLED;
+  const isScheduled = activity.status === ActivityStatus.SCHEDULED;
   const isPastActivity = now >= new Date(activity.endDate);
   const isCompleted = activity.status === ActivityStatus.COMPLETED;
   const canShowReportUi = isCompleted && isPastActivity && !isCancelled;
+  const canShowCheckInBanner =
+    isLocked || (!isScheduled && !isCancelled && isDayOfActivityOrLater);
 
   const activeTab =
     !isDayOfActivityOrLater && activeTabState === 'attendance'
@@ -720,92 +723,94 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
           </div>
 
           {/* Lock Status & Roll Call Banner */}
-          <div
-            className={`p-4 sm:p-5 rounded-xl border flex items-center justify-between gap-4 flex-wrap shadow-2xs max-w-2xl ${
-              isLocked
-                ? 'bg-[#fffbf2] border-[#fde8bb] text-[#812901]'
-                : 'bg-[#eef7f0] border-[#c2e9ca] text-[#2c4e37]'
-            }`}
-          >
-            <div className="flex items-center gap-3.5">
-              <div
-                className={`w-11 h-11 rounded-lg flex items-center justify-center shrink-0 ${
-                  isLocked
-                    ? 'bg-[#ffe082] text-[#812901]'
-                    : 'bg-[#c2e9ca] text-[#2c4e37]'
-                }`}
-              >
-                {isLocked ? (
-                  <Lock size={22} weight="bold" />
-                ) : (
-                  <LockOpen size={22} weight="bold" />
-                )}
-              </div>
-              <div className="flex flex-col">
-                <span className="font-bold text-sm">
-                  {isLocked
-                    ? t(
-                        'activities:detail.lockBanner.sealedTitle',
-                        'Attendance Finalized & Sealed',
-                      )
-                    : t(
-                        'activities:detail.lockBanner.openTitle',
-                        'Attendance Open for Check-In',
-                      )}
-                </span>
-                <span className="text-xs opacity-85">
-                  {isLocked
-                    ? t('activities:detail.lockBanner.sealedSubtitle', {
-                        name:
-                          activity.attendanceLockedByName ||
-                          t('common:roles.administrator', 'Administrator'),
-                        defaultValue: `Locked by ${activity.attendanceLockedByName || 'Administrator'} • Edits disabled without AP override`,
-                      })
-                    : t(
-                        'activities:detail.lockBanner.openSubtitle',
-                        'Active check-in session • Changes are autosaved to hub record',
-                      )}
-                </span>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              {isLocked
-                ? isCurrentUserAp && (
-                    <button
-                      type="button"
-                      onClick={() => setLockPromptOpen(true)}
-                      className="px-3.5 py-1.5 rounded-md bg-white border border-[#ffe082] text-xs font-bold text-[#812901] hover:bg-[#fffbf0] transition-colors cursor-pointer flex items-center gap-1.5 shadow-2xs"
-                    >
-                      <LockOpen size={14} weight="bold" />
-                      <span>
-                        {t(
-                          'activities:detail.lockBanner.unlockAp',
-                          'Unlock (AP Override)',
-                        )}
-                      </span>
-                    </button>
-                  )
-                : isPrivileged && (
-                    <button
-                      type="button"
-                      onClick={() => setLockPromptOpen(true)}
-                      className="px-4 py-2 rounded-md bg-[#2c4e37] hover:bg-[#233f2c] text-xs font-bold text-white transition-colors cursor-pointer flex items-center gap-1.5 shadow-2xs"
-                    >
-                      <Lock size={15} weight="bold" />
-                      <span>
-                        {t(
-                          'activities:detail.lockBanner.finalizeAndLock',
-                          'Finalize & Lock Attendance',
-                        )}
-                      </span>
-                    </button>
+          {canShowCheckInBanner && (
+            <div
+              className={`p-4 sm:p-5 rounded-xl border flex items-center justify-between gap-4 flex-wrap shadow-2xs max-w-2xl ${
+                isLocked
+                  ? 'bg-[#fffbf2] border-[#fde8bb] text-[#812901]'
+                  : 'bg-[#eef7f0] border-[#c2e9ca] text-[#2c4e37]'
+              }`}
+            >
+              <div className="flex items-center gap-3.5">
+                <div
+                  className={`w-11 h-11 rounded-lg flex items-center justify-center shrink-0 ${
+                    isLocked
+                      ? 'bg-[#ffe082] text-[#812901]'
+                      : 'bg-[#c2e9ca] text-[#2c4e37]'
+                  }`}
+                >
+                  {isLocked ? (
+                    <Lock size={22} weight="bold" />
+                  ) : (
+                    <LockOpen size={22} weight="bold" />
                   )}
+                </div>
+                <div className="flex flex-col">
+                  <span className="font-bold text-sm">
+                    {isLocked
+                      ? t(
+                          'activities:detail.lockBanner.sealedTitle',
+                          'Attendance Finalized & Sealed',
+                        )
+                      : t(
+                          'activities:detail.lockBanner.openTitle',
+                          'Attendance Open for Check-In',
+                        )}
+                  </span>
+                  <span className="text-xs opacity-85">
+                    {isLocked
+                      ? t('activities:detail.lockBanner.sealedSubtitle', {
+                          name:
+                            activity.attendanceLockedByName ||
+                            t('common:roles.administrator', 'Administrator'),
+                          defaultValue: `Locked by ${activity.attendanceLockedByName || 'Administrator'} • Edits disabled without AP override`,
+                        })
+                      : t(
+                          'activities:detail.lockBanner.openSubtitle',
+                          'Active check-in session • Changes are autosaved to hub record',
+                        )}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                {isLocked
+                  ? isCurrentUserAp && (
+                      <button
+                        type="button"
+                        onClick={() => setLockPromptOpen(true)}
+                        className="px-3.5 py-1.5 rounded-md bg-white border border-[#ffe082] text-xs font-bold text-[#812901] hover:bg-[#fffbf0] transition-colors cursor-pointer flex items-center gap-1.5 shadow-2xs"
+                      >
+                        <LockOpen size={14} weight="bold" />
+                        <span>
+                          {t(
+                            'activities:detail.lockBanner.unlockAp',
+                            'Unlock (AP Override)',
+                          )}
+                        </span>
+                      </button>
+                    )
+                  : isPrivileged && (
+                      <button
+                        type="button"
+                        onClick={() => setLockPromptOpen(true)}
+                        className="px-4 py-2 rounded-md bg-[#2c4e37] hover:bg-[#233f2c] text-xs font-bold text-white transition-colors cursor-pointer flex items-center gap-1.5 shadow-2xs"
+                      >
+                        <Lock size={15} weight="bold" />
+                        <span>
+                          {t(
+                            'activities:detail.lockBanner.finalizeAndLock',
+                            'Finalize & Lock Attendance',
+                          )}
+                        </span>
+                      </button>
+                    )}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Lock / Unlock Confirmation Prompt */}
-          {lockPromptOpen && (
+          {canShowCheckInBanner && lockPromptOpen && (
             <div className="p-5 rounded-xl bg-white border-2 border-[#b85028] shadow-md flex flex-col gap-3 animate-in fade-in duration-150">
               <div className="flex items-center justify-between">
                 <h4 className="text-xs font-bold text-[#1e1b19] flex items-center gap-2">
