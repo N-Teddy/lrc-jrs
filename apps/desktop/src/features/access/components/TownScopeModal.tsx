@@ -54,8 +54,14 @@ export const TownScopeModal: React.FC<TownScopeModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-[#1e1b19]/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-200">
-      <div className="w-full max-w-[500px] bg-white rounded-xl border border-[#e8e1dd] shadow-2xl overflow-hidden flex flex-col">
+    <div
+      className="fixed inset-0 z-50 bg-[#1e1b19]/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-200"
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-[500px] bg-white rounded-xl border border-[#e8e1dd] shadow-2xl overflow-hidden flex flex-col"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Header */}
         <div className="p-6 border-b border-[#f4ece9] flex items-start justify-between">
           <div className="flex items-center gap-3">

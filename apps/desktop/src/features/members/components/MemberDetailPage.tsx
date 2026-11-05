@@ -663,54 +663,9 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
               )}
             </div>
 
-            {/* Official Dual Pillars: Current Resident Hub <-> Origin Hub */}
+            {/* Official Dual Pillars: Origin Hub -> Current Resident Hub */}
             <div className="grid grid-cols-1 lg:grid-cols-7 gap-4 items-center relative z-10">
-              {/* Pillar 1: Current Resident Hub (3 cols) */}
-              <div className="lg:col-span-3 p-5 rounded-lg bg-white border border-[#c2e9ca] shadow-2xs flex flex-col justify-between gap-3 relative overflow-hidden group">
-                <div className="absolute top-0 left-0 right-0 h-1 bg-[#486b52]" />
-                <div className="flex items-center justify-between gap-2">
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xs text-[10px] font-black uppercase tracking-wider bg-[#eef7f0] text-[#2c4e37] border border-[#c2e9ca]">
-                    <span className="w-2 h-2 rounded-full bg-[#486b52] animate-pulse" />
-                    Active Jurisdiction
-                  </span>
-                  <span className="text-sm font-mono font-black text-[#486b52] bg-[#eef7f0] px-2.5 py-0.5 rounded-xs border border-[#c2e9ca]">
-                    {member.homeTown?.code ?? activeTown?.code ?? 'HUB'}
-                  </span>
-                </div>
-
-                <div>
-                  <h4 className="text-xl font-black text-[#1e1b19] tracking-tight">
-                    {member.homeTown?.name ??
-                      activeTown?.name ??
-                      'Assigned Hub'}
-                  </h4>
-                  <div className="flex items-center gap-1.5 text-xs text-[#8a726a] mt-1">
-                    <Buildings size={14} className="text-[#486b52]" />
-                    <span>Official Current Hub in Cameroon</span>
-                  </div>
-                </div>
-
-                <div className="pt-2 border-t border-[#f4ece9] flex items-center justify-between text-[11px] text-[#57423b]">
-                  <span className="font-medium">Jurisdiction Status:</span>
-                  <span className="font-bold text-[#2c4e37]">
-                    Active Roll Member
-                  </span>
-                </div>
-              </div>
-
-              {/* Central Journey Indicator (1 col) */}
-              <div className="lg:col-span-1 flex flex-col items-center justify-center gap-1.5 py-2">
-                <div className="w-10 h-10 rounded-lg bg-[#faf2ee] border border-[#e8e1dd] text-[#b85028] flex items-center justify-center shadow-2xs">
-                  <ArrowsLeftRight size={18} weight="bold" />
-                </div>
-                <span className="text-[10px] font-black uppercase tracking-wider text-[#8a726a] text-center">
-                  {member.transferHistory && member.transferHistory.length > 0
-                    ? `${member.transferHistory.length} ${member.transferHistory.length === 1 ? 'Relocation' : 'Relocations'}`
-                    : 'Native Seat'}
-                </span>
-              </div>
-
-              {/* Pillar 2: Origin Hub / Origin Hub (3 cols) */}
+              {/* Pillar 1: Origin Hub (3 cols) */}
               <div className="lg:col-span-3 p-5 rounded-lg bg-white border border-[#ffdbcf] shadow-2xs flex flex-col justify-between gap-3 relative overflow-hidden group">
                 <div className="absolute top-0 left-0 right-0 h-1 bg-[#b85028]" />
                 <div className="flex items-center justify-between gap-2">
@@ -751,6 +706,51 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
                     {member.createdAt
                       ? new Date(member.createdAt).toLocaleDateString('en-GB')
                       : 'Initial Roll'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Central Journey Indicator (1 col) */}
+              <div className="lg:col-span-1 flex flex-col items-center justify-center gap-1.5 py-2">
+                <div className="w-10 h-10 rounded-lg bg-[#faf2ee] border border-[#e8e1dd] text-[#b85028] flex items-center justify-center shadow-2xs">
+                  <ArrowRight size={18} weight="bold" />
+                </div>
+                <span className="text-[10px] font-black uppercase tracking-wider text-[#8a726a] text-center">
+                  {member.transferHistory && member.transferHistory.length > 0
+                    ? `${member.transferHistory.length} ${member.transferHistory.length === 1 ? 'Relocation' : 'Relocations'}`
+                    : 'Native Seat'}
+                </span>
+              </div>
+
+              {/* Pillar 2: Current Resident Hub (3 cols) */}
+              <div className="lg:col-span-3 p-5 rounded-lg bg-white border border-[#c2e9ca] shadow-2xs flex flex-col justify-between gap-3 relative overflow-hidden group">
+                <div className="absolute top-0 left-0 right-0 h-1 bg-[#486b52]" />
+                <div className="flex items-center justify-between gap-2">
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xs text-[10px] font-black uppercase tracking-wider bg-[#eef7f0] text-[#2c4e37] border border-[#c2e9ca]">
+                    <span className="w-2 h-2 rounded-full bg-[#486b52] animate-pulse" />
+                    Active Jurisdiction
+                  </span>
+                  <span className="text-sm font-mono font-black text-[#486b52] bg-[#eef7f0] px-2.5 py-0.5 rounded-xs border border-[#c2e9ca]">
+                    {member.homeTown?.code ?? activeTown?.code ?? 'HUB'}
+                  </span>
+                </div>
+
+                <div>
+                  <h4 className="text-xl font-black text-[#1e1b19] tracking-tight">
+                    {member.homeTown?.name ??
+                      activeTown?.name ??
+                      'Assigned Hub'}
+                  </h4>
+                  <div className="flex items-center gap-1.5 text-xs text-[#8a726a] mt-1">
+                    <Buildings size={14} className="text-[#486b52]" />
+                    <span>Official Current Hub in Cameroon</span>
+                  </div>
+                </div>
+
+                <div className="pt-2 border-t border-[#f4ece9] flex items-center justify-between text-[11px] text-[#57423b]">
+                  <span className="font-medium">Jurisdiction Status:</span>
+                  <span className="font-bold text-[#2c4e37]">
+                    Active Roll Member
                   </span>
                 </div>
               </div>

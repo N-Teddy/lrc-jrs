@@ -24,8 +24,12 @@ export const ComingSoonModal: React.FC<ComingSoonModalProps> = ({
       role="dialog"
       aria-modal="true"
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200"
+      onClick={onClose}
     >
-      <div className="relative w-full max-w-md bg-white rounded-2xl border border-[#e8e1dd] shadow-2xl overflow-hidden flex flex-col animate-in zoom-in-95 duration-150">
+      <div
+        className="relative w-full max-w-md bg-white rounded-2xl border border-[#e8e1dd] shadow-2xl overflow-hidden flex flex-col animate-in zoom-in-95 duration-150"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Top Decorative Header */}
         <div className="relative px-6 pt-7 pb-5 bg-gradient-to-b from-[#faf2ee] via-[#fff5f2] to-white border-b border-[#f4ece9] flex flex-col items-center text-center">
           <button

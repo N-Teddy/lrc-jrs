@@ -71,8 +71,12 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
       aria-modal="true"
       aria-labelledby="change-pw-title"
       className="fixed inset-0 z-50 flex items-center justify-center bg-[#1e1b19]/60 p-4 backdrop-blur-[2px] animate-fadeIn"
+      onClick={handleClose}
     >
-      <div className="relative w-full max-w-xl rounded-xl border border-[#e8e1dd] bg-white p-6 sm:p-8 shadow-2xl max-h-[92vh] overflow-y-auto">
+      <div
+        className="relative w-full max-w-xl rounded-xl border border-[#e8e1dd] bg-white p-6 sm:p-8 shadow-2xl max-h-[92vh] overflow-y-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Header */}
         <div className="flex items-start justify-between pb-4 border-b border-[#faf2ee]">
           <div className="flex items-center gap-3">
