@@ -1,4 +1,4 @@
-import { useMembersQuery, useTranslation } from '@jrs/client-core';
+import { useTranslation } from '@jrs/client-core';
 import type { IUser } from '@jrs/shared';
 import {
   ChatCircleText,
@@ -11,7 +11,7 @@ import {
   X,
 } from '@phosphor-icons/react';
 import type React from 'react';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { UserAvatar } from '../../../components';
 import { formatCameroonPhone } from '../../members/utils/member-ui.utils';
 
@@ -30,58 +30,19 @@ export const BatchInviteModal: React.FC<BatchInviteModalProps> = ({
   isOpen,
   onClose,
   offlineMembers = [],
-  activeTownId,
   onBatchInvite,
 }) => {
   const { t } = useTranslation(['access', 'common']);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [channel, setChannel] = useState<'whatsapp' | 'email'>('whatsapp');
   const [isSending, setIsSending] = useState(false);
-
-  // Debounce search input to avoid spamming server queries
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearch(searchQuery.trim());
-    }, 200);
-    return () => clearTimeout(timer);
-  }, [searchQuery]);
-
-  // Query backend directly when searching
-  const { data: serverSearchResults, isLoading: isSearchLoading } =
-    useMembersQuery(
-      debouncedSearch
-        ? {
-            search: debouncedSearch,
-            townId: activeTownId || undefined,
-            hasAppAccess: false,
-            limit: 100,
-          }
-        : undefined,
-    );
-
-  // Combine base offlineMembers with server search results, deduplicating by ID
-  const allKnownMembers = useMemo(() => {
-    const map = new Map<string, IUser>();
-    for (const m of offlineMembers) {
-      map.set(m.id, m);
-    }
-    if (serverSearchResults?.items) {
-      for (const m of serverSearchResults.items) {
-        if (!m.account?.hasAppAccess) {
-          map.set(m.id, m);
-        }
-      }
-    }
-    return Array.from(map.values());
-  }, [offlineMembers, serverSearchResults?.items]);
 
   // Filter members dynamically based on search query
   const filteredMembers = useMemo(() => {
     if (!searchQuery.trim()) return offlineMembers;
     const q = searchQuery.toLowerCase().trim();
-    return allKnownMembers.filter((m) => {
+    return offlineMembers.filter((m) => {
       const nameMatch = (m.fullName ?? '').toLowerCase().includes(q);
       const phoneMatch = (m.phoneNumber ?? '').toLowerCase().includes(q);
       const emailMatch = (m.email ?? '').toLowerCase().includes(q);
@@ -90,7 +51,7 @@ export const BatchInviteModal: React.FC<BatchInviteModalProps> = ({
         (m.homeTown?.code ?? '').toLowerCase().includes(q);
       return nameMatch || phoneMatch || emailMatch || townMatch;
     });
-  }, [allKnownMembers, offlineMembers, searchQuery]);
+  }, [offlineMembers, searchQuery]);
 
   if (!isOpen) return null;
 
@@ -237,13 +198,9 @@ export const BatchInviteModal: React.FC<BatchInviteModalProps> = ({
               </span>
               <span className="text-[#b09e97]">•</span>
               <span className="text-[#8a726a]">
-                {isSearchLoading ? (
-                  <span>Searching directory...</span>
-                ) : filteredMembers.length === offlineMembers.length ? (
-                  `${offlineMembers.length} offline members`
-                ) : (
-                  `Showing ${filteredMembers.length} members`
-                )}
+                {filteredMembers.length === offlineMembers.length
+                  ? `${offlineMembers.length} offline members`
+                  : `Showing ${filteredMembers.length} of ${offlineMembers.length}`}
               </span>
             </div>
             {filteredMembers.length > 0 && (
