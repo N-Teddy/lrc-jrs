@@ -162,7 +162,7 @@ export const MemberCardGridView: React.FC<MemberCardGridViewProps> = ({
             <article
               key={m.id}
               onClick={() => onViewMember(m.id)}
-              className="bg-white rounded-xl border border-[#e8e1dd] p-5 shadow-xs hover:shadow-md transition-all flex flex-col justify-between group cursor-pointer"
+              className="bg-white rounded-lg border border-[#e8e1dd] p-5 shadow-xs hover:shadow-md transition-all flex flex-col justify-between group cursor-pointer"
             >
               <div>
                 {/* Header Row */}
@@ -179,12 +179,9 @@ export const MemberCardGridView: React.FC<MemberCardGridViewProps> = ({
                       </h3>
                       <div className="flex items-center gap-1.5 mt-0.5">
                         <span
-                          className={`inline-flex px-2 py-0.5 rounded-md text-[10px] font-bold border ${roleInfo.badgeBg} ${roleInfo.badgeText} ${roleInfo.border}`}
+                          className={`inline-flex px-2 py-0.5 rounded-xs text-[10px] font-bold border ${roleInfo.badgeBg} ${roleInfo.badgeText} ${roleInfo.border}`}
                         >
                           {roleInfo.shortLabel}
-                        </span>
-                        <span className="inline-flex px-1.5 py-0.5 rounded bg-[#f4ece9] text-[#57423b] text-[10px] font-mono font-bold">
-                          {m.homeTown?.code ?? 'HUB'}
                         </span>
                       </div>
                     </div>
@@ -202,13 +199,13 @@ export const MemberCardGridView: React.FC<MemberCardGridViewProps> = ({
                         setOpenMenuId(openMenuId === m.id ? null : m.id)
                       }
                       title={t('members:table.actions')}
-                      className="w-7 h-7 rounded-lg text-[#8a726a] hover:text-[#1e1b19] hover:bg-[#faf2ee] flex items-center justify-center transition-colors cursor-pointer"
+                      className="w-7 h-7 rounded-md text-[#8a726a] hover:text-[#1e1b19] hover:bg-[#faf2ee] flex items-center justify-center transition-colors cursor-pointer"
                     >
                       <DotsThreeVertical size={16} weight="bold" />
                     </button>
 
                     {openMenuId === m.id && (
-                      <div className="absolute right-0 top-full mt-1 w-44 bg-white rounded-xl border border-[#e8e1dd] shadow-lg py-1 z-30 flex flex-col animate-in fade-in zoom-in-95 duration-100">
+                      <div className="absolute right-0 top-full mt-1 w-44 bg-white rounded-lg border border-[#e8e1dd] shadow-lg py-1 z-30 flex flex-col animate-in fade-in zoom-in-95 duration-100">
                         <button
                           type="button"
                           onClick={() => {
@@ -264,7 +261,7 @@ export const MemberCardGridView: React.FC<MemberCardGridViewProps> = ({
 
                 {/* Demographic & Age Badge */}
                 {age !== null && (
-                  <div className="flex items-center gap-2 px-2.5 py-1.5 bg-[#faf2ee] rounded-xl mb-3.5 text-xs text-[#57423b]">
+                  <div className="flex items-center gap-2 px-2.5 py-1.5 bg-[#faf2ee] rounded-md mb-3.5 text-xs text-[#57423b]">
                     <Cake size={16} className="text-[#486b52] shrink-0" />
                     <span className="font-bold">{age} yrs</span>
                     <span className="text-[#8a726a]">•</span>
@@ -296,7 +293,7 @@ export const MemberCardGridView: React.FC<MemberCardGridViewProps> = ({
                         target="_blank"
                         rel="noreferrer"
                         title={t('members:table.whatsappChat')}
-                        className="p-1 rounded-md bg-[#c2e9ca] text-[#2c4e37] hover:opacity-85 transition-opacity"
+                        className="p-1 rounded-xs bg-[#c2e9ca] text-[#2c4e37] hover:opacity-85 transition-opacity"
                       >
                         <ChatCircleText size={15} weight="fill" />
                       </a>
@@ -317,13 +314,35 @@ export const MemberCardGridView: React.FC<MemberCardGridViewProps> = ({
               {/* Card Footer */}
               <div className="pt-3 border-t border-[#f4ece9] flex items-center justify-between text-xs">
                 <div className="flex items-center gap-1.5">
-                  <span className="text-[11px] font-semibold text-[#8a726a]">
-                    {m.homeTown?.code ?? '—'}
+                  <span className="text-[11px] text-[#8a726a] font-medium">
+                    {m.integrationDate
+                      ? new Date(m.integrationDate).toLocaleDateString('en-GB')
+                      : ''}
                   </span>
                 </div>
-                <div className="text-[11px] font-bold text-[#b85028] group-hover:underline inline-flex items-center gap-1">
-                  <span>{t('members:table.viewProfile')}</span>
-                  <ArrowRight size={13} weight="bold" />
+                <div className="flex items-center gap-1 shrink-0">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onEditMember(m);
+                    }}
+                    className="w-7 h-7 rounded-md text-[#8a726a] hover:text-[#1e1b19] hover:bg-[#faf2ee] flex items-center justify-center transition-colors cursor-pointer"
+                    title={t('common:edit', 'Edit')}
+                  >
+                    <PencilSimple size={14} weight="bold" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onViewMember(m.id);
+                    }}
+                    className="h-7 px-2.5 rounded-md bg-[#faf2ee] hover:bg-[#b85028] text-[#b85028] hover:text-white border border-[#e8d5cc] font-semibold text-xs transition-colors flex items-center gap-1 cursor-pointer"
+                  >
+                    <span>{t('common:details', 'Details')}</span>
+                    <ArrowRight size={12} weight="bold" />
+                  </button>
                 </div>
               </div>
             </article>
