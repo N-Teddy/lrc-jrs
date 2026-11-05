@@ -26,6 +26,7 @@ import {
   getActivityTypeConfig,
 } from '../utils/activity-ui.utils';
 import { ActivityActionMenu } from './ActivityActionMenu';
+import { CancelActivityModal } from './CancelActivityModal';
 
 interface ActivityTableViewProps {
   activities: IActivity[];
@@ -64,22 +65,20 @@ export const ActivityTableView: React.FC<ActivityTableViewProps> = ({
   const { activeTownId } = useTownContext();
   const updateActivityMutation = useUpdateActivityMutation();
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const [activityToCancel, setActivityToCancel] = useState<IActivity | null>(
+    null,
+  );
 
   const totalPages = Math.ceil(total / limit) || 1;
 
-  const handleCancelActivity = async (activity: IActivity) => {
-    if (
-      !window.confirm(
-        t(
-          'activities:detail.confirmCancel',
-          'Are you sure you want to cancel this activity? You can undo this cancellation at any time.',
-        ),
-      )
-    ) {
-      return;
-    }
+  const handleCancelActivity = (activity: IActivity) => {
+    setActivityToCancel(activity);
+  };
+
+  const handleConfirmCancel = async () => {
+    if (!activityToCancel) return;
     await updateActivityMutation.mutateAsync({
-      id: activity.id,
+      id: activityToCancel.id,
       dto: {
         status: ActivityStatus.CANCELLED,
         changeReason: t(
@@ -88,6 +87,7 @@ export const ActivityTableView: React.FC<ActivityTableViewProps> = ({
         ),
       },
     });
+    setActivityToCancel(null);
   };
 
   const handleUndoCancel = async (activity: IActivity) => {
@@ -402,6 +402,15 @@ export const ActivityTableView: React.FC<ActivityTableViewProps> = ({
           variant="white"
         />
       </div>
+
+      {/* Cancel Activity Confirmation Modal */}
+      <CancelActivityModal
+        isOpen={Boolean(activityToCancel)}
+        onClose={() => setActivityToCancel(null)}
+        onConfirm={handleConfirmCancel}
+        activityTitle={activityToCancel?.title}
+        isLoading={updateActivityMutation.isPending}
+      />
     </div>
   );
 };

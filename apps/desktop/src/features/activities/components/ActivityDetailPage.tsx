@@ -56,6 +56,7 @@ import {
 } from '../utils/activity-ui.utils';
 import { ActivityAttendanceRoster } from './ActivityAttendanceRoster';
 import { ActivityReportUploadModal } from './ActivityReportUploadModal';
+import { CancelActivityModal } from './CancelActivityModal';
 import { DriveFilePreviewModal } from './DriveFilePreviewModal';
 
 interface ActivityDetailPageProps {
@@ -100,6 +101,7 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
     }
   }, [initialTab]);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
   const [reportToDelete, setReportToDelete] = useState<IActivityReport | null>(
     null,
   );
@@ -151,17 +153,11 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
       ? 'overview'
       : activeTabState;
 
-  const handleCancelActivity = async () => {
-    if (
-      !window.confirm(
-        t(
-          'activities:detail.confirmCancel',
-          'Are you sure you want to cancel this activity? You can undo this cancellation at any time.',
-        ),
-      )
-    ) {
-      return;
-    }
+  const handleCancelActivity = () => {
+    setIsCancelModalOpen(true);
+  };
+
+  const handleConfirmCancel = async () => {
     await updateActivityMutation.mutateAsync({
       id: activity.id,
       dto: {
@@ -172,6 +168,7 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
         ),
       },
     });
+    setIsCancelModalOpen(false);
   };
 
   const handleUndoCancel = async () => {
@@ -1333,6 +1330,15 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
         isOpen={Boolean(previewFile)}
         onClose={() => setPreviewFile(null)}
         file={previewFile}
+      />
+
+      {/* Cancel Activity Confirmation Modal */}
+      <CancelActivityModal
+        isOpen={isCancelModalOpen}
+        onClose={() => setIsCancelModalOpen(false)}
+        onConfirm={handleConfirmCancel}
+        activityTitle={activity.title}
+        isLoading={updateActivityMutation.isPending}
       />
     </div>
   );

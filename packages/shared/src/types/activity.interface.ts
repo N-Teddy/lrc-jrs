@@ -6,7 +6,12 @@ import type { ITown } from './town.interface.js';
 
 export interface IActivityChangeLog {
   id: string;
-  changeType: 'RESCHEDULED' | 'LOCATION_CHANGED' | 'STATUS_CHANGED';
+  changeType:
+    | 'RESCHEDULED'
+    | 'LOCATION_CHANGED'
+    | 'STATUS_CHANGED'
+    | 'CANCELLED'
+    | 'REOPENED';
   changedBy: string;
   changedByName: string;
   changedAt: string;

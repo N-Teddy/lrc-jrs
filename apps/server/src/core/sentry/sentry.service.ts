@@ -45,6 +45,20 @@ export class SentryService {
       } catch {}
     }
 
+    // Ensure .env files are loaded into process.env if running on Node 20+
+    if (
+      !process.env.SENTRY_DSN &&
+      !process.env.SENTRY_BACKEND_DSN &&
+      typeof process.loadEnvFile === 'function'
+    ) {
+      try {
+        process.loadEnvFile('apps/server/.env');
+      } catch {}
+      try {
+        process.loadEnvFile('.env');
+      } catch {}
+    }
+
     const dsn =
       customDsn ||
       process.env.SENTRY_DSN ||

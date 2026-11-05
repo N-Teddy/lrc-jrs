@@ -420,6 +420,7 @@ export const ActivityAuditLogView: React.FC<ActivityAuditLogViewProps> = ({
           {filteredHistory.map((log, index) => {
             const isReschedule = log.changeType === 'RESCHEDULED';
             const isLocation = log.changeType === 'LOCATION_CHANGED';
+            const isCancel = log.changeType === 'CANCELLED';
             const changedFields = getChangedFields(log);
             const isLast = index === filteredHistory.length - 1;
 
@@ -429,11 +430,13 @@ export const ActivityAuditLogView: React.FC<ActivityAuditLogViewProps> = ({
                 <div className="flex flex-col items-center shrink-0">
                   <div
                     className={`w-8 h-8 rounded-full flex items-center justify-center shadow-xs border-2 border-white shrink-0 z-10 ${
-                      isReschedule
-                        ? 'bg-[#b85028] text-white'
-                        : isLocation
-                          ? 'bg-[#486b52] text-white'
-                          : 'bg-[#1e1b19] text-white'
+                      isCancel
+                        ? 'bg-[#ba1a1a] text-white'
+                        : isReschedule
+                          ? 'bg-[#b85028] text-white'
+                          : isLocation
+                            ? 'bg-[#486b52] text-white'
+                            : 'bg-[#1e1b19] text-white'
                     }`}
                   >
                     <ClockCounterClockwise size={15} weight="bold" />
@@ -451,14 +454,16 @@ export const ActivityAuditLogView: React.FC<ActivityAuditLogViewProps> = ({
                       <div className="flex items-center gap-2">
                         <span
                           className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
-                            isReschedule
-                              ? 'bg-[#ffdbcf] text-[#812901]'
-                              : isLocation
-                                ? 'bg-[#edf3ee] text-[#486b52]'
-                                : 'bg-[#faf2ee] text-[#1e1b19]'
+                            isCancel
+                              ? 'bg-[#ffdad6] text-[#ba1a1a]'
+                              : isReschedule
+                                ? 'bg-[#ffdbcf] text-[#812901]'
+                                : isLocation
+                                  ? 'bg-[#edf3ee] text-[#486b52]'
+                                  : 'bg-[#faf2ee] text-[#1e1b19]'
                           }`}
                         >
-                          {log.changeType.replace('_', ' ')}
+                          {log.changeType.replace(/_/g, ' ')}
                         </span>
                         <span className="text-[11px] font-mono text-[#8a726a]">
                           {t('activities:audit.revisionNumber', {

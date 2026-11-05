@@ -142,6 +142,7 @@ export interface IMemberQueryDto {
   limit?: number;
   search?: string;
   townId?: string;
+  townIds?: string;
   role?: UserRole;
   isJr?: boolean;
   hasAppAccess?: boolean;

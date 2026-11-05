@@ -160,20 +160,34 @@ export class UsersService {
     const andConditions: any[] = [];
 
     // Town resolution:
-    // AP can query any town or leave open; PC is scoped to target town
-    const requestedTown = query.townId || scopedTownId;
-    if (requestedTown && requestedTown !== 'all') {
-      const townObjectId = await this.resolveTownObjectId(requestedTown);
-      if (townObjectId) {
-        filter.homeTownId = townObjectId;
+    // Support multi-town filtering for inter-town rosters or single town scoping
+    if (query.townIds) {
+      const idList = query.townIds
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean);
+      const objectIds = (
+        await Promise.all(idList.map((id) => this.resolveTownObjectId(id)))
+      ).filter(Boolean);
+      if (objectIds.length > 0) {
+        filter.homeTownId = { $in: objectIds };
       }
-    } else if (currentUser?.role !== UserRole.AP && currentUser?.homeTownId) {
-      // Non-AP must always be scoped to their home or active town
-      const fallbackTownId = await this.resolveTownObjectId(
-        scopedTownId || currentUser.homeTownId,
-      );
-      if (fallbackTownId) {
-        filter.homeTownId = fallbackTownId;
+    } else {
+      // AP can query any town or leave open; PC is scoped to target town
+      const requestedTown = query.townId || scopedTownId;
+      if (requestedTown && requestedTown !== 'all') {
+        const townObjectId = await this.resolveTownObjectId(requestedTown);
+        if (townObjectId) {
+          filter.homeTownId = townObjectId;
+        }
+      } else if (currentUser?.role !== UserRole.AP && currentUser?.homeTownId) {
+        // Non-AP must always be scoped to their home or active town
+        const fallbackTownId = await this.resolveTownObjectId(
+          scopedTownId || currentUser.homeTownId,
+        );
+        if (fallbackTownId) {
+          filter.homeTownId = fallbackTownId;
+        }
       }
     }
 

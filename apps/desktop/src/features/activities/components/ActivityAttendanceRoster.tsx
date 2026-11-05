@@ -35,6 +35,7 @@ import {
   UserCheck,
   Users,
   X,
+  XCircle,
 } from '@phosphor-icons/react';
 import type React from 'react';
 import { useEffect, useMemo, useState } from 'react';
@@ -102,7 +103,9 @@ export const ActivityAttendanceRoster: React.FC<
   const { data: attendanceData, isLoading: isAttendanceLoading } =
     useAttendanceQuery(activity.id);
 
-  // Timing guard & simulation
+  // Status & timing guards
+  const isCancelled = activity.status === ActivityStatus.CANCELLED;
+  const isScheduled = activity.status === ActivityStatus.SCHEDULED;
   const actuallyStarted = isActivityStarted(activity.startDate);
   const [simulatedUnlocked, setSimulatedUnlocked] = useState(false);
   const isUnlocked = actuallyStarted || simulatedUnlocked;
@@ -112,6 +115,7 @@ export const ActivityAttendanceRoster: React.FC<
     activity.isAttendanceLocked || attendanceData?.isLocked,
   );
   const isEditable =
+    !isCancelled &&
     canManageAttendance &&
     isUnlocked &&
     (!isAttendanceLocked || isCurrentUserAp);
@@ -159,11 +163,19 @@ export const ActivityAttendanceRoster: React.FC<
   const [guestPhone, setGuestPhone] = useState('');
   const [guestNotes, setGuestNotes] = useState('');
 
-  // 1. Local town hub members (default roster)
-  const { data: membersData, isLoading: isMembersLoading } = useMembersQuery({
-    townId: activity.townId,
-    limit: 150,
-  });
+  // 1. Inter-town or local town hub members (default roster)
+  const isInterTown = (activity.includedTownIds?.length ?? 0) > 0;
+  const rosterTownIds = isInterTown
+    ? [activity.townId, ...(activity.includedTownIds || [])]
+        .filter(Boolean)
+        .join(',')
+    : undefined;
+
+  const { data: membersData, isLoading: isMembersLoading } = useMembersQuery(
+    isInterTown
+      ? { townIds: rosterTownIds, limit: 300 }
+      : { townId: activity.townId, limit: 150 },
+  );
 
   // 2. Global search across all regions when searching
   const isSearching = Boolean(memberSearch.trim());
@@ -278,11 +290,17 @@ export const ActivityAttendanceRoster: React.FC<
 
   // Filtered members list: incorporates local roster matches and cross-region search results
   const filteredMembers = useMemo(() => {
-    if (!isSearching) return membersList;
+    // When attendance is locked, only display saved attendee records who were present
+    let list = membersList;
+    if (isAttendanceLocked) {
+      list = list.filter((m) => m.status === AttendanceStatus.PRESENT);
+    }
+
+    if (!isSearching) return list;
 
     const query = memberSearch.toLowerCase().trim();
     // 1. Members already registered in this roster that match query
-    const existingMatches = membersList.filter(
+    const existingMatches = list.filter(
       (m) =>
         m.member.fullName?.toLowerCase().includes(query) ||
         m.member.phoneNumber?.includes(query) ||
@@ -290,7 +308,11 @@ export const ActivityAttendanceRoster: React.FC<
         m.member.homeTown?.name?.toLowerCase().includes(query),
     );
 
-    const existingIds = new Set(membersList.map((m) => m.member.id));
+    if (isAttendanceLocked) {
+      return existingMatches;
+    }
+
+    const existingIds = new Set(list.map((m) => m.member.id));
 
     // 2. Members from other regions/towns returned by the global search
     const crossRegionMatches: MemberAttendanceState[] = [];
@@ -306,7 +328,20 @@ export const ActivityAttendanceRoster: React.FC<
     }
 
     return [...existingMatches, ...crossRegionMatches];
-  }, [membersList, isSearching, memberSearch, globalSearchResults]);
+  }, [
+    membersList,
+    isSearching,
+    memberSearch,
+    globalSearchResults,
+    isAttendanceLocked,
+  ]);
+
+  const displayedGuests = useMemo(() => {
+    if (isAttendanceLocked) {
+      return guestRecords.filter((g) => g.status === AttendanceStatus.PRESENT);
+    }
+    return guestRecords;
+  }, [guestRecords, isAttendanceLocked]);
 
   // Handlers for Member Status changes (strictly binary: Present vs Absent)
   const handleSetMemberStatus = (
@@ -549,47 +584,54 @@ export const ActivityAttendanceRoster: React.FC<
               )}
 
               {/* Lock / Unlock Attendance Button */}
-              {isAttendanceLocked
-                ? isCurrentUserAp && (
-                    <button
-                      type="button"
-                      onClick={() => setIsUnlockModalOpen(true)}
-                      disabled={unlockMutation.isPending}
-                      className="px-3.5 py-2 rounded-lg bg-white border border-[#ffe082] text-[#812901] hover:bg-[#fffbf0] font-bold text-xs shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer"
-                    >
-                      <LockOpen size={15} weight="bold" />
-                      <span>Unlock (AP Override)</span>
-                    </button>
-                  )
-                : isPrivileged && (
-                    <button
-                      type="button"
-                      onClick={() => setIsLockModalOpen(true)}
-                      disabled={lockMutation.isPending}
-                      className="px-3.5 py-2 rounded-lg bg-[#2c4e37] hover:bg-[#233f2c] text-white font-bold text-xs shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer"
-                    >
-                      <Lock size={15} weight="bold" />
-                      <span>Finalize & Lock</span>
-                    </button>
-                  )}
+              {!isCancelled &&
+                (isAttendanceLocked
+                  ? isCurrentUserAp && (
+                      <button
+                        type="button"
+                        onClick={() => setIsUnlockModalOpen(true)}
+                        disabled={unlockMutation.isPending}
+                        className="px-3.5 py-2 rounded-lg bg-white border border-[#ffe082] text-[#812901] hover:bg-[#fffbf0] font-bold text-xs shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer"
+                      >
+                        <LockOpen size={15} weight="bold" />
+                        <span>Unlock (AP Override)</span>
+                      </button>
+                    )
+                  : !isScheduled &&
+                    isUnlocked &&
+                    isPrivileged && (
+                      <button
+                        type="button"
+                        onClick={() => setIsLockModalOpen(true)}
+                        disabled={lockMutation.isPending}
+                        className="px-3.5 py-2 rounded-lg bg-[#2c4e37] hover:bg-[#233f2c] text-white font-bold text-xs shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer"
+                      >
+                        <Lock size={15} weight="bold" />
+                        <span>Finalize & Lock</span>
+                      </button>
+                    ))}
 
-              {/* Primary Save Attendance Button */}
-              <button
-                type="button"
-                onClick={handleSaveAttendance}
-                disabled={
-                  !isEditable || recordAttendanceMutation.isPending || !isDirty
-                }
-                title={!isDirty ? 'No changes detected' : undefined}
-                className="px-4 py-2 rounded-lg bg-[#b85028] hover:bg-[#a44520] text-white font-bold text-xs shadow-xs transition-colors flex items-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {recordAttendanceMutation.isPending ? (
-                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                ) : (
-                  <FloppyDisk size={16} weight="bold" />
-                )}
-                <span>{t('attendance:markAttendance')}</span>
-              </button>
+              {/* Primary Save Attendance Button: Hidden when locked or cancelled */}
+              {!isAttendanceLocked && !isCancelled && (
+                <button
+                  type="button"
+                  onClick={handleSaveAttendance}
+                  disabled={
+                    !isEditable ||
+                    recordAttendanceMutation.isPending ||
+                    !isDirty
+                  }
+                  title={!isDirty ? 'No changes detected' : undefined}
+                  className="px-4 py-2 rounded-lg bg-[#b85028] hover:bg-[#a44520] text-white font-bold text-xs shadow-xs transition-colors flex items-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {recordAttendanceMutation.isPending ? (
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                  ) : (
+                    <FloppyDisk size={16} weight="bold" />
+                  )}
+                  <span>{t('attendance:markAttendance')}</span>
+                </button>
+              )}
             </>
           )}
         </div>
@@ -759,8 +801,31 @@ export const ActivityAttendanceRoster: React.FC<
         </div>
       </div>
 
+      {/* Cancelled Activity Notice */}
+      {isCancelled && (
+        <div className="bg-[#ffdad6]/40 border border-[#ffb4a8] rounded-xl p-4 flex items-start gap-3.5 shadow-2xs">
+          <div className="w-10 h-10 rounded-lg bg-[#ffdad6] text-[#ba1a1a] flex items-center justify-center shrink-0">
+            <XCircle size={22} weight="fill" />
+          </div>
+          <div className="flex flex-col gap-0.5">
+            <h3 className="font-bold text-xs text-[#ba1a1a]">
+              {t(
+                'activities:detail.cancelledNoticeTitle',
+                'Activity Cancelled',
+              )}
+            </h3>
+            <p className="text-xs text-[#57423b]">
+              {t(
+                'activities:detail.cancelledAttendanceNotice',
+                'This activity has been cancelled. Attendance records cannot be taken, saved, or finalized.',
+              )}
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* 4. Timing Guard Lock Notice */}
-      {!isUnlocked && (
+      {!isCancelled && !isUnlocked && (
         <div className="bg-[#faf2ee] border border-[#ffdbcf] rounded-xl p-4 flex items-start gap-3.5">
           <div className="w-9 h-9 rounded-lg bg-[#ffdbcf]/60 border border-[#ffb59c] flex items-center justify-center text-[#812901] shrink-0">
             <Lock size={20} weight="bold" />
@@ -861,7 +926,7 @@ export const ActivityAttendanceRoster: React.FC<
                     : 'bg-[#e8e1dd] text-[#57423b]'
                 }`}
               >
-                {guestRecords.length}
+                {displayedGuests.length}
               </span>
             </button>
           </div>
@@ -892,7 +957,7 @@ export const ActivityAttendanceRoster: React.FC<
                   )}
                 </div>
 
-                {canWrite && (
+                {canWrite && !isAttendanceLocked && !isCancelled && (
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
@@ -922,7 +987,7 @@ export const ActivityAttendanceRoster: React.FC<
               </div>
             ) : (
               <div className="flex items-center justify-end w-full">
-                {canWrite && (
+                {canWrite && !isAttendanceLocked && !isCancelled && (
                   <button
                     type="button"
                     onClick={() => setIsAddGuestModalOpen(true)}
@@ -952,9 +1017,18 @@ export const ActivityAttendanceRoster: React.FC<
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-4 gap-3.5">
                   {filteredMembers.map(({ member, status, checkInTime }) => {
                     const isPresent = status === AttendanceStatus.PRESENT;
-                    const isExternal =
-                      Boolean(member.homeTownId) &&
-                      member.homeTownId !== activity.townId;
+                    const hostTownId = activity.hostTownId || activity.townId;
+                    const participatingTownIds = activity.includedTownIds || [];
+                    const memberHomeTownId =
+                      member.homeTownId ||
+                      (member.homeTown as any)?._id ||
+                      (member.homeTown as any)?.id;
+                    const isOutsideHostTown =
+                      Boolean(memberHomeTownId) &&
+                      memberHomeTownId !== hostTownId;
+                    const isParticipating =
+                      participatingTownIds.includes(memberHomeTownId);
+                    const isVisitor = isOutsideHostTown && !isParticipating;
 
                     return (
                       <div
@@ -989,32 +1063,28 @@ export const ActivityAttendanceRoster: React.FC<
                               <span className="text-[10px] font-semibold text-[#8a726a] bg-[#faf2ee] px-1.5 py-0.2 rounded border border-[#e8e1dd]">
                                 {member.role}
                               </span>
-                              {(member.homeTown?.name || isExternal) && (
+                              {isOutsideHostTown && (
                                 <span
-                                  className={`text-[9px] font-semibold px-1.5 py-0.2 rounded border flex items-center gap-0.5 ${
-                                    isExternal
-                                      ? 'bg-[#fff2ee] text-[#b85028] border-[#ffdbcf]'
-                                      : 'bg-[#faf2ee] text-[#57423b] border-[#e8e1dd]'
-                                  }`}
-                                  title={
-                                    member.homeTown?.name
-                                      ? `${t('towns:hub', { defaultValue: isFrench ? 'Centre' : 'Hub' })}: ${member.homeTown.name}`
-                                      : t('attendance:visiting', {
-                                          defaultValue: isFrench
-                                            ? 'En visite'
-                                            : 'Visiting',
-                                        })
-                                  }
+                                  className="text-[9px] font-semibold px-1.5 py-0.2 rounded border border-[#ffdbcf] bg-[#fff2ee] text-[#b85028] flex items-center gap-0.5 truncate max-w-[85px]"
+                                  title={`Hub: ${member.homeTown?.name || 'External Hub'}`}
                                 >
-                                  <MapPin size={9} weight="fill" />
-                                  <span className="truncate max-w-[65px]">
-                                    {member.homeTown?.name ||
-                                      t('attendance:visiting', {
-                                        defaultValue: isFrench
-                                          ? 'En visite'
-                                          : 'Visiting',
-                                      })}
+                                  <MapPin
+                                    size={9}
+                                    weight="fill"
+                                    className="shrink-0"
+                                  />
+                                  <span className="truncate">
+                                    {member.homeTown?.name || 'External'}
                                   </span>
+                                </span>
+                              )}
+                              {isVisitor && (
+                                <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-[#fceee9] text-[#b85028] border border-[#f7cdbf]">
+                                  {t('attendance:visitor', {
+                                    defaultValue: isFrench
+                                      ? 'Visiteur'
+                                      : 'Visitor',
+                                  })}
                                 </span>
                               )}
                             </div>
@@ -1032,7 +1102,7 @@ export const ActivityAttendanceRoster: React.FC<
                                   minute: '2-digit',
                                 })}
                               </span>
-                            ) : isExternal ? (
+                            ) : isVisitor ? (
                               <span className="text-[#b85028] font-semibold text-[10px]">
                                 {t('attendance:visitor', {
                                   defaultValue: isFrench
@@ -1051,12 +1121,12 @@ export const ActivityAttendanceRoster: React.FC<
                             )}
                           </div>
 
-                          {!canWrite ? (
+                          {!canWrite || isAttendanceLocked ? (
                             <span
-                              className={`px-2 py-0.5 rounded-lg text-xs font-bold flex items-center gap-1 shadow-2xs ${
+                              className={`px-2.5 py-1 rounded-lg text-xs font-bold flex items-center gap-1 shadow-2xs ${
                                 isPresent
-                                  ? 'bg-[#c2e9ca] text-[#2c4e37]'
-                                  : isExternal
+                                  ? 'bg-[#c2e9ca] text-[#2c4e37] border border-[#a9d0b2]'
+                                  : isVisitor
                                     ? 'bg-[#fff2ee] text-[#b85028] border border-[#ffdbcf]'
                                     : 'bg-[#faf2ee] text-[#8a726a] border border-[#e8e1dd]'
                               }`}
@@ -1069,7 +1139,7 @@ export const ActivityAttendanceRoster: React.FC<
                                         ? 'Présent(e)'
                                         : 'Present',
                                     })
-                                  : isExternal
+                                  : isVisitor
                                     ? t('attendance:visitor', {
                                         defaultValue: isFrench
                                           ? 'Visiteur'
@@ -1106,7 +1176,7 @@ export const ActivityAttendanceRoster: React.FC<
                                 </>
                               ) : (
                                 <span>
-                                  {isExternal
+                                  {isVisitor
                                     ? t('attendance:recordPresent', {
                                         defaultValue: isFrench
                                           ? 'Enregistrer présent'
@@ -1133,7 +1203,7 @@ export const ActivityAttendanceRoster: React.FC<
           {/* Guests Tab View: Clean Table with Strictly Binary State */}
           {activeTab === 'guests' && (
             <div className="overflow-x-auto">
-              {guestRecords.length === 0 ? (
+              {displayedGuests.length === 0 ? (
                 <div className="p-12 text-center text-xs text-[#8a726a]">
                   {t('attendance:guest.noGuests')}
                 </div>
@@ -1147,7 +1217,7 @@ export const ActivityAttendanceRoster: React.FC<
                       <th className="py-3 px-4 text-center font-bold">
                         Status
                       </th>
-                      {canWrite && (
+                      {canWrite && !isAttendanceLocked && (
                         <th className="py-3 px-4 text-right font-bold">
                           Action
                         </th>
@@ -1155,7 +1225,7 @@ export const ActivityAttendanceRoster: React.FC<
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#e8e1dd] text-xs text-[#1e1b19]">
-                    {guestRecords.map((g) => {
+                    {displayedGuests.map((g) => {
                       const isPresent = g.status === AttendanceStatus.PRESENT;
 
                       return (
@@ -1174,7 +1244,7 @@ export const ActivityAttendanceRoster: React.FC<
                             {g.guestInfo.notes || '—'}
                           </td>
                           <td className="py-3 px-4 text-center">
-                            {!canWrite ? (
+                            {!canWrite || isAttendanceLocked ? (
                               <span
                                 className={`px-2.5 py-1 rounded-lg text-xs font-bold inline-flex items-center gap-1 ${
                                   isPresent
@@ -1227,7 +1297,7 @@ export const ActivityAttendanceRoster: React.FC<
                               </button>
                             )}
                           </td>
-                          {canWrite && (
+                          {canWrite && !isAttendanceLocked && (
                             <td className="py-3 px-4 text-right">
                               <button
                                 type="button"

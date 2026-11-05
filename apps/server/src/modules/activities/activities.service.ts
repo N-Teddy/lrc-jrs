@@ -1021,9 +1021,12 @@ export class ActivitiesService {
   ): Promise<IAttendance> {
     const activity = await this.findValidActivityById(activityId);
 
-    // STRICT LOCK GUARD: Attendance cannot be modified if finalized and locked
+    // STRICT LOCK & STATUS GUARD: Attendance cannot be modified if finalized and locked or if activity is cancelled
     if (activity.isAttendanceLocked) {
       throw new BadRequestAppException(ErrorCode.ACTIVITY_ALREADY_COMPLETED);
+    }
+    if (activity.status === ActivityStatus.CANCELLED) {
+      throw new BadRequestAppException(ErrorCode.BAD_REQUEST);
     }
 
     // STRICT TIMING GUARD: Attendance is forbidden before activity start date
@@ -1540,6 +1543,13 @@ export class ActivitiesService {
       throw new ForbiddenAppException(ErrorCode.FORBIDDEN);
     }
 
+    if (
+      activity.status === ActivityStatus.CANCELLED ||
+      activity.status === ActivityStatus.SCHEDULED
+    ) {
+      throw new BadRequestAppException(ErrorCode.BAD_REQUEST);
+    }
+
     const now = new Date();
     activity.isAttendanceLocked = true;
     activity.attendanceLockedAt = now;
@@ -1818,6 +1828,13 @@ export class ActivitiesService {
 
     if (currentUser.role !== UserRole.AP && currentUser.role !== UserRole.PC) {
       throw new ForbiddenAppException(ErrorCode.FORBIDDEN);
+    }
+
+    if (
+      activity.status === ActivityStatus.CANCELLED ||
+      activity.status === ActivityStatus.SCHEDULED
+    ) {
+      throw new BadRequestAppException(ErrorCode.BAD_REQUEST);
     }
 
     const validFiles = (files || []).filter((f) => f?.buffer);
