@@ -35,7 +35,6 @@ interface ActivityTableViewProps {
   limit: number;
   onPageChange: (page: number) => void;
   onViewDetails: (activity: IActivity) => void;
-  onViewPreparation?: (activity: IActivity) => void;
   onEditActivity: (activity: IActivity) => void;
   onViewHistory: (activity: IActivity) => void;
   onDeleteActivity?: (activity: IActivity) => void;
@@ -53,7 +52,6 @@ export const ActivityTableView: React.FC<ActivityTableViewProps> = ({
   limit,
   onPageChange,
   onViewDetails,
-  onViewPreparation,
   onEditActivity,
   onViewHistory,
   onDeleteActivity,
@@ -367,7 +365,6 @@ export const ActivityTableView: React.FC<ActivityTableViewProps> = ({
                       }
                       onClose={() => setOpenMenuId(null)}
                       onViewDetails={onViewDetails}
-                      onViewPreparation={onViewPreparation}
                       onEditActivity={onEditActivity}
                       onViewHistory={onViewHistory}
                       onCancelActivity={handleCancelActivity}

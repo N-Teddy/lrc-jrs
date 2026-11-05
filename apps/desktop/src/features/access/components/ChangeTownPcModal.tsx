@@ -1,4 +1,6 @@
 import {
+  ErrorService,
+  toast,
   useAuth,
   useChangeTownPcMutation,
   useMembersQuery,
@@ -11,12 +13,10 @@ import {
   ArrowRight,
   ArrowsLeftRight,
   Check,
-  CheckCircle,
   Crown,
   MagnifyingGlass,
   Prohibit,
   Users,
-  Warning,
   X,
 } from '@phosphor-icons/react';
 import type React from 'react';
@@ -64,9 +64,6 @@ export const ChangeTownPcModal: React.FC<ChangeTownPcModalProps> = ({
   const [disposition, setDisposition] = useState<
     'demote_to_member' | 'revoke_access'
   >('demote_to_member');
-
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
   // Queries
   const { data: towns = [] } = useTownsQuery();
@@ -124,8 +121,6 @@ export const ChangeTownPcModal: React.FC<ChangeTownPcModalProps> = ({
       setNewPcId('');
       setCandidateSearch('');
       setDisposition('demote_to_member');
-      setErrorMsg(null);
-      setSuccessMsg(null);
     }
   }, [isOpen, targetTownId, targetOutgoingPc, activeTownId, towns]);
 
@@ -163,18 +158,15 @@ export const ChangeTownPcModal: React.FC<ChangeTownPcModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedTownId) {
-      setErrorMsg('Please select a town hub.');
+      toast.error('Please select a town hub.');
       return;
     }
     if (!newPcId) {
-      setErrorMsg(
+      toast.error(
         'Please select a member to promote to Program Coordinator (PC).',
       );
       return;
     }
-
-    setErrorMsg(null);
-    setSuccessMsg(null);
 
     try {
       const res = await changeTownPcMutation.mutateAsync({
@@ -184,17 +176,11 @@ export const ChangeTownPcModal: React.FC<ChangeTownPcModalProps> = ({
         outgoingPcDisposition: outgoingPcId ? disposition : undefined,
       });
 
-      setSuccessMsg(res.message);
-      setTimeout(() => {
-        onSuccess?.();
-        onClose();
-      }, 1400);
-    } catch (err: any) {
-      setErrorMsg(
-        err?.response?.data?.message ||
-          err?.message ||
-          'Failed to transition PC leadership.',
-      );
+      toast.success(res.message);
+      onSuccess?.();
+      onClose();
+    } catch (err: unknown) {
+      ErrorService.handle(err);
     }
   };
 
@@ -237,20 +223,6 @@ export const ChangeTownPcModal: React.FC<ChangeTownPcModalProps> = ({
           onSubmit={handleSubmit}
           className="p-6 flex flex-col gap-5 overflow-y-auto min-h-0"
         >
-          {errorMsg && (
-            <div className="p-3.5 rounded-lg bg-[#ffdad6] border border-[#ffb4a8] text-[#ba1a1a] text-xs font-semibold flex items-center gap-2">
-              <Warning size={18} className="shrink-0" />
-              <span>{errorMsg}</span>
-            </div>
-          )}
-
-          {successMsg && (
-            <div className="p-3.5 rounded-lg bg-[#c2e9ca] border border-[#a9d0b2] text-[#2c4e37] text-xs font-semibold flex items-center gap-2">
-              <CheckCircle size={18} weight="fill" className="shrink-0" />
-              <span>{successMsg}</span>
-            </div>
-          )}
-
           {/* Town Selection (if AP has multi-town oversight) */}
           <div className="flex flex-col gap-1.5">
             <label

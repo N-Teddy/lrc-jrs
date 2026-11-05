@@ -1,4 +1,4 @@
-import { useTranslation } from '@jrs/client-core';
+import { ErrorService, toast, useTranslation } from '@jrs/client-core';
 import { type IUpdateMemberDto, type IUser, UserRole } from '@jrs/shared';
 import { PencilSimple, Warning, X } from '@phosphor-icons/react';
 import type React from 'react';
@@ -200,13 +200,12 @@ export const EditMemberModal: React.FC<EditMemberModalProps> = ({
           role: formData.role,
         });
       }
-      onClose();
-    } catch (err: any) {
-      setErrorMsg(
-        err?.response?.data?.message ||
-          err?.message ||
-          t('members:modal.errorUpdateFailed', 'Failed to update member.'),
+      toast.success(
+        t('members:modal.updateSuccess', 'Member updated successfully.'),
       );
+      onClose();
+    } catch (err: unknown) {
+      ErrorService.handle(err);
     }
   };
 

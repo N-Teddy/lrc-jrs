@@ -1,4 +1,4 @@
-import { ActivityType, type IAuthUser } from '@jrs/shared';
+import type { IAuthUser } from '@jrs/shared';
 import {
   Body,
   Controller,
@@ -31,7 +31,6 @@ import { TownScope } from '../../core/decorators/town-scope.decorator';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
 import { TownScopeGuard } from '../../core/guards/town-scope.guard';
 import { ActivitiesService } from './activities.service';
-import { ActivityReminderService } from './activity-reminder.service';
 import {
   ActivityQueryDto,
   CreateActivityDto,
@@ -44,10 +43,7 @@ import {
 @UseGuards(JwtAuthGuard, TownScopeGuard)
 @Controller('activities')
 export class ActivitiesController {
-  constructor(
-    private readonly activitiesService: ActivitiesService,
-    private readonly reminderService: ActivityReminderService,
-  ) {}
+  constructor(private readonly activitiesService: ActivitiesService) {}
 
   @Get()
   @TownScope('townId')
@@ -226,47 +222,6 @@ export class ActivitiesController {
       `attachment; filename="${encodeURIComponent(fileData.filename)}"`,
     );
     fileData.stream.pipe(res);
-  }
-
-  // --------------------------------------------------------------------------
-  // Dynamic Reminder Templates & Admin Checklists
-  // --------------------------------------------------------------------------
-
-  @Get('reminder-templates')
-  @ApiOperation({ summary: 'List all activity reminder checklist templates' })
-  @ApiResponse({ status: 200, description: 'List of reminder templates' })
-  async getReminderTemplates() {
-    return this.reminderService.getTemplates();
-  }
-
-  @Get('reminder-templates/:type')
-  @ApiOperation({
-    summary: 'Get reminder checklist template for specific activity type',
-  })
-  @ApiResponse({ status: 200, description: 'Reminder template' })
-  async getReminderTemplate(@Param('type') type: ActivityType) {
-    return this.reminderService.getTemplateByType(type);
-  }
-
-  @Post('reminders/trigger-daily')
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({
-    summary:
-      'Manually trigger daily activity milestones and report follow-up check',
-  })
-  @ApiResponse({ status: 200, description: 'Daily milestones processed' })
-  async triggerDailyMilestones() {
-    return this.reminderService.processDailyMilestones();
-  }
-
-  @Post('reminders/trigger-monthly')
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({
-    summary: 'Manually trigger monthly activities digest dispatch',
-  })
-  @ApiResponse({ status: 200, description: 'Monthly digest processed' })
-  async triggerMonthlyDigest() {
-    return this.reminderService.processMonthlyDigest();
   }
 
   @Get(':id')

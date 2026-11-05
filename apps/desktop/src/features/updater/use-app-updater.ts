@@ -186,6 +186,7 @@ export function useAppUpdater() {
         isDownloading: false,
         error: msg,
       }));
+      ErrorService.handle(err);
     }
   }, [status.availableUpdate]);
 

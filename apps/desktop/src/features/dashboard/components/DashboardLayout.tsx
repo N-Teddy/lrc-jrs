@@ -69,10 +69,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
   const [activitySubTab, setActivitySubTab] = useState<
     | 'schedule'
-    | 'reminders'
     | 'overview'
-    | 'preparation'
-    | 'checklist'
     | 'attendance'
     | 'report'
     | 'history'
@@ -114,16 +111,6 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           resource.entityType === 'ATTENDANCE'
         ) {
           setActivitySubTab('attendance');
-        } else if (
-          resource.subTab === 'reminders' ||
-          resource.subTab === 'guidelines'
-        ) {
-          setActivitySubTab('reminders');
-        } else if (
-          resource.subTab === 'preparation' ||
-          resource.subTab === 'checklist'
-        ) {
-          setActivitySubTab('preparation');
         } else if (
           resource.subTab === 'audit-log' ||
           resource.subTab === 'history'

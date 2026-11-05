@@ -6,7 +6,13 @@ import {
   useTranslation,
 } from '@jrs/client-core';
 import type { IUser } from '@jrs/shared';
-import { ArrowRight, ArrowsLeftRight, Info, X } from '@phosphor-icons/react';
+import {
+  ArrowRight,
+  ArrowsLeftRight,
+  Info,
+  WarningCircle,
+  X,
+} from '@phosphor-icons/react';
 import type React from 'react';
 import { useEffect, useMemo, useState } from 'react';
 import {
@@ -33,6 +39,7 @@ export const TransferTownModal: React.FC<TransferTownModalProps> = ({
 
   const [toTownId, setToTownId] = useState<string>('');
   const [reason, setReason] = useState<string>('');
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // Filter out the member's current home town
   const currentTownId = member.homeTownId;
@@ -50,6 +57,7 @@ export const TransferTownModal: React.FC<TransferTownModalProps> = ({
   // Set default selection when towns load or modal opens
   useEffect(() => {
     if (isOpen) {
+      setErrorMessage(null);
       setReason('');
       if (availableTowns.length > 0) {
         setToTownId(availableTowns[0].id);
@@ -78,7 +86,7 @@ export const TransferTownModal: React.FC<TransferTownModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!toTownId) {
-      toast.error(
+      setErrorMessage(
         t(
           'members:transferModal.selectDestError',
           'Please select a destination town hub.',
@@ -88,6 +96,7 @@ export const TransferTownModal: React.FC<TransferTownModalProps> = ({
     }
 
     try {
+      setErrorMessage(null);
       await transferMutation.mutateAsync({
         userId: member.id,
         dto: {
@@ -139,6 +148,14 @@ export const TransferTownModal: React.FC<TransferTownModalProps> = ({
             <X size={18} weight="bold" />
           </button>
         </div>
+
+        {/* Error Alert */}
+        {errorMessage && (
+          <div className="p-3.5 rounded-lg bg-[#ffdad6]/60 border border-[#ffb4ab] text-xs font-semibold text-[#ba1a1a] flex items-center gap-2.5">
+            <WarningCircle size={18} weight="fill" className="shrink-0" />
+            <span>{errorMessage}</span>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-5">
           {/* Member Profile Badge */}
