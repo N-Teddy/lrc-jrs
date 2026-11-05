@@ -15,6 +15,9 @@ async function bootstrap() {
   const logger = new Logger('Bootstrap');
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
+  // Ensure Sentry is active once ConfigModule has populated process.env
+  SentryService.init();
+
   // Serve static assets from uploads directory
   app.useStaticAssets(path.join(process.cwd(), 'uploads'), {
     prefix: '/uploads/',

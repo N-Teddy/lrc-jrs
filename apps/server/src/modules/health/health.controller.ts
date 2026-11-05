@@ -27,7 +27,7 @@ export class HealthController {
   }
 
   @Public()
-  @Get('api/health/test-sentry')
+  @Get(['health/test-sentry', 'test-sentry'])
   @ApiOperation({
     summary:
       'Diagnostic endpoint to trigger a simulated backend error for Sentry verification',
