@@ -10,8 +10,10 @@ import { type IUser, UserRole } from '@jrs/shared';
 import {
   ArrowRight,
   ArrowsLeftRight,
+  Check,
   CheckCircle,
   Crown,
+  MagnifyingGlass,
   Prohibit,
   Users,
   Warning,
@@ -58,6 +60,7 @@ export const ChangeTownPcModal: React.FC<ChangeTownPcModalProps> = ({
   // Form State
   const [outgoingPcId, setOutgoingPcId] = useState<string>('');
   const [newPcId, setNewPcId] = useState<string>('');
+  const [candidateSearch, setCandidateSearch] = useState<string>('');
   const [disposition, setDisposition] = useState<
     'demote_to_member' | 'revoke_access'
   >('demote_to_member');
@@ -101,6 +104,17 @@ export const ChangeTownPcModal: React.FC<ChangeTownPcModalProps> = ({
     });
   }, [townMembers, outgoingPcId]);
 
+  // Filter candidates by search term
+  const filteredCandidates = useMemo(() => {
+    if (!candidateSearch.trim()) return candidateMembers;
+    const q = candidateSearch.toLowerCase().trim();
+    return candidateMembers.filter((m) => {
+      const nameMatch = m.fullName.toLowerCase().includes(q);
+      const phoneMatch = m.phoneNumber?.toLowerCase().includes(q);
+      return nameMatch || phoneMatch;
+    });
+  }, [candidateMembers, candidateSearch]);
+
   // Sync props when modal opens
   useEffect(() => {
     if (isOpen) {
@@ -108,6 +122,7 @@ export const ChangeTownPcModal: React.FC<ChangeTownPcModalProps> = ({
       setSelectedTownId(town);
       setOutgoingPcId(targetOutgoingPc?.id || '');
       setNewPcId('');
+      setCandidateSearch('');
       setDisposition('demote_to_member');
       setErrorMsg(null);
       setSuccessMsg(null);
@@ -132,16 +147,6 @@ export const ChangeTownPcModal: React.FC<ChangeTownPcModalProps> = ({
     value: town.id,
     label: `${town.name} (${town.code})`,
   }));
-
-  // Candidate Options
-  const candidateOptions: SelectOption[] = candidateMembers.map((member) => {
-    const age = calculateAge(member.dateOfBirth);
-    return {
-      value: member.id,
-      label: member.fullName,
-      description: `Age: ${age ?? '—'} • ${member.account?.hasAppAccess ? 'Has App Access' : 'Offline Member'}`,
-    };
-  });
 
   // Outgoing PC Options
   const outgoingOptions: SelectOption[] = [
@@ -199,11 +204,11 @@ export const ChangeTownPcModal: React.FC<ChangeTownPcModalProps> = ({
       onClick={onClose}
     >
       <div
-        className="w-full max-w-[560px] bg-white rounded-xl border border-[#e8e1dd] shadow-2xl overflow-hidden flex flex-col"
+        className="w-full max-w-2xl bg-white rounded-xl border border-[#e8e1dd] shadow-2xl flex flex-col max-h-[90vh] overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="p-6 border-b border-[#f4ece9] flex items-start justify-between">
+        <div className="p-6 border-b border-[#f4ece9] flex items-start justify-between shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-11 h-11 rounded-lg bg-[#fff2ee] border border-[#ffdbcf] text-[#b85028] flex items-center justify-center shrink-0">
               <Crown size={24} weight="duotone" />
@@ -228,7 +233,10 @@ export const ChangeTownPcModal: React.FC<ChangeTownPcModalProps> = ({
         </div>
 
         {/* Content Form */}
-        <form onSubmit={handleSubmit} className="p-6 flex flex-col gap-5">
+        <form
+          onSubmit={handleSubmit}
+          className="p-6 flex flex-col gap-5 overflow-y-auto min-h-0"
+        >
           {errorMsg && (
             <div className="p-3.5 rounded-lg bg-[#ffdad6] border border-[#ffb4a8] text-[#ba1a1a] text-xs font-semibold flex items-center gap-2">
               <Warning size={18} className="shrink-0" />
@@ -267,7 +275,7 @@ export const ChangeTownPcModal: React.FC<ChangeTownPcModalProps> = ({
                 className="w-full"
               />
             ) : (
-              <div className="p-2.5 rounded-md bg-[#faf2ee] border border-[#e8e1dd] text-xs font-bold text-[#1e1b19] flex items-center justify-between">
+              <div className="p-2.5 rounded-lg bg-[#faf2ee] border border-[#e8e1dd] text-xs font-bold text-[#1e1b19] flex items-center justify-between">
                 <span>{currentTown?.name || 'Current Town'}</span>
                 <span className="font-mono text-[10px] text-[#8a726a]">
                   {currentTown?.code}
@@ -358,34 +366,118 @@ export const ChangeTownPcModal: React.FC<ChangeTownPcModalProps> = ({
             )}
           </div>
 
-          {/* 2. New PC Promotion */}
+          {/* 2. New PC Promotion (Redesigned with searchable candidate picker) */}
           <div className="p-4 rounded-xl bg-white border border-[#e8e1dd] shadow-2xs flex flex-col gap-3">
-            <span className="text-[11px] font-bold text-[#8a726a] uppercase tracking-wider flex items-center gap-1.5">
-              <Crown size={14} className="text-[#b85028]" />
-              New Program Coordinator (To Appoint)
-            </span>
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-bold text-[#8a726a] uppercase tracking-wider flex items-center gap-1.5">
+                <Crown size={14} className="text-[#b85028]" />
+                New Program Coordinator (To Appoint)
+              </span>
+              <span className="text-[10px] font-bold text-[#486b52] bg-[#edf3ee] px-2 py-0.5 rounded-xs border border-[#c2e9ca]">
+                Eligible Age: 18 - 30 yrs
+              </span>
+            </div>
 
-            <CustomSelect
-              id="new-pc-select"
-              value={newPcId}
-              onChange={(val) => setNewPcId(val)}
-              options={candidateOptions}
-              placeholder="Select eligible member to promote to PC..."
-              variant="form"
-              size="sm"
-              className="w-full"
-            />
+            {/* Candidate Search Input */}
+            <div className="relative flex items-center">
+              <MagnifyingGlass
+                size={15}
+                className="absolute left-3 text-[#8a726a] pointer-events-none"
+              />
+              <input
+                type="text"
+                value={candidateSearch}
+                onChange={(e) => setCandidateSearch(e.target.value)}
+                placeholder="Search eligible members by name or phone..."
+                className="w-full pl-8.5 pr-8 py-1.5 rounded-lg bg-[#faf2ee] focus:bg-white border border-[#e8e1dd] focus:border-[#b85028] focus:ring-2 focus:ring-[#b85028]/20 text-xs text-[#1e1b19] placeholder:text-[#8a726a] transition-all"
+              />
+              {candidateSearch && (
+                <button
+                  type="button"
+                  onClick={() => setCandidateSearch('')}
+                  className="absolute right-2.5 text-[#8a726a] hover:text-[#1e1b19] p-0.5 rounded cursor-pointer"
+                >
+                  <X size={13} />
+                </button>
+              )}
+            </div>
 
+            {/* Candidate Selection List (inline, prevents dropdown overflow) */}
+            <div className="flex flex-col gap-1.5 max-h-48 overflow-y-auto pr-1">
+              {candidateMembers.length === 0 ? (
+                <div className="py-6 text-center text-xs text-[#8a726a]">
+                  No members aged 18-30 found in this hub eligible for
+                  promotion.
+                </div>
+              ) : filteredCandidates.length === 0 ? (
+                <div className="py-6 text-center text-xs text-[#8a726a]">
+                  No eligible candidates match "{candidateSearch}".
+                </div>
+              ) : (
+                filteredCandidates.map((member) => {
+                  const isSelected = newPcId === member.id;
+                  const age = calculateAge(member.dateOfBirth);
+                  return (
+                    <div
+                      key={member.id}
+                      onClick={() => setNewPcId(member.id)}
+                      className={`p-2.5 rounded-lg border flex items-center justify-between transition-all cursor-pointer ${
+                        isSelected
+                          ? 'bg-[#fff8f5] border-[#b85028] shadow-2xs'
+                          : 'bg-white border-[#e8e1dd] hover:bg-[#faf2ee]'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div
+                          className={`w-4 h-4 rounded-full border flex items-center justify-center transition-colors shrink-0 ${
+                            isSelected
+                              ? 'bg-[#b85028] border-[#b85028] text-white'
+                              : 'border-[#cfc4be] bg-white'
+                          }`}
+                        >
+                          {isSelected && <Check size={10} weight="bold" />}
+                        </div>
+                        <UserAvatar
+                          avatarUrl={member.avatarUrl}
+                          name={member.fullName}
+                          size="sm"
+                        />
+                        <div className="min-w-0">
+                          <div className="text-xs font-bold text-[#1e1b19] truncate">
+                            {member.fullName}
+                          </div>
+                          <div className="text-[11px] text-[#8a726a] font-mono">
+                            {formatCameroonPhone(member.phoneNumber)}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span className="px-1.5 py-0.5 rounded-xs text-[10px] font-bold bg-[#edf3ee] text-[#2c4e37] border border-[#c2e9ca]">
+                          {age ? `${age} yrs` : '18-30'}
+                        </span>
+                        {member.account?.hasAppAccess && (
+                          <span className="px-1.5 py-0.5 rounded-xs text-[10px] font-semibold bg-[#faf2ee] text-[#57423b] border border-[#e8e1dd]">
+                            App Access
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+
+            {/* Selected Candidate Summary Preview */}
             {newPcMember && (
-              <div className="p-3 rounded-lg bg-[#faf2ee] border border-[#e8e1dd] flex items-center justify-between text-xs">
-                <div className="flex items-center gap-2.5">
+              <div className="p-3 rounded-lg bg-[#fff8f5] border border-[#ffdbcf] flex items-center justify-between text-xs mt-1">
+                <div className="flex items-center gap-2.5 min-w-0">
                   <UserAvatar
                     avatarUrl={newPcMember.avatarUrl}
                     name={newPcMember.fullName}
                     size="sm"
                   />
-                  <div>
-                    <span className="font-bold text-[#1e1b19] block">
+                  <div className="min-w-0">
+                    <span className="font-bold text-[#1e1b19] block truncate">
                       {newPcMember.fullName}
                     </span>
                     <span className="text-[11px] text-[#8a726a]">
@@ -394,16 +486,29 @@ export const ChangeTownPcModal: React.FC<ChangeTownPcModalProps> = ({
                     </span>
                   </div>
                 </div>
-                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#c2e9ca] text-[#2c4e37]">
-                  Eligible (18-30)
-                </span>
+                <div className="flex items-center gap-2 shrink-0">
+                  <span className="px-2 py-0.5 rounded-xs text-[10px] font-bold bg-[#c2e9ca] text-[#2c4e37]">
+                    Selected Candidate
+                  </span>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setNewPcId('');
+                    }}
+                    className="p-1 rounded text-[#8a726a] hover:text-[#ba1a1a] cursor-pointer"
+                    title="Clear selection"
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
               </div>
             )}
           </div>
 
           {/* Transition Summary Preview */}
           {newPcMember && (
-            <div className="p-3.5 rounded-lg bg-[#fff8f5] border border-[#ffdbcf] text-xs flex items-center justify-between gap-3">
+            <div className="p-3.5 rounded-lg bg-[#fff8f5] border border-[#ffdbcf] text-xs flex items-center justify-between gap-3 shrink-0">
               <div className="flex items-center gap-2 min-w-0">
                 <span className="font-bold text-[#57423b] truncate">
                   {outgoingMember ? outgoingMember.fullName : 'Additional PC'}
@@ -413,7 +518,7 @@ export const ChangeTownPcModal: React.FC<ChangeTownPcModalProps> = ({
                   {newPcMember.fullName}
                 </span>
               </div>
-              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#ffdbcf] text-[#812901] shrink-0">
+              <span className="px-2 py-0.5 rounded-xs text-[10px] font-bold bg-[#ffdbcf] text-[#812901] shrink-0">
                 {disposition === 'revoke_access' && outgoingMember
                   ? 'Access Revoked'
                   : 'Member Kept'}
@@ -422,7 +527,7 @@ export const ChangeTownPcModal: React.FC<ChangeTownPcModalProps> = ({
           )}
 
           {/* Action Buttons */}
-          <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#f4ece9]">
+          <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#f4ece9] shrink-0">
             <button
               type="button"
               onClick={onClose}
