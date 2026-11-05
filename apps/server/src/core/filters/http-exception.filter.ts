@@ -8,6 +8,7 @@ import {
   HttpException as NestHttpException,
 } from '@nestjs/common';
 import type { Request, Response } from 'express';
+import { SentryService } from '../sentry/sentry.service';
 
 @Catch(NestHttpException)
 export class HttpExceptionFilter implements ExceptionFilter {
@@ -79,6 +80,38 @@ export class HttpExceptionFilter implements ExceptionFilter {
         `[${request.method}] ${request.url} - ${status} (${errorCode})`,
         exception.stack,
       );
+
+      // Report internal server errors (500+) to Sentry
+      const user = (
+        request as unknown as {
+          user?: {
+            userId?: string;
+            role?: string;
+            townCode?: string;
+            email?: string;
+          };
+        }
+      ).user;
+      SentryService.captureException(exception, {
+        method: request.method,
+        url: request.url,
+        ip: request.ip,
+        body: request.body,
+        params: request.params,
+        query: request.query as Record<string, unknown>,
+        user: user
+          ? {
+              userId: user.userId,
+              role: user.role,
+              townCode: user.townCode,
+              email: user.email,
+            }
+          : undefined,
+        extra: {
+          errorCode,
+          errorName,
+        },
+      });
     } else {
       this.logger.warn(
         `[${request.method}] ${request.url} - ${status} (${errorCode}): ${JSON.stringify(errorMessage)}`,

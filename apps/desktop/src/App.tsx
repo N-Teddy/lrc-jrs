@@ -1,5 +1,7 @@
 import { CoreProviders, useTranslation } from '@jrs/client-core';
+import { useEffect } from 'react';
 import { ErrorBoundary, ToastContainer } from './components';
+import { setSentryUser } from './core/sentry';
 import {
   FirstTimeSetupScreen,
   ForgotPasswordScreen,
@@ -47,6 +49,20 @@ function AppContent() {
   } = useDesktopAppFlow();
 
   const updater = useAppUpdater();
+
+  // Synchronize authenticated user context with Sentry telemetry
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      setSentryUser({
+        id: user.id,
+        role: user.role,
+        townCode: user.homeTownId,
+        email: user.email,
+      });
+    } else {
+      setSentryUser(null);
+    }
+  }, [isAuthenticated, user]);
 
   if (isLoading) {
     return (

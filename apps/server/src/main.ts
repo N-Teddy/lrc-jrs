@@ -5,9 +5,13 @@ import { NestFactory } from '@nestjs/core';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import compression from 'compression';
 import { AppModule } from './app.module';
+import { SentryService } from './core/sentry/sentry.service';
 import { setupSwagger } from './core/swagger/swagger.config';
 
 async function bootstrap() {
+  // Initialize Sentry error tracking as early as possible
+  SentryService.init();
+
   const logger = new Logger('Bootstrap');
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 

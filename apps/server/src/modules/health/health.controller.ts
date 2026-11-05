@@ -25,4 +25,16 @@ export class HealthController {
   check() {
     return this.health.check([() => this.mongoose.pingCheck('database')]);
   }
+
+  @Public()
+  @Get('api/health/test-sentry')
+  @ApiOperation({
+    summary:
+      'Diagnostic endpoint to trigger a simulated backend error for Sentry verification',
+  })
+  testSentry() {
+    throw new Error(
+      'LRC JRS Sentry Diagnostic Verification Error (Backend Test)',
+    );
+  }
 }

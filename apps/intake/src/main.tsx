@@ -1,9 +1,21 @@
 import React, { Component, type ReactNode } from 'react';
 import ReactDOM from 'react-dom/client';
 import '@fontsource/plus-jakarta-sans';
+import * as Sentry from '@sentry/react';
 import App from './App';
 import './index.css';
 import { I18nProvider } from './i18n';
+
+// Initialize Sentry for public member intake portal if configured
+const sentryDsn = import.meta.env.VITE_SENTRY_DSN;
+if (sentryDsn && sentryDsn.trim() !== '') {
+  Sentry.init({
+    dsn: sentryDsn,
+    environment: import.meta.env.MODE || 'development',
+    release: '0.0.4',
+    tracesSampleRate: 0.1,
+  });
+}
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -26,6 +38,13 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     console.error('Uncaught error in Intake application:', error, errorInfo);
+    if (sentryDsn) {
+      Sentry.captureException(error, {
+        extra: {
+          componentStack: errorInfo.componentStack,
+        },
+      });
+    }
   }
 
   render() {

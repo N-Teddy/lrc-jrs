@@ -1,3 +1,4 @@
+import { ErrorService } from '@jrs/client-core';
 import { Component, type ErrorInfo, type ReactNode } from 'react';
 import { AppCrashFallback } from './AppCrashFallback';
 
@@ -41,6 +42,14 @@ export class ErrorBoundary extends Component<
       error,
       errorInfo,
     );
+
+    // Forward React component crash to Sentry & telemetry reporters
+    ErrorService.reportError(error, {
+      componentStack: errorInfo.componentStack ?? undefined,
+      extra: {
+        errorBoundary: 'GlobalErrorBoundary',
+      },
+    });
 
     if (this.props.onCatch) {
       try {

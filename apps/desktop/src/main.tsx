@@ -2,7 +2,11 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import { ErrorBoundary } from './components';
+import { initSentry } from './core/sentry';
 import './index.css';
+
+// Initialize Sentry error tracking for desktop runtime
+initSentry();
 
 // Ensure process.env and NODE_ENV are explicitly available in desktop runtime
 if (typeof window !== 'undefined') {

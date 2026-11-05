@@ -18,10 +18,54 @@ export interface ExtractedErrorInfo {
   details?: Record<string, unknown>;
 }
 
+export interface ErrorReportContext {
+  componentStack?: string;
+  screen?: string;
+  userId?: string;
+  userRole?: string;
+  townHub?: string;
+  details?: Record<string, unknown>;
+  statusCode?: number;
+  errorCode?: string;
+  tags?: Record<string, string>;
+  extra?: Record<string, unknown>;
+}
+
+export type ErrorReporter = (
+  error: unknown,
+  context?: ErrorReportContext,
+) => void;
+
 // biome-ignore lint/complexity/noStaticOnlyClass: Centralized static utility service
 export class ErrorService {
   private static lastNetworkErrorTime = 0;
   private static readonly NETWORK_ERROR_THROTTLE_MS = 6000;
+  private static reporters: ErrorReporter[] = [];
+
+  /**
+   * Register a telemetry or error tracking reporter callback (e.g. Sentry)
+   */
+  static registerReporter(reporter: ErrorReporter): () => void {
+    ErrorService.reporters.push(reporter);
+    return () => {
+      ErrorService.reporters = ErrorService.reporters.filter(
+        (r) => r !== reporter,
+      );
+    };
+  }
+
+  /**
+   * Dispatches an error with context to all registered telemetry reporters
+   */
+  static reportError(error: unknown, context?: ErrorReportContext): void {
+    for (const reporter of ErrorService.reporters) {
+      try {
+        reporter(error, context);
+      } catch (err) {
+        console.warn('[ErrorService] Error reporter failed:', err);
+      }
+    }
+  }
 
   /**
    * Reset the network error throttle window (e.g. when network requests resume successfully)
@@ -260,6 +304,24 @@ export class ErrorService {
         return localizedMessage;
       }
       ErrorService.lastNetworkErrorTime = now;
+    }
+
+    // Forward server crashes (500s), uncaught exceptions, and non-routine errors to telemetry
+    const isRoutineClientValidation =
+      statusCode === 400 &&
+      !ErrorService.isRawServerError(message, statusCode) &&
+      !(message || '').toLowerCase().includes('axioserror');
+
+    if (!isNetwork && !isRoutineClientValidation) {
+      ErrorService.reportError(error, {
+        statusCode,
+        errorCode,
+        details,
+        extra: {
+          localizedMessage,
+          title: options?.title,
+        },
+      });
     }
 
     if (!options?.silent) {

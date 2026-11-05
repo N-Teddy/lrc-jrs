@@ -7,6 +7,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import type { Request, Response } from 'express';
+import { SentryService } from '../sentry/sentry.service';
 
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
@@ -38,6 +39,34 @@ export class AllExceptionsFilter implements ExceptionFilter {
           ? exception.stack
           : JSON.stringify(exception),
       );
+
+      // Report unhandled backend crash to Sentry
+      const user = (
+        request as unknown as {
+          user?: {
+            userId?: string;
+            role?: string;
+            townCode?: string;
+            email?: string;
+          };
+        }
+      ).user;
+      SentryService.captureException(exception, {
+        method: request.method,
+        url: request.url,
+        ip: request.ip,
+        body: request.body,
+        params: request.params,
+        query: request.query as Record<string, unknown>,
+        user: user
+          ? {
+              userId: user.userId,
+              role: user.role,
+              townCode: user.townCode,
+              email: user.email,
+            }
+          : undefined,
+      });
     } else {
       this.logger.warn(
         `Mongoose validation error at [${request.method}] ${request.url}`,

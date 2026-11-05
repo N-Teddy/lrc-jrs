@@ -1,8 +1,14 @@
 import { CoreProviders } from '@jrs/client-core';
 import { StatusBar } from 'expo-status-bar';
+import React, { useEffect } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { getApiBaseUrl } from './src/config/api.config';
+import { initMobileSentry, setMobileSentryUser } from './src/config/sentry';
+
+// Initialize Sentry error tracking for mobile runtime
+initMobileSentry();
+
 import {
   FirstTimeSetupScreen,
   ForgotPasswordScreen,
@@ -47,6 +53,20 @@ function AppContent() {
 
   // Register push notifications
   usePushNotifications();
+
+  // Synchronize authenticated user context with mobile Sentry
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      setMobileSentryUser({
+        id: user.id,
+        role: user.role,
+        townCode: user.homeTownId,
+        email: user.email,
+      });
+    } else {
+      setMobileSentryUser(null);
+    }
+  }, [isAuthenticated, user]);
 
   if (isLoading) {
     return (
