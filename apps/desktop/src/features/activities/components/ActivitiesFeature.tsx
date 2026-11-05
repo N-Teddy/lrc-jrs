@@ -27,7 +27,6 @@ import {
 } from './ActivityFilterToolbar';
 import { ActivityFormModal } from './ActivityFormModal';
 import { ActivityRemindersTab } from './ActivityRemindersTab';
-import { ActivityReminderTemplatesModal } from './ActivityReminderTemplatesModal';
 import { ActivityStatsOverview } from './ActivityStatsOverview';
 import { ActivityTableView } from './ActivityTableView';
 import { DeleteActivityDialog } from './DeleteActivityDialog';
@@ -88,8 +87,6 @@ export const ActivitiesFeature: React.FC<ActivitiesFeatureProps> = ({
 
   // Modals State
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
-  const [isReminderTemplatesModalOpen, setIsReminderTemplatesModalOpen] =
-    useState(false);
   const [isComingSoonModalOpen, setIsComingSoonModalOpen] = useState(false);
   const [editingActivity, setEditingActivity] = useState<IActivity | null>(
     null,
@@ -531,12 +528,6 @@ export const ActivitiesFeature: React.FC<ActivitiesFeatureProps> = ({
         activity={deletingActivity}
         onConfirmDelete={handleConfirmDelete}
         isDeleting={deleteActivityMutation.isPending}
-      />
-
-      {/* Activity Reminder Guidelines & Templates Modal */}
-      <ActivityReminderTemplatesModal
-        isOpen={isReminderTemplatesModalOpen}
-        onClose={() => setIsReminderTemplatesModalOpen(false)}
       />
 
       {/* Coming Soon Modal for Reminders & Guidelines on PROD */}

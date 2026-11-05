@@ -15,13 +15,11 @@ import {
   FileText,
   Lightning,
   ListChecks,
-  PencilSimple,
   Sparkle,
   Warning,
   WarningCircle,
 } from '@phosphor-icons/react';
 import type React from 'react';
-import { useEffect, useMemo, useState } from 'react';
 import {
   formatActivityDate,
   getActivityTypeConfig,
@@ -36,7 +34,6 @@ interface ActivityPreparationTabProps {
 export const ActivityPreparationTab: React.FC<ActivityPreparationTabProps> = ({
   activity,
   isPrivileged,
-  onOpenTemplatesModal,
 }) => {
   const { t, i18n } = useTranslation(['activities', 'common', 'errors']);
   const currentLang = i18n.language?.startsWith('fr') ? 'fr' : 'en';
@@ -50,37 +47,6 @@ export const ActivityPreparationTab: React.FC<ActivityPreparationTabProps> = ({
 
   // Milestone Trigger Mutation
   const triggerMilestonesMutation = useTriggerDailyMilestonesMutation();
-
-  // Local Storage checklist completion persistence per activity instance
-  const storageKey = `lrc_activity_checklist_${activity.id}`;
-  const [completedIds, setCompletedIds] = useState<string[]>(() => {
-    try {
-      const stored = localStorage.getItem(storageKey);
-      return stored ? JSON.parse(stored) : [];
-    } catch {
-      return [];
-    }
-  });
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(storageKey, JSON.stringify(completedIds));
-    } catch {
-      // ignore storage quota errors
-    }
-  }, [completedIds, storageKey]);
-
-  const toggleItem = (itemId: string) => {
-    setCompletedIds((prev) =>
-      prev.includes(itemId)
-        ? prev.filter((id) => id !== itemId)
-        : [...prev, itemId],
-    );
-  };
-
-  const handleResetChecklist = () => {
-    setCompletedIds([]);
-  };
 
   // Milestone Calculations
   const now = new Date();
@@ -99,24 +65,8 @@ export const ActivityPreparationTab: React.FC<ActivityPreparationTabProps> = ({
       (activity.reports && activity.reports.length > 0),
   );
 
-  // Checklist Calculations
+  // Guidelines items (immutable system defaults)
   const items = template?.items || [];
-  const completedCount = items.filter((item) =>
-    completedIds.includes(item.id),
-  ).length;
-  const totalCount = items.length;
-  const percentComplete =
-    totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
-
-  const requiredItems = useMemo(
-    () => items.filter((i) => i.isRequired),
-    [items],
-  );
-  const completedRequiredCount = requiredItems.filter((i) =>
-    completedIds.includes(i.id),
-  ).length;
-  const allRequiredDone =
-    requiredItems.length > 0 && completedRequiredCount === requiredItems.length;
 
   const customInstructions =
     currentLang === 'en'
@@ -176,21 +126,6 @@ export const ActivityPreparationTab: React.FC<ActivityPreparationTabProps> = ({
           {/* Leadership Quick Trigger Action */}
           {isPrivileged && (
             <div className="flex items-center gap-2 self-start sm:self-auto">
-              {onOpenTemplatesModal && (
-                <button
-                  type="button"
-                  onClick={onOpenTemplatesModal}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#e8e1dd] hover:border-[#b85028]/40 bg-[#faf2ee] hover:bg-white text-[#57423b] hover:text-[#b85028] text-xs font-bold transition-all shadow-2xs cursor-pointer"
-                >
-                  <PencilSimple size={14} weight="bold" />
-                  <span>
-                    {t(
-                      'activities:reminders.customizeTemplate',
-                      'Edit Guidelines',
-                    )}
-                  </span>
-                </button>
-              )}
               <button
                 type="button"
                 onClick={handleRunMilestoneCheck}
@@ -476,7 +411,7 @@ export const ActivityPreparationTab: React.FC<ActivityPreparationTabProps> = ({
         )}
       </div>
 
-      {/* 2. Interactive Preparation Checklist Card */}
+      {/* 2. Preparation Guidelines Card (Fixed System Directives) */}
       <div className="bg-white rounded-lg border border-[#e8e1dd] shadow-2xs p-5 md:p-6 flex flex-col gap-5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#f2ebe7] pb-4">
           <div className="flex items-center gap-3">
@@ -488,7 +423,7 @@ export const ActivityPreparationTab: React.FC<ActivityPreparationTabProps> = ({
                 <h2 className="text-base font-bold text-[#1e1b19]">
                   {t(
                     'activities:reminders.checklistTitle',
-                    'Preparation Checklist',
+                    'Preparation Guidelines',
                   )}
                 </h2>
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#faf2ee] text-[#b85028] border border-[#e8e1dd]">
@@ -498,69 +433,20 @@ export const ActivityPreparationTab: React.FC<ActivityPreparationTabProps> = ({
               <p className="text-xs text-[#8a726a]">
                 {t('activities:reminders.checklistDesc', {
                   type: typeConfig.label,
-                  defaultValue: `Standard operational steps recommended for this ${typeConfig.label} gathering`,
+                  defaultValue: `Standard operational protocol and guidelines for this ${typeConfig.label} gathering`,
                 })}
               </p>
             </div>
           </div>
 
-          {/* Progress Pill & Reset */}
-          <div className="flex items-center gap-3 self-start sm:self-auto">
-            <div className="flex flex-col items-end">
-              <span className="text-xs font-bold text-[#1e1b19]">
-                {t('activities:reminders.completedCount', {
-                  completed: completedCount,
-                  total: totalCount,
-                  defaultValue: `${completedCount} of ${totalCount} completed`,
-                })}
-              </span>
-              <span className="text-[10px] text-[#8a726a]">
-                {allRequiredDone ? (
-                  <span className="text-[#486b52] font-semibold flex items-center gap-1">
-                    <CheckCircle size={11} weight="fill" />
-                    {t(
-                      'activities:reminders.allRequiredDone',
-                      'All required preparation tasks completed!',
-                    )}
-                  </span>
-                ) : (
-                  <span>
-                    {t('activities:reminders.requiredRemaining', {
-                      count: requiredItems.length - completedRequiredCount,
-                      defaultValue: `${requiredItems.length - completedRequiredCount} required tasks remaining`,
-                    })}
-                  </span>
-                )}
-              </span>
-            </div>
-
-            {completedCount > 0 && (
-              <button
-                type="button"
-                onClick={handleResetChecklist}
-                className="p-1.5 rounded-md hover:bg-[#faf2ee] text-[#8a726a] hover:text-[#ba1a1a] transition-colors cursor-pointer"
-                title={t(
-                  'activities:reminders.resetChecklist',
-                  'Reset Progress',
-                )}
-              >
-                <ArrowClockwise size={14} weight="bold" />
-              </button>
-            )}
+          <div className="flex items-center gap-2 self-start sm:self-auto">
+            <span className="px-2.5 py-1 rounded-md bg-[#faf2ee] border border-[#e8e1dd] text-xs font-bold text-[#57423b]">
+              {items.length} {items.length === 1 ? 'Step' : 'Steps'}
+            </span>
           </div>
         </div>
 
-        {/* Progress Bar */}
-        <div className="w-full bg-[#f2ebe7] rounded-full h-2 overflow-hidden">
-          <div
-            className={`h-full transition-all duration-300 rounded-full ${
-              allRequiredDone ? 'bg-[#486b52]' : 'bg-[#b85028]'
-            }`}
-            style={{ width: `${percentComplete}%` }}
-          />
-        </div>
-
-        {/* Checklist Items List */}
+        {/* Guidelines List */}
         {isTemplateLoading ? (
           <div className="py-8 flex items-center justify-center">
             <ArrowClockwise
@@ -579,7 +465,6 @@ export const ActivityPreparationTab: React.FC<ActivityPreparationTabProps> = ({
         ) : (
           <div className="flex flex-col divide-y divide-[#f2ebe7]">
             {items.map((item, index) => {
-              const isChecked = completedIds.includes(item.id);
               const label =
                 currentLang === 'en'
                   ? item.labelEn || item.labelFr
@@ -588,37 +473,14 @@ export const ActivityPreparationTab: React.FC<ActivityPreparationTabProps> = ({
               return (
                 <div
                   key={item.id}
-                  onClick={() => toggleItem(item.id)}
-                  className={`py-3.5 px-3 rounded-lg flex items-start gap-3.5 cursor-pointer transition-colors ${
-                    isChecked
-                      ? 'bg-[#f8fbf9]/60 hover:bg-[#f8fbf9]'
-                      : 'hover:bg-[#faf2ee]/40'
-                  }`}
+                  className="py-3 px-3 rounded-lg flex items-start gap-3 hover:bg-[#faf2ee]/40 transition-colors"
                 >
-                  {/* Checkbox Box */}
-                  <div
-                    aria-hidden="true"
-                    className={`w-5 h-5 rounded-md mt-0.5 flex items-center justify-center shrink-0 transition-all border ${
-                      isChecked
-                        ? 'bg-[#486b52] border-[#486b52] text-white'
-                        : 'bg-white border-[#d8ccc6] hover:border-[#b85028]'
-                    }`}
-                  >
-                    {isChecked && <Check size={12} weight="bold" />}
+                  <div className="w-6 h-6 rounded-md bg-[#faf2ee] border border-[#e8e1dd] text-[#b85028] font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">
+                    {index + 1}
                   </div>
 
-                  {/* Task Content */}
                   <div className="flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
-                    <span
-                      className={`text-xs select-none transition-all ${
-                        isChecked
-                          ? 'line-through text-[#8a726a]'
-                          : 'text-[#1e1b19] font-medium'
-                      }`}
-                    >
-                      <span className="font-bold text-[#b85028] mr-2">
-                        {index + 1}.
-                      </span>
+                    <span className="text-xs text-[#1e1b19] font-medium leading-relaxed">
                       {label}
                     </span>
 

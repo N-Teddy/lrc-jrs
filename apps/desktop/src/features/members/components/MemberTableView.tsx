@@ -2,6 +2,7 @@ import { useTownContext, useTranslation } from '@jrs/client-core';
 import type { IUser } from '@jrs/shared';
 import {
   ArrowCounterClockwise,
+  CalendarCheck,
   ChatCircleText,
   Check,
   Copy,
@@ -36,7 +37,10 @@ interface MemberTableViewProps {
   page: number;
   limit: number;
   onPageChange: (page: number) => void;
-  onViewMember: (memberId: string) => void;
+  onViewMember: (
+    memberId: string,
+    tab?: 'identity' | 'transfers' | 'attendance' | 'access',
+  ) => void;
   onEditMember: (member: IUser) => void;
   onManageAccess: (member: IUser) => void;
   onDeleteMember?: (member: IUser) => void;
@@ -373,6 +377,27 @@ export const MemberTableView: React.FC<MemberTableViewProps> = ({
                             <Eye size={15} className="text-[#8a726a]" />
                             <span>
                               {t('members:table.viewProfile', 'View Profile')}
+                            </span>
+                          </button>
+
+                          {/* Attendance History */}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setOpenMenuId(null);
+                              onViewMember(m.id, 'attendance');
+                            }}
+                            className="w-full px-3 py-2 text-left text-xs text-[#1e1b19] hover:bg-[#faf2ee] flex items-center gap-2 font-medium cursor-pointer"
+                          >
+                            <CalendarCheck
+                              size={15}
+                              className="text-[#8a726a]"
+                            />
+                            <span>
+                              {t(
+                                'members:table.attendanceHistory',
+                                'Attendance History',
+                              )}
                             </span>
                           </button>
 

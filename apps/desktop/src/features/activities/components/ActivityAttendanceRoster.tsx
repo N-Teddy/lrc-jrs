@@ -48,7 +48,9 @@ import {
 
 interface ActivityAttendanceRosterProps {
   activity: IActivity;
-  onBack: () => void;
+  onBack?: () => void;
+  isPrivileged?: boolean;
+  embedded?: boolean;
 }
 
 interface MemberAttendanceState {
@@ -81,7 +83,7 @@ function computeRosterSnapshot(
 
 export const ActivityAttendanceRoster: React.FC<
   ActivityAttendanceRosterProps
-> = ({ activity, onBack }) => {
+> = ({ activity, onBack, embedded = false }) => {
   const { t, i18n } = useTranslation(['attendance', 'towns', 'common']);
   const isFrench = i18n.language?.startsWith('fr');
   const { canWrite, activeTownId } = useTownContext();
@@ -503,21 +505,27 @@ export const ActivityAttendanceRoster: React.FC<
   );
 
   return (
-    <div className="flex flex-col gap-6 max-w-7xl mx-auto w-full animate-in fade-in duration-200">
+    <div
+      className={`flex flex-col gap-6 ${embedded ? 'w-full' : 'max-w-7xl mx-auto w-full'} animate-in fade-in duration-200`}
+    >
       {/* 1. Back Navigation & Action Bar */}
-      <div className="flex items-center justify-between gap-4">
-        <button
-          type="button"
-          onClick={onBack}
-          className="inline-flex items-center gap-2 text-xs font-bold text-[#8a726a] hover:text-[#b85028] transition-colors cursor-pointer group"
-        >
-          <ArrowLeft
-            size={16}
-            weight="bold"
-            className="group-hover:-translate-x-1 transition-transform"
-          />
-          <span>{t('attendance:backToActivities')}</span>
-        </button>
+      <div
+        className={`flex items-center ${embedded ? 'justify-end' : 'justify-between'} gap-4`}
+      >
+        {!embedded && onBack && (
+          <button
+            type="button"
+            onClick={onBack}
+            className="inline-flex items-center gap-2 text-xs font-bold text-[#8a726a] hover:text-[#b85028] transition-colors cursor-pointer group"
+          >
+            <ArrowLeft
+              size={16}
+              weight="bold"
+              className="group-hover:-translate-x-1 transition-transform"
+            />
+            <span>{t('attendance:backToActivities')}</span>
+          </button>
+        )}
 
         <div className="flex items-center gap-2.5">
           {!canWrite ? (
@@ -632,65 +640,67 @@ export const ActivityAttendanceRoster: React.FC<
 
       {/* 2. Activity Summary Banner Card */}
       <div className="bg-white rounded-xl border border-[#e8e1dd] shadow-xs p-6 flex flex-col gap-5">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-[#e8e1dd]">
-          <div className="flex flex-col gap-2">
-            <div className="flex flex-wrap items-center gap-2">
-              <span
-                className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold border ${typeConfig.badgeBg} ${typeConfig.badgeText} ${typeConfig.badgeBorder}`}
-              >
-                <span>{typeConfig.label}</span>
-              </span>
-
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#faf2ee] border border-[#e8e1dd] text-xs font-medium text-[#57423b]">
-                <MapPin size={13} weight="fill" className="text-[#486b52]" />
-                <span>
-                  {activity.town?.name || 'Local'} Hub (
-                  {activity.town?.code || 'HUB'})
+        {!embedded && (
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-[#e8e1dd]">
+            <div className="flex flex-col gap-2">
+              <div className="flex flex-wrap items-center gap-2">
+                <span
+                  className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold border ${typeConfig.badgeBg} ${typeConfig.badgeText} ${typeConfig.badgeBorder}`}
+                >
+                  <span>{typeConfig.label}</span>
                 </span>
-              </span>
 
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#faf2ee] border border-[#e8e1dd] text-xs font-medium text-[#57423b]">
-                <CalendarBlank
-                  size={13}
-                  weight="bold"
-                  className="text-[#b85028]"
-                />
-                <span>
-                  {dateInfo.dateRange} · {dateInfo.timeRange}
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#faf2ee] border border-[#e8e1dd] text-xs font-medium text-[#57423b]">
+                  <MapPin size={13} weight="fill" className="text-[#486b52]" />
+                  <span>
+                    {activity.town?.name || 'Local'} Hub (
+                    {activity.town?.code || 'HUB'})
+                  </span>
                 </span>
-              </span>
 
-              {activity.status === ActivityStatus.IN_PROGRESS && (
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#edf3ee] border border-[#c2e9ca] text-xs font-bold text-[#486b52]">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#486b52] animate-ping" />
-                  <span>Live Session</span>
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#faf2ee] border border-[#e8e1dd] text-xs font-medium text-[#57423b]">
+                  <CalendarBlank
+                    size={13}
+                    weight="bold"
+                    className="text-[#b85028]"
+                  />
+                  <span>
+                    {dateInfo.dateRange} · {dateInfo.timeRange}
+                  </span>
                 </span>
+
+                {activity.status === ActivityStatus.IN_PROGRESS && (
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#edf3ee] border border-[#c2e9ca] text-xs font-bold text-[#486b52]">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#486b52] animate-ping" />
+                    <span>Live Session</span>
+                  </span>
+                )}
+              </div>
+
+              <h1 className="text-xl sm:text-2xl font-extrabold text-[#1e1b19] tracking-tight">
+                {activity.title}
+              </h1>
+
+              {activity.notes && (
+                <p className="text-xs text-[#57423b] leading-relaxed max-w-3xl">
+                  {activity.notes}
+                </p>
               )}
             </div>
 
-            <h1 className="text-xl sm:text-2xl font-extrabold text-[#1e1b19] tracking-tight">
-              {activity.title}
-            </h1>
-
-            {activity.notes && (
-              <p className="text-xs text-[#57423b] leading-relaxed max-w-3xl">
-                {activity.notes}
-              </p>
-            )}
+            <div className="flex flex-col items-start lg:items-end gap-1 text-xs text-[#8a726a] shrink-0">
+              <span className="font-mono text-[11px]">
+                Hub:{' '}
+                <strong className="text-[#1e1b19]">
+                  {activity.town?.name || 'Local'}
+                </strong>
+              </span>
+              <span className="font-mono text-[10px]">
+                ID: #{activity.id.slice(-8).toUpperCase()}
+              </span>
+            </div>
           </div>
-
-          <div className="flex flex-col items-start lg:items-end gap-1 text-xs text-[#8a726a] shrink-0">
-            <span className="font-mono text-[11px]">
-              Hub:{' '}
-              <strong className="text-[#1e1b19]">
-                {activity.town?.name || 'Local'}
-              </strong>
-            </span>
-            <span className="font-mono text-[10px]">
-              ID: #{activity.id.slice(-8).toUpperCase()}
-            </span>
-          </div>
-        </div>
+        )}
 
         {/* 3. Live Turnout Counter Strip (Strictly 4 KPIs, No Excused) */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5">

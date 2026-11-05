@@ -6,23 +6,20 @@ import {
   useTranslation,
   useTriggerDailyMilestonesMutation,
   useTriggerMonthlyDigestMutation,
-  useUpdateActivityReminderTemplateMutation,
 } from '@jrs/client-core';
-import { ActivityStatus, ActivityType, type IChecklistItem } from '@jrs/shared';
+import { ActivityStatus, ActivityType } from '@jrs/shared';
 import {
   ArrowRight,
   Bell,
-  Check,
   ClockCountdown,
   Lightning,
   ListChecks,
   PaperPlaneRight,
-  Plus,
+  ShieldCheck,
   Sparkle,
-  Trash,
 } from '@phosphor-icons/react';
 import type React from 'react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import emptyRemindersSvg from '../../../assets/illustrations/empty-reminders.svg';
 import { EmptyState } from '../../../components';
 import {
@@ -49,8 +46,9 @@ export const ActivityRemindersTab: React.FC<ActivityRemindersTabProps> = ({
   onNavigateToActivity,
   isPrivileged = true,
 }) => {
-  const { t } = useTranslation(['activities', 'common', 'errors']);
+  const { t, i18n } = useTranslation(['activities', 'common', 'errors']);
   const { addToast } = useToast();
+  const currentLang = i18n.language?.startsWith('fr') ? 'fr' : 'en';
   const { activeTownId } = useTownContext();
 
   const [selectedType, setSelectedType] = useState<ActivityType>(
@@ -59,7 +57,6 @@ export const ActivityRemindersTab: React.FC<ActivityRemindersTabProps> = ({
 
   // Queries & Mutations
   const { data: allTemplates } = useActivityReminderTemplatesQuery();
-  const updateTemplateMutation = useUpdateActivityReminderTemplateMutation();
   const triggerDailyMutation = useTriggerDailyMilestonesMutation();
   const triggerMonthlyMutation = useTriggerMonthlyDigestMutation();
 
@@ -75,85 +72,14 @@ export const ActivityRemindersTab: React.FC<ActivityRemindersTabProps> = ({
     (act) => act.status === ActivityStatus.SCHEDULED,
   );
 
-  // Active Template Local Form State
+  // Active Template (Immutable System Defaults)
   const activeTemplate = allTemplates?.find(
     (item) => item.activityType === selectedType,
   );
 
-  const [items, setItems] = useState<IChecklistItem[]>([]);
-  const [instructionsFr, setInstructionsFr] = useState('');
-  const [instructionsEn, setInstructionsEn] = useState('');
-
-  useEffect(() => {
-    if (activeTemplate) {
-      setItems(activeTemplate.items || []);
-      setInstructionsFr(activeTemplate.customInstructionsFr || '');
-      setInstructionsEn(activeTemplate.customInstructionsEn || '');
-    } else {
-      setItems([]);
-      setInstructionsFr('');
-      setInstructionsEn('');
-    }
-  }, [activeTemplate]);
-
-  const handleAddItem = () => {
-    const newItem: IChecklistItem = {
-      id: `item-${Date.now()}`,
-      labelKey: `task_${Date.now()}`,
-      labelFr: 'Nouvelle étape de préparation',
-      labelEn: 'New preparation step',
-      isRequired: true,
-    };
-    setItems((prev) => [...prev, newItem]);
-  };
-
-  const handleUpdateItem = (
-    index: number,
-    field: keyof IChecklistItem,
-    value: any,
-  ) => {
-    setItems((prev) => {
-      const copy = [...prev];
-      copy[index] = { ...copy[index], [field]: value };
-      return copy;
-    });
-  };
-
-  const handleRemoveItem = (index: number) => {
-    setItems((prev) => prev.filter((_, i) => i !== index));
-  };
-
-  const handleSave = async () => {
-    try {
-      await updateTemplateMutation.mutateAsync({
-        type: selectedType,
-        dto: {
-          items,
-          customInstructionsFr: instructionsFr.trim() || undefined,
-          customInstructionsEn: instructionsEn.trim() || undefined,
-        },
-      });
-
-      const typeConfig = getActivityTypeConfig(selectedType, t);
-      addToast({
-        type: 'success',
-        title: t('activities:reminders.saveTemplate', 'Save Guidelines'),
-        message: t('activities:reminders.templateSavedSuccess', {
-          type: typeConfig.label,
-          defaultValue: `Checklist guidelines for ${typeConfig.label} updated successfully!`,
-        }),
-      });
-    } catch {
-      addToast({
-        type: 'error',
-        title: t('common:error', 'Error'),
-        message: t(
-          'errors:ERR_INTERNAL_SERVER',
-          'Failed to update reminder template.',
-        ),
-      });
-    }
-  };
+  const items = activeTemplate?.items || [];
+  const instructionsFr = activeTemplate?.customInstructionsFr || '';
+  const instructionsEn = activeTemplate?.customInstructionsEn || '';
 
   const handleTriggerDaily = async () => {
     try {
@@ -472,7 +398,7 @@ export const ActivityRemindersTab: React.FC<ActivityRemindersTabProps> = ({
         )}
       </section>
 
-      {/* 3. Guidelines & Standardized Preparation Checklist Template Editor */}
+      {/* 3. Official System Guidelines & Preparation Protocol (Read-Only) */}
       <section className="bg-white rounded-lg border border-[#e8e1dd] shadow-2xs overflow-hidden flex flex-col">
         {/* Section Header */}
         <div className="p-4 bg-[#faf6f4] border-b border-[#f2ebe7] flex items-center justify-between gap-3">
@@ -482,17 +408,21 @@ export const ActivityRemindersTab: React.FC<ActivityRemindersTabProps> = ({
               <h3 className="text-sm font-bold text-[#1e1b19]">
                 {t(
                   'activities:reminders.templatesEditorTitle',
-                  'Checklist & Guidelines Template Editor',
+                  'Official Gathering Guidelines & Protocol',
                 )}
               </h3>
               <p className="text-[11px] text-[#8a726a]">
                 {t(
                   'activities:reminders.templatesEditorDesc',
-                  'Configure standardized operational checklists and leadership directives automatically attached to each activity type',
+                  'Standardized operational protocols and leadership directives attached to each activity type',
                 )}
               </p>
             </div>
           </div>
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xs bg-[#eef7f0] text-[#2c4e37] border border-[#c2e9ca] text-[10px] font-bold">
+            <ShieldCheck size={13} weight="bold" />
+            <span>Official System Standard</span>
+          </span>
         </div>
 
         {/* Activity Type Switcher Ribbon */}
@@ -520,7 +450,7 @@ export const ActivityRemindersTab: React.FC<ActivityRemindersTabProps> = ({
           })}
         </div>
 
-        {/* Template Form Content */}
+        {/* Guidelines View Content */}
         <div className="p-5 flex flex-col gap-6">
           {/* Active Type Header Box */}
           <div
@@ -539,33 +469,26 @@ export const ActivityRemindersTab: React.FC<ActivityRemindersTabProps> = ({
                 <span className="text-xs text-[#8a726a]">
                   {t(
                     'activities:reminders.leadershipGuidelinesNotice',
-                    `Administrative guidance established by Apostles for ${activeConfig.label}`,
+                    `Administrative guidance established for ${activeConfig.label}`,
                     { type: activeConfig.label },
                   )}
                 </span>
               </div>
             </div>
 
-            <button
-              type="button"
-              onClick={handleAddItem}
-              className="inline-flex items-center gap-1.5 h-8 px-3 bg-white hover:bg-[#faf2ee] text-[#b85028] border border-[#e8e1dd] hover:border-[#b85028]/40 rounded-md text-xs font-semibold shadow-2xs transition-all cursor-pointer"
-            >
-              <Plus size={14} weight="bold" />
-              <span>
-                {t('activities:reminders.addItem', 'Add Checklist Item')}
-              </span>
-            </button>
+            <span className="text-xs font-semibold text-[#8a726a]">
+              {items.length} {items.length === 1 ? 'Directive' : 'Directives'}
+            </span>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            {/* Left 7 Cols: Checklist Items */}
+            {/* Left 7 Cols: Protocol Steps */}
             <div className="lg:col-span-7 flex flex-col gap-3">
               <div className="flex items-center justify-between gap-2">
                 <h4 className="text-xs font-bold uppercase tracking-wider text-[#8a726a]">
                   {t(
                     'activities:reminders.checklistTitle',
-                    'Preparation Checklist',
+                    'Preparation Steps',
                   )}{' '}
                   ({items.length})
                 </h4>
@@ -575,101 +498,47 @@ export const ActivityRemindersTab: React.FC<ActivityRemindersTabProps> = ({
                 <div className="p-8 border border-dashed border-[#e8e1dd] rounded-lg text-center flex flex-col items-center justify-center gap-2">
                   <ListChecks size={28} className="text-[#8a726a]/50" />
                   <p className="text-xs text-[#8a726a]">
-                    No checklist items defined yet for this activity type.
+                    No preparation steps defined for this activity type.
                   </p>
-                  <button
-                    type="button"
-                    onClick={handleAddItem}
-                    className="text-xs font-bold text-[#b85028] hover:underline cursor-pointer"
-                  >
-                    + Add first task
-                  </button>
                 </div>
               ) : (
-                <div className="flex flex-col gap-2.5 max-h-[500px] overflow-y-auto pr-1">
+                <div className="flex flex-col gap-2 max-h-[500px] overflow-y-auto pr-1 divide-y divide-[#f4ece9]">
                   {items.map((item, idx) => (
                     <div
                       key={item.id || idx}
-                      className="p-3.5 rounded-lg border border-[#e8e1dd] bg-[#faf6f4]/50 flex flex-col gap-2.5 hover:border-[#b85028]/30 transition-colors"
+                      className="pt-3 first:pt-0 flex items-start gap-3"
                     >
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="w-5 h-5 rounded-md bg-white border border-[#e8e1dd] flex items-center justify-center text-[10px] font-bold text-[#8a726a]">
-                          {idx + 1}
-                        </span>
+                      <span className="w-6 h-6 rounded-md bg-[#faf2ee] border border-[#e8e1dd] flex items-center justify-center text-[11px] font-bold text-[#b85028] shrink-0 mt-0.5">
+                        {idx + 1}
+                      </span>
 
-                        <div className="flex items-center gap-2">
-                          <button
-                            type="button"
-                            onClick={() =>
-                              handleUpdateItem(
-                                idx,
-                                'isRequired',
-                                !item.isRequired,
-                              )
-                            }
-                            className={`px-2 py-0.5 rounded-md text-[10px] font-semibold cursor-pointer transition-colors border ${
-                              item.isRequired
-                                ? 'bg-[#b85028]/10 text-[#b85028] border-[#b85028]/30'
-                                : 'bg-white text-[#8a726a] border-[#e8e1dd]'
-                            }`}
-                          >
-                            {item.isRequired
-                              ? t(
-                                  'activities:reminders.requiredBadge',
-                                  'Required',
-                                )
-                              : t(
-                                  'activities:reminders.optionalBadge',
-                                  'Optional',
-                                )}
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveItem(idx)}
-                            className="w-7 h-7 rounded-md hover:bg-white text-[#8a726a] hover:text-[#b85028] flex items-center justify-center transition-colors cursor-pointer"
-                          >
-                            <Trash size={14} />
-                          </button>
+                      <div className="flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <div className="flex flex-col">
+                          <span className="text-xs font-bold text-[#1e1b19]">
+                            {currentLang === 'en'
+                              ? item.labelEn || item.labelFr
+                              : item.labelFr || item.labelEn}
+                          </span>
+                          <span className="text-[11px] text-[#8a726a]">
+                            {currentLang === 'en' ? item.labelFr : item.labelEn}
+                          </span>
                         </div>
-                      </div>
 
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        <label className="flex flex-col gap-1 text-[10px] font-bold text-[#8a726a]">
-                          <span>
+                        {item.isRequired ? (
+                          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#fff0eb] text-[#b85028] border border-[#ffd8cb] shrink-0 self-start sm:self-auto">
                             {t(
-                              'activities:reminders.itemLabelFr',
-                              'French Label',
+                              'activities:reminders.requiredBadge',
+                              'Required',
                             )}
                           </span>
-                          <input
-                            type="text"
-                            value={item.labelFr || ''}
-                            onChange={(e) =>
-                              handleUpdateItem(idx, 'labelFr', e.target.value)
-                            }
-                            placeholder="ex: Réserver la salle et la sonorisation"
-                            className="h-8 px-2.5 rounded-md border border-[#e8e1dd] bg-white text-xs text-[#1e1b19] font-normal focus:outline-none focus:border-[#b85028]"
-                          />
-                        </label>
-
-                        <label className="flex flex-col gap-1 text-[10px] font-bold text-[#8a726a]">
-                          <span>
+                        ) : (
+                          <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-[#f2ebe7] text-[#8a726a] border border-[#e8e1dd] shrink-0 self-start sm:self-auto">
                             {t(
-                              'activities:reminders.itemLabelEn',
-                              'English Label',
+                              'activities:reminders.optionalBadge',
+                              'Optional',
                             )}
                           </span>
-                          <input
-                            type="text"
-                            value={item.labelEn || ''}
-                            onChange={(e) =>
-                              handleUpdateItem(idx, 'labelEn', e.target.value)
-                            }
-                            placeholder="ex: Confirm venue and sound equipment"
-                            className="h-8 px-2.5 rounded-md border border-[#e8e1dd] bg-white text-xs text-[#1e1b19] font-normal focus:outline-none focus:border-[#b85028]"
-                          />
-                        </label>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -682,41 +551,31 @@ export const ActivityRemindersTab: React.FC<ActivityRemindersTabProps> = ({
               <h4 className="text-xs font-bold uppercase tracking-wider text-[#8a726a]">
                 {t(
                   'activities:reminders.leadershipGuidelinesTitle',
-                  'Leadership Directives & Instructions',
+                  'Administrative Directives & Instructions',
                 )}
               </h4>
 
-              <label className="flex flex-col gap-1.5 text-xs font-bold text-[#57423b]">
-                <span>
-                  {t(
-                    'activities:reminders.instructionsFr',
-                    'Directives Pastorales (Français)',
-                  )}
-                </span>
-                <textarea
-                  rows={4}
-                  value={instructionsFr}
-                  onChange={(e) => setInstructionsFr(e.target.value)}
-                  placeholder="Instructions pastorales envoyées aux coordinateurs de centre..."
-                  className="p-3 rounded-md border border-[#e8e1dd] bg-white text-xs text-[#1e1b19] font-normal focus:outline-none focus:border-[#b85028] resize-none leading-relaxed"
-                />
-              </label>
+              {instructionsFr && (
+                <div className="p-3.5 rounded-lg bg-[#faf6f4] border border-[#e8e1dd] flex flex-col gap-1">
+                  <span className="text-[10px] font-bold text-[#8a726a] uppercase tracking-wider">
+                    Directives Administratives (Français)
+                  </span>
+                  <p className="text-xs text-[#1e1b19] leading-relaxed whitespace-pre-line">
+                    {instructionsFr}
+                  </p>
+                </div>
+              )}
 
-              <label className="flex flex-col gap-1.5 text-xs font-bold text-[#57423b]">
-                <span>
-                  {t(
-                    'activities:reminders.instructionsEn',
-                    'Leadership Directives (English)',
-                  )}
-                </span>
-                <textarea
-                  rows={4}
-                  value={instructionsEn}
-                  onChange={(e) => setInstructionsEn(e.target.value)}
-                  placeholder="Pastoral directives sent to town coordinators..."
-                  className="p-3 rounded-md border border-[#e8e1dd] bg-white text-xs text-[#1e1b19] font-normal focus:outline-none focus:border-[#b85028] resize-none leading-relaxed"
-                />
-              </label>
+              {instructionsEn && (
+                <div className="p-3.5 rounded-lg bg-[#faf6f4] border border-[#e8e1dd] flex flex-col gap-1">
+                  <span className="text-[10px] font-bold text-[#8a726a] uppercase tracking-wider">
+                    Coordination Directives (English)
+                  </span>
+                  <p className="text-xs text-[#1e1b19] leading-relaxed whitespace-pre-line">
+                    {instructionsEn}
+                  </p>
+                </div>
+              )}
 
               {/* Informational Alert Box */}
               <div className="p-3 rounded-md bg-[#faf2ee] border border-[#e8e1dd] text-[11px] text-[#57423b] flex items-start gap-2">
@@ -726,29 +585,12 @@ export const ActivityRemindersTab: React.FC<ActivityRemindersTabProps> = ({
                   className="text-[#b85028] shrink-0 mt-0.5"
                 />
                 <span>
-                  These checklist steps and directives are automatically bundled
-                  into automated D-14 / D-7 WhatsApp broadcasts and
-                  notifications dispatched to town coordinators.
+                  These standard guidelines are automatically bundled into
+                  automated D-14 / D-7 broadcasts and notifications dispatched
+                  to town coordinators.
                 </span>
               </div>
             </div>
-          </div>
-
-          {/* Action Footer Bar */}
-          <div className="pt-4 border-t border-[#f2ebe7] flex items-center justify-end gap-3">
-            <button
-              type="button"
-              onClick={handleSave}
-              disabled={updateTemplateMutation.isPending}
-              className="inline-flex items-center gap-2 h-9 px-5 bg-[#b85028] hover:bg-[#a44520] text-white rounded-md text-xs font-semibold shadow-2xs active:scale-[0.98] transition-all disabled:opacity-50 cursor-pointer"
-            >
-              <Check size={16} weight="bold" />
-              <span>
-                {updateTemplateMutation.isPending
-                  ? t('activities:reminders.savingTemplate', 'Saving...')
-                  : t('activities:reminders.saveTemplate', 'Save Guidelines')}
-              </span>
-            </button>
           </div>
         </div>
       </section>

@@ -1,4 +1,4 @@
-import { ActivityType, type IAuthUser, type IChecklistItem } from '@jrs/shared';
+import { ActivityType, type IAuthUser } from '@jrs/shared';
 import {
   Body,
   Controller,
@@ -10,7 +10,6 @@ import {
   Param,
   Patch,
   Post,
-  Put,
   Query,
   Res,
   UploadedFiles,
@@ -247,23 +246,6 @@ export class ActivitiesController {
   @ApiResponse({ status: 200, description: 'Reminder template' })
   async getReminderTemplate(@Param('type') type: ActivityType) {
     return this.reminderService.getTemplateByType(type);
-  }
-
-  @Put('reminder-templates/:type')
-  @ApiOperation({
-    summary: 'Update reminder checklist template for specific activity type',
-  })
-  @ApiResponse({ status: 200, description: 'Template updated' })
-  async updateReminderTemplate(
-    @Param('type') type: ActivityType,
-    @Body()
-    dto: {
-      items: IChecklistItem[];
-      customInstructionsFr?: string;
-      customInstructionsEn?: string;
-    },
-  ) {
-    return this.reminderService.updateTemplate(type, dto);
   }
 
   @Post('reminders/trigger-daily')

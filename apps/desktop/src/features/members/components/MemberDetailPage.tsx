@@ -429,18 +429,23 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
                 </div>
 
                 <div className="p-3.5 rounded-lg bg-[#faf2ee] border border-[#e8e1dd] flex flex-col gap-1">
-                  <span className="text-[#8a726a] font-medium">Gender</span>
+                  <span className="text-[#8a726a] font-medium">
+                    {t('members:modal.gender', 'Gender')}
+                  </span>
                   <span className="font-bold text-[#1e1b19] text-sm">
                     {member.gender
-                      ? member.gender.charAt(0) +
-                        member.gender.slice(1).toLowerCase()
-                      : 'Not recorded'}
+                      ? t(
+                          `members:gender.${member.gender.toLowerCase()}`,
+                          member.gender.charAt(0) +
+                            member.gender.slice(1).toLowerCase(),
+                        )
+                      : t('common:notRecorded', 'Not recorded')}
                   </span>
                 </div>
 
                 <div className="p-3.5 rounded-lg bg-[#faf2ee] border border-[#e8e1dd] flex flex-col gap-1">
                   <span className="text-[#8a726a] font-medium">
-                    Date of Birth
+                    {t('members:modal.dob', 'Date of Birth')}
                   </span>
                   <span className="font-bold text-[#1e1b19] text-sm">
                     {member.dateOfBirth
@@ -452,13 +457,13 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
                             year: 'numeric',
                           },
                         )
-                      : 'Not recorded'}
+                      : t('common:notRecorded', 'Not recorded')}
                   </span>
                 </div>
 
                 <div className="p-3.5 rounded-lg bg-[#faf2ee] border border-[#e8e1dd] flex flex-col gap-1">
                   <span className="text-[#8a726a] font-medium">
-                    Integration Date
+                    {t('members:modal.integrationDate', 'Integration Date')}
                   </span>
                   <span className="font-bold text-[#1e1b19] text-sm">
                     {member.integrationDate
@@ -469,7 +474,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
                             year: 'numeric',
                           },
                         )
-                      : 'Not recorded'}
+                      : t('common:notRecorded', 'Not recorded')}
                   </span>
                 </div>
 
