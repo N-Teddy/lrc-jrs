@@ -131,11 +131,44 @@ export const ToastItemComponent: React.FC<{
   } else if (
     lowerMsg.includes('axioserror') ||
     lowerMsg.includes('status code 500') ||
-    lowerMsg.includes('internal server error')
+    lowerMsg.includes('internal server error') ||
+    lowerMsg.includes('cannot post') ||
+    lowerMsg.includes('cannot get') ||
+    lowerMsg.includes('cannot put') ||
+    lowerMsg.includes('cannot patch') ||
+    lowerMsg.includes('cannot delete') ||
+    lowerMsg.includes('cast to objectid') ||
+    lowerMsg.includes('duplicate key') ||
+    lowerMsg.includes('e11000') ||
+    lowerMsg.includes('syntaxerror') ||
+    lowerMsg.includes('typeerror') ||
+    lowerMsg.includes('referenceerror')
   ) {
     resolvedMessage = t('errors:ERR_INTERNAL_SERVER', {
       defaultValue: 'A server error occurred. Please try again later.',
     });
+  } else if (
+    lowerMsg.includes('should not exist') ||
+    lowerMsg.includes('must be a') ||
+    lowerMsg.includes('must be an') ||
+    lowerMsg.includes('must be valid') ||
+    lowerMsg.includes('should not be empty') ||
+    lowerMsg.includes('cannot be empty') ||
+    lowerMsg.includes('must not be empty') ||
+    lowerMsg.includes('each value in') ||
+    lowerMsg.includes('is not a valid') ||
+    lowerMsg.includes('validation failed')
+  ) {
+    if (lowerMsg.includes('attendance')) {
+      resolvedMessage = t('errors:ERR_ATTENDANCE_RECORDING_FAILED', {
+        defaultValue: 'Failed to record attendance for the selected members.',
+      });
+    } else {
+      resolvedMessage = t('errors:ERR_VALIDATION_FAILED', {
+        defaultValue:
+          'Some entered information is invalid or incomplete. Please verify the form and try again.',
+      });
+    }
   }
 
   const duration = item.duration ?? 4000;

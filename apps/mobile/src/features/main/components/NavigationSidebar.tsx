@@ -227,8 +227,24 @@ export const NavigationSidebar: React.FC<NavigationSidebarProps> = ({
                   {/* Top Bar with Brand & Close Button */}
                   <View style={styles.sidebarTopBar}>
                     <View style={styles.brandTitleRow}>
-                      <View style={styles.brandBadge}>
-                        <Text style={styles.brandBadgeText}>JRS</Text>
+                      <View
+                        style={[
+                          styles.brandBadge,
+                          __DEV__ && {
+                            backgroundColor: '#fef3c7',
+                            borderColor: '#fcd34d',
+                            borderWidth: 1,
+                          },
+                        ]}
+                      >
+                        <Text
+                          style={[
+                            styles.brandBadgeText,
+                            __DEV__ && { color: '#92400e', fontWeight: '800' },
+                          ]}
+                        >
+                          {__DEV__ ? 'DEV' : 'JRS'}
+                        </Text>
                       </View>
                       <Text style={styles.sidebarHeaderTitle}>
                         {isFrench ? 'Profil & Espace' : 'Profile & Workspace'}
@@ -596,7 +612,9 @@ export const NavigationSidebar: React.FC<NavigationSidebarProps> = ({
 
                   {/* Version Meta */}
                   <Text style={styles.versionText}>
-                    LRC JRS Mobile • v1.0.0 (Build 42)
+                    {__DEV__
+                      ? 'LRC JRS Mobile (Dev) • v1.0.0 (Build 42)'
+                      : 'LRC JRS Mobile • v1.0.0 (Build 42)'}
                   </Text>
                 </View>
               </View>

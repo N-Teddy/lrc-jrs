@@ -1,6 +1,8 @@
 import {
+  ErrorService,
   type IDriveFileVaultItem,
   type IDriveFolderOption,
+  toast,
   useActivitiesQuery,
   useAuth,
   useCreateDriveFolderMutation,
@@ -41,7 +43,6 @@ import {
   SquaresFour,
   Trash,
   UploadSimple,
-  WarningCircle,
   X,
 } from '@phosphor-icons/react';
 import { openUrl } from '@tauri-apps/plugin-opener';
@@ -108,7 +109,6 @@ export const DriveExplorerFeature: React.FC = () => {
   const [uploadFolderId, setUploadFolderId] = useState<string>('');
   const [uploadSummary, setUploadSummary] = useState<string>('');
   const [isUploading, setIsUploading] = useState(false);
-  const [uploadError, setUploadError] = useState<string | null>(null);
   const uploadFileInputRef = useRef<HTMLInputElement>(null);
 
   // Folder CRUD States
@@ -120,7 +120,6 @@ export const DriveExplorerFeature: React.FC = () => {
   const [folderNameInput, setFolderNameInput] = useState('');
   const [folderParentIdInput, setFolderParentIdInput] = useState('');
   const [isFolderSubmitting, setIsFolderSubmitting] = useState(false);
-  const [folderError, setFolderError] = useState<string | null>(null);
 
   const [deleteFolderTarget, setDeleteFolderTarget] =
     useState<IDriveFolderOption | null>(null);
@@ -660,7 +659,6 @@ export const DriveExplorerFeature: React.FC = () => {
     setUploadFolderId(dest);
     setUploadFiles([]);
     setUploadSummary('');
-    setUploadError(null);
     setIsUploadModalOpen(true);
   };
 
@@ -675,7 +673,6 @@ export const DriveExplorerFeature: React.FC = () => {
     setFolderParentIdInput(
       parentId || (selectedFolderId !== 'ALL' ? selectedFolderId : ''),
     );
-    setFolderError(null);
   };
 
   // Open rename folder modal
@@ -686,7 +683,6 @@ export const DriveExplorerFeature: React.FC = () => {
     });
     setFolderNameInput(folder.name);
     setFolderParentIdInput(folder.parentId || '');
-    setFolderError(null);
   };
 
   // Drag and Drop files upload handler
@@ -695,7 +691,6 @@ export const DriveExplorerFeature: React.FC = () => {
     setUploadFiles(files);
     setUploadFolderId(selectedFolderId !== 'ALL' ? selectedFolderId : '');
     setUploadSummary('');
-    setUploadError(null);
     setIsUploadModalOpen(true);
   };
 
@@ -703,12 +698,11 @@ export const DriveExplorerFeature: React.FC = () => {
   const handleUploadSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (uploadFiles.length === 0) {
-      setUploadError('Please select at least one file to upload.');
+      toast.error('Please select at least one file to upload.');
       return;
     }
 
     setIsUploading(true);
-    setUploadError(null);
 
     try {
       const formData = new FormData();
@@ -723,15 +717,12 @@ export const DriveExplorerFeature: React.FC = () => {
       }
 
       await uploadStandaloneMutation.mutateAsync({ formData });
+      toast.success('Files uploaded to Google Drive successfully.');
       setIsUploadModalOpen(false);
       setUploadFiles([]);
       setUploadSummary('');
     } catch (err: any) {
-      setUploadError(
-        err?.response?.data?.message ||
-          err?.message ||
-          'Failed to upload files to Google Drive.',
-      );
+      ErrorService.handle(err);
     } finally {
       setIsUploading(false);
     }
@@ -742,12 +733,11 @@ export const DriveExplorerFeature: React.FC = () => {
     e.preventDefault();
     const name = folderNameInput.trim();
     if (!name) {
-      setFolderError('Folder name cannot be empty.');
+      toast.error('Folder name cannot be empty.');
       return;
     }
 
     setIsFolderSubmitting(true);
-    setFolderError(null);
 
     try {
       if (folderModalState?.mode === 'create') {
@@ -758,6 +748,7 @@ export const DriveExplorerFeature: React.FC = () => {
         if (created?.id) {
           setSelectedFolderId(created.id);
         }
+        toast.success('Folder created successfully.');
       } else if (
         folderModalState?.mode === 'rename' &&
         folderModalState.folder
@@ -766,15 +757,12 @@ export const DriveExplorerFeature: React.FC = () => {
           id: folderModalState.folder.id,
           name,
         });
+        toast.success('Folder renamed successfully.');
       }
       setFolderModalState(null);
       setFolderNameInput('');
     } catch (err: any) {
-      setFolderError(
-        err?.response?.data?.message ||
-          err?.message ||
-          'Failed to save folder.',
-      );
+      ErrorService.handle(err);
     } finally {
       setIsFolderSubmitting(false);
     }
@@ -1621,13 +1609,6 @@ export const DriveExplorerFeature: React.FC = () => {
               onSubmit={handleUploadSubmit}
               className="p-5 flex flex-col gap-4"
             >
-              {uploadError && (
-                <div className="p-3 rounded-lg bg-[#ffdad6] border border-[#ffb4a8] text-[#ba1a1a] text-xs font-semibold flex items-center gap-2">
-                  <WarningCircle size={16} className="shrink-0" />
-                  <span>{uploadError}</span>
-                </div>
-              )}
-
               {/* Destination Folder Selector */}
               <div className="flex flex-col gap-1.5">
                 <label
@@ -1783,13 +1764,6 @@ export const DriveExplorerFeature: React.FC = () => {
               onSubmit={handleFolderSubmit}
               className="p-5 flex flex-col gap-4"
             >
-              {folderError && (
-                <div className="p-3 rounded-lg bg-[#ffdad6] border border-[#ffb4a8] text-[#ba1a1a] text-xs font-semibold flex items-center gap-2">
-                  <WarningCircle size={16} className="shrink-0" />
-                  <span>{folderError}</span>
-                </div>
-              )}
-
               {folderModalState.mode === 'create' && (
                 <div className="flex flex-col gap-1.5">
                   <label

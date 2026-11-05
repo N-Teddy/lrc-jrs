@@ -1,14 +1,12 @@
-import { useTranslation } from '@jrs/client-core';
+import { ErrorService, toast, useTranslation } from '@jrs/client-core';
 import type { IUpdateMemberAccessDto, IUser } from '@jrs/shared';
 import {
   ChatCircleText,
-  CheckCircle,
   EnvelopeSimple,
   Key,
   LockKey,
   PaperPlaneTilt,
   Prohibit,
-  Warning,
   X,
 } from '@phosphor-icons/react';
 import React, { useEffect, useState } from 'react';
@@ -29,8 +27,6 @@ export const ManageAccessModal: React.FC<ManageAccessModalProps> = ({
 }) => {
   const { t } = useTranslation(['members', 'access', 'common']);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [successMsg, setSuccessMsg] = useState<string | null>(null);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const [inviteChannel, setInviteChannel] = useState<'whatsapp' | 'email'>(
     'email',
@@ -52,17 +48,16 @@ export const ManageAccessModal: React.FC<ManageAccessModalProps> = ({
 
   const handleResendCredentials = async () => {
     setIsSubmitting(true);
-    setErrorMsg(null);
-    setSuccessMsg(null);
     try {
       await onUpdateAccess(member.id, { resendInvite: true });
-      setSuccessMsg(t('members:accessModal.resendSuccess'));
-    } catch (err: any) {
-      setErrorMsg(
-        err?.response?.data?.message ||
-          err?.message ||
-          'Failed to resend credentials.',
+      toast.success(
+        t(
+          'members:accessModal.resendSuccess',
+          'Credentials resent successfully.',
+        ),
       );
+    } catch (err: any) {
+      ErrorService.handle(err);
     } finally {
       setIsSubmitting(false);
     }
@@ -70,20 +65,16 @@ export const ManageAccessModal: React.FC<ManageAccessModalProps> = ({
 
   const handleInviteToApp = async () => {
     setIsSubmitting(true);
-    setErrorMsg(null);
-    setSuccessMsg(null);
     try {
       await onUpdateAccess(member.id, {
         hasAppAccess: true,
         channel: inviteChannel,
       });
-      setSuccessMsg('Invitation sent successfully.');
-    } catch (err: any) {
-      setErrorMsg(
-        err?.response?.data?.message ||
-          err?.message ||
-          'Failed to send invitation.',
+      toast.success(
+        t('members:access.inviteSuccess', 'Invitation sent successfully.'),
       );
+    } catch (err: any) {
+      ErrorService.handle(err);
     } finally {
       setIsSubmitting(false);
     }
@@ -91,24 +82,18 @@ export const ManageAccessModal: React.FC<ManageAccessModalProps> = ({
 
   const handleToggleActive = async () => {
     setIsSubmitting(true);
-    setErrorMsg(null);
-    setSuccessMsg(null);
     try {
       const nextRevoked = !isRevoked;
       await onUpdateAccess(member.id, {
         isAccessRevoked: nextRevoked,
       });
-      setSuccessMsg(
+      toast.success(
         nextRevoked
           ? 'Account access has been suspended.'
           : 'Account successfully reactivated.',
       );
     } catch (err: any) {
-      setErrorMsg(
-        err?.response?.data?.message ||
-          err?.message ||
-          'Failed to toggle account access.',
-      );
+      ErrorService.handle(err);
     } finally {
       setIsSubmitting(false);
     }
@@ -149,20 +134,6 @@ export const ManageAccessModal: React.FC<ManageAccessModalProps> = ({
 
         {/* Content Body */}
         <div className="p-6 flex flex-col gap-4">
-          {errorMsg && (
-            <div className="p-3.5 rounded-lg bg-[#ffdad6] border border-[#ffb4a8] text-[#ba1a1a] text-xs font-semibold flex items-center gap-2">
-              <Warning size={18} className="shrink-0" />
-              <span>{errorMsg}</span>
-            </div>
-          )}
-
-          {successMsg && (
-            <div className="p-3.5 rounded-lg bg-[#c2e9ca] border border-[#a9d0b2] text-[#2c4e37] text-xs font-semibold flex items-center gap-2">
-              <CheckCircle size={18} weight="fill" className="shrink-0" />
-              <span>{successMsg}</span>
-            </div>
-          )}
-
           {/* Account Status Card */}
           <div className="p-4 rounded-xl bg-[#faf2ee] border border-[#e8e1dd] flex flex-col gap-3">
             <div className="flex items-center justify-between pb-2 border-b border-[#e8e1dd]">

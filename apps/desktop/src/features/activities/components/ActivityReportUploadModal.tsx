@@ -1,5 +1,7 @@
 import {
+  ErrorService,
   type IDriveFolderOption,
+  toast,
   useDeleteActivityReportMutation,
   useDriveFoldersQuery,
   useTranslation,
@@ -41,7 +43,6 @@ export const ActivityReportUploadModal: React.FC<
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [summary, setSummary] = useState(activity.report?.summary || '');
   const [selectedFolderId, setSelectedFolderId] = useState<string>('');
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [reportToDelete, setReportToDelete] = useState<IActivityReport | null>(
     null,
   );
@@ -172,12 +173,11 @@ export const ActivityReportUploadModal: React.FC<
   if (!isOpen) return null;
 
   const handleFilesAdded = (fileList: FileList | File[]) => {
-    setErrorMsg(null);
     const added: File[] = [];
     for (let i = 0; i < fileList.length; i++) {
       const file = fileList[i];
       if (file.size > 25 * 1024 * 1024) {
-        setErrorMsg(
+        toast.error(
           t('activities:reportsModal.fileTooLarge', {
             name: file.name,
             defaultValue: `"${file.name}" exceeds maximum allowed limit (25 MB)`,
@@ -214,7 +214,7 @@ export const ActivityReportUploadModal: React.FC<
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
     if (selectedFiles.length === 0) {
-      setErrorMsg(
+      toast.error(
         t(
           'activities:reportsModal.selectAtLeastOne',
           'Please select at least one report file to upload',
@@ -223,7 +223,6 @@ export const ActivityReportUploadModal: React.FC<
       return;
     }
 
-    setErrorMsg(null);
     try {
       const formData = new FormData();
       for (const file of selectedFiles) {
@@ -242,14 +241,16 @@ export const ActivityReportUploadModal: React.FC<
       });
 
       setSelectedFiles([]);
+      toast.success(
+        t(
+          'activities:reportsModal.uploadSuccess',
+          'Activity reports uploaded successfully.',
+        ),
+      );
       onSuccess?.();
       onClose();
     } catch (err: any) {
-      setErrorMsg(
-        err.response?.data?.message ||
-          err.message ||
-          'Failed to upload report to Google Drive',
-      );
+      ErrorService.handle(err);
     }
   };
 
@@ -261,11 +262,15 @@ export const ActivityReportUploadModal: React.FC<
         fileId: reportToDelete.fileId,
       });
       setReportToDelete(null);
+      toast.success(
+        t(
+          'activities:reportsModal.deleteSuccess',
+          'Report removed successfully.',
+        ),
+      );
       onSuccess?.();
     } catch (err: any) {
-      setErrorMsg(
-        err.response?.data?.message || err.message || 'Failed to remove report',
-      );
+      ErrorService.handle(err);
     }
   };
 
@@ -611,14 +616,6 @@ export const ActivityReportUploadModal: React.FC<
                 className="w-full px-3.5 py-2.5 rounded-md bg-[#faf2ee]/50 border border-[#e8e1dd] text-xs text-[#1e1b19] focus:outline-none focus:border-[#b85028] transition-colors resize-none placeholder:text-[#a08a82]"
               />
             </div>
-
-            {/* Error notice */}
-            {errorMsg && (
-              <div className="p-3 rounded-lg bg-[#ffdad6] border border-[#ffb4ab] text-xs font-bold text-[#ba1a1a] flex items-center gap-2">
-                <WarningCircle size={16} weight="bold" className="shrink-0" />
-                <span>{errorMsg}</span>
-              </div>
-            )}
 
             {/* Footer actions */}
             <div className="flex items-center justify-end gap-3 pt-2">

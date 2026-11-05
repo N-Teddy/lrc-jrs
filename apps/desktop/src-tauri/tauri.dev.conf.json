@@ -1,0 +1,13 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "LRC JRS Dev",
+  "identifier": "com.ngangman-teddy.lrc-jrs.dev",
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "LRC JRS (Dev) - Youth Community Portal"
+      }
+    ]
+  }
+}

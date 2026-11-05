@@ -9,7 +9,7 @@
     "check": "biome check --write .",
     "check-types": "turbo run check-types",
     "audit": "pnpm audit --prod",
-    "desktop": "WEBKIT_DISABLE_DMABUF_RENDERER=1 WEBKIT_DISABLE_SANDBOX_THIS_IS_DANGEROUS=1 pnpm --filter @jrs/desktop tauri dev",
+    "desktop": "WEBKIT_DISABLE_DMABUF_RENDERER=1 WEBKIT_DISABLE_SANDBOX_THIS_IS_DANGEROUS=1 pnpm --filter @jrs/desktop tauri dev -c src-tauri/tauri.dev.conf.json",
     "mobile": "pnpm --filter @jrs/mobile start",
     "android": "pnpm --filter @jrs/mobile android",
     "android:dev": "pnpm --filter @jrs/mobile android:dev",

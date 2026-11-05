@@ -1,3 +1,4 @@
+import { ErrorService, i18n, toast } from '@jrs/client-core';
 import type { Update } from '@tauri-apps/plugin-updater';
 import { useCallback, useEffect, useState } from 'react';
 import pkg from '../../../package.json';
@@ -96,6 +97,14 @@ export function useAppUpdater() {
           lastCheckedAt: new Date(),
           error: null,
         }));
+        if (manual) {
+          toast.info(
+            i18n.t(
+              'dashboard:whatsNewModal.upToDate',
+              'You are running the latest version of the application.',
+            ),
+          );
+        }
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
@@ -104,8 +113,23 @@ export function useAppUpdater() {
         ...s,
         isChecking: false,
         lastCheckedAt: new Date(),
-        error: manual ? msg : null,
+        error: null,
       }));
+      if (manual) {
+        if (
+          msg.includes('Could not fetch a valid release JSON') ||
+          msg.includes('404')
+        ) {
+          toast.info(
+            i18n.t(
+              'dashboard:whatsNewModal.noRemoteRelease',
+              'No online release found. The build may still be compiling on GitHub, or you are already up to date.',
+            ),
+          );
+        } else {
+          ErrorService.handle(err);
+        }
+      }
     }
   }, []);
 

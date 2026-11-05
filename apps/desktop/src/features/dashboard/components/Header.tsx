@@ -107,6 +107,11 @@ export const Header: React.FC<HeaderProps> = ({
             <h1 className="text-base font-bold text-[#1e1b19] tracking-tight">
               {title}
             </h1>
+            {import.meta.env.DEV && (
+              <span className="px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-amber-100 text-amber-800 border border-amber-300">
+                DEV
+              </span>
+            )}
             <span className="text-[11px] text-[#8a726a] hidden lg:inline">
               • {todayFormatted}
             </span>

@@ -145,16 +145,33 @@ export const Sidebar: React.FC<SidebarProps> = ({
             }`}
           >
             <div className="flex items-center gap-3">
-              <img
-                src={appIcon}
-                alt="JRS"
-                className="w-8 h-8 rounded-lg object-cover shadow-2xs shrink-0 border border-[#e8e1dd]"
-              />
+              <div className="relative shrink-0">
+                <img
+                  src={appIcon}
+                  alt="JRS"
+                  className="w-8 h-8 rounded-lg object-cover shadow-2xs shrink-0 border border-[#e8e1dd]"
+                />
+                {import.meta.env.DEV && (
+                  <span
+                    className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-amber-500 border-2 border-white shadow-2xs"
+                    title="Development Mode"
+                  />
+                )}
+              </div>
               {!isCollapsed && (
                 <div className="flex flex-col min-w-0">
-                  <span className="font-bold text-sm text-[#1e1b19] leading-tight truncate">
-                    {t('common:appName')}
-                  </span>
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <span className="font-bold text-sm text-[#1e1b19] leading-tight truncate">
+                      {import.meta.env.DEV
+                        ? `${t('common:appName')} (Dev)`
+                        : t('common:appName')}
+                    </span>
+                    {import.meta.env.DEV && (
+                      <span className="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-amber-100 text-amber-800 border border-amber-300 shrink-0">
+                        DEV
+                      </span>
+                    )}
+                  </div>
                   <span className="text-[11px] text-[#8a726a] font-medium leading-tight">
                     {t('common:fellowshipName')}
                   </span>

@@ -77,12 +77,17 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
           <div className="bg-white rounded-2xl border border-[#e8e1dd] p-6 sm:p-10 shadow-sm flex flex-col">
             {/* Brand Logo & Header */}
             <div className="mb-7">
-              <div className="mb-5 flex items-center">
+              <div className="mb-5 flex items-center justify-between">
                 <img
                   src={appLogo}
                   alt="JRS Portal"
                   className="h-9 w-auto object-contain rounded-md"
                 />
+                {import.meta.env.DEV && (
+                  <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-amber-100 text-amber-800 border border-amber-300">
+                    DEV ENVIRONMENT
+                  </span>
+                )}
               </div>
               <h1 className="text-2xl font-bold tracking-tight text-[#1e1b19] sm:text-3xl">
                 {t('auth:login.title')}
@@ -271,7 +276,14 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
 
           {/* Version Indicator */}
           <div className="mt-6 flex items-center justify-center gap-2 text-xs font-mono text-[#8a726a] select-none">
-            <span className="font-medium text-[#57423b]">JRS Portal</span>
+            <span className="font-medium text-[#57423b]">
+              {import.meta.env.DEV ? 'JRS Portal (Dev)' : 'JRS Portal'}
+            </span>
+            {import.meta.env.DEV && (
+              <span className="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-amber-100 text-amber-800 border border-amber-300">
+                DEV
+              </span>
+            )}
             <span className="text-[#8a726a]/50">•</span>
             <span className="px-2 py-0.5 rounded-md bg-[#faf2ee] border border-[#e8e1dd] text-[#57423b] font-bold text-[11px]">
               v{APP_VERSION}

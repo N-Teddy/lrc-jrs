@@ -1,4 +1,6 @@
 import {
+  ErrorService,
+  toast,
   useAttendanceQuery,
   useAuth,
   useLockAttendanceMutation,
@@ -22,7 +24,6 @@ import {
   Buildings,
   CalendarBlank,
   Check,
-  CheckCircle,
   FloppyDisk,
   Lock,
   LockOpen,
@@ -33,7 +34,6 @@ import {
   Trash,
   UserCheck,
   Users,
-  WarningCircle,
   X,
 } from '@phosphor-icons/react';
 import type React from 'react';
@@ -97,8 +97,6 @@ export const ActivityAttendanceRoster: React.FC<
   // Active sub-tab: 'members' | 'guests'
   const [activeTab, setActiveTab] = useState<'members' | 'guests'>('members');
   const [memberSearch, setMemberSearch] = useState('');
-  const [saveSuccessMsg, setSaveSuccessMsg] = useState<string | null>(null);
-  const [saveErrorMsg, setSaveErrorMsg] = useState<string | null>(null);
 
   // Queries
   const { data: attendanceData, isLoading: isAttendanceLoading } =
@@ -132,15 +130,11 @@ export const ActivityAttendanceRoster: React.FC<
         activityId: activity.id,
         reason: lockReason.trim() || 'Roll call finalized',
       });
-      setSaveSuccessMsg('Attendance finalized and locked successfully');
+      toast.success('Attendance finalized and locked successfully');
       setIsLockModalOpen(false);
       setLockReason('');
     } catch (err: any) {
-      setSaveErrorMsg(
-        err.response?.data?.message ||
-          err.message ||
-          'Failed to lock attendance',
-      );
+      ErrorService.handle(err);
     }
   };
 
@@ -151,15 +145,11 @@ export const ActivityAttendanceRoster: React.FC<
         activityId: activity.id,
         reason: unlockReason.trim(),
       });
-      setSaveSuccessMsg('Attendance unlocked via AP override');
+      toast.success('Attendance unlocked via AP override');
       setIsUnlockModalOpen(false);
-      setUnlockReason('');
+      setLockReason('');
     } catch (err: any) {
-      setSaveErrorMsg(
-        err.response?.data?.message ||
-          err.message ||
-          'Failed to unlock attendance',
-      );
+      ErrorService.handle(err);
     }
   };
 
@@ -446,9 +436,6 @@ export const ActivityAttendanceRoster: React.FC<
 
   // Submit attendance to backend
   const handleSaveAttendance = async () => {
-    setSaveErrorMsg(null);
-    setSaveSuccessMsg(null);
-
     const attendeesPayload: IRecordAttendanceItemDto[] = [];
 
     // Members (strictly PRESENT or ABSENT)
@@ -488,16 +475,14 @@ export const ActivityAttendanceRoster: React.FC<
         },
       });
       setInitialSnapshot(currentSnapshot);
-      setSaveSuccessMsg('Attendance recorded and synchronized successfully.');
-      setTimeout(() => setSaveSuccessMsg(null), 4000);
-    } catch (err: any) {
-      const serverMsg = Array.isArray(err?.response?.data?.message)
-        ? err.response.data.message.join(', ')
-        : err?.response?.data?.message || err?.message;
-      setSaveErrorMsg(
-        serverMsg ||
-          'Failed to record attendance. Please check that the activity has started.',
+      toast.success(
+        t(
+          'activities:attendance.savedSuccess',
+          'Attendance recorded and synchronized successfully.',
+        ),
       );
+    } catch (err: any) {
+      ErrorService.handle(err);
     }
   };
 
@@ -609,21 +594,6 @@ export const ActivityAttendanceRoster: React.FC<
           )}
         </div>
       </div>
-
-      {/* Notifications / Alerts */}
-      {saveSuccessMsg && (
-        <div className="p-3.5 bg-[#edf3ee] border border-[#c2e9ca] rounded-xl text-[#486b52] flex items-center gap-2 text-xs font-bold">
-          <CheckCircle size={18} weight="fill" />
-          <span>{saveSuccessMsg}</span>
-        </div>
-      )}
-
-      {saveErrorMsg && (
-        <div className="p-3.5 bg-[#ffdad6]/50 border border-[#ffb4a8] rounded-xl text-[#ba1a1a] flex items-center gap-2 text-xs font-bold">
-          <WarningCircle size={18} weight="fill" />
-          <span>{saveErrorMsg}</span>
-        </div>
-      )}
 
       {/* Read-only Participating Town Notice */}
       {!canManageAttendance && (

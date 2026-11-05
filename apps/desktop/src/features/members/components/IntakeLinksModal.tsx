@@ -1,4 +1,6 @@
 import {
+  ErrorService,
+  toast,
   useCreateRegistrationLinkMutation,
   useDeactivateRegistrationLinkMutation,
   useRegistrationLinksQuery,
@@ -16,7 +18,6 @@ import {
   ShareNetwork,
   ShieldCheck,
   Trash,
-  Warning,
   WhatsappLogo,
   X,
 } from '@phosphor-icons/react';
@@ -50,7 +51,6 @@ export const IntakeLinksModal: React.FC<IntakeLinksModalProps> = ({
 
   // Form State
   const [expiresInHours, setExpiresInHours] = useState<number>(72); // 3 days default
-  const [formError, setFormError] = useState<string | null>(null);
   const [createdSuccessLink, setCreatedSuccessLink] =
     useState<IRegistrationLink | null>(null);
 
@@ -138,7 +138,6 @@ export const IntakeLinksModal: React.FC<IntakeLinksModalProps> = ({
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
-    setFormError(null);
 
     try {
       const res = await createLinkMutation.mutateAsync({
@@ -147,15 +146,15 @@ export const IntakeLinksModal: React.FC<IntakeLinksModalProps> = ({
       });
 
       setCreatedSuccessLink(res);
+      toast.success(
+        t(
+          'members:intakeLinks.generateSuccess',
+          'Registration link generated successfully.',
+        ),
+      );
       setActiveTab('list');
     } catch (err: any) {
-      setFormError(
-        err?.message ||
-          t(
-            'members:intakeLinks.generateError',
-            'Failed to generate self-entry link. Please try again.',
-          ),
-      );
+      ErrorService.handle(err);
     }
   };
 
@@ -274,13 +273,6 @@ export const IntakeLinksModal: React.FC<IntakeLinksModalProps> = ({
         <div className="p-6 overflow-y-auto flex-1 min-h-0">
           {activeTab === 'create' ? (
             <form onSubmit={handleCreate} className="flex flex-col gap-5 py-1">
-              {formError && (
-                <div className="p-3.5 rounded-lg bg-[#ffdad6] border border-[#ffb4a8] text-[#ba1a1a] text-xs font-semibold flex items-center gap-2">
-                  <Warning size={18} className="shrink-0" />
-                  <span>{formError}</span>
-                </div>
-              )}
-
               {/* Compact Information Note */}
               <div className="px-3.5 py-2.5 rounded-lg bg-[#fff8f5] border border-[#ffdbcf] text-xs flex items-center gap-2.5 text-[#57423b]">
                 <ShieldCheck

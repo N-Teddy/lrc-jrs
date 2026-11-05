@@ -1,4 +1,4 @@
-import { useTranslation } from '@jrs/client-core';
+import { ErrorService, toast, useTranslation } from '@jrs/client-core';
 import {
   ActivityStatus,
   ActivityType,
@@ -80,7 +80,6 @@ export const ActivityFormModal: React.FC<ActivityFormModalProps> = ({
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [changeReason, setChangeReason] = useState('');
-  const [error, setError] = useState<string | null>(null);
 
   // Auto-determine activity status based on date/time schedule
   const computedStatus = useMemo<ActivityStatus>(() => {
@@ -134,7 +133,6 @@ export const ActivityFormModal: React.FC<ActivityFormModalProps> = ({
       setEndDate(toDateTimeLocalString(later.toISOString()));
       setChangeReason('');
     }
-    setError(null);
   }, [initialActivity, activeTownId, towns]);
 
   const isDirty = useMemo(() => {
@@ -206,25 +204,24 @@ export const ActivityFormModal: React.FC<ActivityFormModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
 
     if (isCompleted) {
-      setError('Completed activities cannot be modified.');
+      toast.error('Completed activities cannot be modified.');
       return;
     }
 
     if (!title.trim()) {
-      setError('Activity title is required.');
+      toast.error('Activity title is required.');
       return;
     }
 
     if (!townId) {
-      setError('Please select a host town.');
+      toast.error('Please select a host town.');
       return;
     }
 
     if (!startDate) {
-      setError('Start date and time are required.');
+      toast.error('Start date and time are required.');
       return;
     }
 
@@ -247,7 +244,7 @@ export const ActivityFormModal: React.FC<ActivityFormModalProps> = ({
         (now.getMonth() - parsedStart.getMonth());
 
       if (monthsDiff !== 1 || parsedStart < twoWeeksAgo) {
-        setError(
+        toast.error(
           'Activities cannot be scheduled for past months, except within the 14-day grace window into the previous month.',
         );
         return;
@@ -258,12 +255,12 @@ export const ActivityFormModal: React.FC<ActivityFormModalProps> = ({
     const endIso = endDate ? new Date(endDate).toISOString() : undefined;
 
     if (endIso && new Date(endIso) < new Date(startIso)) {
-      setError('End date/time cannot be before start date/time.');
+      toast.error('End date/time cannot be before start date/time.');
       return;
     }
 
     if (isEditing && !changeReason.trim()) {
-      setError(
+      toast.error(
         'Please provide a documented reason for this update or reschedule.',
       );
       return;
@@ -286,7 +283,7 @@ export const ActivityFormModal: React.FC<ActivityFormModalProps> = ({
       });
       onClose();
     } catch (err: any) {
-      setError(err?.message || 'Failed to save activity. Please try again.');
+      ErrorService.handle(err);
     }
   };
 
@@ -347,13 +344,6 @@ export const ActivityFormModal: React.FC<ActivityFormModalProps> = ({
                 This activity has already taken place and is marked as
                 Completed. Completed activities cannot be modified.
               </span>
-            </div>
-          )}
-
-          {error && (
-            <div className="p-3.5 bg-[#ffdad6] border border-[#ffb4a8] rounded-md text-[#ba1a1a] flex items-center gap-2 font-semibold">
-              <WarningCircle size={18} weight="fill" className="shrink-0" />
-              <span>{error}</span>
             </div>
           )}
 

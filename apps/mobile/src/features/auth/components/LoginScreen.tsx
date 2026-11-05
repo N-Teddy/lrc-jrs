@@ -134,6 +134,13 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
           >
             {/* Top Bar: Language Switcher Pill */}
             <View style={styles.topUtilityBar}>
+              {__DEV__ ? (
+                <View style={styles.devEnvironmentPill}>
+                  <Text style={styles.devEnvironmentText}>DEV ENVIRONMENT</Text>
+                </View>
+              ) : (
+                <View />
+              )}
               <View style={styles.langPillContainer}>
                 <TouchableOpacity
                   style={[
@@ -415,9 +422,23 @@ const styles = StyleSheet.create({
   },
   topUtilityBar: {
     flexDirection: 'row',
-    justifyContent: 'flex-end',
+    justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 8,
+  },
+  devEnvironmentPill: {
+    backgroundColor: '#fef3c7',
+    borderColor: '#fcd34d',
+    borderWidth: 1,
+    borderRadius: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+  },
+  devEnvironmentText: {
+    color: '#92400e',
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 0.5,
   },
   langPillContainer: {
     flexDirection: 'row',

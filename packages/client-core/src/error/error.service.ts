@@ -62,7 +62,42 @@ export class ErrorService {
     return (
       lower.includes('request failed with status code 500') ||
       lower.includes('internal server error') ||
-      lower.includes('err_internal_server')
+      lower.includes('err_internal_server') ||
+      lower.includes('cannot post') ||
+      lower.includes('cannot get') ||
+      lower.includes('cannot patch') ||
+      lower.includes('cannot put') ||
+      lower.includes('cannot delete') ||
+      lower.includes('cast to objectid') ||
+      lower.includes('duplicate key') ||
+      lower.includes('e11000') ||
+      lower.includes('syntaxerror') ||
+      lower.includes('typeerror') ||
+      lower.includes('referenceerror') ||
+      lower.includes('rangeerror')
+    );
+  }
+
+  /**
+   * Determine if an error message represents developer validation or technical schema jargon
+   */
+  static isTechnicalOrValidationJargon(message?: string): boolean {
+    if (!message) return false;
+    const lower = message.toLowerCase();
+    return (
+      lower.includes('should not exist') ||
+      lower.includes('must be a') ||
+      lower.includes('must be an') ||
+      lower.includes('must be valid') ||
+      lower.includes('should not be empty') ||
+      lower.includes('cannot be empty') ||
+      lower.includes('must not be empty') ||
+      lower.includes('each value in') ||
+      lower.includes('is not a valid') ||
+      lower.includes('validation failed') ||
+      lower.includes('bad request') ||
+      lower.includes('dto') ||
+      lower.includes('property ')
     );
   }
 
@@ -191,6 +226,22 @@ export class ErrorService {
         localizedMessage = i18n.t(`errors:${ErrorCode.INTERNAL_SERVER_ERROR}`, {
           defaultValue: 'A server error occurred. Please try again later.',
         });
+      } else if (
+        ErrorService.isTechnicalOrValidationJargon(localizedMessage) ||
+        statusCode === 400
+      ) {
+        const lower = (localizedMessage || '').toLowerCase();
+        if (lower.includes('attendance')) {
+          localizedMessage = i18n.t('errors:ERR_ATTENDANCE_RECORDING_FAILED', {
+            defaultValue:
+              'Failed to record attendance for the selected members.',
+          });
+        } else {
+          localizedMessage = i18n.t('errors:ERR_VALIDATION_FAILED', {
+            defaultValue:
+              'Some entered information is invalid or incomplete. Please verify the form and try again.',
+          });
+        }
       }
     }
 

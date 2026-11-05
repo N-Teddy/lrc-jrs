@@ -13,6 +13,10 @@ if (typeof window !== 'undefined') {
   win.process.env = win.process.env || {};
   win.process.env.NODE_ENV = nodeEnv;
   win.__DEV__ = isDev;
+
+  if (isDev) {
+    document.title = 'LRC JRS (Dev) - Youth Fellowship Portal';
+  }
 }
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(

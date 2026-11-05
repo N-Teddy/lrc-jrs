@@ -1,16 +1,10 @@
-import { useTranslation } from '@jrs/client-core';
+import { ErrorService, toast, useTranslation } from '@jrs/client-core';
 import {
   type ICreateMemberDto,
   MAX_ACTIVE_PCS_PER_TOWN,
   UserRole,
 } from '@jrs/shared';
-import {
-  IdentificationBadge,
-  Key,
-  MapPin,
-  Warning,
-  X,
-} from '@phosphor-icons/react';
+import { IdentificationBadge, Key, MapPin, X } from '@phosphor-icons/react';
 import type React from 'react';
 import { useRef, useState } from 'react';
 import {
@@ -53,7 +47,6 @@ export const RegisterMemberModal: React.FC<RegisterMemberModalProps> = ({
   });
 
   const [hasAppAccess, setHasAppAccess] = useState(true);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
@@ -70,7 +63,7 @@ export const RegisterMemberModal: React.FC<RegisterMemberModalProps> = ({
     const file = e.target.files?.[0];
     if (file) {
       if (file.size > 5 * 1024 * 1024) {
-        setErrorMsg('Image size must be less than 5MB');
+        toast.error('Image size must be less than 5MB');
         return;
       }
       const url = URL.createObjectURL(file);
@@ -98,23 +91,22 @@ export const RegisterMemberModal: React.FC<RegisterMemberModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setErrorMsg(null);
 
     if (!formData.fullName.trim()) {
-      setErrorMsg('Full name is required.');
+      toast.error('Full name is required.');
       return;
     }
     if (!formData.dateOfBirth) {
-      setErrorMsg('Date of birth is required.');
+      toast.error('Date of birth is required.');
       return;
     }
     if (formData.phoneDigits.length < 9) {
-      setErrorMsg('Please enter a valid 9-digit Cameroonian telephone number.');
+      toast.error('Please enter a valid 9-digit Cameroonian telephone number.');
       return;
     }
 
     if (formData.role === UserRole.PC && isPcQuotaFull) {
-      setErrorMsg('The PC quota for this hub is full (maximum 2 active PCs).');
+      toast.error('The PC quota for this hub is full (maximum 2 active PCs).');
       return;
     }
 
@@ -147,13 +139,12 @@ export const RegisterMemberModal: React.FC<RegisterMemberModalProps> = ({
           hasAppAccess,
         });
       }
+      toast.success(
+        t('members:registerModal.success', 'Member registered successfully.'),
+      );
       onClose();
     } catch (err: any) {
-      setErrorMsg(
-        err?.response?.data?.message ||
-          err?.message ||
-          'Failed to register member.',
-      );
+      ErrorService.handle(err);
     }
   };
 
@@ -195,13 +186,6 @@ export const RegisterMemberModal: React.FC<RegisterMemberModalProps> = ({
           onSubmit={handleSubmit}
           className="p-6 flex flex-col gap-4 max-h-[calc(88vh-110px)] overflow-y-auto"
         >
-          {errorMsg && (
-            <div className="p-3.5 rounded-lg bg-[#ffdad6] border border-[#ffb4a8] text-[#ba1a1a] text-xs font-semibold flex items-center gap-2">
-              <Warning size={18} className="shrink-0" />
-              <span>{errorMsg}</span>
-            </div>
-          )}
-
           <MemberModalFormFields
             formData={formData}
             onChange={handleFieldChange}

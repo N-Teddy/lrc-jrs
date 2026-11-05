@@ -1,6 +1,11 @@
-import { useTransferTownMutation, useTranslation } from '@jrs/client-core';
+import {
+  ErrorService,
+  toast,
+  useTransferTownMutation,
+  useTranslation,
+} from '@jrs/client-core';
 import type { ITown, IUser } from '@jrs/shared';
-import { ArrowsLeftRight, WarningCircle, X } from '@phosphor-icons/react';
+import { ArrowsLeftRight, X } from '@phosphor-icons/react';
 import type React from 'react';
 import { useEffect, useMemo, useState } from 'react';
 import {
@@ -29,7 +34,6 @@ export const InitiateTransferModal: React.FC<InitiateTransferModalProps> = ({
   const [selectedMemberId, setSelectedMemberId] = useState<string>('');
   const [destinationTownId, setDestinationTownId] = useState<string>('');
   const [transferReason, setTransferReason] = useState<string>('');
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const transferMutation = useTransferTownMutation();
 
@@ -74,7 +78,6 @@ export const InitiateTransferModal: React.FC<InitiateTransferModalProps> = ({
 
   useEffect(() => {
     if (isOpen) {
-      setErrorMessage(null);
       setTransferReason('');
       if (eligibleMembers.length > 0) {
         setSelectedMemberId(eligibleMembers[0].id);
@@ -107,7 +110,7 @@ export const InitiateTransferModal: React.FC<InitiateTransferModalProps> = ({
   const handleExecuteTransfer = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedMemberId || !destinationTownId) {
-      setErrorMessage(
+      toast.error(
         t(
           'transfers:modal.errorSelect',
           'Please select a member and a destination hub.',
@@ -117,7 +120,6 @@ export const InitiateTransferModal: React.FC<InitiateTransferModalProps> = ({
     }
 
     try {
-      setErrorMessage(null);
       await transferMutation.mutateAsync({
         userId: selectedMemberId,
         dto: {
@@ -125,13 +127,12 @@ export const InitiateTransferModal: React.FC<InitiateTransferModalProps> = ({
           reason: transferReason.trim() || undefined,
         },
       });
+      toast.success(
+        t('transfers:modal.success', 'Member transfer initiated successfully.'),
+      );
       onClose();
     } catch (err: any) {
-      setErrorMessage(
-        err?.response?.data?.message ||
-          err?.message ||
-          t('transfers:modal.errorGeneric', 'Failed to complete transfer.'),
-      );
+      ErrorService.handle(err);
     }
   };
 
@@ -170,13 +171,6 @@ export const InitiateTransferModal: React.FC<InitiateTransferModalProps> = ({
             <X size={18} weight="bold" />
           </button>
         </div>
-
-        {errorMessage && (
-          <div className="p-3.5 rounded-lg bg-[#ffdad6]/60 border border-[#ffb4ab] text-xs font-semibold text-[#ba1a1a] flex items-center gap-2.5">
-            <WarningCircle size={18} weight="fill" className="shrink-0" />
-            <span>{errorMessage}</span>
-          </div>
-        )}
 
         <form onSubmit={handleExecuteTransfer} className="flex flex-col gap-5">
           {/* Member Selector */}
