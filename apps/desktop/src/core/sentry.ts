@@ -97,6 +97,20 @@ export function initSentry(): void {
         Sentry.captureException(event.reason);
       }
     });
+
+    // Expose convenient test helper in dev mode
+    const win = window as unknown as { testSentry?: () => string | undefined };
+    win.testSentry = () => {
+      const eventId = Sentry.captureException(
+        new Error('LRC JRS Desktop Alert Verification Test'),
+      );
+      console.log(
+        `%c[Sentry Desktop]%c Dispatched test alert to Sentry! Event ID: ${eventId}`,
+        'background: #b85028; color: white; padding: 2px 4px; border-radius: 4px; font-weight: bold;',
+        'color: inherit; font-weight: bold;',
+      );
+      return eventId;
+    };
   } catch (err) {
     console.warn('[Sentry Desktop] Initialization error:', err);
   }
