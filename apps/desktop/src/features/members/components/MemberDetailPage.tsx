@@ -78,13 +78,19 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
 
   const hasAppAccess = member?.account?.hasAppAccess ?? false;
   const isRevoked = member?.account?.isAccessRevoked ?? false;
+  const hasTransferHistory = Boolean(
+    member?.transferHistory && member.transferHistory.length > 0,
+  );
 
-  // Auto-switch away from access tab if member doesn't have app access
+  // Auto-switch away from restricted tabs if conditions are not met
   useEffect(() => {
     if (!hasAppAccess && activeDetailTab === 'access') {
       setActiveDetailTab('identity');
     }
-  }, [hasAppAccess, activeDetailTab]);
+    if (!hasTransferHistory && activeDetailTab === 'transfers') {
+      setActiveDetailTab('identity');
+    }
+  }, [hasAppAccess, hasTransferHistory, activeDetailTab]);
 
   // Evaluate permissions: AP has full access across all hubs;
   // PC can only manage members currently residing in their own assigned hub.
@@ -347,21 +353,23 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
           <span>{t('members:detail.tabIdentity')}</span>
         </button>
 
-        <button
-          type="button"
-          onClick={() => setActiveDetailTab('transfers')}
-          className={`flex items-center justify-center min-w-[140px] gap-2 px-4 py-2 rounded-md text-xs font-bold transition-all cursor-pointer ${
-            activeDetailTab === 'transfers'
-              ? 'bg-white text-[#b85028] shadow-xs border border-[#e8e1dd]'
-              : 'text-[#8a726a] hover:text-[#57423b] hover:bg-[#f4ece9] border border-transparent'
-          }`}
-        >
-          <Swap
-            size={18}
-            weight={activeDetailTab === 'transfers' ? 'bold' : 'regular'}
-          />
-          <span>{t('members:detail.tabRegistry')}</span>
-        </button>
+        {hasTransferHistory && (
+          <button
+            type="button"
+            onClick={() => setActiveDetailTab('transfers')}
+            className={`flex items-center justify-center min-w-[140px] gap-2 px-4 py-2 rounded-md text-xs font-bold transition-all cursor-pointer ${
+              activeDetailTab === 'transfers'
+                ? 'bg-white text-[#b85028] shadow-xs border border-[#e8e1dd]'
+                : 'text-[#8a726a] hover:text-[#57423b] hover:bg-[#f4ece9] border border-transparent'
+            }`}
+          >
+            <Swap
+              size={18}
+              weight={activeDetailTab === 'transfers' ? 'bold' : 'regular'}
+            />
+            <span>{t('members:detail.tabRegistry')}</span>
+          </button>
+        )}
 
         <button
           type="button"
@@ -612,7 +620,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
       )}
 
       {/* 5. Tab 2: Town Registry & Relocation Records */}
-      {activeDetailTab === 'transfers' && (
+      {hasTransferHistory && activeDetailTab === 'transfers' && (
         <div className="flex flex-col gap-6 animate-in fade-in duration-200">
           {/* Official Hub Registry Passport Header Card */}
           <div className="relative bg-gradient-to-br from-white via-[#fffaf7] to-white rounded-xl border-2 border-[#ffdbcf]/70 p-6 sm:p-8 shadow-sm overflow-hidden flex flex-col gap-6">
