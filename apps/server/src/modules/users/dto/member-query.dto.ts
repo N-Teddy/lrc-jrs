@@ -30,22 +30,30 @@ export class MemberQueryDto extends IntersectionType(
   })
   @IsOptional()
   @Transform(({ value }) => {
-    if (value === 'true' || value === true) return true;
-    if (value === 'false' || value === false) return false;
+    if (value === 'true' || value === true || value === 1 || value === '1') {
+      return true;
+    }
+    if (value === 'false' || value === false || value === 0 || value === '0') {
+      return false;
+    }
     return undefined;
   })
   @IsBoolean()
-  isJr?: boolean;
+  isJr?: boolean | string;
 
   @ApiPropertyOptional({
     description: 'Filter only members with or without platform app access',
   })
   @IsOptional()
   @Transform(({ value }) => {
-    if (value === 'true' || value === true) return true;
-    if (value === 'false' || value === false) return false;
+    if (value === 'true' || value === true || value === 1 || value === '1') {
+      return true;
+    }
+    if (value === 'false' || value === false || value === 0 || value === '0') {
+      return false;
+    }
     return undefined;
   })
   @IsBoolean()
-  hasAppAccess?: boolean;
+  hasAppAccess?: boolean | string;
 }

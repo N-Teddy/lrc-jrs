@@ -1,4 +1,4 @@
-import { useTranslation } from '@jrs/client-core';
+import { useMembersQuery, useTranslation } from '@jrs/client-core';
 import type { IUser } from '@jrs/shared';
 import {
   ChatCircleText,
@@ -11,7 +11,7 @@ import {
   X,
 } from '@phosphor-icons/react';
 import type React from 'react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { UserAvatar } from '../../../components';
 import { formatCameroonPhone } from '../../members/utils/member-ui.utils';
 
@@ -30,28 +30,46 @@ export const BatchInviteModal: React.FC<BatchInviteModalProps> = ({
   isOpen,
   onClose,
   offlineMembers = [],
+  activeTownId,
   onBatchInvite,
 }) => {
   const { t } = useTranslation(['access', 'common']);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [channel, setChannel] = useState<'whatsapp' | 'email'>('whatsapp');
   const [isSending, setIsSending] = useState(false);
 
-  // Filter members dynamically based on search query
-  const filteredMembers = useMemo(() => {
-    if (!searchQuery.trim()) return offlineMembers;
-    const q = searchQuery.toLowerCase().trim();
-    return offlineMembers.filter((m) => {
-      const nameMatch = (m.fullName ?? '').toLowerCase().includes(q);
-      const phoneMatch = (m.phoneNumber ?? '').toLowerCase().includes(q);
-      const emailMatch = (m.email ?? '').toLowerCase().includes(q);
-      const townMatch =
-        (m.homeTown?.name ?? '').toLowerCase().includes(q) ||
-        (m.homeTown?.code ?? '').toLowerCase().includes(q);
-      return nameMatch || phoneMatch || emailMatch || townMatch;
-    });
-  }, [offlineMembers, searchQuery]);
+  // Debounce search input slightly (200ms) to mirror responsive member list tab search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search.trim());
+    }, 200);
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  // Query offline members from server matching search, matching Member list tab architecture
+  const queryParams = useMemo(
+    () => ({
+      townId: activeTownId && activeTownId !== 'all' ? activeTownId : undefined,
+      hasAppAccess: false,
+      search: debouncedSearch ? debouncedSearch : undefined,
+      limit: 100,
+    }),
+    [activeTownId, debouncedSearch],
+  );
+
+  const { data: membersResponse, isLoading } = useMembersQuery(queryParams, {
+    enabled: isOpen,
+  });
+
+  // Guarantee that ONLY members without app access are displayed
+  const members = useMemo(() => {
+    const raw =
+      membersResponse?.items ??
+      (!debouncedSearch && offlineMembers.length > 0 ? offlineMembers : []);
+    return raw.filter((m) => !m.account?.hasAppAccess);
+  }, [membersResponse?.items, debouncedSearch, offlineMembers]);
 
   if (!isOpen) return null;
 
@@ -61,17 +79,16 @@ export const BatchInviteModal: React.FC<BatchInviteModalProps> = ({
     );
   };
 
-  const isAllFilteredSelected =
-    filteredMembers.length > 0 &&
-    filteredMembers.every((m) => selectedIds.includes(m.id));
+  const isAllCurrentSelected =
+    members.length > 0 && members.every((m) => selectedIds.includes(m.id));
 
-  const toggleSelectAllFiltered = () => {
-    if (isAllFilteredSelected) {
-      const filteredSet = new Set(filteredMembers.map((m) => m.id));
-      setSelectedIds((prev) => prev.filter((id) => !filteredSet.has(id)));
+  const toggleSelectAllCurrent = () => {
+    if (isAllCurrentSelected) {
+      const currentIds = new Set(members.map((m) => m.id));
+      setSelectedIds((prev) => prev.filter((id) => !currentIds.has(id)));
     } else {
       const newIds = new Set(selectedIds);
-      for (const m of filteredMembers) {
+      for (const m of members) {
         newIds.add(m.id);
       }
       setSelectedIds(Array.from(newIds));
@@ -84,17 +101,29 @@ export const BatchInviteModal: React.FC<BatchInviteModalProps> = ({
     try {
       await onBatchInvite(selectedIds, channel);
       setSelectedIds([]);
-      setSearchQuery('');
+      setSearch('');
+      setDebouncedSearch('');
       onClose();
     } finally {
       setIsSending(false);
     }
   };
 
+  const handleClose = () => {
+    setSearch('');
+    setDebouncedSearch('');
+    setSelectedIds([]);
+    onClose();
+  };
+
+  const totalMembersCount =
+    membersResponse?.total ??
+    (search.trim() ? members.length : offlineMembers.length);
+
   return (
     <div
       className="fixed inset-0 z-50 bg-[#1e1b19]/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-200"
-      onClick={onClose}
+      onClick={handleClose}
     >
       <div
         className="w-full max-w-3xl bg-white rounded-xl border border-[#e8e1dd]/80 shadow-2xl overflow-hidden flex flex-col h-[85vh] max-h-[780px]"
@@ -123,7 +152,7 @@ export const BatchInviteModal: React.FC<BatchInviteModalProps> = ({
           </div>
           <button
             type="button"
-            onClick={onClose}
+            onClick={handleClose}
             className="w-8 h-8 rounded-md bg-[#faf2ee] hover:bg-[#f4ece9] border border-[#e8e1dd]/80 flex items-center justify-center text-[#8a726a] hover:text-[#1e1b19] cursor-pointer transition-colors"
           >
             <X size={16} />
@@ -172,19 +201,20 @@ export const BatchInviteModal: React.FC<BatchInviteModalProps> = ({
             />
             <input
               type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
               placeholder={t(
                 'access:modals.searchMembersPlaceholder',
                 'Search offline members by name, phone number, or hub...',
               )}
               className="w-full h-11 pl-10 pr-10 rounded-lg bg-[#faf2ee]/70 focus:bg-white border border-[#e8e1dd]/80 focus:border-[#b85028] focus:ring-2 focus:ring-[#b85028]/15 text-xs sm:text-sm font-medium text-[#1e1b19] placeholder:text-[#8a726a] transition-all outline-none"
             />
-            {searchQuery && (
+            {search && (
               <button
                 type="button"
-                onClick={() => setSearchQuery('')}
+                onClick={() => setSearch('')}
                 className="absolute right-3 text-[#8a726a] hover:text-[#1e1b19] p-1 rounded cursor-pointer transition-colors"
+                title="Clear search"
               >
                 <X size={15} />
               </button>
@@ -198,18 +228,20 @@ export const BatchInviteModal: React.FC<BatchInviteModalProps> = ({
               </span>
               <span className="text-[#b09e97]">•</span>
               <span className="text-[#8a726a]">
-                {filteredMembers.length === offlineMembers.length
-                  ? `${offlineMembers.length} offline members`
-                  : `Showing ${filteredMembers.length} of ${offlineMembers.length}`}
+                {isLoading ? (
+                  <span>Searching directory...</span>
+                ) : (
+                  `${totalMembersCount} offline members`
+                )}
               </span>
             </div>
-            {filteredMembers.length > 0 && (
+            {members.length > 0 && (
               <button
                 type="button"
-                onClick={toggleSelectAllFiltered}
+                onClick={toggleSelectAllCurrent}
                 className="font-bold text-[#b85028] hover:underline cursor-pointer flex items-center gap-1.5"
               >
-                {isAllFilteredSelected ? (
+                {isAllCurrentSelected ? (
                   <>
                     <Square size={13} />
                     <span>Deselect All</span>
@@ -217,7 +249,7 @@ export const BatchInviteModal: React.FC<BatchInviteModalProps> = ({
                 ) : (
                   <>
                     <CheckSquare size={13} weight="bold" />
-                    <span>Select All Filtered ({filteredMembers.length})</span>
+                    <span>Select All ({members.length})</span>
                   </>
                 )}
               </button>
@@ -228,19 +260,22 @@ export const BatchInviteModal: React.FC<BatchInviteModalProps> = ({
         {/* Members Selection List */}
         <div className="px-6 py-2 flex-1 overflow-y-auto min-h-0">
           <div className="flex flex-col gap-2 min-h-[340px] pr-1">
-            {offlineMembers.length === 0 && !searchQuery.trim() ? (
-              <div className="py-16 text-center text-xs text-[#8a726a]">
-                {t(
-                  'access:modals.allMembersOnboarded',
-                  'All members in this hub already have platform access credentials granted!',
-                )}
+            {isLoading && members.length === 0 ? (
+              <div className="py-16 text-center text-xs text-[#8a726a] flex flex-col items-center justify-center gap-2">
+                <div className="w-5 h-5 border-2 border-[#b85028]/30 border-t-[#b85028] rounded-full animate-spin" />
+                <span>Searching directory...</span>
               </div>
-            ) : filteredMembers.length === 0 ? (
+            ) : members.length === 0 ? (
               <div className="py-16 text-center text-xs text-[#8a726a]">
-                No offline members match "{searchQuery}".
+                {search.trim()
+                  ? `No offline members match "${search}".`
+                  : t(
+                      'access:modals.allMembersOnboarded',
+                      'All members in this hub already have platform access credentials granted!',
+                    )}
               </div>
             ) : (
-              filteredMembers.map((m) => {
+              members.map((m) => {
                 const isSelected = selectedIds.includes(m.id);
                 return (
                   <div
@@ -294,7 +329,7 @@ export const BatchInviteModal: React.FC<BatchInviteModalProps> = ({
           <div className="flex items-center gap-2">
             <button
               type="button"
-              onClick={onClose}
+              onClick={handleClose}
               className="px-4 py-2 rounded-md bg-white border border-[#e8e1dd]/80 text-xs font-bold text-[#57423b] hover:bg-[#f4ece9] cursor-pointer transition-colors"
             >
               {t('common:cancel')}

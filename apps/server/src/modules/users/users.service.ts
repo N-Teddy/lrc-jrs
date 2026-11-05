@@ -209,8 +209,10 @@ export class UsersService {
 
     // Search query matching name, phone, or email
     if (query.search?.trim()) {
-      const term = query.search.trim();
-      const regex = new RegExp(term, 'i');
+      const escaped = query.search
+        .trim()
+        .replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp(escaped, 'i');
       const searchCondition = [
         { fullName: regex },
         { phoneNumber: regex },

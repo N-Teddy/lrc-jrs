@@ -383,7 +383,10 @@ export class ActivitiesService {
     }
 
     if (query.search?.trim()) {
-      const searchRegex = new RegExp(query.search.trim(), 'i');
+      const escaped = query.search
+        .trim()
+        .replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const searchRegex = new RegExp(escaped, 'i');
       andConditions.push({
         $or: [{ title: searchRegex }, { notes: searchRegex }],
       });
@@ -511,7 +514,6 @@ export class ActivitiesService {
     const activities = await this.activityModel.find(filter).exec();
     const totalActivities = activities.length;
 
-    const now = new Date();
     let upcomingCount = 0;
     let completedCount = 0;
 
