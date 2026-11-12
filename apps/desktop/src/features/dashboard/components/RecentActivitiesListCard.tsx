@@ -92,15 +92,24 @@ export const RecentActivitiesListCard: React.FC<
                   </div>
                 </div>
 
-                {/* Turnout & Report Badges */}
-                <div className="flex items-center gap-2 shrink-0">
+                {/* Turnout & Report Badges with visual attendance bar */}
+                <div className="flex items-center gap-2.5 shrink-0">
                   <div className="flex flex-col items-end">
-                    <span className="text-xs font-bold text-[#486b52] font-mono">
-                      {act.turnoutRate}%
-                    </span>
-                    <span className="text-[9px] text-[#8a726a]">
-                      {act.totalPresent} présents
-                    </span>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-xs font-bold text-[#486b52] font-mono">
+                        {act.turnoutRate}%
+                      </span>
+                      <span className="text-[10px] text-[#8a726a]">
+                        ({act.totalPresent})
+                      </span>
+                    </div>
+                    {/* Visual mini-indicator bar */}
+                    <div className="w-16 h-1.5 bg-[#f4ece9] rounded-full overflow-hidden mt-0.5 border border-[#e8e1dd]">
+                      <div
+                        style={{ width: `${Math.min(100, act.turnoutRate)}%` }}
+                        className="h-full bg-[#486b52] rounded-full transition-all duration-500"
+                      />
+                    </div>
                   </div>
 
                   <div className="flex items-center gap-1 pl-1.5 border-l border-[#e8e1dd]">

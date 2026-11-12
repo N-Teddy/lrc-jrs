@@ -491,16 +491,28 @@ export class DashboardService {
         .limit(4)
         .exec();
 
+      const allTowns = await this.townModel.find({}, 'name code').exec();
+      const townNameMap = new Map<string, string>();
+      for (const t of allTowns) {
+        townNameMap.set(t._id.toString(), t.name);
+        if (t.code) townNameMap.set(t.code, t.name);
+      }
+
       for (const u of usersWithTransfers) {
         if (u.transferHistory && u.transferHistory.length > 0) {
           const latestTransfer =
             u.transferHistory[u.transferHistory.length - 1];
+          const fromName =
+            townNameMap.get(latestTransfer.fromTownId) ||
+            latestTransfer.fromTownId;
+          const toName =
+            townNameMap.get(latestTransfer.toTownId) || latestTransfer.toTownId;
           recentTransfers.push({
             id: `${u._id}_${latestTransfer.transferredAt}`,
             memberId: u._id.toString(),
             memberName: u.fullName,
-            fromTownName: latestTransfer.fromTownId,
-            toTownName: latestTransfer.toTownId,
+            fromTownName: fromName,
+            toTownName: toName,
             transferredAt: latestTransfer.transferredAt,
             reason: latestTransfer.reason,
           });

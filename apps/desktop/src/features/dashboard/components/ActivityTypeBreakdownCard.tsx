@@ -1,6 +1,7 @@
 import { ActivityType, type IActivityTypeDistribution } from '@jrs/shared';
 import { SquaresFour } from '@phosphor-icons/react';
 import type React from 'react';
+import { useState } from 'react';
 import { getActivityTypeConfig } from '../../activities/utils/activity-ui.utils';
 
 export const ACTIVITY_TYPE_COLORS: Record<ActivityType, string> = {
@@ -20,7 +21,39 @@ interface ActivityTypeBreakdownCardProps {
 export const ActivityTypeBreakdownCard: React.FC<
   ActivityTypeBreakdownCardProps
 > = ({ distribution }) => {
+  const [hoveredType, setHoveredType] = useState<ActivityType | null>(null);
+
   const totalCount = distribution.reduce((sum, item) => sum + item.count, 0);
+
+  // SVG Geometry for Activity Donut Wheel
+  const radius = 38;
+  const strokeWidth = 12;
+  const circumference = 2 * Math.PI * radius;
+
+  // Compute slices
+  let accumulatedAngle = 0;
+  const slices = distribution.map((item) => {
+    const pct = totalCount > 0 ? (item.count / totalCount) * 100 : 0;
+    const strokeDash = (pct / 100) * circumference;
+    const offset = -accumulatedAngle;
+    if (totalCount > 0) {
+      accumulatedAngle += strokeDash;
+    }
+    const color = ACTIVITY_TYPE_COLORS[item.type] || '#b85028';
+    const cfg = getActivityTypeConfig(item.type);
+    return {
+      type: item.type,
+      count: item.count,
+      pct: Math.round(pct),
+      strokeDash,
+      offset,
+      color,
+      label: cfg.label,
+    };
+  });
+
+  const activeSlice =
+    hoveredType !== null ? slices.find((s) => s.type === hoveredType) : null;
 
   return (
     <div className="bg-white rounded-2xl border border-[#e8e1dd] shadow-xs p-5 flex flex-col justify-between transition-all hover:border-[#cfc4be]">
@@ -32,10 +65,10 @@ export const ActivityTypeBreakdownCard: React.FC<
           </div>
           <div>
             <h3 className="font-bold text-xs text-[#1e1b19]">
-              Types d'Activités
+              Diagramme de Répartition des Activités
             </h3>
             <p className="text-[11px] text-[#8a726a]">
-              Distribution sur la période
+              Roue des 7 catégories de rassemblements
             </p>
           </div>
         </div>
@@ -45,47 +78,161 @@ export const ActivityTypeBreakdownCard: React.FC<
         </div>
       </div>
 
-      {/* Categories List */}
-      <div className="py-3 flex flex-col gap-2 flex-1 overflow-y-auto max-h-[260px] pr-1">
-        {distribution.map((item) => {
-          const cfg = getActivityTypeConfig(item.type);
-          const color = ACTIVITY_TYPE_COLORS[item.type] || '#b85028';
+      {/* Visual Content: SVG Activity Donut Wheel + Category Matrix */}
+      <div className="py-4 flex flex-col sm:flex-row items-center justify-around gap-5">
+        {/* Visual Diagram: Donut Wheel */}
+        <div className="relative w-32 h-32 shrink-0 flex items-center justify-center">
+          <svg className="w-32 h-32 -rotate-90" viewBox="0 0 100 100">
+            {/* Background Track */}
+            <circle
+              cx="50"
+              cy="50"
+              r={radius}
+              fill="none"
+              stroke="#f4ece9"
+              strokeWidth={strokeWidth}
+            />
 
-          return (
-            <div key={item.type} className="flex flex-col gap-1">
-              <div className="flex items-center justify-between text-[11px] text-[#57423b]">
-                <div className="flex items-center gap-1.5 truncate">
-                  <span
-                    className="w-2 h-2 rounded-full shrink-0"
-                    style={{ backgroundColor: color }}
+            {/* Slices when totalCount > 0 */}
+            {totalCount > 0 ? (
+              slices.map((slice) => {
+                if (slice.strokeDash <= 0) return null;
+                const isHovered = hoveredType === slice.type;
+                return (
+                  <circle
+                    key={slice.type}
+                    cx="50"
+                    cy="50"
+                    r={radius}
+                    fill="none"
+                    stroke={slice.color}
+                    strokeWidth={isHovered ? strokeWidth + 3 : strokeWidth}
+                    strokeDasharray={`${slice.strokeDash} ${circumference - slice.strokeDash}`}
+                    strokeDashoffset={slice.offset}
+                    className="transition-all duration-300 cursor-pointer"
+                    onMouseEnter={() => setHoveredType(slice.type)}
+                    onMouseLeave={() => setHoveredType(null)}
                   />
-                  <span className="font-semibold truncate">{cfg.label}</span>
-                </div>
-                <span className="font-mono font-bold shrink-0">
-                  {item.count}{' '}
-                  <span className="text-[#8a726a] font-normal">
-                    ({item.percentage}%)
-                  </span>
-                </span>
-              </div>
+                );
+              })
+            ) : (
+              // Empty State Dotted Guide Wheel
+              <circle
+                cx="50"
+                cy="50"
+                r={radius}
+                fill="none"
+                stroke="#e8e1dd"
+                strokeWidth={strokeWidth}
+                strokeDasharray="4 6"
+              />
+            )}
+          </svg>
 
-              <div className="w-full h-1.5 bg-[#faf2ee] rounded-full overflow-hidden">
-                <div
-                  style={{
-                    width: `${item.percentage}%`,
-                    backgroundColor: color,
-                  }}
-                  className="h-full rounded-full transition-all duration-500"
-                />
+          {/* Donut Center Label */}
+          <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center px-1">
+            {activeSlice ? (
+              <>
+                <span
+                  className="text-lg font-black font-mono leading-none"
+                  style={{ color: activeSlice.color }}
+                >
+                  {activeSlice.count}
+                </span>
+                <span className="text-[10px] font-bold text-[#1e1b19] truncate max-w-[80px] mt-0.5">
+                  {activeSlice.label}
+                </span>
+              </>
+            ) : (
+              <>
+                <span className="text-xl font-black text-[#1e1b19] font-mono leading-none">
+                  {totalCount}
+                </span>
+                <span className="text-[10px] text-[#8a726a] font-semibold mt-0.5">
+                  {totalCount <= 1 ? 'Session' : 'Sessions'}
+                </span>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Visual Category Matrix Grid */}
+        <div className="flex flex-col gap-1.5 flex-1 w-full">
+          {slices.map((item) => {
+            const isHovered = hoveredType === item.type;
+            const hasActivity = item.count > 0;
+
+            return (
+              <div
+                key={item.type}
+                onMouseEnter={() => setHoveredType(item.type)}
+                onMouseLeave={() => setHoveredType(null)}
+                className={`px-2.5 py-1 rounded-xl transition-all flex items-center justify-between text-xs cursor-pointer border ${
+                  isHovered
+                    ? 'bg-[#faf2ee] border-[#b85028]/40 shadow-xs'
+                    : hasActivity
+                      ? 'bg-[#faf2ee]/40 border-[#e8e1dd] hover:bg-[#faf2ee]'
+                      : 'border-transparent text-[#8a726a] hover:bg-[#faf2ee]/30'
+                }`}
+              >
+                <div className="flex items-center gap-2 truncate">
+                  <span
+                    className="w-2.5 h-2.5 rounded-full shrink-0"
+                    style={{ backgroundColor: item.color }}
+                  />
+                  <span
+                    className={`truncate text-[11px] ${
+                      hasActivity
+                        ? 'font-bold text-[#1e1b19]'
+                        : 'font-medium text-[#8a726a]'
+                    }`}
+                  >
+                    {item.label}
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-1.5 shrink-0 font-mono text-[11px]">
+                  {hasActivity ? (
+                    <span
+                      className="font-bold px-1.5 py-0.2 rounded-md"
+                      style={{
+                        backgroundColor: `${item.color}15`,
+                        color: item.color,
+                      }}
+                    >
+                      {item.count} ({item.pct}%)
+                    </span>
+                  ) : (
+                    <span className="text-[#8a726a]/60">0</span>
+                  )}
+                </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
+
+      {/* Visual Proportional Spectrum Ribbon */}
+      {totalCount > 0 && (
+        <div className="pt-2">
+          <div className="w-full h-2 rounded-full overflow-hidden flex bg-[#faf2ee] border border-[#e8e1dd]">
+            {slices
+              .filter((s) => s.count > 0)
+              .map((s) => (
+                <div
+                  key={`ribbon-${s.type}`}
+                  style={{ width: `${s.pct}%`, backgroundColor: s.color }}
+                  className="h-full transition-all duration-500"
+                  title={`${s.label}: ${s.count} (${s.pct}%)`}
+                />
+              ))}
+          </div>
+        </div>
+      )}
 
       {/* Footer */}
       <div className="pt-2.5 border-t border-[#f4ece9] flex items-center justify-between text-[11px] text-[#8a726a]">
-        <span>7 catégories officielles</span>
+        <span>Survoler une catégorie pour isoler sa part</span>
         <span className="font-semibold text-[#b85028]">
           Cadence communautaire
         </span>
