@@ -8,8 +8,8 @@
   "scripts": {
     "build": "nest build",
     "deploy": "nest deploy",
-    "start": "nest start",
-    "start:dev": "nest start --watch",
+    "start": "nest start --exec \"node --experimental-require-module\"",
+    "start:dev": "nest start --watch --exec \"node --experimental-require-module\"",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
     "seed": "ts-node -r tsconfig-paths/register src/database/seeds/seed.ts",
@@ -57,9 +57,9 @@
     "socket.io": "^4.8.1"
   },
   "devDependencies": {
-    "@nestjs/cli": "^12.0.0",
-    "@nestjs/schematics": "^12.0.0",
-    "@nestjs/testing": "^12.0.1",
+    "@nestjs/cli": "^11.0.0",
+    "@nestjs/schematics": "^11.0.0",
+    "@nestjs/testing": "^11.0.0",
     "@types/bcrypt": "^5.0.2",
     "@types/compression": "^1.8.1",
     "@types/cron": "^2.4.3",
