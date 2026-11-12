@@ -18,10 +18,18 @@ export const AttendanceTrendCard: React.FC<AttendanceTrendCardProps> = ({
     20, // baseline scale
   );
 
+  const totalRecorded = trend.reduce((sum, t) => sum + t.totalPresent, 0);
+  const avgTurnout =
+    trend.length > 0
+      ? Math.round(
+          trend.reduce((sum, t) => sum + t.turnoutRate, 0) / trend.length,
+        )
+      : 0;
+
   return (
-    <div className="bg-white rounded-xl border border-[#e8e1dd] shadow-xs p-5 flex flex-col justify-between h-full transition-all hover:border-[#cfc4be]">
+    <div className="bg-white rounded-2xl border border-[#e8e1dd] shadow-xs p-5 flex flex-col justify-between transition-all hover:border-[#cfc4be]">
       {/* Header */}
-      <div className="flex items-center justify-between pb-3 border-b border-[#f4ece9]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-[#f4ece9] gap-2">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-lg bg-[#edf3ee] text-[#486b52] flex items-center justify-center border border-[#c2e9ca]">
             <ChartBar size={18} weight="duotone" />
@@ -31,12 +39,12 @@ export const AttendanceTrendCard: React.FC<AttendanceTrendCardProps> = ({
               Courbe d'Assiduité & Fréquentation
             </h3>
             <p className="text-[11px] text-[#8a726a]">
-              Dernières activités • Répartition Membres vs Invités
+              Dernières 5 activités • Répartition Membres vs Invités
             </p>
           </div>
         </div>
 
-        {/* Legend */}
+        {/* Legend & Stats */}
         <div className="flex items-center gap-3 text-[11px]">
           <div className="flex items-center gap-1.5">
             <span className="w-2.5 h-2.5 rounded-sm bg-[#486b52]" />
@@ -46,18 +54,22 @@ export const AttendanceTrendCard: React.FC<AttendanceTrendCardProps> = ({
             <span className="w-2.5 h-2.5 rounded-sm bg-[#b85028]" />
             <span className="text-[#57423b] font-medium">Invités</span>
           </div>
+          <span className="text-[#8a726a] hidden md:inline">•</span>
+          <span className="font-mono font-bold text-[#1e1b19] bg-[#faf2ee] px-2 py-0.5 rounded border border-[#e8e1dd] text-[10px] hidden md:inline">
+            {totalRecorded} présences • {avgTurnout}% moy.
+          </span>
         </div>
       </div>
 
       {/* Chart Canvas Area */}
-      <div className="relative py-6 flex-1 flex flex-col justify-end min-h-[170px]">
+      <div className="relative py-4 flex-1 flex flex-col justify-end min-h-[150px]">
         {trend.length === 0 ? (
           <div className="my-auto py-8 text-center text-xs text-[#8a726a] flex flex-col items-center justify-center gap-1.5">
             <Users size={28} className="text-[#8a726a]/40" />
             <span>Aucune donnée d'assiduité sur les événements récents.</span>
           </div>
         ) : (
-          <div className="flex items-end justify-around gap-2 sm:gap-4 h-[140px] pt-4 px-2">
+          <div className="flex items-end justify-around gap-2 sm:gap-4 h-[125px] pt-2 px-2">
             {trend.map((point) => {
               const memberHeightPct = Math.min(
                 100,
@@ -83,27 +95,37 @@ export const AttendanceTrendCard: React.FC<AttendanceTrendCardProps> = ({
                 >
                   {/* Floating Value Pill */}
                   <div
-                    className={`text-[10px] font-mono font-bold text-[#1e1b19] mb-1 transition-all ${
-                      isHovered ? 'scale-110 text-[#b85028]' : 'text-[#57423b]'
+                    className={`text-[10px] font-mono font-bold mb-1 transition-all ${
+                      point.totalPresent === 0
+                        ? 'text-[#8a726a]/60'
+                        : isHovered
+                          ? 'scale-110 text-[#b85028]'
+                          : 'text-[#1e1b19]'
                     }`}
                   >
-                    {point.totalPresent}
+                    {point.totalPresent === 0 ? '—' : point.totalPresent}
                   </div>
 
                   {/* Stacked Bar Container */}
-                  <div className="w-8 sm:w-11 bg-[#faf2ee] rounded-t-md overflow-hidden flex flex-col-reverse h-[95px] border border-[#e8e1dd] transition-all group-hover:border-[#b85028]/40 group-hover:shadow-xs">
-                    {/* Member Segment */}
-                    <div
-                      style={{ height: `${memberHeightPct}%` }}
-                      className="w-full bg-[#486b52] transition-all group-hover:bg-[#3d5a45]"
-                      title={`Membres : ${point.membersPresent}`}
-                    />
-                    {/* Guest Segment */}
-                    <div
-                      style={{ height: `${guestHeightPct}%` }}
-                      className="w-full bg-[#b85028] transition-all group-hover:bg-[#a44520]"
-                      title={`Invités : ${point.guestsPresent}`}
-                    />
+                  <div className="w-8 sm:w-11 rounded-t-md overflow-hidden flex flex-col-reverse h-[80px] relative transition-all">
+                    {point.totalPresent === 0 ? (
+                      <div className="w-full h-1 bg-[#e8e1dd] rounded-full mt-auto mb-0.5 opacity-60" />
+                    ) : (
+                      <div className="w-full h-full bg-[#faf2ee] rounded-t-md overflow-hidden flex flex-col-reverse border border-[#e8e1dd] group-hover:border-[#b85028]/40 group-hover:shadow-xs transition-all">
+                        {/* Member Segment */}
+                        <div
+                          style={{ height: `${memberHeightPct}%` }}
+                          className="w-full bg-[#486b52] transition-all group-hover:bg-[#3d5a45]"
+                          title={`Membres : ${point.membersPresent}`}
+                        />
+                        {/* Guest Segment */}
+                        <div
+                          style={{ height: `${guestHeightPct}%` }}
+                          className="w-full bg-[#b85028] transition-all group-hover:bg-[#a44520]"
+                          title={`Invités : ${point.guestsPresent}`}
+                        />
+                      </div>
+                    )}
                   </div>
 
                   {/* Date label */}

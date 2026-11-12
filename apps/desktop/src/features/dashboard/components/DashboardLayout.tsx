@@ -196,21 +196,11 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 
       {/* 3. Main Workspace Area */}
       <main
-        className={`pt-16 min-h-screen transition-all duration-200 ${
+        className={`pt-16 min-h-screen transition-all duration-200 pb-16 ${
           isSidebarCollapsed ? 'pl-[72px]' : 'pl-[260px]'
-        } ${
-          activeTab === 'dashboard'
-            ? 'h-screen overflow-hidden flex flex-col pb-11'
-            : 'pb-14'
         }`}
       >
-        <div
-          className={`max-w-[1536px] mx-auto w-full ${
-            activeTab === 'dashboard'
-              ? 'px-6 py-2 flex-1 flex flex-col justify-center min-h-0'
-              : 'p-6 sm:p-8'
-          }`}
-        >
+        <div className="max-w-[1536px] mx-auto w-full p-4 sm:p-6 lg:p-8">
           {/* External Town Ambient Notification */}
           {!isViewingHomeTown && activeTown && (
             <div className="mb-4 px-5 py-3 rounded-xl bg-[#fff8e1] border-2 border-[#ffe082] shadow-xs flex flex-wrap items-center justify-between gap-4 animate-in fade-in slide-in-from-top-2 duration-200 shrink-0">
@@ -262,11 +252,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               duration: 0.15,
               ease: 'easeOut',
             }}
-            className={`w-full ${
-              activeTab === 'dashboard'
-                ? 'flex-1 flex flex-col justify-center items-center min-h-0 h-full'
-                : ''
-            }`}
+            className="w-full"
           >
             {activeTab === 'members' ? (
               <MembersFeature

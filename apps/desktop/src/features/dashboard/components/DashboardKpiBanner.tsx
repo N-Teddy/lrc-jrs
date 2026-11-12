@@ -17,7 +17,7 @@ export const DashboardKpiBanner: React.FC<DashboardKpiBannerProps> = ({
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 w-full">
       {/* 1. Community Members */}
-      <div className="bg-white rounded-xl border border-[#e8e1dd] shadow-xs p-4 flex flex-col justify-between transition-all hover:border-[#cfc4be] hover:shadow-2xs">
+      <div className="bg-white rounded-2xl border border-[#e8e1dd] shadow-xs p-4 flex flex-col justify-between transition-all hover:border-[#cfc4be] hover:shadow-2xs">
         <div className="flex items-start justify-between">
           <div>
             <p className="text-[11px] font-bold text-[#8a726a] uppercase tracking-wider">
@@ -42,7 +42,7 @@ export const DashboardKpiBanner: React.FC<DashboardKpiBannerProps> = ({
       </div>
 
       {/* 2. Turnout Rate */}
-      <div className="bg-white rounded-xl border border-[#e8e1dd] shadow-xs p-4 flex flex-col justify-between transition-all hover:border-[#cfc4be] hover:shadow-2xs">
+      <div className="bg-white rounded-2xl border border-[#e8e1dd] shadow-xs p-4 flex flex-col justify-between transition-all hover:border-[#cfc4be] hover:shadow-2xs">
         <div className="flex items-start justify-between">
           <div>
             <p className="text-[11px] font-bold text-[#8a726a] uppercase tracking-wider">
@@ -65,7 +65,7 @@ export const DashboardKpiBanner: React.FC<DashboardKpiBannerProps> = ({
       </div>
 
       {/* 3. External Reach & Guests */}
-      <div className="bg-white rounded-xl border border-[#e8e1dd] shadow-xs p-4 flex flex-col justify-between transition-all hover:border-[#cfc4be] hover:shadow-2xs">
+      <div className="bg-white rounded-2xl border border-[#e8e1dd] shadow-xs p-4 flex flex-col justify-between transition-all hover:border-[#cfc4be] hover:shadow-2xs">
         <div className="flex items-start justify-between">
           <div>
             <p className="text-[11px] font-bold text-[#8a726a] uppercase tracking-wider">
@@ -90,7 +90,7 @@ export const DashboardKpiBanner: React.FC<DashboardKpiBannerProps> = ({
       </div>
 
       {/* 4. Upcoming Activities */}
-      <div className="bg-white rounded-xl border border-[#e8e1dd] shadow-xs p-4 flex flex-col justify-between transition-all hover:border-[#cfc4be] hover:shadow-2xs">
+      <div className="bg-white rounded-2xl border border-[#e8e1dd] shadow-xs p-4 flex flex-col justify-between transition-all hover:border-[#cfc4be] hover:shadow-2xs">
         <div className="flex items-start justify-between">
           <div>
             <p className="text-[11px] font-bold text-[#8a726a] uppercase tracking-wider">

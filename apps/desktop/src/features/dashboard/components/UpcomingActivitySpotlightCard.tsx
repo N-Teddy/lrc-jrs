@@ -13,33 +13,44 @@ import { ACTIVITY_TYPE_COLORS } from './ActivityTypeBreakdownCard';
 interface UpcomingActivitySpotlightCardProps {
   activity?: IUpcomingActivitySpotlight;
   onOpenActivity?: (activityId: string) => void;
+  onCreateActivity?: () => void;
 }
 
 export const UpcomingActivitySpotlightCard: React.FC<
   UpcomingActivitySpotlightCardProps
-> = ({ activity, onOpenActivity }) => {
+> = ({ activity, onOpenActivity, onCreateActivity }) => {
   if (!activity) {
     return (
-      <div className="bg-white rounded-xl border border-[#e8e1dd] shadow-xs p-5 flex flex-col justify-between h-full transition-all hover:border-[#cfc4be]">
-        <div className="flex items-center gap-2.5 pb-3 border-b border-[#f4ece9]">
-          <div className="w-8 h-8 rounded-lg bg-[#faf2ee] text-[#8a726a] flex items-center justify-center border border-[#e8e1dd]">
-            <CalendarBlank size={18} weight="duotone" />
+      <div className="bg-white rounded-2xl border border-[#e8e1dd] shadow-xs p-5 transition-all hover:border-[#cfc4be]">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3.5">
+            <div className="w-11 h-11 rounded-xl bg-[#faf2ee] text-[#8a726a] flex items-center justify-center border border-[#e8e1dd] shrink-0">
+              <CalendarBlank size={22} weight="duotone" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="font-extrabold text-sm text-[#1e1b19]">
+                  Prochaine Activité à l'Agenda
+                </h3>
+                <span className="px-2 py-0.5 rounded-full bg-[#faf2ee] text-[#8a726a] text-[10px] font-bold border border-[#e8e1dd]">
+                  Aucun événement
+                </span>
+              </div>
+              <p className="text-xs text-[#8a726a] mt-0.5">
+                Aucune session n'est encore programmée pour votre paroisse sur
+                cette période.
+              </p>
+            </div>
           </div>
-          <div>
-            <h3 className="font-bold text-xs text-[#1e1b19]">
-              Prochaine Activité
-            </h3>
-            <p className="text-[11px] text-[#8a726a]">À l'agenda</p>
-          </div>
-        </div>
-
-        <div className="my-auto py-8 text-center text-xs text-[#8a726a] flex flex-col items-center justify-center gap-1.5">
-          <CalendarBlank size={28} className="text-[#8a726a]/40" />
-          <span>Aucune activité planifiée pour le moment.</span>
-        </div>
-
-        <div className="pt-2.5 border-t border-[#f4ece9] text-[11px] text-[#8a726a] text-center italic">
-          Planifiez une nouvelle session via l'onglet Activités.
+          {onCreateActivity && (
+            <button
+              type="button"
+              onClick={onCreateActivity}
+              className="h-9 px-4 rounded-xl bg-[#b85028] hover:bg-[#a44520] text-white font-bold text-xs shadow-xs transition-colors flex items-center gap-1.5 shrink-0 self-start sm:self-auto cursor-pointer"
+            >
+              <span>+ Programmer une activité</span>
+            </button>
+          )}
         </div>
       </div>
     );
@@ -59,84 +70,94 @@ export const UpcomingActivitySpotlightCard: React.FC<
   });
 
   return (
-    <div className="bg-white rounded-xl border border-[#e8e1dd] shadow-xs p-5 flex flex-col justify-between h-full transition-all hover:border-[#cfc4be]">
-      {/* Header with Countdown Badge */}
-      <div className="flex items-center justify-between pb-3 border-b border-[#f4ece9]">
-        <div className="flex items-center gap-2">
-          <span
-            className="w-2.5 h-2.5 rounded-full"
-            style={{ backgroundColor: typeColor }}
-          />
-          <span className="text-xs font-bold text-[#1e1b19]">
-            {typeConfig.label}
-          </span>
-        </div>
+    <div className="relative overflow-hidden bg-gradient-to-br from-[#fff7f5] via-white to-white rounded-2xl border border-[#ffdbcf] shadow-xs p-5 transition-all hover:border-[#ffb59c] hover:shadow-sm">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        {/* Left Side: Activity Type Pill, Title, Details */}
+        <div className="flex flex-col gap-2 min-w-0 flex-1">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span
+              className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-extrabold shadow-2xs border"
+              style={{
+                backgroundColor: `${typeColor}15`,
+                color: typeColor,
+                borderColor: `${typeColor}30`,
+              }}
+            >
+              <span
+                className="w-1.5 h-1.5 rounded-full"
+                style={{ backgroundColor: typeColor }}
+              />
+              {typeConfig.label}
+            </span>
 
-        {activity.isToday ? (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#ffdad4] text-[#9f2f23] text-[10px] font-extrabold animate-pulse">
-            <Sparkle size={11} weight="fill" />
-            <span>Aujourd'hui !</span>
-          </span>
-        ) : activity.daysUntil === 1 ? (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#fff2ee] text-[#b85028] text-[10px] font-bold border border-[#ffdbcf]">
-            Demain
-          </span>
-        ) : (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#faf2ee] text-[#57423b] text-[10px] font-bold border border-[#e8e1dd]">
-            Dans {activity.daysUntil} jours
-          </span>
-        )}
-      </div>
+            {activity.isToday ? (
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#ffdad4] text-[#9f2f23] text-[10px] font-extrabold animate-pulse">
+                <Sparkle size={11} weight="fill" />
+                <span>Aujourd'hui !</span>
+              </span>
+            ) : activity.daysUntil === 1 ? (
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#fff2ee] text-[#b85028] text-[10px] font-bold border border-[#ffdbcf]">
+                Demain
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#faf2ee] text-[#57423b] text-[10px] font-bold border border-[#e8e1dd]">
+                Dans {activity.daysUntil} jours
+              </span>
+            )}
 
-      {/* Main Activity Details */}
-      <div className="py-4 flex flex-col gap-2.5">
-        <h4
-          className="text-base font-extrabold text-[#1e1b19] line-clamp-2 leading-snug hover:text-[#b85028] transition-colors cursor-pointer"
-          onClick={() => onOpenActivity?.(activity.id)}
-          title={activity.title}
-        >
-          {activity.title}
-        </h4>
-
-        <div className="flex flex-col gap-1.5 text-xs text-[#57423b]">
-          <div className="flex items-center gap-2">
-            <CalendarBlank size={14} className="text-[#8a726a] shrink-0" />
-            <span className="capitalize font-medium">{formattedDate}</span>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <Clock size={14} className="text-[#8a726a] shrink-0" />
-            <span className="font-mono text-[11px] font-semibold text-[#1e1b19]">
-              {formattedTime}
+            <span className="text-[11px] text-[#8a726a] font-medium hidden sm:inline">
+              Pôle organisateur :{' '}
+              <strong className="text-[#b85028]">
+                {activity.hostTownName}
+              </strong>
             </span>
           </div>
 
-          {activity.locationVenue && (
-            <div className="flex items-center gap-2">
-              <MapPin size={14} className="text-[#8a726a] shrink-0" />
-              <span className="truncate">{activity.locationVenue}</span>
+          <h3
+            className="text-base sm:text-lg font-extrabold text-[#1e1b19] tracking-tight hover:text-[#b85028] transition-colors cursor-pointer line-clamp-1"
+            onClick={() => onOpenActivity?.(activity.id)}
+            title={activity.title}
+          >
+            {activity.title}
+          </h3>
+
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-[#57423b]">
+            <div className="flex items-center gap-1.5">
+              <CalendarBlank size={14} className="text-[#b85028] shrink-0" />
+              <span className="capitalize font-semibold">{formattedDate}</span>
             </div>
-          )}
 
-          <div className="flex items-center gap-1.5 mt-1 text-[11px] text-[#8a726a]">
-            <span>Pôle organisateur :</span>
-            <span className="font-bold text-[#b85028]">
-              {activity.hostTownName}
-            </span>
+            <div className="flex items-center gap-1.5">
+              <Clock size={14} className="text-[#8a726a] shrink-0" />
+              <span className="font-mono text-[11px] font-bold text-[#1e1b19]">
+                {formattedTime}
+              </span>
+            </div>
+
+            {activity.locationVenue && (
+              <div className="flex items-center gap-1.5 truncate max-w-xs">
+                <MapPin size={14} className="text-[#8a726a] shrink-0" />
+                <span className="truncate">{activity.locationVenue}</span>
+              </div>
+            )}
           </div>
         </div>
-      </div>
 
-      {/* Action Button */}
-      <div className="pt-3 border-t border-[#f4ece9]">
-        <button
-          type="button"
-          onClick={() => onOpenActivity?.(activity.id)}
-          className="w-full h-9 rounded-lg bg-[#b85028] hover:bg-[#a44520] text-white font-bold text-xs shadow-xs transition-colors flex items-center justify-center gap-2 cursor-pointer"
-        >
-          <span>Consulter le registre</span>
-          <ArrowRight size={14} weight="bold" />
-        </button>
+        {/* Right Side: CTA Button */}
+        <div className="shrink-0 flex items-center">
+          <button
+            type="button"
+            onClick={() => onOpenActivity?.(activity.id)}
+            className="h-10 px-5 rounded-xl bg-[#b85028] hover:bg-[#a44520] text-white font-bold text-xs shadow-xs transition-all flex items-center gap-2 cursor-pointer group"
+          >
+            <span>Consulter le registre</span>
+            <ArrowRight
+              size={14}
+              weight="bold"
+              className="group-hover:translate-x-0.5 transition-transform"
+            />
+          </button>
+        </div>
       </div>
     </div>
   );

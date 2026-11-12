@@ -207,14 +207,16 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
       {isLoading ? (
         <div className="flex flex-col gap-5">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
-            <Skeleton height={110} borderRadius={12} count={4} />
+            <Skeleton height={110} borderRadius={16} count={4} />
           </div>
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            <div className="lg:col-span-2">
-              <Skeleton height={260} borderRadius={12} />
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+            <div className="lg:col-span-8 flex flex-col gap-5">
+              <Skeleton height={130} borderRadius={16} />
+              <Skeleton height={260} borderRadius={16} />
             </div>
-            <div>
-              <Skeleton height={260} borderRadius={12} />
+            <div className="lg:col-span-4 flex flex-col gap-5">
+              <Skeleton height={200} borderRadius={16} />
+              <Skeleton height={200} borderRadius={16} />
             </div>
           </div>
         </div>
@@ -223,54 +225,56 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           {/* 2. Row 1: Executive KPI Banners (4 Columns) */}
           <DashboardKpiBanner kpis={data.kpis} />
 
-          {/* 3. Row 2: Attendance Trend (2/3) + Next Activity Spotlight (1/3) */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            <div className="lg:col-span-2">
-              <AttendanceTrendCard trend={data.attendanceTrend} />
-            </div>
-            <div>
+          {/* 3. Main 2-Column Asymmetric Workspace (8 cols Left / 4 cols Right) */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+            {/* LEFT COLUMN: Operations & Activities (8 Columns) */}
+            <div className="lg:col-span-8 flex flex-col gap-5">
+              {/* Prochaine Activité Hero Spotlight */}
               <UpcomingActivitySpotlightCard
                 activity={data.upcomingActivity}
                 onOpenActivity={() => onSelectTab('activities')}
+                onCreateActivity={onOpenCreateActivity}
+              />
+
+              {/* Courbe d'Assiduité & Fréquentation */}
+              <AttendanceTrendCard trend={data.attendanceTrend} />
+
+              {/* Dernières Activités Réalisées */}
+              <RecentActivitiesListCard
+                activities={data.recentActivities}
+                onSelectActivity={() => onSelectTab('activities')}
+                onViewAll={() => onSelectTab('activities')}
               />
             </div>
-          </div>
 
-          {/* 4. Row 3: Demographics (1/3) + Upcoming Birthdays (1/3) + Activity Types (1/3) */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div>
-              <DemographicsDistributionCard demographics={data.demographics} />
-            </div>
-            <div>
+            {/* RIGHT COLUMN: Community Care, Celebrations & Alerts (4 Columns) */}
+            <div className="lg:col-span-4 flex flex-col gap-5">
+              {/* Anniversaires du Mois */}
               <UpcomingBirthdaysCard
                 birthdays={data.upcomingBirthdays}
                 onTriggerCelebration={handleTriggerCelebration}
               />
-            </div>
-            <div>
+
+              {/* Alertes & Flux Opérationnel */}
+              <OperationalAlertsFeedCard
+                alerts={data.operationalAlerts}
+                transfers={data.recentTransfers}
+                onNavigateToIntake={() => onSelectTab('access')}
+                onNavigateToTransfers={() => onSelectTab('transfers')}
+              />
+
+              {/* Démographie & Profils */}
+              <DemographicsDistributionCard demographics={data.demographics} />
+
+              {/* Types d'Activités */}
               <ActivityTypeBreakdownCard
                 distribution={data.activityTypeDistribution}
               />
             </div>
           </div>
-
-          {/* 5. Row 4: Recent Activities (1/2) + Operational Alerts Feed (1/2) */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <RecentActivitiesListCard
-              activities={data.recentActivities}
-              onSelectActivity={() => onSelectTab('activities')}
-              onViewAll={() => onSelectTab('activities')}
-            />
-            <OperationalAlertsFeedCard
-              alerts={data.operationalAlerts}
-              transfers={data.recentTransfers}
-              onNavigateToIntake={() => onSelectTab('access')}
-              onNavigateToTransfers={() => onSelectTab('transfers')}
-            />
-          </div>
         </>
       ) : (
-        <div className="p-12 text-center text-xs text-[#8a726a]">
+        <div className="p-12 text-center text-xs text-[#8a726a] bg-white rounded-2xl border border-[#e8e1dd]">
           Impossible de charger les métriques du tableau de bord.
         </div>
       )}

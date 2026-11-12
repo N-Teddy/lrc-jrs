@@ -19,7 +19,7 @@ export const RecentActivitiesListCard: React.FC<
   RecentActivitiesListCardProps
 > = ({ activities, onSelectActivity, onViewAll }) => {
   return (
-    <div className="bg-white rounded-xl border border-[#e8e1dd] shadow-xs p-5 flex flex-col justify-between h-full transition-all hover:border-[#cfc4be]">
+    <div className="bg-white rounded-2xl border border-[#e8e1dd] shadow-xs p-5 flex flex-col justify-between transition-all hover:border-[#cfc4be]">
       {/* Header */}
       <div className="flex items-center justify-between pb-3 border-b border-[#f4ece9]">
         <div className="flex items-center gap-2.5">

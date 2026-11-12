@@ -1,11 +1,5 @@
 import type { IUpcomingBirthday } from '@jrs/shared';
-import {
-  Cake,
-  CalendarHeart,
-  Confetti,
-  Sparkle,
-  WhatsappLogo,
-} from '@phosphor-icons/react';
+import { Cake, Confetti, Sparkle, WhatsappLogo } from '@phosphor-icons/react';
 import type React from 'react';
 import { UserAvatar } from '../../../components/UserAvatar';
 
@@ -27,7 +21,7 @@ export const UpcomingBirthdaysCard: React.FC<UpcomingBirthdaysCardProps> = ({
   const todayCount = birthdays.filter((b) => b.isToday).length;
 
   return (
-    <div className="bg-white rounded-xl border border-[#e8e1dd] shadow-xs p-5 flex flex-col justify-between h-full transition-all hover:border-[#cfc4be]">
+    <div className="bg-white rounded-2xl border border-[#e8e1dd] shadow-xs p-5 flex flex-col justify-between transition-all hover:border-[#cfc4be]">
       {/* Card Header */}
       <div className="flex items-center justify-between pb-3 border-b border-[#f4ece9]">
         <div className="flex items-center gap-2.5">
@@ -55,12 +49,53 @@ export const UpcomingBirthdaysCard: React.FC<UpcomingBirthdaysCardProps> = ({
         </div>
       </div>
 
+      {/* Birthday Celebrant Celebration Action Banner if someone has a birthday today */}
+      {todayCount > 0 && onTriggerCelebration && (
+        <div className="mt-3 p-2.5 rounded-xl bg-gradient-to-r from-[#fff2ee] to-[#ffe8e0] border border-[#ffb59c] flex items-center justify-between gap-2 shadow-2xs">
+          <div className="flex items-center gap-2 min-w-0">
+            <Sparkle
+              size={16}
+              weight="fill"
+              className="text-[#b85028] animate-spin shrink-0"
+            />
+            <span className="text-xs font-extrabold text-[#b85028] truncate">
+              {todayCount === 1
+                ? 'Anniversaire aujourd’hui !'
+                : `${todayCount} Anniversaires aujourd’hui !`}
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              const celebrant = birthdays.find((b) => b.isToday);
+              if (celebrant && onTriggerCelebration) {
+                onTriggerCelebration(celebrant);
+              }
+            }}
+            className="px-2.5 py-1 rounded-lg bg-[#b85028] hover:bg-[#a44520] text-white text-[11px] font-bold shadow-xs transition-colors flex items-center gap-1 shrink-0 cursor-pointer"
+          >
+            <Confetti size={13} weight="bold" />
+            <span>Fêter 🎉</span>
+          </button>
+        </div>
+      )}
+
       {/* Birthday List Container */}
       <div className="py-3 flex flex-col gap-2.5 flex-1 overflow-y-auto max-h-[260px] pr-1">
         {birthdays.length === 0 ? (
-          <div className="my-auto py-8 text-center text-xs text-[#8a726a] flex flex-col items-center justify-center gap-1.5">
-            <CalendarHeart size={28} className="text-[#8a726a]/40" />
-            <span>Aucun anniversaire enregistré ce mois-ci.</span>
+          <div className="py-6 px-4 text-center text-xs text-[#8a726a] flex flex-col items-center justify-center gap-2 bg-[#faf2ee]/40 rounded-xl border border-dashed border-[#e8e1dd]">
+            <div className="w-10 h-10 rounded-full bg-[#fff2ee] text-[#b85028] flex items-center justify-center border border-[#ffdbcf]">
+              <Cake size={20} weight="duotone" />
+            </div>
+            <div>
+              <p className="font-bold text-[#57423b]">
+                Aucun anniversaire en {capitalizedMonth}
+              </p>
+              <p className="text-[11px] text-[#8a726a] mt-0.5">
+                Des rappels automatiques seront envoyés 7 jours avant chaque
+                anniversaire.
+              </p>
+            </div>
           </div>
         ) : (
           birthdays.map((b) => {
