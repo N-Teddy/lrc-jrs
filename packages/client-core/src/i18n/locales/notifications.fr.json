@@ -161,5 +161,11 @@
       "title": "Rapport d'activité attendu",
       "body": "Le rapport d'activité pour {{name}} n'a pas encore été finalisé"
     }
+  },
+  "birthday": {
+    "todayTitle": "🎉 Anniversaire aujourd'hui : {{name}} ({{age}} ans) !",
+    "todayBody": "C'est l'anniversaire de {{name}} aujourd'hui ({{age}} ans, {{town}}). Pensez à lui envoyer un message de vœux !",
+    "upcoming7dTitle": "🎂 Anniversaire dans 7 jours : {{name}} ({{age}} ans)",
+    "upcoming7dBody": "{{name}} ({{town}}) fêtera ses {{age}} ans le {{date}}. Pensez à lui préparer ses vœux."
   }
 }

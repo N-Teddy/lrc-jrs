@@ -1,34 +1,87 @@
-import { useTranslation } from '@jrs/client-core';
-import type { IAuthUser } from '@jrs/shared';
-import {
-  ArrowRight,
-  Bug,
-  CalendarDots,
-  FolderOpen,
-  ShieldCheck,
-  Sparkle,
-  Users,
-  Warning,
-} from '@phosphor-icons/react';
+import { useDashboardOverviewQuery, useTownContext } from '@jrs/client-core';
+import type { IAuthUser, IUpcomingBirthday } from '@jrs/shared';
+import { CalendarPlus, MapPin, UserPlus } from '@phosphor-icons/react';
 import type React from 'react';
-import { useState } from 'react';
-import constructionComingSoonSvg from '../../../assets/illustrations/construction-coming-soon.svg';
+import { useEffect, useState } from 'react';
+import Skeleton from 'react-loading-skeleton';
 import { AppCrashFallback } from '../../../components/AppCrashFallback';
 import type { DashboardTabId } from '../hooks/use-dashboard-layout';
+import { ActivityTypeBreakdownCard } from './ActivityTypeBreakdownCard';
+import { AttendanceTrendCard } from './AttendanceTrendCard';
+import { BirthdayCelebrationOverlay } from './BirthdayCelebrationOverlay';
+import { DashboardKpiBanner } from './DashboardKpiBanner';
+import { DemographicsDistributionCard } from './DemographicsDistributionCard';
+import { OperationalAlertsFeedCard } from './OperationalAlertsFeedCard';
+import { RecentActivitiesListCard } from './RecentActivitiesListCard';
+import { UpcomingActivitySpotlightCard } from './UpcomingActivitySpotlightCard';
+import { UpcomingBirthdaysCard } from './UpcomingBirthdaysCard';
 
 interface DashboardOverviewProps {
   user: IAuthUser;
   onSelectTab: (tab: DashboardTabId) => void;
+  onOpenCreateActivity?: () => void;
+  onOpenRegisterMember?: () => void;
 }
 
 export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
+  user,
   onSelectTab,
+  onOpenCreateActivity,
+  onOpenRegisterMember,
 }) => {
-  const { t } = useTranslation();
+  const { activeTown } = useTownContext();
+
+  // Period state
+  const [period, setPeriod] = useState<'month' | 'quarter' | 'year'>('month');
+
+  // Birthday celebration modal state
+  const [isCelebrationOpen, setIsCelebrationOpen] = useState(false);
+  const [selectedCelebrants, setSelectedCelebrants] = useState<
+    IUpcomingBirthday[]
+  >([]);
+
+  // Dev error simulation state
   const [isPreviewingError, setIsPreviewingError] = useState(false);
   const [triggerRealCrash, setTriggerRealCrash] = useState(false);
 
-  // If testing real crash in dev mode, throw an unhandled runtime error for ErrorBoundary
+  // Fetch dashboard aggregate data
+  const { data, isLoading } = useDashboardOverviewQuery({
+    townId: activeTown?.id || activeTown?.code,
+    period,
+  });
+
+  // Check and trigger Android Birthday Celebration Screen Effect on connection
+  useEffect(() => {
+    if (
+      !data?.hasBirthdayToday ||
+      !data?.todayCelebrants ||
+      data.todayCelebrants.length === 0
+    ) {
+      return;
+    }
+
+    const todayStr = new Date().toISOString().split('T')[0];
+    const celebrantIds = data.todayCelebrants
+      .map((c) => c.id)
+      .sort()
+      .join('_');
+    const storageKey = `jrs_birthday_celebration_${todayStr}_${celebrantIds}`;
+
+    // Only show once per session / day automatically
+    if (!sessionStorage.getItem(storageKey)) {
+      sessionStorage.setItem(storageKey, 'true');
+      setSelectedCelebrants(data.todayCelebrants);
+      setIsCelebrationOpen(true);
+    }
+  }, [data]);
+
+  // Manual trigger from birthdays card
+  const handleTriggerCelebration = (celebrant: IUpcomingBirthday) => {
+    setSelectedCelebrants([celebrant]);
+    setIsCelebrationOpen(true);
+  };
+
+  // If testing real crash in dev mode
   if (triggerRealCrash) {
     throw new Error(
       'DevSimulationError: Unhandled runtime error triggered to verify React ErrorBoundary.',
@@ -46,130 +99,210 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
         }
         errorInfo={{
           componentStack:
-            '    at DashboardOverview (DashboardOverview.tsx:32)\n    at DashboardLayout (DashboardLayout.tsx:298)\n    at AppContent (App.tsx:144)',
+            '    at DashboardOverview (DashboardOverview.tsx)\n    at DashboardLayout (DashboardLayout.tsx)',
         }}
         onReset={() => setIsPreviewingError(false)}
       />
     );
   }
 
-  const quickNavItems: Array<{
-    tab: DashboardTabId;
-    label: string;
-    icon: React.ReactNode;
-    color: string;
-  }> = [
-    {
-      tab: 'members',
-      label: t('navigation:members', 'Members'),
-      icon: <Users size={18} weight="duotone" />,
-      color: 'hover:border-[#b85028] hover:text-[#b85028]',
-    },
-    {
-      tab: 'activities',
-      label: t('navigation:activities', 'Activities & Calendar'),
-      icon: <CalendarDots size={18} weight="duotone" />,
-      color: 'hover:border-[#486b52] hover:text-[#486b52]',
-    },
-    {
-      tab: 'access',
-      label: t('navigation:access', 'Intake Submissions'),
-      icon: <ShieldCheck size={18} weight="duotone" />,
-      color: 'hover:border-[#b85028] hover:text-[#b85028]',
-    },
-    {
-      tab: 'reports',
-      label: t('navigation:reports', 'Document Vault'),
-      icon: <FolderOpen size={18} weight="duotone" />,
-      color: 'hover:border-[#486b52] hover:text-[#486b52]',
-    },
-  ];
+  const userFirstName = user?.fullName?.split(' ')[0] || 'Leader';
 
   return (
-    <div className="w-full my-auto flex flex-col items-center justify-center animate-in fade-in duration-300 min-h-0 select-none py-1">
-      {/* Large Vector Illustration - Scaled responsively to viewport */}
-      <div className="relative flex items-center justify-center my-1 shrink-0">
-        <img
-          src={constructionComingSoonSvg}
-          alt={t('dashboard:comingSoonBadge', 'Still in Construction')}
-          className="h-48 sm:h-56 md:h-68 lg:h-80 xl:h-92 max-h-[38vh] w-auto object-contain select-none pointer-events-none drop-shadow-sm transition-transform duration-300 hover:scale-[1.01]"
-        />
-      </div>
+    <div className="w-full flex flex-col gap-5 animate-in fade-in duration-300 pb-12 select-none">
+      {/* 1. Header Toolbar: Welcome Greeting, Town Badge, Period Selector, Actions */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#e8e1dd]">
+        <div>
+          <div className="flex items-center gap-2">
+            <h2 className="text-xl sm:text-2xl font-extrabold text-[#1e1b19] tracking-tight">
+              Bonjour, {userFirstName} 👋
+            </h2>
+            {activeTown && (
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#fff2ee] text-[#b85028] text-xs font-bold border border-[#ffdbcf]">
+                <MapPin size={12} weight="fill" />
+                <span>{activeTown.name}</span>
+              </span>
+            )}
+          </div>
+          <p className="text-xs text-[#8a726a] mt-0.5">
+            Tableau de bord de coordination et métriques de la jeunesse
+            paroissiale
+          </p>
+        </div>
 
-      {/* In-Development Badge */}
-      <div className="inline-flex items-center gap-1.5 bg-[#ffdbcf]/60 text-[#812901] px-3.5 py-1 rounded-full text-xs font-bold mb-2 border border-[#ffb59c]/50 shadow-2xs shrink-0">
-        <Sparkle size={13} weight="fill" className="text-[#b85028]" />
-        <span>{t('dashboard:comingSoonBadge', 'Still in Construction')}</span>
-      </div>
-
-      {/* Main Title */}
-      <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-[#1e1b19] tracking-tight mb-1 text-center shrink-0">
-        {t('dashboard:comingSoonTitle', 'Dashboard Analytics In Development')}
-      </h1>
-
-      {/* Short, Punchy 1-Sentence Description */}
-      <p className="text-xs sm:text-sm text-[#57423b] text-center max-w-md leading-relaxed mb-4 px-4 shrink-0">
-        {t(
-          'dashboard:comingSoonDesc',
-          'Hub analytics and community metrics are in active development.',
-        )}
-      </p>
-
-      {/* Quick Access Navigation Buttons without header text */}
-      <div className="w-full max-w-2xl px-4 mb-2 shrink-0">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5">
-          {quickNavItems.map((item) => (
+        {/* Period Selector & Quick Actions */}
+        <div className="flex flex-wrap items-center gap-2.5">
+          {/* Period Filter Buttons */}
+          <div className="flex items-center bg-[#faf2ee] p-1 rounded-xl border border-[#e8e1dd] text-xs font-bold">
             <button
-              key={item.tab}
               type="button"
-              onClick={() => onSelectTab(item.tab)}
-              className={`group flex items-center justify-between px-3 py-2.5 rounded-xl bg-white border border-[#e8e1dd] text-left transition-all duration-150 shadow-2xs hover:shadow-xs cursor-pointer ${item.color}`}
+              onClick={() => setPeriod('month')}
+              className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                period === 'month'
+                  ? 'bg-white text-[#b85028] shadow-xs'
+                  : 'text-[#57423b] hover:text-[#1e1b19]'
+              }`}
             >
-              <div className="flex items-center gap-2 min-w-0">
-                <div className="w-7 h-7 rounded-lg bg-[#faf2ee] border border-[#e8e1dd] flex items-center justify-center text-[#57423b] group-hover:text-inherit shrink-0 transition-colors">
-                  {item.icon}
-                </div>
-                <span className="text-xs font-bold text-[#1e1b19] group-hover:text-inherit transition-colors truncate">
-                  {item.label}
-                </span>
-              </div>
-              <ArrowRight
-                size={12}
-                weight="bold"
-                className="text-[#8a726a] group-hover:text-inherit group-hover:translate-x-0.5 transition-all shrink-0 ml-1.5"
-              />
+              Ce mois
             </button>
-          ))}
+            <button
+              type="button"
+              onClick={() => setPeriod('quarter')}
+              className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                period === 'quarter'
+                  ? 'bg-white text-[#b85028] shadow-xs'
+                  : 'text-[#57423b] hover:text-[#1e1b19]'
+              }`}
+            >
+              Ce trimestre
+            </button>
+            <button
+              type="button"
+              onClick={() => setPeriod('year')}
+              className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                period === 'year'
+                  ? 'bg-white text-[#b85028] shadow-xs'
+                  : 'text-[#57423b] hover:text-[#1e1b19]'
+              }`}
+            >
+              Année 2026
+            </button>
+          </div>
+
+          {/* Quick Create Activity */}
+          <button
+            type="button"
+            onClick={() => {
+              if (onOpenCreateActivity) {
+                onOpenCreateActivity();
+              } else {
+                onSelectTab('activities');
+              }
+            }}
+            className="h-9 px-3.5 rounded-xl bg-[#b85028] hover:bg-[#a44520] text-white font-bold text-xs shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer"
+          >
+            <CalendarPlus size={15} weight="bold" />
+            <span className="hidden sm:inline">Nouvelle Activité</span>
+          </button>
+
+          {/* Quick Register Member */}
+          <button
+            type="button"
+            onClick={() => {
+              if (onOpenRegisterMember) {
+                onOpenRegisterMember();
+              } else {
+                onSelectTab('members');
+              }
+            }}
+            className="h-9 px-3 rounded-xl bg-white border border-[#e8e1dd] hover:bg-[#faf2ee] text-[#57423b] font-bold text-xs shadow-2xs transition-colors flex items-center gap-1.5 cursor-pointer"
+          >
+            <UserPlus size={15} weight="bold" />
+            <span className="hidden sm:inline">Inscrire Membre</span>
+          </button>
         </div>
       </div>
 
-      {/* Dev-Only Error Page Review Section */}
+      {/* Loading Skeleton */}
+      {isLoading ? (
+        <div className="flex flex-col gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+            <Skeleton height={110} borderRadius={12} count={4} />
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <div className="lg:col-span-2">
+              <Skeleton height={260} borderRadius={12} />
+            </div>
+            <div>
+              <Skeleton height={260} borderRadius={12} />
+            </div>
+          </div>
+        </div>
+      ) : data ? (
+        <>
+          {/* 2. Row 1: Executive KPI Banners (4 Columns) */}
+          <DashboardKpiBanner kpis={data.kpis} />
+
+          {/* 3. Row 2: Attendance Trend (2/3) + Next Activity Spotlight (1/3) */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <div className="lg:col-span-2">
+              <AttendanceTrendCard trend={data.attendanceTrend} />
+            </div>
+            <div>
+              <UpcomingActivitySpotlightCard
+                activity={data.upcomingActivity}
+                onOpenActivity={() => onSelectTab('activities')}
+              />
+            </div>
+          </div>
+
+          {/* 4. Row 3: Demographics (1/3) + Upcoming Birthdays (1/3) + Activity Types (1/3) */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div>
+              <DemographicsDistributionCard demographics={data.demographics} />
+            </div>
+            <div>
+              <UpcomingBirthdaysCard
+                birthdays={data.upcomingBirthdays}
+                onTriggerCelebration={handleTriggerCelebration}
+              />
+            </div>
+            <div>
+              <ActivityTypeBreakdownCard
+                distribution={data.activityTypeDistribution}
+              />
+            </div>
+          </div>
+
+          {/* 5. Row 4: Recent Activities (1/2) + Operational Alerts Feed (1/2) */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <RecentActivitiesListCard
+              activities={data.recentActivities}
+              onSelectActivity={() => onSelectTab('activities')}
+              onViewAll={() => onSelectTab('activities')}
+            />
+            <OperationalAlertsFeedCard
+              alerts={data.operationalAlerts}
+              transfers={data.recentTransfers}
+              onNavigateToIntake={() => onSelectTab('access')}
+              onNavigateToTransfers={() => onSelectTab('transfers')}
+            />
+          </div>
+        </>
+      ) : (
+        <div className="p-12 text-center text-xs text-[#8a726a]">
+          Impossible de charger les métriques du tableau de bord.
+        </div>
+      )}
+
+      {/* Android Screen Effect Birthday Animation Overlay */}
+      <BirthdayCelebrationOverlay
+        celebrants={selectedCelebrants}
+        isOpen={isCelebrationOpen}
+        onClose={() => setIsCelebrationOpen(false)}
+        isSelfCelebrant={selectedCelebrants.some((c) => c.id === user.id)}
+      />
+
+      {/* Dev Diagnostics Bar */}
       {import.meta.env.DEV && (
-        <div className="mt-2.5 flex flex-col items-center gap-1 shrink-0">
-          <div className="flex flex-wrap items-center justify-center gap-2">
+        <div className="mt-8 pt-4 border-t border-[#f4ece9] flex items-center justify-between text-[11px] text-[#8a726a]">
+          <span>Outils de diagnostic développement :</span>
+          <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={() => setIsPreviewingError(true)}
-              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 text-[11px] font-semibold transition-all cursor-pointer shadow-2xs"
-              title="Preview the application crash screen without unmounting state"
+              className="px-2.5 py-1 rounded bg-[#faf2ee] hover:bg-[#f4ece9] text-[#57423b] font-medium transition-colors cursor-pointer border border-[#e8e1dd]"
             >
-              <Bug size={13} weight="bold" className="text-amber-700" />
-              <span>Review Error Page</span>
+              Aperçu Page d'Erreur
             </button>
-
             <button
               type="button"
               onClick={() => setTriggerRealCrash(true)}
-              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-red-50 hover:bg-red-100 text-red-900 border border-red-300 text-[11px] font-semibold transition-all cursor-pointer shadow-2xs"
-              title="Throw an actual unhandled exception to test the root ErrorBoundary"
+              className="px-2.5 py-1 rounded bg-[#ffdad4]/60 hover:bg-[#ffdad4] text-[#9f2f23] font-medium transition-colors cursor-pointer border border-[#ffdad4]"
             >
-              <Warning size={13} weight="bold" className="text-red-700" />
-              <span>Simulate Real Crash</span>
+              Simuler Crash Réel
             </button>
           </div>
-          <span className="text-[9px] text-[#8a726a] font-mono">
-            Visible in development only
-          </span>
         </div>
       )}
     </div>

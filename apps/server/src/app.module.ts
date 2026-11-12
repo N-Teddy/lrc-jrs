@@ -21,6 +21,7 @@ import { TownsSeeder } from './database/seeds/seeders/towns.seeder';
 import { UsersSeeder } from './database/seeds/seeders/users.seeder';
 import { ActivitiesModule } from './modules/activities/activities.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { HealthModule } from './modules/health/health.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { RegistrationLinksModule } from './modules/registration-links/registration-links.module';
@@ -42,6 +43,7 @@ import { ServicesModule } from './services/services.module';
     TownsModule,
     UsersModule,
     ActivitiesModule,
+    DashboardModule,
     AuthModule,
     RegistrationLinksModule,
     NotificationsModule,

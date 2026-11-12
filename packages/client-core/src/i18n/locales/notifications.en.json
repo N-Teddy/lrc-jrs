@@ -161,5 +161,11 @@
       "title": "Activity Report Due",
       "body": "The activity report for {{name}} has not yet been submitted"
     }
+  },
+  "birthday": {
+    "todayTitle": "🎉 Birthday Today: {{name}} ({{age}} yrs)!",
+    "todayBody": "Today is {{name}}'s birthday ({{age}} yrs, {{town}}). Remember to send warm greetings on behalf of the community!",
+    "upcoming7dTitle": "🎂 Birthday in 7 Days: {{name}} ({{age}} yrs)",
+    "upcoming7dBody": "{{name}} ({{town}}) will turn {{age}} on {{date}}. Remember to prepare greetings."
   }
 }

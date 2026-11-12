@@ -38,4 +38,7 @@ export const queryKeys = {
     list: (query?: unknown) => ['notifications', 'list', query] as const,
     unreadCount: ['notifications', 'unread-count'] as const,
   },
+  dashboard: {
+    overview: (params?: unknown) => ['dashboard', 'overview', params] as const,
+  },
 };
