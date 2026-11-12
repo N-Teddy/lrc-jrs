@@ -113,7 +113,7 @@ export const Header: React.FC<HeaderProps> = ({
               </span>
             )}
             <span className="text-[11px] text-[#8a726a] hidden lg:inline">
-              • {todayFormatted}
+              • {todayFormatted.toUpperCase()}
             </span>
           </div>
         </div>

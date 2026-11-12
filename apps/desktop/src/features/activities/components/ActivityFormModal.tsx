@@ -338,7 +338,7 @@ export const ActivityFormModal: React.FC<ActivityFormModalProps> = ({
         {/* Scrollable Form Body */}
         <form
           onSubmit={handleSubmit}
-          className="overflow-y-auto p-7 flex flex-col gap-6 text-xs text-[#1e1b19]"
+          className="overflow-y-auto p-7 pb-28 flex flex-col gap-6 text-xs text-[#1e1b19]"
         >
           {isCompleted && (
             <div className="p-3.5 bg-[#ffdad6] border border-[#ffb4a8] rounded-md text-[#ba1a1a] flex items-center gap-2.5 font-semibold">

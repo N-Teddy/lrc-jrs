@@ -220,7 +220,7 @@ export const RegisterMemberModal: React.FC<RegisterMemberModalProps> = ({
                   {t('members:modal.sectionRole')}
                 </span>
               </div>
-              <div className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#faf2ee] border border-[#e8e1dd] text-[11px] font-bold text-[#57423b]">
+              <div className="flex items-center gap-1 px-2.5 py-0.5 rounded-sm bg-[#faf2ee] border border-[#e8e1dd] text-[11px] font-bold text-[#57423b]">
                 <MapPin size={12} className="text-[#b85028]" />
                 <span>
                   {activeTownName} ({activeTownCode})

@@ -173,7 +173,7 @@ export const ActivityTableView: React.FC<ActivityTableViewProps> = ({
 
   return (
     <div className="bg-white rounded-xl border border-[#e8e1dd] shadow-xs overflow-hidden flex flex-col">
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto min-h-[220px]">
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-[#faf2ee] border-b border-[#e8e1dd] text-[#8a726a] text-[11px] font-bold uppercase tracking-wider">
@@ -218,7 +218,9 @@ export const ActivityTableView: React.FC<ActivityTableViewProps> = ({
               return (
                 <tr
                   key={activity.id}
-                  className="hover:bg-[#faf2ee]/60 transition-colors group"
+                  className={`hover:bg-[#faf2ee]/60 transition-colors group ${
+                    openMenuId === activity.id ? 'relative z-30' : ''
+                  }`}
                 >
                   {/* Activity & Agenda */}
                   <td className="py-3.5 px-4">
@@ -354,7 +356,10 @@ export const ActivityTableView: React.FC<ActivityTableViewProps> = ({
                   </td>
 
                   {/* Actions */}
-                  <td className="py-3.5 px-4 text-right">
+                  <td
+                    className="py-3.5 px-4 text-right"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     <ActivityActionMenu
                       activity={activity}
                       isOpen={openMenuId === activity.id}
@@ -372,8 +377,13 @@ export const ActivityTableView: React.FC<ActivityTableViewProps> = ({
                       onDeleteActivity={onDeleteActivity}
                       isPrivileged={isPrivileged}
                       openUpwards={
-                        index >= Math.max(1, activities.length - 2) &&
-                        activities.length > 2
+                        activities.length > 1 &&
+                        index >=
+                          Math.max(
+                            1,
+                            activities.length -
+                              (activities.length >= 5 ? 3 : 2),
+                          )
                       }
                     />
                   </td>

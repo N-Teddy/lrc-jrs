@@ -74,7 +74,11 @@ export const ActivityActionMenu: React.FC<ActivityActionMenuProps> = ({
   const isDayOfActivityOrLater = todayDay.getTime() >= startDay.getTime();
 
   return (
-    <div className="relative inline-flex items-center justify-end shrink-0">
+    <div
+      className={`relative inline-flex items-center justify-end shrink-0 ${
+        isOpen ? 'z-30' : ''
+      }`}
+    >
       <button
         type="button"
         onClick={onToggle}
@@ -87,7 +91,9 @@ export const ActivityActionMenu: React.FC<ActivityActionMenuProps> = ({
       {isOpen && (
         <div
           className={`absolute ${align === 'right' ? 'right-0' : 'left-0'} ${
-            openUpwards ? 'bottom-full mb-1.5' : 'top-full mt-1'
+            openUpwards
+              ? 'bottom-full mb-1.5 origin-bottom-right'
+              : 'top-full mt-1 origin-top-right'
           } w-max min-w-[200px] whitespace-nowrap bg-white rounded-xl border border-[#e8e1dd] shadow-xl py-1 z-40 flex flex-col animate-in fade-in zoom-in-95 duration-100 text-left`}
           onMouseLeave={onClose}
         >

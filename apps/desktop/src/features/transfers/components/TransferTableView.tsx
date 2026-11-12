@@ -145,7 +145,7 @@ export const TransferTableView: React.FC<TransferTableViewProps> = ({
 
   return (
     <div className="bg-white rounded-xl border border-[#e8e1dd] shadow-xs overflow-hidden flex flex-col">
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto min-h-[220px]">
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-[#faf2ee] border-b border-[#e8e1dd] text-[#8a726a] text-[11px] font-bold uppercase tracking-wider">
@@ -170,7 +170,7 @@ export const TransferTableView: React.FC<TransferTableViewProps> = ({
             </tr>
           </thead>
           <tbody className="text-xs text-[#1e1b19] divide-y divide-[#f4ece9]">
-            {transfers.map((item) => {
+            {transfers.map((item, index) => {
               const fromTown = townsMap.get(item.fromTownId);
               const toTown = townsMap.get(item.toTownId);
               const direction = getTransferDirection(
@@ -181,11 +181,22 @@ export const TransferTableView: React.FC<TransferTableViewProps> = ({
               const badge = getDirectionDisplayInfo(direction, t);
               const formattedDate = formatTransferDate(item.transferredAt);
 
+              // Open dropdown upwards for bottom rows to prevent vertical table overflow and clipping under table / pagination
+              const openUpwards =
+                transfers.length > 1 &&
+                index >=
+                  Math.max(
+                    1,
+                    transfers.length - (transfers.length >= 5 ? 3 : 2),
+                  );
+
               return (
                 <tr
                   key={item.id}
                   onClick={() => onViewMember(item.memberId)}
-                  className="hover:bg-[#faf2ee]/70 transition-colors cursor-pointer group"
+                  className={`hover:bg-[#faf2ee]/70 transition-colors cursor-pointer group ${
+                    openMenuId === item.id ? 'relative z-30' : ''
+                  }`}
                 >
                   {/* 1. Member Info */}
                   <td className="py-3.5 px-4">
@@ -285,7 +296,13 @@ export const TransferTableView: React.FC<TransferTableViewProps> = ({
                       </button>
 
                       {openMenuId === item.id && (
-                        <div className="absolute right-0 top-full mt-1 w-44 bg-white rounded-md border border-[#e8e1dd] shadow-lg py-1 z-40 flex flex-col animate-in fade-in zoom-in-95 duration-100 text-left">
+                        <div
+                          className={`absolute right-0 ${
+                            openUpwards
+                              ? 'bottom-full mb-1.5 origin-bottom-right'
+                              : 'top-full mt-1 origin-top-right'
+                          } w-44 bg-white rounded-xl border border-[#e8e1dd] shadow-lg py-1 z-40 flex flex-col animate-in fade-in zoom-in-95 duration-100 text-left`}
+                        >
                           <button
                             type="button"
                             onClick={() => {

@@ -3,7 +3,11 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 import { ErrorBoundary } from './components';
 import { initSentry } from './core/sentry';
+import { applyZoom, getInitialZoom } from './hooks/use-zoom-shortcuts';
 import './index.css';
+
+// Restore user-configured UI zoom scale before initial render
+applyZoom(getInitialZoom());
 
 // Initialize Sentry error tracking for desktop runtime
 initSentry();

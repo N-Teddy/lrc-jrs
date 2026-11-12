@@ -70,6 +70,35 @@
   --color-outline-variant: #ddc0b7;
 }
 
+:root {
+  --app-zoom: 1;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  min-height: 100%;
+}
+
+/* Compensate CSS zoom in non-Tauri / browser fallback so viewport elements fill edge-to-edge */
+html.css-zoom-active {
+  width: calc(100vw / var(--app-zoom, 1));
+  min-height: calc(100vh / var(--app-zoom, 1));
+}
+
+html.css-zoom-active .w-screen {
+  width: calc(100vw / var(--app-zoom, 1)) !important;
+}
+
+html.css-zoom-active .h-screen {
+  height: calc(100vh / var(--app-zoom, 1)) !important;
+}
+
+html.css-zoom-active .min-h-screen {
+  min-height: calc(100vh / var(--app-zoom, 1)) !important;
+}
+
 body {
   font-family: var(--font-sans);
   background-color: var(--color-surface-canvas);

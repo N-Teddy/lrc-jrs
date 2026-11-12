@@ -218,8 +218,21 @@ export const DatePicker: React.FC<DatePickerProps> = ({
   const generatedId = useId();
   const inputId = id || generatedId;
   const [isOpen, setIsOpen] = useState(false);
+  const [openUpwards, setOpenUpwards] = useState(false);
   const [viewMode, setViewMode] = useState<'days' | 'months' | 'years'>('days');
   const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!isOpen || !containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const spaceAbove = rect.top;
+    if (spaceBelow < 320 && spaceAbove > spaceBelow) {
+      setOpenUpwards(true);
+    } else {
+      setOpenUpwards(false);
+    }
+  }, [isOpen]);
 
   // Parse initial view
   const initialDate = value ? new Date(value) : new Date();
@@ -320,7 +333,13 @@ export const DatePicker: React.FC<DatePickerProps> = ({
 
       {/* Popover Calendar */}
       {isOpen && (
-        <div className="absolute top-[calc(100%+6px)] left-0 z-50 w-72 bg-white rounded-xl border border-[#e8e1dd] shadow-xl p-3.5 animate-in fade-in zoom-in-95 duration-150">
+        <div
+          className={`absolute ${
+            openUpwards
+              ? 'bottom-[calc(100%+6px)] origin-bottom-left'
+              : 'top-[calc(100%+6px)] origin-top-left'
+          } left-0 z-50 w-72 bg-white rounded-xl border border-[#e8e1dd] shadow-xl p-3.5 animate-in fade-in zoom-in-95 duration-150`}
+        >
           {/* Header */}
           <div className="flex items-center justify-between mb-3 pb-2 border-b border-[#f4ece9]">
             <div className="flex items-center gap-1">
@@ -547,7 +566,20 @@ export const MonthYearPicker: React.FC<MonthYearPickerProps> = ({
   const generatedId = useId();
   const inputId = id || generatedId;
   const [isOpen, setIsOpen] = useState(false);
+  const [openUpwards, setOpenUpwards] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!isOpen || !containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const spaceAbove = rect.top;
+    if (spaceBelow < 380 && spaceAbove > spaceBelow) {
+      setOpenUpwards(true);
+    } else {
+      setOpenUpwards(false);
+    }
+  }, [isOpen]);
 
   const initialYear = value
     ? parseInt(value.split('-')[0], 10) || new Date().getFullYear()
@@ -595,7 +627,13 @@ export const MonthYearPicker: React.FC<MonthYearPickerProps> = ({
 
       {/* Popover Card */}
       {isOpen && (
-        <div className="absolute top-[calc(100%+6px)] left-0 z-50 w-64 bg-white rounded-xl border border-[#e8e1dd] shadow-xl p-3.5 animate-in fade-in zoom-in-95 duration-150">
+        <div
+          className={`absolute ${
+            openUpwards
+              ? 'bottom-[calc(100%+6px)] origin-bottom-left'
+              : 'top-[calc(100%+6px)] origin-top-left'
+          } left-0 z-50 w-64 bg-white rounded-xl border border-[#e8e1dd] shadow-xl p-3.5 animate-in fade-in zoom-in-95 duration-150`}
+        >
           {/* Year Navigation */}
           <div className="flex items-center justify-between mb-3 pb-2 border-b border-[#f4ece9]">
             <button
@@ -706,7 +744,20 @@ export const DateTimePicker: React.FC<DateTimePickerProps> = ({
   const generatedId = useId();
   const inputId = id || generatedId;
   const [isOpen, setIsOpen] = useState(false);
+  const [openUpwards, setOpenUpwards] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!isOpen || !containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const spaceAbove = rect.top;
+    if (spaceBelow < 380 && spaceAbove > spaceBelow) {
+      setOpenUpwards(true);
+    } else {
+      setOpenUpwards(false);
+    }
+  }, [isOpen]);
 
   // Split date and time
   const [datePart, timePart] = value ? value.split('T') : ['', ''];
@@ -774,7 +825,13 @@ export const DateTimePicker: React.FC<DateTimePickerProps> = ({
 
       {/* Popover */}
       {isOpen && (
-        <div className="absolute top-[calc(100%+6px)] left-0 z-50 w-80 bg-white rounded-xl border border-[#e8e1dd] shadow-xl p-3.5 animate-in fade-in zoom-in-95 duration-150">
+        <div
+          className={`absolute ${
+            openUpwards
+              ? 'bottom-[calc(100%+6px)] origin-bottom-left'
+              : 'top-[calc(100%+6px)] origin-top-left'
+          } left-0 z-50 w-80 bg-white rounded-xl border border-[#e8e1dd] shadow-xl p-3.5 animate-in fade-in zoom-in-95 duration-150`}
+        >
           <DatePicker
             value={datePart}
             onChange={handleDateChange}

@@ -1,6 +1,6 @@
 import { CoreProviders, useTranslation } from '@jrs/client-core';
 import { useEffect } from 'react';
-import { ErrorBoundary, ToastContainer } from './components';
+import { ErrorBoundary, ToastContainer, ZoomIndicator } from './components';
 import { setSentryUser } from './core/sentry';
 import {
   FirstTimeSetupScreen,
@@ -14,6 +14,7 @@ import { DashboardLayout } from './features/dashboard';
 import { RegionSelectorScreen } from './features/towns';
 import { UpdateModal, useAppUpdater } from './features/updater';
 import { useDesktopAppFlow } from './hooks/use-desktop-app-flow';
+import { useZoomShortcuts } from './hooks/use-zoom-shortcuts';
 import { tauriStoreAdapter } from './storage/tauri-store.adapter';
 
 const API_BASE_URL =
@@ -49,6 +50,7 @@ function AppContent() {
   } = useDesktopAppFlow();
 
   const updater = useAppUpdater();
+  const { zoom, showIndicator } = useZoomShortcuts();
 
   // Synchronize authenticated user context with Sentry telemetry
   useEffect(() => {
@@ -168,6 +170,7 @@ function AppContent() {
 
       <UpdateModal updater={updater} />
       <ToastContainer />
+      <ZoomIndicator zoom={zoom} visible={showIndicator} />
     </>
   );
 }

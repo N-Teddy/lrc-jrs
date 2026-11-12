@@ -12,3 +12,4 @@ export * from './StatsOverviewSkeleton';
 export * from './skeletons';
 export * from './toast/ToastContainer';
 export * from './UserAvatar';
+export * from './ZoomIndicator';

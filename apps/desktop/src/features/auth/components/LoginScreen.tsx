@@ -56,7 +56,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
   });
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-[#fdfbf9]">
+    <div className="flex h-screen w-full overflow-hidden bg-[#fdfbf9]">
       {/* Full 50% Left Side: Edge-to-Edge Clean Hero Image */}
       <div className="relative hidden h-full w-1/2 overflow-hidden lg:block">
         <img
