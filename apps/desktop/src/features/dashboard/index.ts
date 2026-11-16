@@ -1,15 +1,22 @@
 // Components
 
+export * from './components/ActivityBreakdownCard';
 export * from './components/ActivityTypeBreakdownCard';
 export * from './components/AttendanceTrendCard';
 export * from './components/BirthdayCelebrationOverlay';
+export * from './components/DashboardHeroChartCard';
 export * from './components/DashboardKpiBanner';
 export * from './components/DashboardLayout';
 export * from './components/DashboardOverview';
 export * from './components/DemographicsDistributionCard';
+export * from './components/GoalsTrackerCard';
 export * from './components/Header';
 export * from './components/HubSwitcherPopover';
 export * from './components/OperationalAlertsFeedCard';
+export * from './components/OperationalHealthGaugeCard';
+export * from './components/ParishPassCard';
+export * from './components/PastoralTipCard';
+export * from './components/QuotaProgressCard';
 export * from './components/RecentActivitiesListCard';
 export * from './components/Sidebar';
 export * from './components/UpcomingActivitySpotlightCard';

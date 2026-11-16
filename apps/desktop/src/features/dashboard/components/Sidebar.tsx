@@ -270,16 +270,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
               }}
             >
               {/* Active tab background fill & left rounded edge */}
-              <div className="absolute inset-0 bg-[#fff8f5] rounded-l-xl border-l border-[#e8e1dd]" />
+              <div className="absolute inset-0 bg-[#f8fafc] rounded-l-xl border-l border-[#e2e8f0]" />
 
               {/* Top horizontal border: stops 16px before the right edge where scoop curves up */}
-              <div className="absolute top-0 left-3 right-4 h-px bg-[#e8e1dd]" />
+              <div className="absolute top-0 left-3 right-4 h-px bg-[#e2e8f0]" />
 
               {/* Bottom horizontal border: stops 16px before the right edge where scoop curves down */}
-              <div className="absolute bottom-0 left-3 right-4 h-px bg-[#e8e1dd]" />
+              <div className="absolute bottom-0 left-3 right-4 h-px bg-[#e2e8f0]" />
 
-              {/* Right overlap fill: guarantees 0px gap merging with #fff8f5 canvas */}
-              <div className="absolute top-0 bottom-0 right-0 w-4 bg-[#fff8f5]" />
+              {/* Right overlap fill: guarantees 0px gap merging with #f8fafc canvas */}
+              <div className="absolute top-0 bottom-0 right-0 w-4 bg-[#f8fafc]" />
 
               {/* Top Concave Inverted Curve Scoop */}
               <div className="absolute -top-4 right-0 w-[18px] h-4 overflow-hidden pointer-events-none">
@@ -292,11 +292,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 >
                   <path
                     d="M 18 0 V 16 H 0 C 8.8366 16, 16 8.8366, 16 0 Z"
-                    fill="#fff8f5"
+                    fill="#f8fafc"
                   />
                   <path
                     d="M 0 16 C 8.8366 16, 16 8.8366, 16 0"
-                    stroke="#e8e1dd"
+                    stroke="#e2e8f0"
                     strokeWidth="1"
                     fill="none"
                   />
@@ -314,11 +314,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 >
                   <path
                     d="M 0 0 H 18 V 16 H 16 C 16 7.1634, 8.8366 0, 0 0 Z"
-                    fill="#fff8f5"
+                    fill="#f8fafc"
                   />
                   <path
                     d="M 0 0 C 8.8366 0, 16 7.1634, 16 16"
-                    stroke="#e8e1dd"
+                    stroke="#e2e8f0"
                     strokeWidth="1"
                     fill="none"
                   />

@@ -10,14 +10,15 @@ import { useEffect, useMemo, useState } from 'react';
 import Skeleton from 'react-loading-skeleton';
 import { AppCrashFallback } from '../../../components/AppCrashFallback';
 import type { DashboardTabId } from '../hooks/use-dashboard-layout';
-import { ActivityTypeBreakdownCard } from './ActivityTypeBreakdownCard';
-import { AttendanceTrendCard } from './AttendanceTrendCard';
+import { ActivityBreakdownCard } from './ActivityBreakdownCard';
 import { BirthdayCelebrationOverlay } from './BirthdayCelebrationOverlay';
-import { DashboardKpiBanner } from './DashboardKpiBanner';
-import { DemographicsDistributionCard } from './DemographicsDistributionCard';
-import { OperationalAlertsFeedCard } from './OperationalAlertsFeedCard';
+import { DashboardHeroChartCard } from './DashboardHeroChartCard';
+import { GoalsTrackerCard } from './GoalsTrackerCard';
+import { OperationalHealthGaugeCard } from './OperationalHealthGaugeCard';
+import { ParishPassCard } from './ParishPassCard';
+import { PastoralTipCard } from './PastoralTipCard';
+import { QuotaProgressCard } from './QuotaProgressCard';
 import { RecentActivitiesListCard } from './RecentActivitiesListCard';
-import { UpcomingActivitySpotlightCard } from './UpcomingActivitySpotlightCard';
 import { UpcomingBirthdaysCard } from './UpcomingBirthdaysCard';
 
 interface DashboardOverviewProps {
@@ -55,7 +56,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
     period,
   });
 
-  // Check and trigger Android Birthday Celebration Screen Effect on connection
+  // Check and trigger Birthday Celebration Screen Effect on connection if today
   useEffect(() => {
     if (
       !data?.hasBirthdayToday ||
@@ -125,66 +126,29 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   }
 
   return (
-    <div className="w-full flex flex-col gap-5 animate-in fade-in duration-300 pb-12 select-none">
-      {/* 1. Header Toolbar: Welcome Greeting, Town Badge, Period Selector, Actions */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#e8e1dd]">
+    <div className="w-full flex flex-col gap-6 animate-in fade-in duration-300 pb-12 select-none">
+      {/* 1. Top Header Bar (Matching the clean command bar in Reference Image 1) */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
         <div>
-          <div className="flex items-center gap-2">
-            <h2 className="text-xl sm:text-2xl font-extrabold text-[#1e1b19] tracking-tight">
+          <div className="flex items-center gap-2.5">
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
               {greeting}, {userFirstName} 👋
             </h2>
             {activeTown && (
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-sm bg-[#fff2ee] text-[#b85028] text-xs font-bold border border-[#ffdbcf]">
-                <MapPin size={12} weight="fill" />
+              <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 text-xs font-black border border-emerald-100/70">
+                <MapPin size={13} weight="fill" className="text-emerald-600" />
                 <span>{activeTown.name}</span>
               </span>
             )}
           </div>
-          <p className="text-xs text-[#8a726a] mt-0.5">
-            Tableau de bord de coordination et métriques de la jeunesse
-            paroissiale
+          <p className="text-xs text-slate-400 font-medium mt-1">
+            Tableau de bord de coordination pastorale et indicateurs de la
+            jeunesse
           </p>
         </div>
 
-        {/* Period Selector & Quick Actions */}
-        <div className="flex flex-wrap items-center gap-2.5">
-          {/* Period Filter Buttons */}
-          <div className="flex items-center bg-[#faf2ee] p-1 rounded-xl border border-[#e8e1dd] text-xs font-bold">
-            <button
-              type="button"
-              onClick={() => setPeriod('month')}
-              className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
-                period === 'month'
-                  ? 'bg-white text-[#b85028] shadow-xs'
-                  : 'text-[#57423b] hover:text-[#1e1b19]'
-              }`}
-            >
-              Ce mois
-            </button>
-            <button
-              type="button"
-              onClick={() => setPeriod('quarter')}
-              className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
-                period === 'quarter'
-                  ? 'bg-white text-[#b85028] shadow-xs'
-                  : 'text-[#57423b] hover:text-[#1e1b19]'
-              }`}
-            >
-              Ce trimestre
-            </button>
-            <button
-              type="button"
-              onClick={() => setPeriod('year')}
-              className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
-                period === 'year'
-                  ? 'bg-white text-[#b85028] shadow-xs'
-                  : 'text-[#57423b] hover:text-[#1e1b19]'
-              }`}
-            >
-              Année 2026
-            </button>
-          </div>
-
+        {/* Action Buttons */}
+        <div className="flex items-center gap-2.5">
           {/* Quick Create Activity */}
           <button
             type="button"
@@ -195,10 +159,10 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 onSelectTab('activities');
               }
             }}
-            className="h-9 px-3.5 rounded-xl bg-[#b85028] hover:bg-[#a44520] text-white font-bold text-xs shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer"
+            className="h-10 px-4 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-sm shadow-emerald-600/20 transition-all flex items-center gap-2 cursor-pointer active:scale-95"
           >
-            <CalendarPlus size={15} weight="bold" />
-            <span className="hidden sm:inline">Nouvelle Activité</span>
+            <CalendarPlus size={16} weight="bold" />
+            <span>Nouvelle Activité</span>
           </button>
 
           {/* Quick Register Member */}
@@ -211,91 +175,124 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 onSelectTab('members');
               }
             }}
-            className="h-9 px-3 rounded-xl bg-white border border-[#e8e1dd] hover:bg-[#faf2ee] text-[#57423b] font-bold text-xs shadow-2xs transition-colors flex items-center gap-1.5 cursor-pointer"
+            className="h-10 px-4 rounded-2xl bg-white border border-slate-200 hover:bg-slate-50 text-slate-800 font-extrabold text-xs shadow-2xs transition-all flex items-center gap-2 cursor-pointer active:scale-95"
           >
-            <UserPlus size={15} weight="bold" />
-            <span className="hidden sm:inline">Inscrire Membre</span>
+            <UserPlus size={16} weight="bold" className="text-slate-600" />
+            <span>Inscrire Membre</span>
           </button>
         </div>
       </div>
 
       {/* Loading Skeleton */}
       {isLoading ? (
-        <div className="flex flex-col gap-5">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
-            <Skeleton height={110} borderRadius={16} count={4} />
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div className="lg:col-span-8 flex flex-col gap-6">
+            <Skeleton height={260} borderRadius={24} />
+            <div className="grid grid-cols-2 gap-5">
+              <Skeleton height={140} borderRadius={24} />
+              <Skeleton height={140} borderRadius={24} />
+            </div>
+            <div className="grid grid-cols-3 gap-5">
+              <Skeleton height={180} borderRadius={24} />
+              <Skeleton height={180} borderRadius={24} />
+              <Skeleton height={180} borderRadius={24} />
+            </div>
           </div>
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-            <div className="lg:col-span-8 flex flex-col gap-5">
-              <Skeleton height={130} borderRadius={16} />
-              <Skeleton height={260} borderRadius={16} />
-            </div>
-            <div className="lg:col-span-4 flex flex-col gap-5">
-              <Skeleton height={200} borderRadius={16} />
-              <Skeleton height={200} borderRadius={16} />
-            </div>
+          <div className="lg:col-span-4 flex flex-col gap-6">
+            <Skeleton height={240} borderRadius={24} />
+            <Skeleton height={280} borderRadius={24} />
+            <Skeleton height={220} borderRadius={24} />
           </div>
         </div>
       ) : data ? (
-        <>
-          {/* 2. Row 1: Executive KPI Banners (4 Columns) */}
-          <DashboardKpiBanner kpis={data.kpis} />
+        /* 2. Main 2-Column Asymmetric Workspace (8 cols Left / 4 cols Right) */
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          {/* ========================================================= */}
+          {/* LEFT COLUMN: Operations, Charts & Analytics (8 Columns)   */}
+          {/* ========================================================= */}
+          <div className="lg:col-span-8 flex flex-col gap-6">
+            {/* A. Hero Performance Chart & Executive KPI Suite (Balance overview equivalent) */}
+            <DashboardHeroChartCard
+              trend={data.attendanceTrend}
+              kpis={data.kpis}
+              period={period}
+              onPeriodChange={setPeriod}
+            />
 
-          {/* 3. Main 2-Column Asymmetric Workspace (8 cols Left / 4 cols Right) */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
-            {/* LEFT COLUMN: Operations & Activities (8 Columns) */}
-            <div className="lg:col-span-8 flex flex-col gap-5">
-              {/* Prochaine Activité Hero Spotlight */}
-              <UpcomingActivitySpotlightCard
-                activity={data.upcomingActivity}
-                onOpenActivity={() => onSelectTab('activities')}
-                onCreateActivity={onOpenCreateActivity}
+            {/* B. Middle Row: Operational Limits & Pastoral Tip Banner (Spending limit & Tips equivalent) */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <QuotaProgressCard
+                kpis={data.kpis}
+                onManageMembers={() => onSelectTab('members')}
               />
-
-              {/* Courbe d'Assiduité & Fréquentation */}
-              <AttendanceTrendCard trend={data.attendanceTrend} />
-
-              {/* Dernières Activités Réalisées */}
-              <RecentActivitiesListCard
-                activities={data.recentActivities}
-                onSelectActivity={() => onSelectTab('activities')}
-                onViewAll={() => onSelectTab('activities')}
-              />
+              <PastoralTipCard onOpenAction={() => onSelectTab('activities')} />
             </div>
 
-            {/* RIGHT COLUMN: Community Care, Celebrations & Alerts (4 Columns) */}
-            <div className="lg:col-span-4 flex flex-col gap-5">
-              {/* Anniversaires du Mois */}
-              <UpcomingBirthdaysCard
-                birthdays={data.upcomingBirthdays}
-                onTriggerCelebration={handleTriggerCelebration}
-              />
-
-              {/* Alertes & Flux Opérationnel */}
-              <OperationalAlertsFeedCard
-                alerts={data.operationalAlerts}
-                transfers={data.recentTransfers}
-                onNavigateToIntake={() => onSelectTab('access')}
-                onNavigateToTransfers={() => onSelectTab('transfers')}
-              />
-
-              {/* Démographie & Profils */}
-              <DemographicsDistributionCard demographics={data.demographics} />
-
-              {/* Types d'Activités */}
-              <ActivityTypeBreakdownCard
+            {/* C. Bottom Analytics Triad (Cost analysis, Health gauge & Goals equivalent) */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+              {/* Card 1: Breakdown by Activity Type */}
+              <ActivityBreakdownCard
                 distribution={data.activityTypeDistribution}
+                totalCount={
+                  data.kpis.upcomingActivitiesCount +
+                  data.kpis.completedActivitiesCount
+                }
               />
+
+              {/* Card 2: Operational Health Semi-Circular Radial Gauge */}
+              <OperationalHealthGaugeCard
+                alerts={data.operationalAlerts}
+                onOpenAlerts={() => onSelectTab('access')}
+              />
+
+              {/* Card 3: Key Initiatives & Goals Tracker */}
+              <GoalsTrackerCard onAddGoal={() => onSelectTab('activities')} />
             </div>
           </div>
-        </>
+
+          {/* ========================================================= */}
+          {/* RIGHT RAIL: Parish Pass, Birthdays & Recent Events (4 Cols) */}
+          {/* ========================================================= */}
+          <div className="lg:col-span-4 flex flex-col gap-6">
+            {/* D. Digital Parish Pass Card (Matching the green credit card in Image 1) */}
+            <ParishPassCard
+              user={user}
+              activeTownName={activeTown?.name || 'Douala'}
+              activeTownCode={activeTown?.code || 'DLA'}
+              totalMembers={data.kpis.totalMembers}
+              onOpenAttendance={() => onSelectTab('activities')}
+              onOpenRegisterMember={
+                onOpenRegisterMember || (() => onSelectTab('members'))
+              }
+              onOpenLockRegister={() => onSelectTab('activities')}
+              onOpenDrive={() => onSelectTab('reports')}
+              onOpenBroadcastModal={() => {
+                const whatsappUrl = 'https://chat.whatsapp.com';
+                window.open(whatsappUrl, '_blank');
+              }}
+            />
+
+            {/* E. Dedicated "Anniversaires du Mois" Card (User's specific key request) */}
+            <UpcomingBirthdaysCard
+              birthdays={data.upcomingBirthdays}
+              onTriggerCelebration={handleTriggerCelebration}
+            />
+
+            {/* F. Recent Activities / Session History (Matching Transaction History in Image 1) */}
+            <RecentActivitiesListCard
+              activities={data.recentActivities}
+              onSelectActivity={() => onSelectTab('activities')}
+              onViewAll={() => onSelectTab('activities')}
+            />
+          </div>
+        </div>
       ) : (
-        <div className="p-12 text-center text-xs text-[#8a726a] bg-white rounded-2xl border border-[#e8e1dd]">
+        <div className="p-12 text-center text-xs text-slate-400 bg-white rounded-3xl border border-slate-100 shadow-sm">
           Impossible de charger les métriques du tableau de bord.
         </div>
       )}
 
-      {/* Android Screen Effect Birthday Animation Overlay */}
+      {/* Birthday Celebration Confetti & Card Overlay */}
       <BirthdayCelebrationOverlay
         celebrants={selectedCelebrants}
         isOpen={isCelebrationOpen}
@@ -305,20 +302,20 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
 
       {/* Dev Diagnostics Bar */}
       {import.meta.env.DEV && (
-        <div className="mt-8 pt-4 border-t border-[#f4ece9] flex items-center justify-between text-[11px] text-[#8a726a]">
+        <div className="mt-8 pt-4 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
           <span>Outils de diagnostic développement :</span>
           <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={() => setIsPreviewingError(true)}
-              className="px-2.5 py-1 rounded bg-[#faf2ee] hover:bg-[#f4ece9] text-[#57423b] font-medium transition-colors cursor-pointer border border-[#e8e1dd]"
+              className="px-2.5 py-1 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold transition-colors cursor-pointer border border-slate-200"
             >
               Aperçu Page d'Erreur
             </button>
             <button
               type="button"
               onClick={() => setTriggerRealCrash(true)}
-              className="px-2.5 py-1 rounded bg-[#ffdad4]/60 hover:bg-[#ffdad4] text-[#9f2f23] font-medium transition-colors cursor-pointer border border-[#ffdad4]"
+              className="px-2.5 py-1 rounded-xl bg-red-50 hover:bg-red-100 text-red-700 font-bold transition-colors cursor-pointer border border-red-200"
             >
               Simuler Crash Réel
             </button>
