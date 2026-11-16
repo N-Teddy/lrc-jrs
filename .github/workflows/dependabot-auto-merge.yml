@@ -8,7 +8,6 @@ on:
 permissions:
   contents: write
   pull-requests: write
-  workflows: write
 
 jobs:
   auto-merge-pr:
@@ -34,7 +33,7 @@ jobs:
 
       - name: Enable auto-merge for Dependabot PR
         run: |
-          gh pr merge --squash "$PR_URL" || gh pr merge --auto --squash "$PR_URL" || true
+          gh pr merge --squash "$PR_URL" || gh pr comment "$PR_URL" --body "@dependabot squash and merge" || true
         env:
           PR_URL: ${{ github.event.pull_request.html_url }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -69,11 +68,9 @@ jobs:
             echo "Processing $url"
             gh pr review --approve "$url" || echo "Note: approval step skipped or already approved"
             if ! gh pr merge --squash "$url"; then
-              echo "Direct squash not possible, trying auto-merge or triggering rebase..."
-              gh pr merge --auto --squash "$url" || {
-                echo "Triggering @dependabot rebase for $url to resolve conflicts"
-                gh pr comment "$url" --body "@dependabot rebase" || true
-              }
+              echo "Direct squash not possible (may touch workflows or have conflicts)..."
+              echo "Instructing Dependabot via comment: @dependabot squash and merge"
+              gh pr comment "$url" --body "@dependabot squash and merge" || true
             fi
           done
         env:
