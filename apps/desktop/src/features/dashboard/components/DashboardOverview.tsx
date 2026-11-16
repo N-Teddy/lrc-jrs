@@ -1,8 +1,12 @@
-import { useDashboardOverviewQuery, useTownContext } from '@jrs/client-core';
+import {
+  useDashboardOverviewQuery,
+  useTownContext,
+  useTranslation,
+} from '@jrs/client-core';
 import type { IAuthUser, IUpcomingBirthday } from '@jrs/shared';
 import { CalendarPlus, MapPin, UserPlus } from '@phosphor-icons/react';
 import type React from 'react';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Skeleton from 'react-loading-skeleton';
 import { AppCrashFallback } from '../../../components/AppCrashFallback';
 import type { DashboardTabId } from '../hooks/use-dashboard-layout';
@@ -29,6 +33,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   onOpenCreateActivity,
   onOpenRegisterMember,
 }) => {
+  const { t } = useTranslation(['dashboard', 'common']);
   const { activeTown } = useTownContext();
 
   // Period state
@@ -81,6 +86,19 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
     setIsCelebrationOpen(true);
   };
 
+  const userFirstName = user?.fullName?.split(' ')[0] || 'Leader';
+
+  const greeting = useMemo(() => {
+    const currentHour = new Date().getHours();
+    if (currentHour < 12) {
+      return t('dashboard:greetingMorning', 'Bonjour');
+    }
+    if (currentHour < 18) {
+      return t('dashboard:greetingAfternoon', 'Bon après-midi');
+    }
+    return t('dashboard:greetingEvening', 'Bonsoir');
+  }, [t]);
+
   // If testing real crash in dev mode
   if (triggerRealCrash) {
     throw new Error(
@@ -106,8 +124,6 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
     );
   }
 
-  const userFirstName = user?.fullName?.split(' ')[0] || 'Leader';
-
   return (
     <div className="w-full flex flex-col gap-5 animate-in fade-in duration-300 pb-12 select-none">
       {/* 1. Header Toolbar: Welcome Greeting, Town Badge, Period Selector, Actions */}
@@ -115,10 +131,10 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
         <div>
           <div className="flex items-center gap-2">
             <h2 className="text-xl sm:text-2xl font-extrabold text-[#1e1b19] tracking-tight">
-              Bonjour, {userFirstName} 👋
+              {greeting}, {userFirstName} 👋
             </h2>
             {activeTown && (
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#fff2ee] text-[#b85028] text-xs font-bold border border-[#ffdbcf]">
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-sm bg-[#fff2ee] text-[#b85028] text-xs font-bold border border-[#ffdbcf]">
                 <MapPin size={12} weight="fill" />
                 <span>{activeTown.name}</span>
               </span>

@@ -171,4 +171,14 @@ export class NotificationsGateway
       .to(`user:${userId}`)
       .emit('notification:unread_count', { unreadCount });
   }
+
+  /**
+   * Immediately terminate active sessions for a user whose access has been revoked
+   */
+  terminateSession(userId: string, reason = 'ACCESS_REVOKED'): void {
+    if (!this.server) return;
+    this.server
+      .to(`user:${userId}`)
+      .emit('session:terminated', { userId, reason });
+  }
 }

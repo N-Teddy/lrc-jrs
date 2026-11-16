@@ -4,6 +4,7 @@ import { PencilSimple, Warning, X } from '@phosphor-icons/react';
 import type React from 'react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { SelectOption } from '../../../components';
+import { formatCameroonPhoneInput } from '../utils/member-ui.utils';
 import {
   type MemberModalFormData,
   MemberModalFormFields,
@@ -62,6 +63,7 @@ export const EditMemberModal: React.FC<EditMemberModalProps> = ({
     if (!member) return null;
     const digits = (member.phoneNumber || '').replace(/\D/g, '');
     const localDigits = digits.startsWith('237') ? digits.slice(3) : digits;
+    const formattedDigits = formatCameroonPhoneInput(localDigits);
     const dob = member.dateOfBirth
       ? new Date(member.dateOfBirth).toISOString().split('T')[0]
       : '';
@@ -70,10 +72,11 @@ export const EditMemberModal: React.FC<EditMemberModalProps> = ({
       gender: (member.gender as 'MALE' | 'FEMALE') || 'MALE',
       dateOfBirth: dob,
       integrationDate: member.integrationDate || '',
-      phoneDigits: localDigits,
+      phoneDigits: formattedDigits,
       email: member.email || '',
       role: (member.role as UserRole) || UserRole.MEMBER,
       avatarUrl: member.avatarUrl || null,
+      preferredLanguage: member.preferredLanguage || 'fr',
     };
   }, [member]);
 
@@ -89,6 +92,7 @@ export const EditMemberModal: React.FC<EditMemberModalProps> = ({
         role: initialValues.role,
         avatarFile: null,
         avatarPreview: initialValues.avatarUrl,
+        preferredLanguage: initialValues.preferredLanguage,
       });
       setErrorMsg(null);
     }
@@ -104,6 +108,7 @@ export const EditMemberModal: React.FC<EditMemberModalProps> = ({
       formData.phoneDigits !== initialValues.phoneDigits ||
       formData.email.trim() !== initialValues.email ||
       formData.role !== initialValues.role ||
+      formData.preferredLanguage !== initialValues.preferredLanguage ||
       Boolean(formData.avatarFile)
     );
   }, [initialValues, formData]);
@@ -186,6 +191,8 @@ export const EditMemberModal: React.FC<EditMemberModalProps> = ({
         if (formData.email.trim())
           payload.append('email', formData.email.trim());
         payload.append('role', formData.role);
+        if (formData.preferredLanguage)
+          payload.append('preferredLanguage', formData.preferredLanguage);
         payload.append('avatar', formData.avatarFile);
         await onSubmit(member.id, payload);
       } else {
@@ -198,6 +205,7 @@ export const EditMemberModal: React.FC<EditMemberModalProps> = ({
           phoneNumber: `+237${cleanDigits}`,
           email: formData.email.trim() ? formData.email.trim() : undefined,
           role: formData.role,
+          preferredLanguage: formData.preferredLanguage,
         });
       }
       toast.success(

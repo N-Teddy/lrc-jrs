@@ -106,6 +106,7 @@ export interface ICreateMemberDto {
   role?: UserRole;
   homeTownId?: string;
   hasAppAccess?: boolean;
+  preferredLanguage?: 'fr' | 'en';
 }
 
 export interface IUpdateMemberDto {
@@ -120,6 +121,7 @@ export interface IUpdateMemberDto {
   isActivePC?: boolean;
   homeTownId?: string;
   hasAppAccess?: boolean;
+  preferredLanguage?: 'fr' | 'en';
 }
 
 export interface IUpdateMemberAccessDto {
@@ -128,6 +130,7 @@ export interface IUpdateMemberAccessDto {
   resendInvite?: boolean;
   channel?: 'email' | 'whatsapp';
   allowedReadTownIds?: string[];
+  preferredLanguage?: 'fr' | 'en';
 }
 
 export interface IChangeTownPcDto {

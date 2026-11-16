@@ -31,6 +31,15 @@ export default defineConfig(({ mode }) => {
         ),
       },
     },
+    build: {
+      sourcemap: false,
+      minify: 'esbuild',
+      cssMinify: true,
+    },
+    esbuild: {
+      drop: mode === 'production' ? ['debugger'] : [],
+      legalComments: 'none',
+    },
 
     // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
     //

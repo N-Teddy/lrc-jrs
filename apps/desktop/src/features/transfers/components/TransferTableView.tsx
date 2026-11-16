@@ -235,7 +235,7 @@ export const TransferTableView: React.FC<TransferTableViewProps> = ({
                       </div>
                       <div>
                         <span
-                          className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold border ${badge.bgClass} ${badge.textClass} ${badge.borderClass}`}
+                          className={`inline-flex items-center px-1.5 py-0.5 rounded-sm text-[10px] font-bold border ${badge.bgClass} ${badge.textClass} ${badge.borderClass}`}
                         >
                           {badge.label}
                         </span>
@@ -289,7 +289,7 @@ export const TransferTableView: React.FC<TransferTableViewProps> = ({
                         onClick={() =>
                           setOpenMenuId(openMenuId === item.id ? null : item.id)
                         }
-                        className="w-7 h-7 rounded-md text-[#8a726a] hover:text-[#1e1b19] hover:bg-[#faf2ee] flex items-center justify-center transition-colors cursor-pointer"
+                        className="w-7 h-7 rounded-md text-[#8a726a] hover:text-[#b85028] hover:bg-[#eddcd5] flex items-center justify-center transition-colors cursor-pointer"
                         title={t('common:actions', 'Actions')}
                       >
                         <DotsThreeVertical size={16} weight="bold" />
@@ -327,7 +327,9 @@ export const TransferTableView: React.FC<TransferTableViewProps> = ({
                             {copiedId === item.id ? (
                               <>
                                 <Check size={15} className="text-[#486b52]" />
-                                <span className="text-[#486b52]">Copied!</span>
+                                <span className="text-[#486b52]">
+                                  {t('common:copied', 'Copied!')}
+                                </span>
                               </>
                             ) : (
                               <>
@@ -350,18 +352,20 @@ export const TransferTableView: React.FC<TransferTableViewProps> = ({
       </div>
 
       {/* Pagination Footer */}
-      <div className="p-4 bg-[#faf2ee] border-t border-[#e8e1dd] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#8a726a]">
-        <div>
-          {t('common:showingTransfers', { count: transfers.length, total }) ||
-            `Showing ${transfers.length} of ${total} recorded relocations`}
+      {totalPages > 1 && (
+        <div className="p-4 bg-[#faf2ee] border-t border-[#e8e1dd] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#8a726a]">
+          <div>
+            {t('common:showingTransfers', { count: transfers.length, total }) ||
+              `Showing ${transfers.length} of ${total} recorded relocations`}
+          </div>
+          <PaginationControl
+            page={page}
+            totalPages={totalPages}
+            onPageChange={onPageChange}
+            variant="white"
+          />
         </div>
-        <PaginationControl
-          page={page}
-          totalPages={totalPages}
-          onPageChange={onPageChange}
-          variant="white"
-        />
-      </div>
+      )}
     </div>
   );
 };

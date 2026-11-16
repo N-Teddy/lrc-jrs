@@ -345,7 +345,7 @@ export const ChangeTownPcModal: React.FC<ChangeTownPcModalProps> = ({
                 <Crown size={14} className="text-[#b85028]" />
                 New Program Coordinator (To Appoint)
               </span>
-              <span className="text-[10px] font-bold text-[#486b52] bg-[#edf3ee] px-2 py-0.5 rounded-xs border border-[#c2e9ca]">
+              <span className="text-[10px] font-bold text-[#486b52] bg-[#edf3ee] px-2 py-0.5 rounded-sm border border-[#c2e9ca]">
                 Eligible Age: 18 - 30 yrs
               </span>
             </div>
@@ -424,11 +424,11 @@ export const ChangeTownPcModal: React.FC<ChangeTownPcModalProps> = ({
                         </div>
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
-                        <span className="px-1.5 py-0.5 rounded-xs text-[10px] font-bold bg-[#edf3ee] text-[#2c4e37] border border-[#c2e9ca]">
+                        <span className="px-1.5 py-0.5 rounded-sm text-[10px] font-bold bg-[#edf3ee] text-[#2c4e37] border border-[#c2e9ca]">
                           {age ? `${age} yrs` : '18-30'}
                         </span>
                         {member.account?.hasAppAccess && (
-                          <span className="px-1.5 py-0.5 rounded-xs text-[10px] font-semibold bg-[#faf2ee] text-[#57423b] border border-[#e8e1dd]">
+                          <span className="px-1.5 py-0.5 rounded-sm text-[10px] font-semibold bg-[#faf2ee] text-[#57423b] border border-[#e8e1dd]">
                             App Access
                           </span>
                         )}
@@ -459,7 +459,7 @@ export const ChangeTownPcModal: React.FC<ChangeTownPcModalProps> = ({
                   </div>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
-                  <span className="px-2 py-0.5 rounded-xs text-[10px] font-bold bg-[#c2e9ca] text-[#2c4e37]">
+                  <span className="px-2 py-0.5 rounded-sm text-[10px] font-bold bg-[#c2e9ca] text-[#2c4e37]">
                     Selected Candidate
                   </span>
                   <button
@@ -490,7 +490,7 @@ export const ChangeTownPcModal: React.FC<ChangeTownPcModalProps> = ({
                   {newPcMember.fullName}
                 </span>
               </div>
-              <span className="px-2 py-0.5 rounded-xs text-[10px] font-bold bg-[#ffdbcf] text-[#812901] shrink-0">
+              <span className="px-2 py-0.5 rounded-sm text-[10px] font-bold bg-[#ffdbcf] text-[#812901] shrink-0">
                 {disposition === 'revoke_access' && outgoingMember
                   ? 'Access Revoked'
                   : 'Member Kept'}

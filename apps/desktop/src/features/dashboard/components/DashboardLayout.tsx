@@ -9,7 +9,7 @@ import type { IAuthUser, NotificationResource } from '@jrs/shared';
 import { ArrowUUpLeft, Bug, Buildings } from '@phosphor-icons/react';
 import { motion } from 'motion/react';
 import type React from 'react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { AppCrashFallback } from '../../../components';
 import { APP_VERSION } from '../../../constants/version';
 import { ActivitiesFeature } from '../../activities';
@@ -66,6 +66,20 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   // Resource Navigation Deep-link States
   const [memberSubTab, setMemberSubTab] = useState<MemberSubTab>('directory');
   const [showDevErrorPreview, setShowDevErrorPreview] = useState(false);
+  const [sessionDuration, setSessionDuration] = useState('0m');
+
+  useEffect(() => {
+    const loginTime = Date.now();
+    const update = () => {
+      const mins = Math.floor((Date.now() - loginTime) / 60000);
+      const h = Math.floor(mins / 60);
+      const m = mins % 60;
+      setSessionDuration(h > 0 ? `${h}h ${m}m` : `${m}m`);
+    };
+    update();
+    const iv = setInterval(update, 30000);
+    return () => clearInterval(iv);
+  }, []);
   const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
   const [activitySubTab, setActivitySubTab] = useState<
     | 'schedule'
@@ -211,22 +225,24 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                 <div className="flex flex-col">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-xs font-black text-[#7a5500] uppercase tracking-wider">
-                      External Hub: {activeTown.name} ({activeTown.code})
+                      {t('dashboard:externalHubTitle', {
+                        name: activeTown.name,
+                        code: activeTown.code,
+                      })}
                     </span>
                     {!canWrite ? (
-                      <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-[#ffe082] text-[#6d4c00]">
-                        Read-Only View
+                      <span className="px-2 py-0.5 rounded-sm text-[10px] font-bold bg-[#ffe082] text-[#6d4c00]">
+                        {t('dashboard:readOnlyView')}
                       </span>
                     ) : (
-                      <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-[#c2e9ca] text-[#2c4e37]">
-                        Write Access Enabled
+                      <span className="px-2 py-0.5 rounded-sm text-[10px] font-bold bg-[#c2e9ca] text-[#2c4e37]">
+                        {t('dashboard:writeAccessBadge')}
                       </span>
                     )}
                   </div>
                   <p className="text-xs text-[#8d6e19] mt-0.5 font-medium">
-                    You are browsing data for <strong>{activeTown.name}</strong>
-                    .
-                    {!canWrite && ' You do not have write access in this town.'}
+                    {t('dashboard:externalHubDesc')}{' '}
+                    {!canWrite && t('dashboard:noWriteAccessInTown')}
                   </p>
                 </div>
               </div>
@@ -235,10 +251,10 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                 <button
                   type="button"
                   onClick={() => setActiveTownId(user.homeTownId)}
-                  className="px-4 py-2 rounded-md bg-white hover:bg-[#fff9c4] text-[#7a5500] border border-[#ffd54f] text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
+                  className="px-4 py-2 rounded-lg bg-white hover:bg-[#fff9c4] text-[#7a5500] border border-[#ffd54f] text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
                 >
                   <ArrowUUpLeft size={16} weight="bold" />
-                  <span>Return to My Hub</span>
+                  <span>{t('dashboard:returnToMyHub')}</span>
                 </button>
               )}
             </div>
@@ -327,32 +343,28 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             )}
           </div>
 
-          {/* Center: Legal Copyright */}
-          <div className="text-center font-medium text-[#57423b] truncate hidden md:block">
-            {t('dashboard:footer.allRightsReserved', {
-              year: new Date().getFullYear(),
-            })}
-          </div>
-
-          {/* Right: Build & Edition Metadata + Dev Review Link */}
-          <div className="flex items-center gap-2 font-mono text-[11px] text-[#8a726a] shrink-0">
+          {/* Right: Build Metadata + Connected Session Duration */}
+          <div className="flex items-center gap-3 font-mono text-[11px] text-[#8a726a] shrink-0">
             {import.meta.env.DEV && (
               <button
                 type="button"
                 onClick={() => setShowDevErrorPreview(true)}
-                className="px-2 py-0.5 rounded-md bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 font-sans text-[10px] font-bold transition-colors cursor-pointer flex items-center gap-1 mr-1"
+                className="px-2 py-0.5 rounded-sm bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 font-sans text-[10px] font-bold transition-colors cursor-pointer flex items-center gap-1 mr-1"
                 title="Developer Only: Preview Crash & Error Screen"
               >
                 <Bug size={12} weight="bold" />
                 <span>DEV: Review Error Page</span>
               </button>
             )}
-            <span className="px-2 py-0.5 rounded-md bg-[#faf2ee] border border-[#e8e1dd] text-[#57423b] font-bold">
+            <span className="font-sans font-medium text-[#57423b]">
+              {t('dashboard:footer.connectedDuration', {
+                time: sessionDuration,
+              })}
+            </span>
+            <span className="text-[#8a726a]/60">•</span>
+            <span className="px-2 py-0.5 rounded-sm bg-[#faf2ee] border border-[#e8e1dd] text-[#57423b] font-bold">
               v{APP_VERSION}
             </span>
-            <span>{t('dashboard:footer.build')}</span>
-            <span className="text-[#8a726a]/60">•</span>
-            <span>{t('dashboard:footer.desktopEdition')}</span>
           </div>
         </div>
       </footer>

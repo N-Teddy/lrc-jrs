@@ -48,7 +48,11 @@
     "showingMembers": "Affichage de {{count}} sur {{total}} membres enregistrés",
     "showingActivities": "Affichage de {{start}} - {{end}} sur {{total}} activités",
     "showingTransfers": "Affichage de {{count}} sur {{total}} mutations enregistrées",
-    "showingAccounts": "Affichage de {{count}} sur {{total}} membres enregistrés"
+    "showingAccounts": "Affichage de {{count}} sur {{total}} membres enregistrés",
+    "communityName": "Jeunesse Paroissiale Saint-Joseph",
+    "upload": "Téléverser",
+    "details": "Détails",
+    "copiedToClipboard": "Copié dans le presse-papiers !"
   },
   "auth": {
     "login": {
@@ -284,8 +288,18 @@
       "allRightsReserved": "© {{year}} Plateforme JRS. Tous droits réservés.",
       "version": "v0.1.0",
       "build": "Version 2026.10",
-      "desktopEdition": "Édition Bureau"
-    }
+      "desktopEdition": "Édition Bureau",
+      "connectedDuration": "Connecté : {{time}}"
+    },
+    "greetingMorning": "Bonjour",
+    "greetingAfternoon": "Bon après-midi",
+    "greetingEvening": "Bonsoir",
+    "externalHubTitle": "Centre Externe : {{name}} ({{code}})",
+    "readOnlyView": "Mode Lecture Seule",
+    "writeAccessBadge": "Accès en écriture activé",
+    "externalHubDesc": "Vous consultez des données hors de votre centre paroissial d'attache.",
+    "noWriteAccessInTown": "Vous n'avez pas d'accès en écriture dans ce centre.",
+    "returnToMyHub": "Retourner à mon centre"
   },
   "roles": {
     "ap": "AP",
@@ -377,7 +391,8 @@
       "turnout": "Participation",
       "status": "Statut",
       "actions": "Actions",
-      "empty": "Aucune activité trouvée correspondant aux critères."
+      "empty": "Aucune activité trouvée correspondant aux critères.",
+      "emptyDescShort": "Aucune activité planifiée dans ce centre pour le moment."
     },
     "card": {
       "details": "Détails",
@@ -662,6 +677,9 @@
       "d7Pill": "J-7 Envoyé",
       "reportDuePill": "Rapport en attente",
       "menuChecklist": "Directives & Rappels"
+    },
+    "attendance": {
+      "savedSuccess": "Présences enregistrées et synchronisées avec succès."
     }
   },
   "attendance": {
@@ -671,6 +689,9 @@
     "notStartedDesc": "Les présences ne peuvent pas être enregistrées avant le début officiel de l'activité ({{date}}). Veuillez revenir une fois le rassemblement commencé.",
     "markAttendance": "Enregistrer les Présences",
     "savedSuccess": "Présences mises à jour avec succès.",
+    "lockSuccess": "Les présences ont été finalisées et verrouillées avec succès.",
+    "unlockSuccess": "Les présences ont été déverrouillées avec succès.",
+    "duplicateGuestError": "Un invité portant ce nom a déjà été enregistré pour cette activité.",
     "markAllPresent": "Marquer tous présents",
     "clearAll": "Effacer tout",
     "visiting": "En visite",
@@ -702,7 +723,8 @@
       "confirmAdd": "Ajouter l'invité",
       "notes": "Notes / Invité par",
       "remove": "Retirer",
-      "noGuests": "Aucun invité enregistré pour cette session."
+      "noGuests": "Aucun invité enregistré pour cette session.",
+      "badge": "Invité"
     }
   },
   "members": {
@@ -760,7 +782,11 @@
       "modalTitle": "Validation des Fiches de Renseignement",
       "modalSubtitle": "Membres ayant renseigné leurs coordonnées via le lien d'auto-saisie pour {{town}}. Vérifiez et confirmez avant ajout dans l'annuaire.",
       "pendingCount": "{{count}} En attente",
-      "checking": "Vérification des fiches en cours..."
+      "checking": "Vérification des fiches en cours...",
+      "createLinkTitle": "Créer et gérer les liens d'inscription des membres",
+      "createLink": "Créer un lien",
+      "allCaughtUpBadge": "À jour",
+      "allCaughtUpDescShort": "Toutes les soumissions de membres pour ce centre ont été vérifiées."
     },
     "intakeLinks": {
       "modalTitle": "Liens d'Auto-saisie des Fiches Membres",
@@ -856,7 +882,10 @@
       "viewProfile": "Voir le profil",
       "editRecord": "Modifier le profil",
       "manageAccess": "Gérer les accès",
-      "deactivateMember": "Désactiver"
+      "deactivateMember": "Désactiver",
+      "phone": "Téléphone",
+      "directoryEmpty": "Le répertoire communautaire est vide",
+      "directoryEmptyDesc": "Aucun membre enregistré dans ce centre pour le moment."
     },
     "modal": {
       "registerTitle": "Enregistrer un Nouveau Membre",
@@ -932,7 +961,38 @@
       "granted": "Accordé",
       "notGranted": "Hors-ligne Uniquement",
       "lastLogin": "Dernière Connexion",
-      "registeredOn": "Inscrit le"
+      "registeredOn": "Inscrit le",
+      "copyPhone": "Copier le numéro",
+      "transferHub": "Transférer de centre",
+      "tabAccess": "Accès & Compte",
+      "identityHeader": "Identité & Données démographiques",
+      "fullName": "Nom complet",
+      "emailAddress": "Adresse email",
+      "copied": "Copié !",
+      "none": "Aucun",
+      "noneConfigured": "Aucun configuré",
+      "portalCredentialsHeader": "Compte & Identifiants du Portail",
+      "portalCredentialsDesc": "Gérer les autorisations de connexion, la sécurité et les mots de passe temporaires.",
+      "accessSuspended": "Accès suspendu",
+      "activeAppAccess": "Accès actif à l'application",
+      "offlineOnly": "Hors-ligne uniquement (Sans connexion)",
+      "assignedRole": "Rôle attribué",
+      "activePc": "PC Actif",
+      "credentialStatus": "Statut des identifiants",
+      "tempPasswordActive": "Mot de passe temporaire (En attente de modification)",
+      "permanentPasswordSet": "Mot de passe permanent défini",
+      "noCredentialsIssued": "Aucun identifiant émis",
+      "manageAccessAction": "Gérer les accès & identifiants de la plateforme",
+      "pcLeadershipHeader": "Coordination de Programme (PC)",
+      "pcLeadershipDesc": "{{name}} est actuellement la personne contact pour {{town}}.",
+      "transferPcLeadership": "Transférer la responsabilité de PC",
+      "crossHubScopes": "Périmètres de lecture inter-centres",
+      "crossHubScopesDesc": "Centres externes que ce membre est autorisé à consulter en lecture seule.",
+      "homeHubOnly": "Centre principal uniquement ({{name}})",
+      "active": "Actif",
+      "suspended": "Suspendu",
+      "portalAccount": "Compte Portail",
+      "accountStatus": "Statut du compte"
     },
     "accessModal": {
       "title": "Gérer les Accès & Identifiants du Portail",
@@ -946,7 +1006,23 @@
       "suspendDesc": "Bloquer temporairement l'accès au portail sans supprimer le profil.",
       "suspendAction": "Suspendre l'Accès",
       "reactivateAction": "Réactiver l'Accès",
-      "deactivateConfirmation": "Êtes-vous sûr de vouloir désactiver {{name}} ? Le membre sera archivé et n'apparaîtra plus dans les listes actives."
+      "deactivateConfirmation": "Êtes-vous sûr de vouloir désactiver {{name}} ? Le membre sera archivé et n'apparaîtra plus dans les listes actives.",
+      "accountStatus": "Statut du compte",
+      "active": "Actif",
+      "suspended": "Suspendu",
+      "noAppAccess": "Aucun accès à l'application",
+      "loginIdentifier": "Identifiant de connexion (Téléphone)",
+      "registeredEmail": "Email enregistré",
+      "none": "Aucun",
+      "inviteToApp": "Inviter sur l'application",
+      "inviteDesc": "Accorder à ce membre l'accès à l'application et lui envoyer ses identifiants de connexion.",
+      "preferredLanguage": "Langue préférée",
+      "french": "Français",
+      "english": "Anglais",
+      "sendInvitation": "Envoyer l'invitation",
+      "sending": "Envoi en cours...",
+      "accountSuspendedSuccess": "L'accès au compte a été suspendu.",
+      "accountReactivatedSuccess": "Compte réactivé avec succès."
     },
     "transferModal": {
       "title": "Transférer le Centre du Membre",
@@ -966,6 +1042,9 @@
       "transferringMember": "Transfert du Membre en Cours...",
       "selectDestError": "Veuillez sélectionner un centre de ville de destination.",
       "transferFailedError": "Échec du transfert du membre. Veuillez vérifier vos autorisations et réessayer."
+    },
+    "actions": {
+      "registerMember": "Enregistrer le premier membre"
     }
   },
   "access": {
@@ -1019,7 +1098,8 @@
       "manageScopes": "Accès Centres",
       "suspend": "Suspendre Accès",
       "reactivate": "Réactiver Accès",
-      "noAccounts": "Aucun compte trouvé correspondant aux critères"
+      "noAccounts": "Aucun compte trouvé correspondant aux critères",
+      "noAccountsDesc": "Aucun compte authentifié dans ce centre pour le moment."
     },
     "modals": {
       "batchInviteTitle": "Intégration Groupée des Membres",
@@ -1167,7 +1247,11 @@
       "searchPlaceholder": "Rechercher par nom de fichier, résumé, activité ou auteur..."
     },
     "formats": {
-      "all": "Tous les fichiers"
+      "all": "Tous les fichiers",
+      "doc": "Document Word",
+      "sheet": "Feuille de calcul",
+      "pdf": "Document PDF",
+      "image": "Fichier Image"
     },
     "preview": {
       "openDrive": "Ouvrir dans Google Drive",

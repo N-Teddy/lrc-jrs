@@ -98,4 +98,13 @@ export class CreateMemberDto {
   @IsOptional()
   @IsString()
   integrationDate?: string;
+
+  @ApiPropertyOptional({
+    example: 'fr',
+    enum: ['fr', 'en'],
+    description: 'Preferred language of the member',
+  })
+  @IsOptional()
+  @IsEnum(['fr', 'en'])
+  preferredLanguage?: 'fr' | 'en';
 }

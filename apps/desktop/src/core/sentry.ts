@@ -31,6 +31,7 @@ export function initSentry(): void {
       release: '0.0.4',
       sampleRate: 1.0,
       tracesSampleRate: 0.1, // Sample 10% of transactions to respect free quota
+      attachStacktrace: true,
       beforeSend(event) {
         // Redact any sensitive tokens or cookies
         if (event.request?.headers) {

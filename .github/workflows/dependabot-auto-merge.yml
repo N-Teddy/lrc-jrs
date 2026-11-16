@@ -1,0 +1,50 @@
+name: Dependabot Auto-Merge
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  auto-merge-pr:
+    name: Auto-merge New/Updated PR
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && github.actor == 'dependabot[bot]'
+    steps:
+      - name: Fetch Dependabot metadata
+        id: metadata
+        uses: dependabot/fetch-metadata@v2
+        with:
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: Enable auto-merge for Dependabot PR
+        run: gh pr merge --auto --squash "$PR_URL"
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  sweep-existing-prs:
+    name: Sweep All Existing Dependabot PRs
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch'
+    steps:
+      - name: Enable auto-merge on all open Dependabot PRs
+        run: |
+          prs=$(gh pr list --author "app/dependabot" --state open --json url --jq '.[].url')
+          if [ -z "$prs" ]; then
+            prs=$(gh pr list --author "dependabot[bot]" --state open --json url --jq '.[].url')
+          fi
+          if [ -z "$prs" ]; then
+            echo "No open Dependabot PRs found."
+            exit 0
+          fi
+          for url in $prs; do
+            echo "Enabling auto-merge for $url"
+            gh pr merge --auto --squash "$url" || echo "Could not enable auto-merge for $url"
+          done
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

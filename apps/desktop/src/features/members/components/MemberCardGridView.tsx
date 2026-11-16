@@ -1,4 +1,4 @@
-import { useTranslation } from '@jrs/client-core';
+import { useTownContext, useTranslation } from '@jrs/client-core';
 import type { IUser } from '@jrs/shared';
 import {
   ArrowCounterClockwise,
@@ -61,6 +61,7 @@ export const MemberCardGridView: React.FC<MemberCardGridViewProps> = ({
   onRegisterMember,
 }) => {
   const { t } = useTranslation();
+  const { canWrite } = useTownContext();
   const totalPages = Math.ceil(total / limit) || 1;
 
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
@@ -182,7 +183,7 @@ export const MemberCardGridView: React.FC<MemberCardGridViewProps> = ({
                       </h3>
                       <div className="flex items-center gap-1.5 mt-0.5">
                         <span
-                          className={`inline-flex px-2 py-0.5 rounded-xs text-[10px] font-bold border ${roleInfo.badgeBg} ${roleInfo.badgeText} ${roleInfo.border}`}
+                          className={`inline-flex px-2 py-0.5 rounded-sm text-[10px] font-bold border ${roleInfo.badgeBg} ${roleInfo.badgeText} ${roleInfo.border}`}
                         >
                           {roleInfo.shortLabel}
                         </span>
@@ -202,61 +203,82 @@ export const MemberCardGridView: React.FC<MemberCardGridViewProps> = ({
                         setOpenMenuId(openMenuId === m.id ? null : m.id)
                       }
                       title={t('members:table.actions')}
-                      className="w-7 h-7 rounded-md text-[#8a726a] hover:text-[#1e1b19] hover:bg-[#faf2ee] flex items-center justify-center transition-colors cursor-pointer"
+                      className="w-7 h-7 rounded-md text-[#8a726a] hover:text-[#b85028] hover:bg-[#eddcd5] flex items-center justify-center transition-colors cursor-pointer"
                     >
                       <DotsThreeVertical size={16} weight="bold" />
                     </button>
 
                     {openMenuId === m.id && (
                       <div className="absolute right-0 top-full mt-1 w-44 bg-white rounded-lg border border-[#e8e1dd] shadow-lg py-1 z-30 flex flex-col animate-in fade-in zoom-in-95 duration-100">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setOpenMenuId(null);
-                            onEditMember(m);
-                          }}
-                          className="w-full px-3 py-1.5 text-left text-xs text-[#1e1b19] hover:bg-[#faf2ee] flex items-center gap-2 font-medium cursor-pointer"
-                        >
-                          <PencilSimple
-                            size={14}
-                            weight="bold"
-                            className="text-[#8a726a]"
-                          />
-                          <span>{t('members:table.editRecord')}</span>
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setOpenMenuId(null);
-                            onManageAccess(m);
-                          }}
-                          className="w-full px-3 py-1.5 text-left text-xs text-[#1e1b19] hover:bg-[#faf2ee] flex items-center gap-2 font-medium cursor-pointer"
-                        >
-                          <Key
-                            size={14}
-                            weight="bold"
-                            className="text-[#8a726a]"
-                          />
-                          <span>{t('members:table.manageAccess')}</span>
-                        </button>
-
-                        {isCurrentUserAp && onDeleteMember && (
+                        {canWrite && (
                           <>
-                            <div className="my-1 border-t border-[#f4ece9]" />
                             <button
                               type="button"
                               onClick={() => {
                                 setOpenMenuId(null);
-                                onDeleteMember(m);
+                                onEditMember(m);
                               }}
-                              className="w-full px-3 py-1.5 text-left text-xs text-[#ba1a1a] hover:bg-[#ffdad6]/40 flex items-center gap-2 font-medium cursor-pointer"
+                              className="w-full px-3 py-1.5 text-left text-xs text-[#1e1b19] hover:bg-[#faf2ee] flex items-center gap-2 font-medium cursor-pointer"
                             >
-                              <Trash size={14} weight="bold" />
-                              <span>{t('members:table.deactivateMember')}</span>
+                              <PencilSimple
+                                size={14}
+                                weight="bold"
+                                className="text-[#8a726a]"
+                              />
+                              <span>{t('members:table.editRecord')}</span>
                             </button>
+
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setOpenMenuId(null);
+                                onManageAccess(m);
+                              }}
+                              className="w-full px-3 py-1.5 text-left text-xs text-[#1e1b19] hover:bg-[#faf2ee] flex items-center gap-2 font-medium cursor-pointer"
+                            >
+                              <Key
+                                size={14}
+                                weight="bold"
+                                className="text-[#8a726a]"
+                              />
+                              <span>{t('members:table.manageAccess')}</span>
+                            </button>
+
+                            {isCurrentUserAp && onDeleteMember && (
+                              <>
+                                <div className="my-1 border-t border-[#f4ece9]" />
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setOpenMenuId(null);
+                                    onDeleteMember(m);
+                                  }}
+                                  className="w-full px-3 py-1.5 text-left text-xs text-[#ba1a1a] hover:bg-[#ffdad6]/40 flex items-center gap-2 font-medium cursor-pointer"
+                                >
+                                  <Trash size={14} weight="bold" />
+                                  <span>
+                                    {t('members:table.deactivateMember')}
+                                  </span>
+                                </button>
+                              </>
+                            )}
                           </>
                         )}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setOpenMenuId(null);
+                            onViewMember(m.id);
+                          }}
+                          className="w-full px-3 py-1.5 text-left text-xs text-[#1e1b19] hover:bg-[#faf2ee] flex items-center gap-2 font-medium cursor-pointer"
+                        >
+                          <ArrowRight
+                            size={14}
+                            weight="bold"
+                            className="text-[#8a726a]"
+                          />
+                          <span>{t('common:details', 'Details')}</span>
+                        </button>
                       </div>
                     )}
                   </div>
@@ -296,7 +318,7 @@ export const MemberCardGridView: React.FC<MemberCardGridViewProps> = ({
                         target="_blank"
                         rel="noreferrer"
                         title={t('members:table.whatsappChat')}
-                        className="p-1 rounded-xs bg-[#c2e9ca] text-[#2c4e37] hover:opacity-85 transition-opacity"
+                        className="p-1 rounded-sm bg-[#c2e9ca] text-[#2c4e37] hover:opacity-85 transition-opacity"
                       >
                         <ChatCircleText size={15} weight="fill" />
                       </a>
@@ -324,17 +346,19 @@ export const MemberCardGridView: React.FC<MemberCardGridViewProps> = ({
                   </span>
                 </div>
                 <div className="flex items-center gap-1 shrink-0">
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onEditMember(m);
-                    }}
-                    className="w-7 h-7 rounded-md text-[#8a726a] hover:text-[#1e1b19] hover:bg-[#faf2ee] flex items-center justify-center transition-colors cursor-pointer"
-                    title={t('common:edit', 'Edit')}
-                  >
-                    <PencilSimple size={14} weight="bold" />
-                  </button>
+                  {canWrite && (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onEditMember(m);
+                      }}
+                      className="w-7 h-7 rounded-md text-[#8a726a] hover:text-[#b85028] hover:bg-[#eddcd5] flex items-center justify-center transition-colors cursor-pointer"
+                      title={t('common:edit', 'Edit')}
+                    >
+                      <PencilSimple size={14} weight="bold" />
+                    </button>
+                  )}
                   <button
                     type="button"
                     onClick={(e) => {

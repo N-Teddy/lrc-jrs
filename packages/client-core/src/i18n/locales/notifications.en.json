@@ -10,7 +10,6 @@
   "minutesAgo": "{{count}}m ago",
   "hoursAgo": "{{count}}h ago",
   "daysAgo": "{{count}}d ago",
-
   "centerSubtitle": "Live feed of activities and system updates",
   "allCaughtUp": "You're all caught up!",
   "noNotifications": "No notifications",
@@ -37,7 +36,6 @@
   "yesterday": "Yesterday",
   "earlierThisWeek": "Earlier this week",
   "older": "Older",
-
   "categories": {
     "activity": "Activities",
     "attendance": "Attendance",
@@ -48,106 +46,72 @@
     "alert": "Alerts",
     "system": "System"
   },
-
   "activityCreatedTitle": "New Activity Added",
   "activityCreatedBody": "{{name}} scheduled for {{date}}",
-
   "activityUpdatedTitle": "Activity Updated",
   "activityUpdatedBody": "Details for {{name}} have been updated",
-
   "activityRescheduledTitle": "Activity Rescheduled",
   "activityRescheduledBody": "{{name}} rescheduled from {{oldDate}} to {{newDate}}",
-
   "activityLocationChangedTitle": "Activity Venue Changed",
   "activityLocationChangedBody": "The location for {{name}} has moved to {{venue}}",
-
   "activityCancelledTitle": "Activity Cancelled",
   "activityCancelledBody": "{{name}} scheduled for {{date}} has been cancelled",
-
   "activityReopenedTitle": "Activity Reopened",
   "activityReopenedBody": "{{name}} has been reopened for {{date}}",
-
   "activityCompletedTitle": "Activity Concluded",
   "activityCompletedBody": "{{name}} has concluded. Please finalize attendance and submit reports.",
-
   "activityDeletedTitle": "Activity Deleted",
   "activityDeletedBody": "Activity {{name}} was deleted by {{by}}",
-
   "attendanceRecordedTitle": "Attendance Finalized",
   "attendanceRecordedBody": "Attendance for {{name}} has been recorded",
-
   "memberRegisteredTitle": "New Member Joined",
   "memberRegisteredBody": "{{name}} has joined {{town}}",
-
   "memberUpdatedTitle": "Member Profile Updated",
   "memberUpdatedBody": "Profile details for {{name}} have been updated",
-
   "memberDeletedTitle": "Member Removed",
   "memberDeletedBody": "{{name}} was removed from {{town}} by {{by}}",
-
   "memberIntakeSubmittedTitle": "New Member Self-Entry",
   "memberIntakeSubmittedBody": "{{name}} submitted their member information for {{town}}",
-
   "memberIntakeApprovedTitle": "Information Validated",
   "memberIntakeApprovedBody": "Your member information for {{town}} has been verified and recorded",
-
   "townTransferTitle": "Town Relocation",
   "townTransferBody": "{{name}} was transferred from {{fromTown}} to {{toTown}}",
-
   "accessGrantedTitle": "App Access Granted",
   "accessGrantedBody": "Your access to the LRC JRS portal is now active",
-
   "accessRevokedTitle": "App Access Revoked",
   "accessRevokedBody": "Your account access has been revoked by administration",
-
   "roleChangedTitle": "Role Updated",
   "roleChangedBody": "Your role has been updated to {{role}}",
-
   "townScopeUpdatedTitle": "Multi-Town Jurisdiction Updated",
   "townScopeUpdatedBody": "Your access has been updated with permissions to view additional town hubs",
-
   "attendanceLockedTitle": "Attendance Locked",
   "attendanceLockedBody": "Attendance for {{name}} has been finalized and locked",
-
   "attendanceUnlockedTitle": "Attendance Unlocked",
   "attendanceUnlockedBody": "Attendance for {{name}} was unlocked for modification",
-
   "reportUploadedTitle": "Report Uploaded",
   "reportUploadedBody": "{{fileName}} uploaded for {{name}}",
-
   "reportDeletedTitle": "Report Deleted",
   "reportDeletedBody": "A report file for {{name}} was deleted",
-
   "driveFileUploadedTitle": "New Vault Document",
   "driveFileUploadedBody": "{{fileName}} has been uploaded to the document vault",
-
   "driveFileDeletedTitle": "Vault Document Removed",
   "driveFileDeletedBody": "Document {{fileName}} was removed by {{by}}",
-
   "memberIntakeRejectedTitle": "Member Self-Entry Update",
   "memberIntakeRejectedBody": "Your member information for {{town}} has been reviewed",
-
   "passwordChangedTitle": "Security Alert: Password Changed",
   "passwordChangedBody": "The password for your account was recently updated",
-
   "systemAnnouncementTitle": "Notice from Administration",
   "systemAnnouncementBody": "{{message}}",
-
   "newTownPcAnnouncedTitle": "New Parish Coordinator",
   "newTownPcAnnouncedBody": "Please welcome {{name}} as the new Parish Coordinator for {{town}}.",
-
   "memberAccountActivatedTitle": "Member Onboarded",
   "memberAccountActivatedBody": "{{name}} has completed account setup and logged in.",
-
   "driveFolderDeletedTitle": "Vault Folder Deleted",
   "driveFolderDeletedBody": "A document folder was deleted by {{by}}",
-
   "registrationLinkDeactivatedTitle": "Registration Link Deactivated",
   "registrationLinkDeactivatedBody": "The registration link for {{town}} was deactivated early by {{by}}",
-
   "reminderTemplateUpdatedTitle": "Activity Guidelines Updated",
   "reminderTemplateUpdatedBody": "Checklist guidelines for {{type}} have been updated by leadership.",
-
   "activity": {
     "monthlyDigest": {
       "title": "Monthly Activity Schedule",
@@ -167,5 +131,7 @@
     "todayBody": "Today is {{name}}'s birthday ({{age}} yrs, {{town}}). Remember to send warm greetings on behalf of the community!",
     "upcoming7dTitle": "🎂 Birthday in 7 Days: {{name}} ({{age}} yrs)",
     "upcoming7dBody": "{{name}} ({{town}}) will turn {{age}} on {{date}}. Remember to prepare greetings."
-  }
+  },
+  "accessRevokedBroadcastTitle": "Account Access Revoked",
+  "accessRevokedBroadcastBody": "Account access for {{name}} has been suspended."
 }

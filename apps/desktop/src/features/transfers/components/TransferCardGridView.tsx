@@ -154,7 +154,10 @@ export const TransferCardGridView: React.FC<TransferCardGridViewProps> = ({
                     <span className="font-semibold text-[#1e1b19] truncate">
                       {fromTown?.name || 'Origin'}
                     </span>
-                    <span className="text-[10px] font-mono text-[#8a726a]">
+                    <span
+                      title={fromTown?.name || 'Origin'}
+                      className="text-[10px] font-mono text-[#8a726a] cursor-help"
+                    >
                       {fromTown?.code || '—'}
                     </span>
                   </div>
@@ -167,7 +170,10 @@ export const TransferCardGridView: React.FC<TransferCardGridViewProps> = ({
                     <span className="font-semibold text-[#1e1b19] truncate">
                       {toTown?.name || 'Destination'}
                     </span>
-                    <span className="text-[10px] font-mono text-[#8a726a]">
+                    <span
+                      title={toTown?.name || 'Destination'}
+                      className="text-[10px] font-mono text-[#8a726a] cursor-help"
+                    >
                       {toTown?.code || '—'}
                     </span>
                   </div>
@@ -218,17 +224,19 @@ export const TransferCardGridView: React.FC<TransferCardGridViewProps> = ({
       </div>
 
       {/* Pagination Footer */}
-      <div className="p-4 bg-white rounded-xl border border-[#e8e1dd] shadow-xs flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#8a726a]">
-        <div>
-          {t('common:showingTransfers', { count: transfers.length, total }) ||
-            `Showing ${transfers.length} of ${total} recorded relocations`}
+      {totalPages > 1 && (
+        <div className="p-4 bg-white rounded-xl border border-[#e8e1dd] shadow-xs flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#8a726a]">
+          <div>
+            {t('common:showingTransfers', { count: transfers.length, total }) ||
+              `Showing ${transfers.length} of ${total} recorded relocations`}
+          </div>
+          <PaginationControl
+            page={page}
+            totalPages={totalPages}
+            onPageChange={onPageChange}
+          />
         </div>
-        <PaginationControl
-          page={page}
-          totalPages={totalPages}
-          onPageChange={onPageChange}
-        />
-      </div>
+      )}
     </div>
   );
 };

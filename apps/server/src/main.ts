@@ -15,6 +15,14 @@ async function bootstrap() {
   const logger = new Logger('Bootstrap');
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
+  // Disable X-Powered-By header and backend fingerprinting
+  app.disable('x-powered-by');
+  app.use((_req: any, res: any, next: any) => {
+    res.removeHeader('X-Powered-By');
+    res.removeHeader('Server');
+    next();
+  });
+
   // Ensure Sentry is active once ConfigModule has populated process.env
   SentryService.init();
 
@@ -38,7 +46,7 @@ async function bootstrap() {
   // Enable CORS for mobile and desktop clients
   app.enableCors({
     origin: true,
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    methods: 'GET,HEAD,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
   });
 

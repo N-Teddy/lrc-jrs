@@ -361,19 +361,21 @@ export const ActivityCardGridView: React.FC<ActivityCardGridViewProps> = ({
                 </div>
 
                 <div className="flex items-center gap-1 shrink-0">
-                  {canWrite && (
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onEditActivity(activity);
-                      }}
-                      className="w-7 h-7 rounded text-[#8a726a] hover:text-[#1e1b19] hover:bg-[#faf2ee] flex items-center justify-center transition-colors cursor-pointer"
-                      title={t('common:edit', 'Edit')}
-                    >
-                      <PencilSimple size={14} weight="bold" />
-                    </button>
-                  )}
+                  {canWrite &&
+                    activity.status !== ActivityStatus.COMPLETED &&
+                    new Date(activity.endDate).getTime() >= Date.now() && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onEditActivity(activity);
+                        }}
+                        className="w-7 h-7 rounded text-[#8a726a] hover:text-[#b85028] hover:bg-[#eddcd5] flex items-center justify-center transition-colors cursor-pointer"
+                        title={t('common:edit', 'Edit')}
+                      >
+                        <PencilSimple size={14} weight="bold" />
+                      </button>
+                    )}
                   <button
                     type="button"
                     onClick={(e) => {

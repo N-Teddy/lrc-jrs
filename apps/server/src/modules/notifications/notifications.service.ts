@@ -90,7 +90,7 @@ export class NotificationsService {
 
     if (targetTownObjectIds.length > 0) {
       // APs oversee all hubs across Cameroon, so include APs even when filtered by town
-      if (dto.target.roles && dto.target.roles.includes(UserRole.AP)) {
+      if (dto.target.roles?.includes(UserRole.AP)) {
         query.$or = [
           { homeTownId: { $in: targetTownObjectIds } },
           { role: UserRole.AP },
@@ -416,5 +416,12 @@ export class NotificationsService {
       .exec();
 
     return { success: true };
+  }
+
+  /**
+   * Terminate active socket session for a user whose access was revoked
+   */
+  terminateUserSession(userId: string, reason = 'ACCESS_REVOKED'): void {
+    this.notificationsGateway.terminateSession(userId, reason);
   }
 }

@@ -311,7 +311,7 @@ export const BatchInviteModal: React.FC<BatchInviteModalProps> = ({
                         </div>
                       </div>
                     </div>
-                    <span className="px-2 py-0.5 rounded-xs text-[10px] font-mono font-bold bg-[#faf2ee] text-[#57423b] border border-[#e8e1dd]/70 shrink-0">
+                    <span className="px-2 py-0.5 rounded-sm text-[10px] font-mono font-bold bg-[#faf2ee] text-[#57423b] border border-[#e8e1dd]/70 shrink-0">
                       {m.homeTown?.code ?? 'HUB'}
                     </span>
                   </div>

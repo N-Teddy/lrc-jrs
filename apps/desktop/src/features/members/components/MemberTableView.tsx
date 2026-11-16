@@ -1,4 +1,4 @@
-import { useTownContext, useTranslation } from '@jrs/client-core';
+import { toast, useTownContext, useTranslation } from '@jrs/client-core';
 import type { IUser } from '@jrs/shared';
 import {
   ArrowCounterClockwise,
@@ -100,7 +100,16 @@ export const MemberTableView: React.FC<MemberTableViewProps> = ({
   const handleCopyPhone = (id: string, phone: string, e: React.MouseEvent) => {
     e.stopPropagation();
     navigator.clipboard.writeText(phone);
-    setCopiedId(id);
+    setCopiedId(`phone-${id}`);
+    toast.success(t('common:copiedToClipboard', 'Copied to clipboard!'));
+    setTimeout(() => setCopiedId(null), 1500);
+  };
+
+  const handleCopyEmail = (id: string, email: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigator.clipboard.writeText(email);
+    setCopiedId(`email-${id}`);
+    toast.success(t('common:copiedToClipboard', 'Copied to clipboard!'));
     setTimeout(() => setCopiedId(null), 1500);
   };
 
@@ -279,17 +288,17 @@ export const MemberTableView: React.FC<MemberTableViewProps> = ({
                                 handleCopyPhone(m.id, m.phoneNumber, e)
                               }
                               title={
-                                copiedId === m.id
+                                copiedId === `phone-${m.id}`
                                   ? 'Copied!'
                                   : t('members:table.copyNumber', 'Copy Number')
                               }
                               className={`w-5 h-5 rounded flex items-center justify-center transition-colors cursor-pointer ${
-                                copiedId === m.id
+                                copiedId === `phone-${m.id}`
                                   ? 'text-[#486b52]'
                                   : 'text-[#8a726a] hover:text-[#b85028] hover:bg-[#faf2ee]'
                               }`}
                             >
-                              {copiedId === m.id ? (
+                              {copiedId === `phone-${m.id}` ? (
                                 <Check size={12} weight="bold" />
                               ) : (
                                 <Copy size={12} />
@@ -328,9 +337,33 @@ export const MemberTableView: React.FC<MemberTableViewProps> = ({
                             size={13}
                             className="shrink-0 text-[#8a726a]"
                           />
-                          <span className="truncate max-w-[200px] hover:text-[#1e1b19] transition-colors font-sans">
+                          <span className="truncate max-w-[170px] hover:text-[#1e1b19] transition-colors font-sans">
                             {m.email}
                           </span>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              if (m.email) {
+                                handleCopyEmail(m.id, m.email, e);
+                              }
+                            }}
+                            title={
+                              copiedId === `email-${m.id}`
+                                ? 'Copied!'
+                                : t('members:detail.copyEmail', 'Copy Email')
+                            }
+                            className={`w-5 h-5 rounded flex items-center justify-center transition-colors cursor-pointer shrink-0 ${
+                              copiedId === `email-${m.id}`
+                                ? 'text-[#486b52]'
+                                : 'text-[#8a726a] hover:text-[#b85028] hover:bg-[#faf2ee]'
+                            }`}
+                          >
+                            {copiedId === `email-${m.id}` ? (
+                              <Check size={12} weight="bold" />
+                            ) : (
+                              <Copy size={12} />
+                            )}
+                          </button>
                         </div>
                       )}
                     </div>
@@ -350,7 +383,7 @@ export const MemberTableView: React.FC<MemberTableViewProps> = ({
                         onClick={() =>
                           setOpenMenuId(openMenuId === m.id ? null : m.id)
                         }
-                        className="w-7 h-7 rounded-md text-[#8a726a] hover:text-[#1e1b19] hover:bg-[#faf2ee] flex items-center justify-center transition-colors cursor-pointer"
+                        className="w-7 h-7 rounded-md text-[#8a726a] hover:text-[#b85028] hover:bg-[#eddcd5] flex items-center justify-center transition-colors cursor-pointer"
                         title={t('common:actions', 'Actions')}
                       >
                         <DotsThreeVertical size={16} weight="bold" />
@@ -456,18 +489,20 @@ export const MemberTableView: React.FC<MemberTableViewProps> = ({
       </div>
 
       {/* Pagination Footer */}
-      <div className="p-4 bg-[#faf2ee] border-t border-[#e8e1dd] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#8a726a]">
-        <div>
-          {t('common:showingMembers', { count: members.length, total }) ||
-            `Showing ${members.length} of ${total} registered members`}
+      {totalPages > 1 && (
+        <div className="p-4 bg-[#faf2ee] border-t border-[#e8e1dd] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#8a726a]">
+          <div>
+            {t('common:showingMembers', { count: members.length, total }) ||
+              `Showing ${members.length} of ${total} registered members`}
+          </div>
+          <PaginationControl
+            page={page}
+            totalPages={totalPages}
+            onPageChange={onPageChange}
+            variant="white"
+          />
         </div>
-        <PaginationControl
-          page={page}
-          totalPages={totalPages}
-          onPageChange={onPageChange}
-          variant="white"
-        />
-      </div>
+      )}
     </div>
   );
 };

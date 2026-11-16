@@ -24,6 +24,7 @@ export interface MemberModalFormData {
   role: UserRole;
   avatarFile: File | null;
   avatarPreview: string | null;
+  preferredLanguage?: 'fr' | 'en';
 }
 
 export interface MemberModalFormFieldsProps {
@@ -84,7 +85,7 @@ export const MemberModalFormFields: React.FC<MemberModalFormFieldsProps> = ({
               {t('members:modal.avatarTitle', 'Member Profile Picture')}
             </span>
             {formData.avatarFile && (
-              <span className="text-[10px] font-bold text-[#2c4e37] bg-[#c2e9ca] px-2 py-0.5 rounded-xs">
+              <span className="text-[10px] font-bold text-[#2c4e37] bg-[#c2e9ca] px-2 py-0.5 rounded-sm">
                 {t('members:modal.avatarNewSelected', 'New Photo Selected')}
               </span>
             )}
@@ -209,8 +210,9 @@ export const MemberModalFormFields: React.FC<MemberModalFormFieldsProps> = ({
               <span className="text-[#b85028]">*</span>
             </label>
             {age !== null && (
-              <span className="text-[10px] font-bold text-[#b85028] bg-[#fff2ee] px-2 py-0.5 rounded-xs border border-[#ffdbcf]">
-                {age} {t('members:modal.yearsShort', 'yrs')} • {ageCat}
+              <span className="text-[10px] font-bold text-[#b85028] bg-[#fff2ee] px-2 py-0.5 rounded-sm border border-[#ffdbcf]">
+                {age} {t('members:modal.yearsShort', 'yrs')} •{' '}
+                {ageCat.replace(/_/g, ' ')}
               </span>
             )}
           </div>
@@ -263,8 +265,23 @@ export const MemberModalFormFields: React.FC<MemberModalFormFieldsProps> = ({
             </label>
           </div>
           <div className="flex items-center h-10 w-full bg-[#faf2ee] rounded-md border border-[#e8e1dd] focus-within:border-[#b85028] focus-within:bg-white transition-all overflow-hidden">
-            <div className="px-3 border-r border-[#e8e1dd] bg-[#f4ece9] h-full flex items-center gap-1.5 shrink-0 select-none">
-              <span className="text-xs font-bold text-[#57423b]">🇨🇲 +237</span>
+            <div className="px-3 border-r border-[#e8e1dd] bg-[#f4ece9] h-full flex items-center gap-2 shrink-0 select-none">
+              <svg
+                width="18"
+                height="12"
+                viewBox="0 0 18 12"
+                className="rounded-sm shrink-0 shadow-2xs"
+                aria-label="Cameroon"
+              >
+                <rect width="6" height="12" fill="#007a5e" />
+                <rect x="6" width="6" height="12" fill="#ce1126" />
+                <rect x="12" width="6" height="12" fill="#fcd116" />
+                <polygon
+                  points="9,4.2 9.5,5.6 11,5.6 9.8,6.5 10.2,7.9 9,7 7.8,7.9 8.2,6.5 7,5.6 8.5,5.6"
+                  fill="#fcd116"
+                />
+              </svg>
+              <span className="text-xs font-bold text-[#57423b]">+237</span>
             </div>
             <input
               id="member-phone"
@@ -307,25 +324,58 @@ export const MemberModalFormFields: React.FC<MemberModalFormFieldsProps> = ({
         </div>
       </div>
 
-      {/* Row 4: Community Role */}
-      {!hideRoleSelect && roleOptions && (
+      {/* Row 4: Community Role & Preferred Language */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
+        {!hideRoleSelect && roleOptions && (
+          <div className="flex flex-col gap-1.5">
+            <label
+              htmlFor="member-role"
+              className="text-xs font-bold text-[#1e1b19]"
+            >
+              {t('members:modal.role')}{' '}
+              <span className="text-[#b85028]">*</span>
+            </label>
+            <CustomSelect<UserRole>
+              options={roleOptions}
+              value={formData.role}
+              onChange={(val) => onChange('role', val)}
+              variant="form"
+              size="md"
+              className="w-full"
+            />
+          </div>
+        )}
+
         <div className="flex flex-col gap-1.5">
-          <label
-            htmlFor="member-role"
-            className="text-xs font-bold text-[#1e1b19]"
-          >
-            {t('members:modal.role')} <span className="text-[#b85028]">*</span>
-          </label>
-          <CustomSelect<UserRole>
-            options={roleOptions}
-            value={formData.role}
-            onChange={(val) => onChange('role', val)}
-            variant="form"
-            size="md"
-            className="w-full"
-          />
+          <span className="text-xs font-bold text-[#1e1b19]">
+            {t('members:modal.preferredLanguage', 'Preferred Language')}
+          </span>
+          <div className="flex items-center gap-2 h-10">
+            <button
+              type="button"
+              onClick={() => onChange('preferredLanguage', 'fr')}
+              className={`flex-1 h-full flex items-center justify-center gap-1.5 rounded-md border text-xs font-bold transition-all cursor-pointer ${
+                (formData.preferredLanguage || 'fr') === 'fr'
+                  ? 'bg-[#fff2ee] border-[#b85028] text-[#b85028]'
+                  : 'bg-[#faf2ee] border-[#e8e1dd] text-[#8a726a] hover:bg-[#f4ece9]'
+              }`}
+            >
+              <span>🇫🇷 Français</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => onChange('preferredLanguage', 'en')}
+              className={`flex-1 h-full flex items-center justify-center gap-1.5 rounded-md border text-xs font-bold transition-all cursor-pointer ${
+                formData.preferredLanguage === 'en'
+                  ? 'bg-[#fff2ee] border-[#b85028] text-[#b85028]'
+                  : 'bg-[#faf2ee] border-[#e8e1dd] text-[#8a726a] hover:bg-[#f4ece9]'
+              }`}
+            >
+              <span>🇬🇧 English</span>
+            </button>
+          </div>
         </div>
-      )}
+      </div>
     </>
   );
 };

@@ -206,7 +206,7 @@ export const IntakeLinksModal: React.FC<IntakeLinksModalProps> = ({
                     'Member Self-Entry Links',
                   )}
                 </h2>
-                <span className="px-2 py-0.5 rounded-xs text-[10px] font-mono font-bold bg-[#faf2ee] text-[#b85028] border border-[#e8e1dd]">
+                <span className="px-2 py-0.5 rounded-sm text-[10px] font-mono font-bold bg-[#faf2ee] text-[#b85028] border border-[#e8e1dd]">
                   {activeTownName} ({activeTownCode})
                 </span>
               </div>
@@ -358,7 +358,7 @@ export const IntakeLinksModal: React.FC<IntakeLinksModalProps> = ({
                           {preset.desc}
                         </span>
                         {preset.recommended && (
-                          <span className="absolute -top-2 -right-1 px-1.5 py-0.2 rounded-xs text-[9px] font-bold bg-[#b85028] text-white shadow-2xs">
+                          <span className="absolute -top-2 -right-1 px-1.5 py-0.2 rounded-sm text-[9px] font-bold bg-[#b85028] text-white shadow-2xs">
                             Rec
                           </span>
                         )}
@@ -534,7 +534,7 @@ export const IntakeLinksModal: React.FC<IntakeLinksModalProps> = ({
                               {link.token}
                             </span>
                             <span
-                              className={`px-2 py-0.5 rounded-xs text-[10px] font-bold ${
+                              className={`px-2 py-0.5 rounded-sm text-[10px] font-bold ${
                                 isExpired
                                   ? 'bg-[#ffdad6] text-[#ba1a1a] border border-[#ffb4a8]'
                                   : 'bg-[#c2e9ca] text-[#2c4e37] border border-[#a9d0b2]'

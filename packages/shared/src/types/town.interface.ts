@@ -59,7 +59,7 @@ export function evaluateTownPermissions(
       return { canRead: false, canWrite: false, isReadOnly: true };
     }
     const allowed = (user.account.allowedReadTownIds || []).map(String);
-    const canRead = allowed.includes(String(targetTownId));
+    const canRead = isHomeTown || allowed.includes(String(targetTownId));
     return { canRead, canWrite: false, isReadOnly: true };
   }
 

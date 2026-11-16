@@ -191,10 +191,12 @@ export const AccountsDirectoryTable: React.FC<AccountsDirectoryTableProps> = ({
                 index >= 2 &&
                 index >= members.length - (members.length >= 5 ? 3 : 2);
 
-              // Town codes for granted external hubs
-              const externalTownCodes = allowedTownIds
-                .map((id) => availableTowns.find((t) => t.id === id)?.code)
-                .filter(Boolean) as string[];
+              // Town objects for granted external hubs and home hub
+              const externalTowns = allowedTownIds
+                .map((id) => availableTowns.find((t) => t.id === id))
+                .filter(Boolean) as ITown[];
+              const homeTown =
+                availableTowns.find((t) => t.id === m.homeTownId) || m.homeTown;
 
               return (
                 <tr
@@ -250,7 +252,7 @@ export const AccountsDirectoryTable: React.FC<AccountsDirectoryTableProps> = ({
                   {/* 3. Role */}
                   <td className="py-3.5 px-4">
                     <span
-                      className={`inline-flex px-2 py-0.5 rounded-md text-[10px] font-bold border ${roleInfo.badgeBg} ${roleInfo.badgeText} ${roleInfo.border}`}
+                      className={`inline-flex px-2 py-0.5 rounded-sm text-[10px] font-bold border ${roleInfo.badgeBg} ${roleInfo.badgeText} ${roleInfo.border}`}
                     >
                       {roleInfo.shortLabel}
                     </span>
@@ -259,14 +261,14 @@ export const AccountsDirectoryTable: React.FC<AccountsDirectoryTableProps> = ({
                   {/* 4. Portal Status */}
                   <td className="py-3.5 px-6">
                     {isRevoked ? (
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-[#ffdad6] text-[#ba1a1a]">
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-sm text-[11px] font-bold bg-[#ffdad6] text-[#ba1a1a]">
                         <span className="w-1.5 h-1.5 rounded-full bg-[#ba1a1a]" />
                         <span>
                           {t('access:table.suspended') || 'Suspended'}
                         </span>
                       </span>
                     ) : isTempPassword ? (
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-[#fff8e1] text-[#b78103] border border-[#ffe082]">
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-sm text-[11px] font-bold bg-[#fff8e1] text-[#b78103] border border-[#ffe082]">
                         <ClockCountdown size={13} weight="bold" />
                         <span>
                           {t('access:table.mustChangePassword') ||
@@ -274,7 +276,7 @@ export const AccountsDirectoryTable: React.FC<AccountsDirectoryTableProps> = ({
                         </span>
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-[#c2e9ca] text-[#2c4e37]">
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-sm text-[11px] font-bold bg-[#c2e9ca] text-[#2c4e37]">
                         <span className="w-1.5 h-1.5 rounded-full bg-[#486b52]" />
                         <span>{t('access:table.active') || 'Active'}</span>
                       </span>
@@ -283,20 +285,24 @@ export const AccountsDirectoryTable: React.FC<AccountsDirectoryTableProps> = ({
 
                   {/* 5. Cross-Hub Scopes */}
                   <td className="py-3.5 px-4">
-                    {externalTownCodes.length > 0 ? (
+                    {externalTowns.length > 0 ? (
                       <div className="flex items-center gap-1 flex-wrap">
-                        {externalTownCodes.map((code) => (
+                        {externalTowns.map((tw) => (
                           <span
-                            key={code}
-                            className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-[#eef7f0] text-[#2c4e37] border border-[#c2e9ca]"
+                            key={tw.id}
+                            title={tw.name}
+                            className="px-1.5 py-0.5 rounded-sm text-[10px] font-mono font-bold bg-[#eef7f0] text-[#2c4e37] border border-[#c2e9ca] cursor-help"
                           >
-                            {code}
+                            {tw.code}
                           </span>
                         ))}
                       </div>
                     ) : (
-                      <span className="text-[11px] text-[#8a726a]">
-                        {t('access:table.homeOnly') || 'Home Hub Only'}
+                      <span
+                        title={homeTown?.name || 'Home Hub'}
+                        className="px-1.5 py-0.5 rounded-sm text-[10px] font-mono font-bold bg-[#faf2ee] text-[#57423b] border border-[#e8e1dd] cursor-help inline-block"
+                      >
+                        {homeTown?.code || 'HUB'}
                       </span>
                     )}
                   </td>
@@ -314,7 +320,7 @@ export const AccountsDirectoryTable: React.FC<AccountsDirectoryTableProps> = ({
                           onClick={() =>
                             setOpenMenuId(openMenuId === m.id ? null : m.id)
                           }
-                          className="w-7 h-7 rounded-md text-[#8a726a] hover:text-[#1e1b19] hover:bg-[#faf2ee] flex items-center justify-center transition-colors cursor-pointer"
+                          className="w-7 h-7 rounded-md text-[#8a726a] hover:text-[#b85028] hover:bg-[#eddcd5] flex items-center justify-center transition-colors cursor-pointer"
                         >
                           <DotsThreeVertical size={16} weight="bold" />
                         </button>

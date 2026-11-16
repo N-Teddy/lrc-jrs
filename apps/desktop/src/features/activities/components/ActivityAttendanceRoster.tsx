@@ -139,7 +139,12 @@ export const ActivityAttendanceRoster: React.FC<
         activityId: activity.id,
         reason: lockReason.trim() || 'Roll call finalized',
       });
-      toast.success('Attendance finalized and locked successfully');
+      toast.success(
+        t(
+          'attendance:lockSuccess',
+          'Attendance finalized and locked successfully',
+        ),
+      );
       setIsLockModalOpen(false);
       setLockReason('');
     } catch (err: any) {
@@ -154,7 +159,9 @@ export const ActivityAttendanceRoster: React.FC<
         activityId: activity.id,
         reason: unlockReason.trim(),
       });
-      toast.success('Attendance unlocked via AP override');
+      toast.success(
+        t('attendance:unlockSuccess', 'Attendance unlocked via AP override'),
+      );
       setIsUnlockModalOpen(false);
       setLockReason('');
     } catch (err: any) {
@@ -423,7 +430,23 @@ export const ActivityAttendanceRoster: React.FC<
 
   const handleAddGuest = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!guestName.trim()) return;
+    const trimmedName = guestName.trim();
+    if (!trimmedName) return;
+
+    const isDuplicate = guestRecords.some(
+      (g) =>
+        g.guestInfo?.fullName?.trim().toLowerCase() ===
+        trimmedName.toLowerCase(),
+    );
+    if (isDuplicate) {
+      toast.error(
+        t(
+          'attendance:duplicateGuestError',
+          'A guest with this name has already been registered for this activity.',
+        ),
+      );
+      return;
+    }
 
     const digitsOnly = guestPhone.replace(/\D/g, '');
     if (digitsOnly.length > 9) {

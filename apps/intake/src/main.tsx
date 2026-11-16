@@ -14,6 +14,7 @@ if (sentryDsn && sentryDsn.trim() !== '') {
     environment: import.meta.env.MODE || 'development',
     release: '0.0.4',
     tracesSampleRate: 0.1,
+    attachStacktrace: true,
   });
 }
 
@@ -133,6 +134,21 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
     }
     return this.props.children;
   }
+}
+
+if (!import.meta.env.DEV) {
+  document.addEventListener('contextmenu', (e) => e.preventDefault());
+  document.addEventListener('keydown', (e) => {
+    if (
+      e.key === 'F12' ||
+      ((e.ctrlKey || e.metaKey) &&
+        e.shiftKey &&
+        ['I', 'J', 'C'].includes(e.key.toUpperCase())) ||
+      ((e.ctrlKey || e.metaKey) && e.key.toUpperCase() === 'U')
+    ) {
+      e.preventDefault();
+    }
+  });
 }
 
 const rootElement = document.getElementById('root');

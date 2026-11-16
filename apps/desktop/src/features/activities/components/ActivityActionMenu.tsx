@@ -48,7 +48,9 @@ export const ActivityActionMenu: React.FC<ActivityActionMenuProps> = ({
     !activeTownId || activeTownId === (activity.hostTownId || activity.townId);
   const canManageActivity = canWrite && (isHostTown || isPrivileged);
   const historyCount = activity.changeHistory?.length || 0;
-  const isCompleted = activity.status === ActivityStatus.COMPLETED;
+  const isCompleted =
+    activity.status === ActivityStatus.COMPLETED ||
+    new Date(activity.endDate).getTime() < Date.now();
   const isCancelled = activity.status === ActivityStatus.CANCELLED;
 
   const startDate = new Date(activity.startDate);
@@ -82,7 +84,7 @@ export const ActivityActionMenu: React.FC<ActivityActionMenuProps> = ({
       <button
         type="button"
         onClick={onToggle}
-        className="w-6 h-6 rounded-md hover:bg-[#faf2ee] text-[#8a726a] hover:text-[#1e1b19] flex items-center justify-center transition-colors cursor-pointer"
+        className="w-6 h-6 rounded-md hover:bg-[#eddcd5] text-[#8a726a] hover:text-[#b85028] flex items-center justify-center transition-colors cursor-pointer"
         aria-label="Activity Actions"
       >
         <DotsThreeVertical size={16} weight="bold" />

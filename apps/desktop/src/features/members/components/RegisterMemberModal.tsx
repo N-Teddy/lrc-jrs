@@ -132,6 +132,8 @@ export const RegisterMemberModal: React.FC<RegisterMemberModalProps> = ({
           payload.append('email', formData.email.trim());
         payload.append('role', formData.role);
         payload.append('hasAppAccess', String(hasAppAccess));
+        if (formData.preferredLanguage)
+          payload.append('preferredLanguage', formData.preferredLanguage);
         payload.append('avatar', formData.avatarFile);
         await onSubmit(payload);
       } else {
@@ -145,6 +147,7 @@ export const RegisterMemberModal: React.FC<RegisterMemberModalProps> = ({
           email: formData.email.trim() ? formData.email.trim() : undefined,
           role: formData.role,
           hasAppAccess,
+          preferredLanguage: formData.preferredLanguage,
         });
       }
       toast.success(

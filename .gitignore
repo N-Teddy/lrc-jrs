@@ -67,3 +67,4 @@ uploads
 .env.local
 .env.*.local
 coverage
+graphify-out/

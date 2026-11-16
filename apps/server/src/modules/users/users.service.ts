@@ -443,6 +443,7 @@ export class UsersService {
       role: assignedRole,
       isActivePC: isPC,
       homeTownId: townObjectId,
+      preferredLanguage: dto.preferredLanguage || 'fr',
       gender: dto.gender,
       integrationDate: dto.integrationDate,
       isWhatsappVerified,
@@ -475,6 +476,7 @@ export class UsersService {
         sanitizedPhone,
         normalizedEmail,
         generatedTempPassword,
+        savedUser.preferredLanguage || 'fr',
       );
     }
 
@@ -701,6 +703,10 @@ export class UsersService {
     let accessGranted = false;
     let accessRevoked = false;
 
+    if (dto.preferredLanguage) {
+      user.preferredLanguage = dto.preferredLanguage;
+    }
+
     if (dto.hasAppAccess !== undefined) {
       const wasAppAccess = user.account.hasAppAccess;
       user.account.hasAppAccess = dto.hasAppAccess;
@@ -722,6 +728,7 @@ export class UsersService {
           user.phoneNumber,
           user.email,
           tempPassword,
+          user.preferredLanguage || dto.preferredLanguage || 'fr',
         );
       }
     }
@@ -756,6 +763,7 @@ export class UsersService {
         user.phoneNumber,
         user.email,
         tempPassword,
+        user.preferredLanguage || dto.preferredLanguage || 'fr',
       );
     }
 
@@ -793,6 +801,10 @@ export class UsersService {
           ),
         );
     } else if (accessRevoked) {
+      // 1. Terminate user session immediately in real-time
+      this.notificationsService.terminateUserSession(user._id.toString());
+
+      // 2. Direct notification to revoked user
       this.notificationsService
         .createNotification(
           {
@@ -816,6 +828,54 @@ export class UsersService {
         .catch((err) =>
           this.logger.warn(
             `Failed to dispatch access revoked notification: ${err.message}`,
+          ),
+        );
+
+      // 3. Broadcast in-app notification to all other users with active app access
+      this.userModel
+        .find({
+          _id: { $ne: user._id },
+          'account.hasAppAccess': true,
+          'account.isAccessRevoked': { $ne: true },
+        })
+        .select('_id')
+        .exec()
+        .then((others) => {
+          const otherUserIds = others.map((o) => o._id.toString());
+          if (otherUserIds.length > 0) {
+            this.notificationsService
+              .createNotification(
+                {
+                  target: {
+                    userIds: otherUserIds,
+                  },
+                  level: 'WARNING',
+                  action: 'ACCESS_REVOKED',
+                  titleKey: 'notifications:accessRevokedBroadcastTitle',
+                  bodyKey: 'notifications:accessRevokedBroadcastBody',
+                  bodyParams: {
+                    name: user.fullName,
+                  },
+                  resource: {
+                    entityType: 'ACCESS',
+                    entityId: user._id.toString(),
+                    townId: user.homeTownId?.toString(),
+                    subTab: 'access',
+                  },
+                  sendPush: false,
+                },
+                _currentUser.id,
+              )
+              .catch((err) =>
+                this.logger.warn(
+                  `Failed to dispatch broadcast access revoked notification: ${err.message}`,
+                ),
+              );
+          }
+        })
+        .catch((err) =>
+          this.logger.warn(
+            `Failed to query users for broadcast access revoked notification: ${err.message}`,
           ),
         );
     } else if (dto.allowedReadTownIds !== undefined) {
@@ -1041,16 +1101,21 @@ export class UsersService {
     phone: string,
     email?: string,
     tempPassword?: string,
+    language: 'fr' | 'en' = 'fr',
   ) {
     if (!tempPassword) return;
 
     // Send WhatsApp (non-blocking)
     this.whatsAppService
-      .sendTemporaryPasswordMessage(phone, {
-        fullName: name,
-        tempPassword,
-        expiresInHours: 48,
-      })
+      .sendTemporaryPasswordMessage(
+        phone,
+        {
+          fullName: name,
+          tempPassword,
+          expiresInHours: 48,
+        },
+        language,
+      )
       .catch((err) =>
         this.logger.warn(`Failed sending WhatsApp invite: ${err.message}`),
       );
@@ -1058,11 +1123,15 @@ export class UsersService {
     // Send Email if address exists (non-blocking)
     if (email) {
       this.emailService
-        .sendTemporaryPasswordEmail(email, {
-          fullName: name,
-          tempPassword,
-          expiresInHours: 48,
-        })
+        .sendTemporaryPasswordEmail(
+          email,
+          {
+            fullName: name,
+            tempPassword,
+            expiresInHours: 48,
+          },
+          language,
+        )
         .catch((err) =>
           this.logger.warn(`Failed sending Email invite: ${err.message}`),
         );

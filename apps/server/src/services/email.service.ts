@@ -199,21 +199,31 @@ export class EmailService implements OnModuleInit, NotificationStrategy {
       loginUrl?: string;
       logoUrl?: string;
     },
+    language: 'fr' | 'en' = 'fr',
   ): Promise<boolean> {
     const host =
       this.configService.get<string>('APP_URL') || 'http://localhost:3000';
     const logoUrl = data.logoUrl || `${host}/uploads/branding/logo.png`;
     const loginUrl =
       data.loginUrl || `lrc-jrs://login?email=${encodeURIComponent(to)}`;
-    const html = TemplateLoaderUtil.render('emails/temporary-password.hbs', {
+    const templateName =
+      language === 'en'
+        ? 'emails/temporary-password.en.hbs'
+        : 'emails/temporary-password.hbs';
+    const html = TemplateLoaderUtil.render(templateName, {
       ...data,
       logoUrl,
       loginUrl,
     });
 
+    const subject =
+      language === 'en'
+        ? 'Welcome to LRC JRS - Your temporary access credentials'
+        : 'Bienvenue sur LRC JRS - Vos accès temporaires';
+
     return this.sendEmail({
       to,
-      subject: 'Bienvenue sur LRC JRS - Vos accès temporaires',
+      subject,
       html,
     });
   }

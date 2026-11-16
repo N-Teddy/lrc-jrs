@@ -165,7 +165,7 @@ export const TownScopeModal: React.FC<TownScopeModalProps> = ({
               </div>
             </div>
           </div>
-          <span className="px-2 py-0.5 rounded-xs text-[10px] font-mono font-bold bg-[#f4ece9] text-[#57423b] border border-[#e8e1dd] shrink-0">
+          <span className="px-2 py-0.5 rounded-sm text-[10px] font-mono font-bold bg-[#f4ece9] text-[#57423b] border border-[#e8e1dd] shrink-0">
             {homeTown?.code ?? 'HUB'}
           </span>
         </div>
@@ -200,10 +200,10 @@ export const TownScopeModal: React.FC<TownScopeModalProps> = ({
                   </div>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
-                  <span className="px-2 py-0.5 rounded-xs text-[10px] font-bold bg-[#edf3ee] text-[#2c4e37] border border-[#c2e9ca]">
+                  <span className="px-2 py-0.5 rounded-sm text-[10px] font-bold bg-[#edf3ee] text-[#2c4e37] border border-[#c2e9ca]">
                     Primary Base (Locked)
                   </span>
-                  <span className="px-2 py-0.5 rounded-xs text-[10px] font-mono font-bold bg-white text-[#57423b] border border-[#c2e9ca]">
+                  <span className="px-2 py-0.5 rounded-sm text-[10px] font-mono font-bold bg-white text-[#57423b] border border-[#c2e9ca]">
                     {homeTown.code}
                   </span>
                 </div>
@@ -311,7 +311,7 @@ export const TownScopeModal: React.FC<TownScopeModalProps> = ({
                           </div>
                         </div>
                       </div>
-                      <span className="px-2 py-0.5 rounded-xs text-[10px] font-mono font-bold bg-[#faf2ee] text-[#57423b] border border-[#e8e1dd] shrink-0">
+                      <span className="px-2 py-0.5 rounded-sm text-[10px] font-mono font-bold bg-[#faf2ee] text-[#57423b] border border-[#e8e1dd] shrink-0">
                         {town.code}
                       </span>
                     </div>

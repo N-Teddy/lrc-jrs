@@ -12,9 +12,9 @@
     }
   },
   "scripts": {
-    "build": "tsc",
+    "build": "node scripts/validate-i18n.cjs && tsc",
     "dev": "tsc --watch",
-    "check-types": "tsc --noEmit"
+    "check-types": "node scripts/validate-i18n.cjs && tsc --noEmit"
   },
   "dependencies": {
     "@jrs/shared": "workspace:*",

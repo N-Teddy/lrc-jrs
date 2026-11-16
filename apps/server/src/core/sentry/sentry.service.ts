@@ -86,6 +86,7 @@ export class SentryService {
         release,
         sampleRate: 1.0, // Capture 100% of errors
         tracesSampleRate: 0.1, // Sample 10% of transactions to respect free tier
+        attachStacktrace: true,
         beforeSend(event) {
           // Automatic data scrubbing for sensitive credentials & PII
           if (event.request?.headers) {

@@ -166,11 +166,13 @@ export class WhatsAppService implements NotificationStrategy {
   async sendTemporaryPasswordMessage(
     to: string,
     data: { fullName: string; tempPassword: string; expiresInHours: number },
+    language: 'fr' | 'en' = 'fr',
   ): Promise<boolean> {
-    const message = TemplateLoaderUtil.render(
-      'whatsapp/temporary-password.txt',
-      data,
-    );
+    const templateName =
+      language === 'en'
+        ? 'whatsapp/temporary-password.en.txt'
+        : 'whatsapp/temporary-password.fr.txt';
+    const message = TemplateLoaderUtil.render(templateName, data);
     return this.sendTextMessage(to, message);
   }
 }

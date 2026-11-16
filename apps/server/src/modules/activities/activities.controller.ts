@@ -1,4 +1,4 @@
-import type { IAuthUser } from '@jrs/shared';
+import { type IAuthUser, UserRole } from '@jrs/shared';
 import {
   Body,
   Controller,
@@ -27,6 +27,7 @@ import {
 import type { Response } from 'express';
 import { CurrentUser } from '../../core/decorators/current-user.decorator';
 import { Public } from '../../core/decorators/public.decorator';
+import { Roles } from '../../core/decorators/roles.decorator';
 import { TownScope } from '../../core/decorators/town-scope.decorator';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
 import { TownScopeGuard } from '../../core/guards/town-scope.guard';
@@ -110,6 +111,7 @@ export class ActivitiesController {
   }
 
   @Post('report/drive-upload')
+  @Roles(UserRole.AP, UserRole.PC)
   @HttpCode(HttpStatus.OK)
   @UseInterceptors(AnyFilesInterceptor())
   @ApiConsumes('multipart/form-data')
@@ -132,6 +134,7 @@ export class ActivitiesController {
   }
 
   @Delete('report/drive-file/:fileId')
+  @Roles(UserRole.AP, UserRole.PC)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary:
@@ -146,6 +149,7 @@ export class ActivitiesController {
   }
 
   @Post('report/drive-folders')
+  @Roles(UserRole.AP, UserRole.PC)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create a new Google Drive folder' })
   @ApiResponse({ status: 201, description: 'Folder created successfully' })
@@ -157,6 +161,7 @@ export class ActivitiesController {
   }
 
   @Patch('report/drive-folders/:id')
+  @Roles(UserRole.AP, UserRole.PC)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Rename a Google Drive folder' })
   @ApiResponse({ status: 200, description: 'Folder renamed successfully' })
@@ -165,6 +170,7 @@ export class ActivitiesController {
   }
 
   @Delete('report/drive-folders/:id')
+  @Roles(UserRole.AP, UserRole.PC)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Delete a Google Drive folder' })
   @ApiResponse({ status: 200, description: 'Folder deleted successfully' })
@@ -232,6 +238,7 @@ export class ActivitiesController {
   }
 
   @Post()
+  @Roles(UserRole.AP, UserRole.PC)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create a new community activity' })
   @ApiResponse({ status: 201, description: 'Activity successfully created' })
@@ -243,6 +250,7 @@ export class ActivitiesController {
   }
 
   @Patch(':id')
+  @Roles(UserRole.AP, UserRole.PC)
   @ApiOperation({
     summary:
       'Update activity details with audit history on reschedules/relocations',
@@ -257,6 +265,7 @@ export class ActivitiesController {
   }
 
   @Delete(':id')
+  @Roles(UserRole.AP, UserRole.PC)
   @ApiOperation({ summary: 'Soft delete an activity' })
   @ApiResponse({ status: 200, description: 'Activity deleted' })
   async delete(@Param('id') id: string, @CurrentUser() currentUser: IAuthUser) {
@@ -273,6 +282,7 @@ export class ActivitiesController {
   }
 
   @Post(':id/attendance')
+  @Roles(UserRole.AP, UserRole.PC)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary:
@@ -288,6 +298,7 @@ export class ActivitiesController {
   }
 
   @Post(':id/attendance/lock')
+  @Roles(UserRole.AP, UserRole.PC)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Finalize and lock attendance for an activity' })
   @ApiResponse({ status: 200, description: 'Attendance locked' })
@@ -300,6 +311,7 @@ export class ActivitiesController {
   }
 
   @Post(':id/attendance/unlock')
+  @Roles(UserRole.AP)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Unlock finalized attendance for an activity (AP only)',
@@ -314,6 +326,7 @@ export class ActivitiesController {
   }
 
   @Post(':id/report')
+  @Roles(UserRole.AP, UserRole.PC)
   @HttpCode(HttpStatus.OK)
   @UseInterceptors(AnyFilesInterceptor())
   @ApiConsumes('multipart/form-data')
@@ -339,6 +352,7 @@ export class ActivitiesController {
   }
 
   @Delete(':id/report/:fileId')
+  @Roles(UserRole.AP, UserRole.PC)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Delete a specific activity report file from Google Drive',
@@ -353,6 +367,7 @@ export class ActivitiesController {
   }
 
   @Delete(':id/report')
+  @Roles(UserRole.AP, UserRole.PC)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Delete activity reports from Google Drive' })
   @ApiResponse({ status: 200, description: 'Reports removed' })

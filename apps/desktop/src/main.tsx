@@ -24,6 +24,20 @@ if (typeof window !== 'undefined') {
 
   if (isDev) {
     document.title = 'LRC JRS (Dev) - Youth Fellowship Portal';
+  } else {
+    // Production tamper & inspection protection: disable context menu & devtools key shortcuts
+    document.addEventListener('contextmenu', (e) => e.preventDefault());
+    document.addEventListener('keydown', (e) => {
+      if (
+        e.key === 'F12' ||
+        ((e.ctrlKey || e.metaKey) &&
+          e.shiftKey &&
+          ['I', 'J', 'C'].includes(e.key.toUpperCase())) ||
+        ((e.ctrlKey || e.metaKey) && e.key.toUpperCase() === 'U')
+      ) {
+        e.preventDefault();
+      }
+    });
   }
 }
 

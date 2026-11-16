@@ -50,6 +50,46 @@ export const resources = {
   },
 } as const;
 
+// ============================================================================
+// COMPILE-TIME TRANSLATION PARITY ENFORCEMENT
+// If any key is missing between English and French bundles, this will trigger
+// a compile error in TypeScript and report it in the build logs.
+// ============================================================================
+type DiffKeyCheck<A, B> = {
+  [K in keyof A]: K extends keyof B
+    ? A[K] extends object
+      ? B[K] extends object
+        ? DiffKeyCheck<A[K], B[K]>
+        : K
+      : never
+    : K;
+}[keyof A];
+
+type IsEmptyCheck<T> = [T] extends [never] ? true : false;
+
+type ValidateParity<A, B> =
+  IsEmptyCheck<DiffKeyCheck<A, B>> extends true
+    ? IsEmptyCheck<DiffKeyCheck<B, A>> extends true
+      ? true
+      : { readonly missingInFirst: DiffKeyCheck<B, A> }
+    : { readonly missingInSecond: DiffKeyCheck<A, B> };
+
+// Static assertions evaluated during TypeScript type-checking
+export const _assertMainBundleParity: ValidateParity<typeof en, typeof fr> =
+  true;
+export const _assertNotificationsParity: ValidateParity<
+  typeof notificationsEn,
+  typeof notificationsFr
+> = true;
+export const _assertErrorsParity: ValidateParity<
+  typeof errorsEn,
+  typeof errorsFr
+> = true;
+export const _assertSuccessParity: ValidateParity<
+  typeof successEn,
+  typeof successFr
+> = true;
+
 export function isDevEnvironment(): boolean {
   try {
     if (process?.env?.NODE_ENV) {

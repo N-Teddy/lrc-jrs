@@ -1,5 +1,5 @@
 import { useTownContext, useTranslation } from '@jrs/client-core';
-import type { IActivity } from '@jrs/shared';
+import { ActivityStatus, type IActivity } from '@jrs/shared';
 import {
   Buildings,
   CaretLeft,
@@ -423,20 +423,23 @@ export const ActivityCalendarView: React.FC<ActivityCalendarViewProps> = ({
                     <span>{t('activities:card.details', 'Details')}</span>
                   </button>
 
-                  {canWrite && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const act = activeActivityModal;
-                        setActiveActivityModal(null);
-                        onEditActivity(act);
-                      }}
-                      className="py-2 px-3 rounded-md bg-[#faf2ee] border border-[#e8e1dd] text-[#57423b] hover:text-[#1e1b19] font-bold text-xs transition-colors cursor-pointer flex items-center gap-1"
-                    >
-                      <PencilSimple size={15} weight="bold" />
-                      <span>{t('common:edit', 'Edit')}</span>
-                    </button>
-                  )}
+                  {canWrite &&
+                    activeActivityModal.status !== ActivityStatus.COMPLETED &&
+                    new Date(activeActivityModal.endDate).getTime() >=
+                      Date.now() && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const act = activeActivityModal;
+                          setActiveActivityModal(null);
+                          onEditActivity(act);
+                        }}
+                        className="py-2 px-3 rounded-md bg-[#faf2ee] border border-[#e8e1dd] text-[#57423b] hover:text-[#1e1b19] font-bold text-xs transition-colors cursor-pointer flex items-center gap-1"
+                      >
+                        <PencilSimple size={15} weight="bold" />
+                        <span>{t('common:edit', 'Edit')}</span>
+                      </button>
+                    )}
                 </div>
               </div>
             </div>

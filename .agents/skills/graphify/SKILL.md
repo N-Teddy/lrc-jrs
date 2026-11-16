@@ -93,3 +93,4 @@ graphify . --mode deep
 ## 4. Best Practices
 * Add large binaries, generated build outputs (`dist/`, `build/`, `node_modules/`), and temp files to `.graphifyignore` or standard `.gitignore`.
 * Open `graphify-out/graph.html` directly in the browser to visually inspect dependencies between monorepo apps and packages.
+
