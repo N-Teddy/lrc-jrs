@@ -46,8 +46,11 @@ export const translations = {
       contactDetails: 'Coordonnées de Contact',
       phoneNumber: 'Numéro WhatsApp / Téléphone',
       phoneHelper: 'Utilisé par votre responsable local pour vous contacter.',
+      phoneError:
+        'Veuillez entrer un numéro à 9 chiffres valide (ex. 671 23 45 67)',
       email: 'Adresse e-mail',
       emailPlaceholder: 'nom@example.com',
+      emailError: 'Veuillez entrer une adresse e-mail valide',
       optional: 'Optionnel',
       summary: 'Récapitulatif de votre fiche',
       reviewTitle: 'Fiche Membre',
@@ -203,8 +206,11 @@ export const translations = {
       contactDetails: 'Contact Details',
       phoneNumber: 'WhatsApp / Phone Number',
       phoneHelper: 'Used by your local leader to contact you.',
+      phoneError:
+        'Please enter a valid 9-digit phone number (e.g. 671 23 45 67)',
       email: 'Email Address',
       emailPlaceholder: 'name@example.com',
+      emailError: 'Please enter a valid email address',
       optional: 'Optional',
       summary: 'Profile Summary',
       reviewTitle: 'Member Card',

@@ -1,4 +1,6 @@
 import {
+  ErrorService,
+  toast,
   useCreateRegistrationLinkMutation,
   useDeactivateRegistrationLinkMutation,
   useRegistrationLinksQuery,
@@ -10,17 +12,20 @@ import {
   Check,
   Clock,
   Copy,
+  Hash,
   Link,
   Plus,
   ShareNetwork,
+  ShieldCheck,
   Trash,
-  Warning,
   WhatsappLogo,
   X,
 } from '@phosphor-icons/react';
 import { openUrl } from '@tauri-apps/plugin-opener';
 import type React from 'react';
 import { useState } from 'react';
+import emptyLinksSvg from '../../../assets/illustrations/empty-links.svg';
+import { EmptyState } from '../../../components';
 
 interface IntakeLinksModalProps {
   isOpen: boolean;
@@ -39,13 +44,13 @@ export const IntakeLinksModal: React.FC<IntakeLinksModalProps> = ({
 }) => {
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<'create' | 'list'>('create');
-  const [copiedToken, setCopiedToken] = useState<string | null>(null);
+  const [copiedItem, setCopiedItem] = useState<{
+    id: string;
+    type: 'link' | 'code';
+  } | null>(null);
 
   // Form State
-  const [title, setTitle] = useState(`Intake - ${activeTownName}`);
   const [expiresInHours, setExpiresInHours] = useState<number>(72); // 3 days default
-  const [customMessage, setCustomMessage] = useState<string>('');
-  const [formError, setFormError] = useState<string | null>(null);
   const [createdSuccessLink, setCreatedSuccessLink] =
     useState<IRegistrationLink | null>(null);
 
@@ -68,7 +73,6 @@ export const IntakeLinksModal: React.FC<IntakeLinksModalProps> = ({
 
   // Compute intake base url from configured environment or runtime origin
   const getIntakeBaseUrl = () => {
-    // 1. Explicitly configured intake URL from environment
     const envUrl = (
       import.meta.env.VITE_INTAKE_URL as string | undefined
     )?.trim();
@@ -76,10 +80,8 @@ export const IntakeLinksModal: React.FC<IntakeLinksModalProps> = ({
       return envUrl.replace(/\/+$/, '');
     }
 
-    // 2. Local development fallback
     if (typeof window !== 'undefined' && window.location) {
       const { hostname } = window.location;
-      // In dev or desktop webview localhost, point directly to the intake web server
       if (
         hostname === 'localhost' ||
         hostname === '127.0.0.1' ||
@@ -89,7 +91,6 @@ export const IntakeLinksModal: React.FC<IntakeLinksModalProps> = ({
       }
     }
 
-    // 3. Default fallback for local dev
     return 'http://localhost:5174';
   };
 
@@ -97,67 +98,63 @@ export const IntakeLinksModal: React.FC<IntakeLinksModalProps> = ({
     return `${getIntakeBaseUrl()}/r/${token}`;
   };
 
-  const handleCopyLink = async (token: string) => {
+  const handleCopyLink = async (token: string, id: string = token) => {
     const url = getPublicLinkUrl(token);
     try {
       await navigator.clipboard.writeText(url);
-      setCopiedToken(token);
-      setTimeout(() => setCopiedToken(null), 2500);
     } catch {
-      // fallback
       const textArea = document.createElement('textarea');
       textArea.value = url;
       document.body.appendChild(textArea);
       textArea.select();
       document.execCommand('copy');
       document.body.removeChild(textArea);
-      setCopiedToken(token);
-      setTimeout(() => setCopiedToken(null), 2500);
     }
+    setCopiedItem({ id, type: 'link' });
+    setTimeout(() => setCopiedItem(null), 2500);
+  };
+
+  const handleCopyCode = async (token: string, id: string = token) => {
+    try {
+      await navigator.clipboard.writeText(token);
+    } catch {
+      const textArea = document.createElement('textarea');
+      textArea.value = token;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+    }
+    setCopiedItem({ id, type: 'code' });
+    setTimeout(() => setCopiedItem(null), 2500);
   };
 
   const handleShareWhatsApp = async (link: IRegistrationLink) => {
     const url = getPublicLinkUrl(link.token);
-    const message = `Bonjour ! Voici le lien officiel pour soumettre votre inscription auprès de la jeunesse LRC (${activeTownName}) :\n\n${url}\n\nCe lien est valide pour une durée limitée. Merci de renseigner vos coordonnées.`;
+    const message = `Bonjour ! Voici le lien officiel pour soumettre votre inscription auprès de la communauté LRC (${activeTownName}) :\n\n${url}\n\nCode d'invitation: ${link.token}\n\nCe lien est valide pour une durée limitée. Merci de renseigner vos coordonnées.`;
     const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
     await handleOpenExternalLink(whatsappUrl);
   };
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
-    setFormError(null);
-
-    if (!title.trim()) {
-      setFormError(
-        t(
-          'members:intakeLinks.titleRequiredError',
-          'Please enter a descriptive title for this intake link.',
-        ),
-      );
-      return;
-    }
 
     try {
       const res = await createLinkMutation.mutateAsync({
-        title: title.trim(),
         homeTownId: activeTownId,
         expiresInHours,
-        customMessage: customMessage.trim() ? customMessage.trim() : undefined,
       });
 
       setCreatedSuccessLink(res);
-      setActiveTab('list');
-      // Reset form
-      setTitle(`Intake - ${activeTownName}`);
-      setCustomMessage('');
-    } catch (err: any) {
-      setFormError(
-        err?.message ||
-          t(
-            'members:intakeLinks.generateError',
-            'Failed to generate self-entry link. Please try again.',
-          ),
+      toast.success(
+        t(
+          'members:intakeLinks.generateSuccess',
+          'Registration link generated successfully.',
+        ),
       );
+      setActiveTab('list');
+    } catch (err: any) {
+      ErrorService.handle(err);
     }
   };
 
@@ -187,31 +184,37 @@ export const IntakeLinksModal: React.FC<IntakeLinksModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
-      <div className="relative w-full max-w-[700px] my-auto bg-white rounded-xl border border-[#e8e1dd] shadow-2xl flex flex-col overflow-hidden max-h-[90vh]">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#1e1b19]/60 backdrop-blur-xs animate-in fade-in duration-200"
+      onClick={onClose}
+    >
+      <div
+        className="relative w-full max-w-2xl my-auto bg-white rounded-xl border border-[#e8e1dd] shadow-2xl flex flex-col overflow-hidden max-h-[90vh]"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Header */}
-        <div className="p-6 pb-4 flex items-start justify-between border-b border-[#f4ece9] bg-gradient-to-r from-white via-white to-[#faf2ee]">
+        <div className="p-6 pb-4 flex items-start justify-between border-b border-[#f4ece9] bg-gradient-to-r from-white via-white to-[#faf2ee] shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-11 h-11 rounded-lg bg-[#fff2ee] border border-[#ffdbcf] flex items-center justify-center text-[#b85028] shrink-0 shadow-2xs">
               <Link size={24} weight="duotone" />
             </div>
             <div className="flex flex-col">
-              <div className="flex items-center gap-2">
-                <h2 className="text-lg font-bold text-[#1e1b19]">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h2 className="text-base font-bold text-[#1e1b19]">
                   {t(
                     'members:intakeLinks.modalTitle',
                     'Member Self-Entry Links',
                   )}
                 </h2>
-                <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-[#faf2ee] text-[#b85028] border border-[#e8e1dd]">
+                <span className="px-2 py-0.5 rounded-sm text-[10px] font-mono font-bold bg-[#faf2ee] text-[#b85028] border border-[#e8e1dd]">
                   {activeTownName} ({activeTownCode})
                 </span>
               </div>
-              <p className="text-xs text-[#8a726a]">
+              <p className="text-xs text-[#8a726a] mt-0.5">
                 {t('members:intakeLinks.modalSubtitle', {
                   town: activeTownName,
                   code: activeTownCode,
-                  defaultValue: `Generate shareable, expiring invitation links so prospective youth can enter their own information into ${activeTownName} (${activeTownCode}).`,
+                  defaultValue: `Generate shareable, expiring invitation links so prospective youth can enter their own information into ${activeTownName}.`,
                 })}
               </p>
             </div>
@@ -219,191 +222,160 @@ export const IntakeLinksModal: React.FC<IntakeLinksModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="w-8 h-8 rounded-lg bg-[#faf2ee] hover:bg-[#f4ece9] border border-[#e8e1dd] flex items-center justify-center text-[#8a726a] hover:text-[#1e1b19] transition-colors cursor-pointer"
+            className="w-8 h-8 rounded-md bg-[#faf2ee] hover:bg-[#f4ece9] border border-[#e8e1dd] flex items-center justify-center text-[#8a726a] hover:text-[#1e1b19] transition-colors cursor-pointer"
           >
-            <X size={18} />
+            <X size={16} />
           </button>
         </div>
 
-        {/* Tab Switcher */}
-        <div className="px-6 pt-3 flex items-center gap-2 border-b border-[#f4ece9] bg-[#fdfbf9]">
-          <button
-            type="button"
-            onClick={() => {
-              setActiveTab('create');
-              setCreatedSuccessLink(null);
-            }}
-            className={`flex items-center gap-2 px-3.5 py-2 border-b-2 text-xs font-bold transition-all cursor-pointer ${
-              activeTab === 'create'
-                ? 'border-[#b85028] text-[#b85028]'
-                : 'border-transparent text-[#8a726a] hover:text-[#57423b]'
-            }`}
-          >
-            <Plus size={15} weight="bold" />
-            <span>
-              {t('members:intakeLinks.tabGenerate', 'Create New Link')}
-            </span>
-          </button>
+        {/* Centralized & Redesigned Tab Switcher */}
+        <div className="px-6 py-2.5 flex items-center justify-center border-b border-[#f4ece9] bg-[#fdfbf9] shrink-0">
+          <div className="inline-flex items-center p-1 bg-[#faf2ee] rounded-lg border border-[#e8e1dd]/80">
+            <button
+              type="button"
+              onClick={() => {
+                setActiveTab('create');
+                setCreatedSuccessLink(null);
+              }}
+              className={`flex items-center gap-2 px-4 py-1.5 rounded-md text-xs font-bold transition-all cursor-pointer ${
+                activeTab === 'create'
+                  ? 'bg-white text-[#b85028] shadow-xs'
+                  : 'text-[#8a726a] hover:text-[#57423b]'
+              }`}
+            >
+              <Plus size={14} weight="bold" />
+              <span>
+                {t('members:intakeLinks.tabGenerate', 'Create New Link')}
+              </span>
+            </button>
 
-          <button
-            type="button"
-            onClick={() => setActiveTab('list')}
-            className={`flex items-center gap-2 px-3.5 py-2 border-b-2 text-xs font-bold transition-all cursor-pointer ${
-              activeTab === 'list'
-                ? 'border-[#b85028] text-[#b85028]'
-                : 'border-transparent text-[#8a726a] hover:text-[#57423b]'
-            }`}
-          >
-            <ShareNetwork size={15} weight="bold" />
-            <span>
-              {t('members:intakeLinks.tabActiveLinks', {
-                count: links.length,
-                defaultValue: `Active & Past Links (${links.length})`,
-              })}
-            </span>
-          </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('list')}
+              className={`flex items-center gap-2 px-4 py-1.5 rounded-md text-xs font-bold transition-all cursor-pointer ${
+                activeTab === 'list'
+                  ? 'bg-white text-[#b85028] shadow-xs'
+                  : 'text-[#8a726a] hover:text-[#57423b]'
+              }`}
+            >
+              <ShareNetwork size={14} weight="bold" />
+              <span>
+                {t('members:intakeLinks.tabActiveLinks', {
+                  count: links.length,
+                  defaultValue: `Active & Past Links (${links.length})`,
+                })}
+              </span>
+            </button>
+          </div>
         </div>
 
         {/* Modal Body */}
-        <div className="p-6 overflow-y-auto flex-1">
+        <div className="p-6 overflow-y-auto flex-1 min-h-0">
           {activeTab === 'create' ? (
-            <form onSubmit={handleCreate} className="flex flex-col gap-5">
-              {formError && (
-                <div className="p-3.5 rounded-lg bg-[#ffdad6] border border-[#ffb4a8] text-[#ba1a1a] text-xs font-semibold flex items-center gap-2">
-                  <Warning size={18} className="shrink-0" />
-                  <span>{formError}</span>
-                </div>
-              )}
-
-              {/* Informational Policy Banner */}
-              <div className="p-3.5 rounded-lg bg-[#f0f6ff] border border-[#d0e2ff] text-[#0043ce] text-xs flex items-start gap-2.5">
-                <Clock size={18} className="shrink-0 mt-0.5" weight="fill" />
-                <div className="space-y-0.5">
-                  <p className="font-bold">
-                    {t(
-                      'members:intakeLinks.policyTitle',
-                      'Security & Review Policy',
-                    )}
-                  </p>
-                  <p className="text-[11px] text-[#0043ce]/90 leading-relaxed">
-                    {t(
-                      'members:intakeLinks.policyDesc',
-                      "Members registered via public intake links will not have application access by default. Each submission will be placed in your town's review queue for leadership verification before acceptance.",
-                    )}
-                  </p>
-                </div>
-              </div>
-
-              {/* Title Input */}
-              <div className="flex flex-col gap-1.5">
-                <label
-                  htmlFor="intake-link-title"
-                  className="text-xs font-bold text-[#57423b]"
-                >
-                  {t(
-                    'members:intakeLinks.campaignTitleLabel',
-                    'Link Title / Occasion',
-                  )}{' '}
-                  <span className="text-[#ba1a1a]">*</span>
-                </label>
-                <input
-                  id="intake-link-title"
-                  type="text"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  placeholder={t(
-                    'members:intakeLinks.campaignTitlePlaceholder',
-                    'e.g. Sunday Service Intake, Youth Camp 2026, New Converts',
-                  )}
-                  className="h-10 px-3.5 rounded-md bg-[#faf2ee] border border-[#e8e1dd] text-xs text-[#1e1b19] outline-none focus:bg-white focus:border-[#b85028] transition-all"
-                  required
+            <form onSubmit={handleCreate} className="flex flex-col gap-5 py-1">
+              {/* Compact Information Note */}
+              <div className="px-3.5 py-2.5 rounded-lg bg-[#fff8f5] border border-[#ffdbcf] text-xs flex items-center gap-2.5 text-[#57423b]">
+                <ShieldCheck
+                  size={18}
+                  weight="duotone"
+                  className="text-[#b85028] shrink-0"
                 />
+                <span className="text-[11px] leading-relaxed">
+                  {t(
+                    'members:intakeLinks.policyDescCompact',
+                    'Registrations submitted via this link will safely appear in your review queue for approval before gaining community directory status.',
+                  )}
+                </span>
               </div>
 
-              {/* Expiration Hours Preset */}
-              <div className="flex flex-col gap-1.5">
-                <span className="text-xs font-bold text-[#57423b]">
-                  {t(
-                    'members:intakeLinks.linkLifespanLabel',
-                    'Link Expiration',
-                  )}{' '}
-                  <span className="text-[#ba1a1a]">*</span>
-                </span>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              {/* Expiration Hours Preset Cards */}
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-[#57423b]">
+                    {t(
+                      'members:intakeLinks.linkLifespanLabel',
+                      'Link Lifespan & Expiration',
+                    )}
+                  </span>
+                  <span className="text-[10px] text-[#8a726a]">
+                    Automatically deactivates after expiration
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
                   {[
                     {
                       label: t('members:intakeLinks.preset24h', '24 Hours'),
                       hours: 24,
+                      desc: 'Quick Outreach',
                     },
                     {
-                      label: t('members:intakeLinks.preset3d', '3 Days (72h)'),
+                      label: t('members:intakeLinks.preset3d', '3 Days'),
                       hours: 72,
+                      desc: 'Recommended (72h)',
+                      recommended: true,
                     },
                     {
                       label: t('members:intakeLinks.preset7d', '7 Days'),
                       hours: 168,
+                      desc: 'Weekly Window',
                     },
                     {
                       label: t('members:intakeLinks.preset30d', '30 Days'),
                       hours: 720,
+                      desc: 'Extended Month',
                     },
-                  ].map((preset) => (
-                    <button
-                      key={preset.hours}
-                      type="button"
-                      onClick={() => setExpiresInHours(preset.hours)}
-                      className={`h-9 px-3 rounded-md text-xs font-bold border transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-                        expiresInHours === preset.hours
-                          ? 'bg-[#b85028] text-white border-[#b85028] shadow-xs'
-                          : 'bg-[#faf2ee] text-[#57423b] border-[#e8e1dd] hover:bg-[#f4ece9]'
-                      }`}
-                    >
-                      <Clock
-                        size={14}
-                        weight={
-                          expiresInHours === preset.hours ? 'fill' : 'regular'
-                        }
-                      />
-                      <span>{preset.label}</span>
-                    </button>
-                  ))}
+                  ].map((preset) => {
+                    const isSelected = expiresInHours === preset.hours;
+                    return (
+                      <button
+                        key={preset.hours}
+                        type="button"
+                        onClick={() => setExpiresInHours(preset.hours)}
+                        className={`p-3 rounded-lg border text-left transition-all cursor-pointer flex flex-col justify-between gap-1 relative ${
+                          isSelected
+                            ? 'bg-[#fff8f5] border-[#b85028] shadow-2xs ring-1 ring-[#b85028]/20'
+                            : 'bg-white border-[#e8e1dd] hover:bg-[#faf2ee]'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span
+                            className={`text-xs font-bold ${
+                              isSelected ? 'text-[#b85028]' : 'text-[#1e1b19]'
+                            }`}
+                          >
+                            {preset.label}
+                          </span>
+                          <Clock
+                            size={14}
+                            weight={isSelected ? 'fill' : 'regular'}
+                            className={
+                              isSelected ? 'text-[#b85028]' : 'text-[#8a726a]'
+                            }
+                          />
+                        </div>
+                        <span className="text-[10px] text-[#8a726a]">
+                          {preset.desc}
+                        </span>
+                        {preset.recommended && (
+                          <span className="absolute -top-2 -right-1 px-1.5 py-0.2 rounded-sm text-[9px] font-bold bg-[#b85028] text-white shadow-2xs">
+                            Rec
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
-              {/* Custom Welcome Message (Optional) */}
-              <div className="flex flex-col gap-1.5">
-                <label
-                  htmlFor="intake-link-custom-message"
-                  className="text-xs font-bold text-[#57423b] flex items-center justify-between"
-                >
-                  <span>
-                    {t(
-                      'members:intakeLinks.customMessageLabel',
-                      'Custom Greeting on Intake Page (Optional)',
-                    )}
-                  </span>
-                </label>
-                <textarea
-                  id="intake-link-custom-message"
-                  rows={2}
-                  value={customMessage}
-                  onChange={(e) => setCustomMessage(e.target.value)}
-                  placeholder={t(
-                    'members:intakeLinks.customMessagePlaceholder',
-                    'e.g. Bienvenue à la jeunesse LRC ! Merci de renseigner votre profil pour nous permettre de faire votre suivi.',
-                  )}
-                  className="p-3 rounded-md bg-[#faf2ee] border border-[#e8e1dd] text-xs text-[#1e1b19] outline-none focus:bg-white focus:border-[#b85028] transition-all resize-none"
-                />
-              </div>
-
               {/* Submit Button */}
-              <div className="pt-2 flex items-center justify-end gap-3 border-t border-[#f4ece9]">
+              <div className="pt-3 flex items-center justify-end gap-3 border-t border-[#f4ece9]">
                 <button
                   type="button"
                   onClick={onClose}
                   className="px-4 py-2 rounded-md border border-[#e8e1dd] text-xs font-bold text-[#8a726a] hover:text-[#57423b] hover:bg-[#faf2ee] transition-all cursor-pointer"
                 >
-                  {t('members:intake.cancel', 'Cancel')}
+                  {t('common:cancel', 'Cancel')}
                 </button>
                 <button
                   type="submit"
@@ -439,30 +411,61 @@ export const IntakeLinksModal: React.FC<IntakeLinksModalProps> = ({
                       )}
                     </span>
                   </div>
-                  <div className="flex items-center gap-2 p-2 bg-white rounded-lg border border-[#a9d0b2]">
-                    <input
-                      type="text"
-                      readOnly
-                      value={getPublicLinkUrl(createdSuccessLink.token)}
-                      className="flex-1 text-xs text-[#1e1b19] outline-none select-all bg-transparent"
-                    />
+                  <div className="flex flex-wrap items-center gap-2 p-2 bg-white rounded-lg border border-[#a9d0b2]">
+                    <div className="flex items-center gap-2 flex-1 min-w-[180px] px-1 font-mono text-xs">
+                      <span className="text-[#8a726a]">Code:</span>
+                      <span className="font-bold text-[#1e1b19] select-all">
+                        {createdSuccessLink.token}
+                      </span>
+                    </div>
                     <button
                       type="button"
-                      onClick={() => handleCopyLink(createdSuccessLink.token)}
-                      className="px-3 py-1.5 rounded bg-[#b85028] text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer hover:bg-[#a44520] transition-colors"
+                      onClick={() =>
+                        handleCopyLink(createdSuccessLink.token, 'new-link')
+                      }
+                      className="px-3 py-1.5 rounded-md bg-[#b85028] text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer hover:bg-[#a44520] transition-colors"
                     >
-                      {copiedToken === createdSuccessLink.token ? (
+                      {copiedItem?.id === 'new-link' &&
+                      copiedItem?.type === 'link' ? (
                         <>
                           <Check size={14} weight="bold" />
                           <span>
-                            {t('members:intakeLinks.copied', 'Copied')}
+                            {t('members:intakeLinks.copiedLink', 'Copied Link')}
                           </span>
                         </>
                       ) : (
                         <>
                           <Copy size={14} weight="bold" />
                           <span>
-                            {t('members:intakeLinks.copyLink', 'Copy')}
+                            {t('members:intakeLinks.copyLink', 'Copy Link')}
+                          </span>
+                        </>
+                      )}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        handleCopyCode(createdSuccessLink.token, 'new-code')
+                      }
+                      className="px-3 py-1.5 rounded-md bg-white border border-[#e8e1dd] text-[#57423b] text-xs font-bold flex items-center gap-1.5 cursor-pointer hover:bg-[#faf2ee] transition-colors"
+                    >
+                      {copiedItem?.id === 'new-code' &&
+                      copiedItem?.type === 'code' ? (
+                        <>
+                          <Check
+                            size={14}
+                            weight="bold"
+                            className="text-[#2c4e37]"
+                          />
+                          <span>
+                            {t('members:intakeLinks.copiedCode', 'Copied Code')}
+                          </span>
+                        </>
+                      ) : (
+                        <>
+                          <Hash size={14} weight="bold" />
+                          <span>
+                            {t('members:intakeLinks.copyCode', 'Copy Code')}
                           </span>
                         </>
                       )}
@@ -470,7 +473,7 @@ export const IntakeLinksModal: React.FC<IntakeLinksModalProps> = ({
                     <button
                       type="button"
                       onClick={() => handleShareWhatsApp(createdSuccessLink)}
-                      className="px-3 py-1.5 rounded bg-[#25D366] text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer hover:bg-[#20ba5a] transition-colors"
+                      className="px-3 py-1.5 rounded-md bg-[#25D366] text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer hover:bg-[#20ba5a] transition-colors"
                     >
                       <WhatsappLogo size={15} weight="fill" />
                       <span>WhatsApp</span>
@@ -482,7 +485,7 @@ export const IntakeLinksModal: React.FC<IntakeLinksModalProps> = ({
                           getPublicLinkUrl(createdSuccessLink.token),
                         )
                       }
-                      className="px-2.5 py-1.5 rounded bg-[#faf2ee] hover:bg-[#f4ece9] border border-[#e8e1dd] text-[#8a726a] hover:text-[#1e1b19] text-xs font-bold flex items-center gap-1 cursor-pointer transition-colors"
+                      className="px-2.5 py-1.5 rounded-md bg-[#faf2ee] hover:bg-[#f4ece9] border border-[#e8e1dd] text-[#8a726a] hover:text-[#1e1b19] text-xs font-bold flex items-center gap-1 cursor-pointer transition-colors"
                       title={t(
                         'members:intakeLinks.previewTitle',
                         'Preview Intake Form in Browser',
@@ -495,168 +498,125 @@ export const IntakeLinksModal: React.FC<IntakeLinksModalProps> = ({
                 </div>
               )}
 
-              {/* Links List */}
+              {/* Links Table / List */}
               {isLinksLoading ? (
-                <div className="py-12 text-center text-xs text-[#8a726a] flex flex-col items-center gap-2">
-                  <div className="w-6 h-6 border-2 border-[#b85028]/30 border-t-[#b85028] rounded-full animate-spin" />
-                  <span>
-                    {t('members:intakeLinks.loading', 'Loading links...')}
-                  </span>
+                <div className="py-12 flex items-center justify-center text-xs text-[#8a726a]">
+                  Loading links...
                 </div>
               ) : links.length === 0 ? (
-                <div className="py-12 text-center text-xs text-[#8a726a] flex flex-col items-center gap-2 border border-dashed border-[#e8e1dd] rounded-xl p-8">
-                  <Link size={32} className="text-[#8a726a]/50" />
-                  <p className="font-bold text-[#57423b]">
-                    {t(
-                      'members:intakeLinks.noLinksTitle',
-                      'No invitation links yet',
-                    )}
-                  </p>
-                  <p className="max-w-xs text-[#8a726a]">
-                    {t('members:intakeLinks.noLinksDesc', {
-                      town: activeTownName,
-                      defaultValue:
-                        'Click "Create New Link" above to generate a shareable member self-entry link.',
-                    })}
-                  </p>
-                </div>
+                <EmptyState
+                  imageSrc={emptyLinksSvg}
+                  title="No Intake Links Yet"
+                  description="Generate a shareable intake link to invite prospective youth to submit their registration profiles."
+                  primaryAction={{
+                    label: 'Create First Link',
+                    onClick: () => setActiveTab('create'),
+                  }}
+                  className="py-12"
+                />
               ) : (
-                <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-2.5 max-h-[420px] overflow-y-auto pr-1">
                   {links.map((link) => {
                     const isExpired =
-                      new Date() > new Date(link.expiresAt) || !link.isActive;
-                    const url = getPublicLinkUrl(link.token);
-                    const isCopied = copiedToken === link.token;
-
+                      !link.isActive || new Date(link.expiresAt) < new Date();
                     return (
                       <div
                         key={link.id}
-                        className={`p-4 rounded-xl border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
+                        className={`p-3.5 rounded-lg border flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-all ${
                           isExpired
-                            ? 'bg-[#fcfbf9] border-[#e8e1dd]/70 opacity-70'
-                            : 'bg-white border-[#e8e1dd] shadow-2xs hover:border-[#b85028]/40'
+                            ? 'bg-[#faf2ee]/50 border-[#e8e1dd] opacity-75'
+                            : 'bg-white border-[#e8e1dd] hover:border-[#b85028]/40 shadow-2xs'
                         }`}
                       >
-                        {/* Left Info */}
                         <div className="flex flex-col gap-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <span className="text-xs font-bold text-[#1e1b19] truncate">
-                              {link.title}
-                            </span>
-                            <span
-                              className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                                isExpired
-                                  ? 'bg-[#f4ece9] text-[#8a726a]'
-                                  : 'bg-[#c2e9ca] text-[#2c4e37]'
-                              }`}
-                            >
-                              {isExpired
-                                ? t(
-                                    'members:intakeLinks.expiredInactiveBadge',
-                                    'Expired / Inactive',
-                                  )
-                                : t(
-                                    'members:intakeLinks.activeBadge',
-                                    'Active',
-                                  )}
-                            </span>
-                            <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-[#faf2ee] text-[#57423b] border border-[#e8e1dd]">
-                              {link.usageCount}{' '}
-                              {link.usageCount === 1
-                                ? t(
-                                    'members:intakeLinks.submission',
-                                    'submission',
-                                  )
-                                : t(
-                                    'members:intakeLinks.submission_plural',
-                                    'submissions',
-                                  )}
-                            </span>
-                          </div>
-
-                          <div className="flex items-center gap-3 text-[11px] text-[#8a726a]">
-                            <span className="flex items-center gap-1">
-                              <Clock size={13} />
-                              {t(
-                                'members:intakeLinks.expiresLabel',
-                                'Expires:',
-                              )}{' '}
-                              {new Date(link.expiresAt).toLocaleDateString()}{' '}
-                              {new Date(link.expiresAt).toLocaleTimeString([], {
-                                hour: '2-digit',
-                                minute: '2-digit',
-                              })}
-                            </span>
-                            <span className="font-mono text-[#b85028] bg-[#fff2ee] px-1.5 py-0.5 rounded text-[10px]">
+                            <span className="font-mono font-bold text-xs px-2 py-0.5 rounded-md bg-[#faf2ee] text-[#1e1b19] border border-[#e8e1dd] select-all">
                               {link.token}
                             </span>
+                            <span
+                              className={`px-2 py-0.5 rounded-sm text-[10px] font-bold ${
+                                isExpired
+                                  ? 'bg-[#ffdad6] text-[#ba1a1a] border border-[#ffb4a8]'
+                                  : 'bg-[#c2e9ca] text-[#2c4e37] border border-[#a9d0b2]'
+                              }`}
+                            >
+                              {isExpired ? 'Expired' : 'Active'}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2 text-[11px] text-[#8a726a] flex-wrap mt-0.5">
+                            <span>
+                              Expires:{' '}
+                              {new Date(link.expiresAt).toLocaleDateString()}
+                            </span>
+                            <span>•</span>
+                            <span>{link.usageCount ?? 0} submissions</span>
                           </div>
                         </div>
 
-                        {/* Right Actions */}
-                        <div className="flex items-center gap-1.5 shrink-0 self-end sm:self-auto">
-                          <button
-                            type="button"
-                            onClick={() => handleCopyLink(link.token)}
-                            className="h-8 px-2.5 rounded-md border border-[#e8e1dd] bg-[#faf2ee] hover:bg-[#f4ece9] text-[#57423b] text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
-                            title={t(
-                              'members:intakeLinks.copyLink',
-                              'Copy public link',
-                            )}
-                          >
-                            {isCopied ? (
-                              <>
-                                <Check
-                                  size={14}
-                                  className="text-[#2c4e37]"
-                                  weight="bold"
-                                />
-                                <span className="text-[#2c4e37]">
-                                  {t('members:intakeLinks.copied', 'Copied')}
-                                </span>
-                              </>
-                            ) : (
-                              <>
-                                <Copy size={14} />
+                        <div className="flex items-center gap-1.5 shrink-0 self-end sm:self-auto flex-wrap">
+                          {!isExpired && (
+                            <>
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  handleCopyLink(link.token, link.id)
+                                }
+                                className="px-2.5 py-1.5 rounded-md bg-[#faf2ee] hover:bg-[#f4ece9] border border-[#e8e1dd] text-xs font-bold text-[#57423b] flex items-center gap-1 cursor-pointer transition-colors"
+                                title="Copy invitation link"
+                              >
+                                {copiedItem?.id === link.id &&
+                                copiedItem?.type === 'link' ? (
+                                  <Check size={13} className="text-[#2c4e37]" />
+                                ) : (
+                                  <Copy size={13} />
+                                )}
                                 <span>
-                                  {t('members:intakeLinks.copyLink', 'Copy')}
+                                  {copiedItem?.id === link.id &&
+                                  copiedItem?.type === 'link'
+                                    ? 'Copied Link'
+                                    : 'Copy Link'}
                                 </span>
-                              </>
-                            )}
-                          </button>
+                              </button>
 
-                          <button
-                            type="button"
-                            onClick={() => handleShareWhatsApp(link)}
-                            disabled={isExpired}
-                            className="h-8 px-2.5 rounded-md bg-[#25D366] hover:bg-[#20ba5a] text-white text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer disabled:opacity-40"
-                            title="Share on WhatsApp"
-                          >
-                            <WhatsappLogo size={15} weight="fill" />
-                            <span>WhatsApp</span>
-                          </button>
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  handleCopyCode(link.token, link.id)
+                                }
+                                className="px-2.5 py-1.5 rounded-md bg-white hover:bg-[#faf2ee] border border-[#e8e1dd] text-xs font-bold text-[#57423b] flex items-center gap-1 cursor-pointer transition-colors"
+                                title="Copy invitation code"
+                              >
+                                {copiedItem?.id === link.id &&
+                                copiedItem?.type === 'code' ? (
+                                  <Check size={13} className="text-[#2c4e37]" />
+                                ) : (
+                                  <Hash size={13} />
+                                )}
+                                <span>
+                                  {copiedItem?.id === link.id &&
+                                  copiedItem?.type === 'code'
+                                    ? 'Copied Code'
+                                    : 'Copy Code'}
+                                </span>
+                              </button>
 
-                          <button
-                            type="button"
-                            onClick={() => handleOpenExternalLink(url)}
-                            className="h-8 w-8 rounded-md border border-[#e8e1dd] bg-[#faf2ee] hover:bg-[#f4ece9] text-[#8a726a] hover:text-[#1e1b19] flex items-center justify-center transition-colors cursor-pointer"
-                            title={t(
-                              'members:intakeLinks.previewTitle',
-                              'Preview Intake Form in Browser',
-                            )}
-                          >
-                            <ArrowSquareOut size={15} />
-                          </button>
-
+                              <button
+                                type="button"
+                                onClick={() => handleShareWhatsApp(link)}
+                                className="px-2.5 py-1.5 rounded-md bg-[#25D366]/10 hover:bg-[#25D366]/20 border border-[#25D366]/30 text-[#128C7E] text-xs font-bold flex items-center gap-1 cursor-pointer transition-colors"
+                                title="Share via WhatsApp"
+                              >
+                                <WhatsappLogo size={14} weight="fill" />
+                                <span>Share</span>
+                              </button>
+                            </>
+                          )}
                           {!isExpired && (
                             <button
                               type="button"
                               onClick={() => handleDeactivate(link.id)}
-                              className="h-8 w-8 rounded-md border border-[#ffb4a8]/50 bg-white hover:bg-[#ffdad6] text-[#ba1a1a] flex items-center justify-center transition-colors cursor-pointer"
-                              title={t(
-                                'members:intakeLinks.deactivateTitle',
-                                'Deactivate link immediately',
-                              )}
+                              className="p-1.5 rounded-md hover:bg-[#ffdad6] text-[#8a726a] hover:text-[#ba1a1a] cursor-pointer transition-colors"
+                              title="Deactivate link"
                             >
                               <Trash size={15} />
                             </button>

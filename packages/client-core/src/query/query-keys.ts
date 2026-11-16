@@ -21,9 +21,6 @@ export const queryKeys = {
     detail: (id: string) => ['activities', id] as const,
     memberHistory: (memberId: string) =>
       ['activities', 'memberHistory', memberId] as const,
-    reminderTemplates: ['activities', 'reminder-templates'] as const,
-    reminderTemplate: (type: string) =>
-      ['activities', 'reminder-templates', type] as const,
   },
   attendance: {
     byActivity: (activityId: string) =>
@@ -40,5 +37,8 @@ export const queryKeys = {
     all: ['notifications'] as const,
     list: (query?: unknown) => ['notifications', 'list', query] as const,
     unreadCount: ['notifications', 'unread-count'] as const,
+  },
+  dashboard: {
+    overview: (params?: unknown) => ['dashboard', 'overview', params] as const,
   },
 };

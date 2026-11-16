@@ -36,6 +36,7 @@
     "remaining": "remaining",
     "expired": "Expired",
     "close": "Close",
+    "notRecorded": "Not recorded",
     "loadingPortal": "Loading LRC JRS Portal...",
     "prev": "Prev",
     "next": "Next",
@@ -48,7 +49,10 @@
     "showingAccounts": "Showing {{count}} of {{total}} registered members",
     "actions": "Actions",
     "tableView": "Table View",
-    "gridView": "Grid View"
+    "gridView": "Grid View",
+    "upload": "Upload",
+    "details": "Details",
+    "copiedToClipboard": "Copied to clipboard!"
   },
   "auth": {
     "login": {
@@ -254,6 +258,14 @@
       "noRemoteRelease": "No online release found. The build may still be compiling on GitHub, or you are already up to date."
     },
     "reservedWorkspace": "Reserved Workspace Initialized",
+    "comingSoonTitle": "Dashboard Analytics In Development",
+    "comingSoonBadge": "Still in Construction",
+    "comingSoonDesc": "Hub analytics and community metrics are in active development.",
+    "quickActionsTitle": "Quick Navigation to Active Modules",
+    "goToMembers": "Members Directory",
+    "goToActivities": "Activities & Calendar",
+    "goToIntake": "Intake Submissions",
+    "goToDrive": "Document Vault",
     "pristineTitle": "Workspace Ready",
     "pristineDesc": "The application shell for {{hub}} is active. This core viewport serves as the dedicated space for youth registries, activities, and notes.",
     "assigned": "your assigned",
@@ -276,8 +288,18 @@
       "allRightsReserved": "© {{year}} JRS Platform. All rights reserved.",
       "version": "v0.1.0",
       "build": "Build 2026.10",
-      "desktopEdition": "Desktop Edition"
-    }
+      "desktopEdition": "Desktop Edition",
+      "connectedDuration": "Session: {{time}}"
+    },
+    "greetingMorning": "Good morning",
+    "greetingAfternoon": "Good afternoon",
+    "greetingEvening": "Good evening",
+    "externalHubTitle": "External Hub: {{name}} ({{code}})",
+    "readOnlyView": "Read-Only View",
+    "writeAccessBadge": "Write Access Enabled",
+    "externalHubDesc": "You are inspecting data outside your registered parish hub.",
+    "noWriteAccessInTown": "You do not have write access in this town.",
+    "returnToMyHub": "Return to My Hub"
   },
   "roles": {
     "ap": "AP",
@@ -366,7 +388,8 @@
       "status": "Status",
       "actions": "Actions",
       "empty": "No activities found matching your filters.",
-      "schedule": "Schedule & Date"
+      "schedule": "Schedule & Date",
+      "emptyDescShort": "No scheduled activities in this hub yet."
     },
     "card": {
       "details": "Details",
@@ -374,7 +397,30 @@
       "trackAttendance": "Track Attendance",
       "viewHistory": "History ({{count}})",
       "edit": "Edit",
-      "delete": "Delete"
+      "delete": "Delete",
+      "attendancePending": "Attendance Pending",
+      "attendees": "Attendees",
+      "attendee": "Attendee",
+      "attendanceBreakdown": "({{members}}m · {{guests}}g)"
+    },
+    "interTown": {
+      "hostBanner": "Inter-city · Host: {{town}}",
+      "singleTown": "participating city",
+      "multipleTowns": "participating cities"
+    },
+    "calendar": {
+      "activitySingle": "Activity",
+      "activityPlural": "Activities",
+      "today": "Today",
+      "days": {
+        "sun": "Sun",
+        "mon": "Mon",
+        "tue": "Tue",
+        "wed": "Wed",
+        "thu": "Thu",
+        "fri": "Fri",
+        "sat": "Sat"
+      }
     },
     "timingNotice": {
       "notStarted": "This activity has not started yet. Attendance tracking is locked until the scheduled start time.",
@@ -631,6 +677,9 @@
       "d7Pill": "D-7 Sent",
       "reportDuePill": "Report Due",
       "menuChecklist": "Checklist & Reminders"
+    },
+    "attendance": {
+      "savedSuccess": "Attendance recorded and synchronized successfully."
     }
   },
   "attendance": {
@@ -640,6 +689,9 @@
     "notStartedDesc": "Attendance cannot be recorded before the activity has officially started ({{date}}). Please check back once the gathering commences.",
     "markAttendance": "Save Attendance",
     "savedSuccess": "Attendance updated successfully.",
+    "lockSuccess": "Attendance finalized and locked successfully.",
+    "unlockSuccess": "Attendance unlocked via AP override.",
+    "duplicateGuestError": "A guest with this name has already been registered for this activity.",
     "metrics": {
       "totalPresent": "Total Present",
       "membersPresent": "Members",
@@ -665,7 +717,8 @@
       "remove": "Remove",
       "noGuests": "No guest visitors registered yet for this session.",
       "phoneNumber": "Phone number (+237...)",
-      "confirmAdd": "Add guest"
+      "confirmAdd": "Add guest",
+      "badge": "Guest"
     },
     "markAllPresent": "Mark all present",
     "clearAll": "Clear all",
@@ -729,7 +782,11 @@
       "modalTitle": "Review Member Self-Entries",
       "modalSubtitle": "Members who entered their details via self-entry link for {{town}}. Review & confirm before saving into the directory.",
       "pendingCount": "{{count}} Pending",
-      "checking": "Checking pending member entries..."
+      "checking": "Checking pending member entries...",
+      "createLinkTitle": "Create and manage member intake links",
+      "createLink": "Create Link",
+      "allCaughtUpBadge": "All Caught Up",
+      "allCaughtUpDescShort": "All member submissions for this hub have been verified."
     },
     "intakeLinks": {
       "modalTitle": "Member Self-Entry Links",
@@ -825,7 +882,10 @@
       "viewProfile": "View Profile",
       "editRecord": "Edit Profile",
       "manageAccess": "Manage Access",
-      "deactivateMember": "Deactivate"
+      "deactivateMember": "Deactivate",
+      "phone": "Phone",
+      "directoryEmpty": "Community directory is empty",
+      "directoryEmptyDesc": "No members registered in this hub yet."
     },
     "modal": {
       "registerTitle": "Register New Community Member",
@@ -872,7 +932,15 @@
       "accessHelper": "A single-use temporary password will be generated and dispatched immediately via WhatsApp and Email. If unchecked, the member remains in the offline registry only.",
       "submitting": "Registering...",
       "saving": "Saving changes...",
-      "saveChanges": "Save Changes"
+      "saveChanges": "Save Changes",
+      "yearsShort": "yrs",
+      "defaultMemberName": "Member",
+      "emailPlaceholder": "member@example.com",
+      "errorImageSize": "Image size must be less than 5MB",
+      "errorFullNameRequired": "Full name is required.",
+      "errorDobRequired": "Date of birth is required.",
+      "errorInvalidPhone": "Please enter a valid 9-digit Cameroonian telephone number.",
+      "errorUpdateFailed": "Failed to update member."
     },
     "detail": {
       "backToMembers": "Back to Members",
@@ -893,7 +961,38 @@
       "granted": "Granted",
       "notGranted": "Offline Only",
       "lastLogin": "Last Sign-In",
-      "registeredOn": "Registered On"
+      "registeredOn": "Registered On",
+      "copyPhone": "Copy phone",
+      "transferHub": "Transfer Hub",
+      "tabAccess": "Access & Account",
+      "identityHeader": "Identity & Demographic Credentials",
+      "fullName": "Full Name",
+      "emailAddress": "Email Address",
+      "copied": "Copied!",
+      "none": "None",
+      "noneConfigured": "None configured",
+      "portalCredentialsHeader": "Portal Account & Credentials",
+      "portalCredentialsDesc": "Manage application login permissions, security state, and temporary passwords.",
+      "accessSuspended": "Access Suspended",
+      "activeAppAccess": "Active App Access",
+      "offlineOnly": "Offline Only (No Login)",
+      "assignedRole": "Assigned Role",
+      "activePc": "Active PC",
+      "credentialStatus": "Credential Status",
+      "tempPasswordActive": "Temporary Password (Pending update)",
+      "permanentPasswordSet": "Permanent Password Set",
+      "noCredentialsIssued": "No Credentials Issued",
+      "manageAccessAction": "Manage Platform Access & Credentials",
+      "pcLeadershipHeader": "Program Coordinator (PC) Leadership",
+      "pcLeadershipDesc": "{{name}} currently serves as Contact Person for {{town}}.",
+      "transferPcLeadership": "Transfer PC Leadership",
+      "crossHubScopes": "Cross-Hub Read Scopes",
+      "crossHubScopesDesc": "External community hubs this member is permitted to inspect in read-only mode.",
+      "homeHubOnly": "Home hub only ({{name}})",
+      "active": "Active",
+      "suspended": "Suspended",
+      "portalAccount": "Portal Account",
+      "accountStatus": "Account Status"
     },
     "accessModal": {
       "title": "Manage Platform Access & Credentials",
@@ -907,7 +1006,23 @@
       "suspendDesc": "Temporarily lock portal access without deleting the registry profile.",
       "suspendAction": "Suspend Access",
       "reactivateAction": "Reactivate Access",
-      "deactivateConfirmation": "Are you sure you want to deactivate {{name}}? They will be archived and will no longer appear in active member rosters."
+      "deactivateConfirmation": "Are you sure you want to deactivate {{name}}? They will be archived and will no longer appear in active member rosters.",
+      "accountStatus": "Account Status",
+      "active": "Active",
+      "suspended": "Suspended",
+      "noAppAccess": "No App Access",
+      "loginIdentifier": "Login Identifier (Phone)",
+      "registeredEmail": "Registered Email",
+      "none": "None",
+      "inviteToApp": "Invite to App",
+      "inviteDesc": "Grant this member access to the application and send them login credentials.",
+      "preferredLanguage": "Preferred Language",
+      "french": "French (Français)",
+      "english": "English (Anglais)",
+      "sendInvitation": "Send Invitation",
+      "sending": "Sending...",
+      "accountSuspendedSuccess": "Account access has been suspended.",
+      "accountReactivatedSuccess": "Account successfully reactivated."
     },
     "transferModal": {
       "title": "Transfer Member Hub",
@@ -927,6 +1042,9 @@
       "transferringMember": "Transferring Member...",
       "selectDestError": "Please select a destination town hub.",
       "transferFailedError": "Failed to transfer member. Please check permissions and try again."
+    },
+    "actions": {
+      "registerMember": "Register First Member"
     }
   },
   "access": {
@@ -960,7 +1078,7 @@
       "batchInvite": "Batch Invite"
     },
     "table": {
-      "member": "Member & Hub",
+      "member": "Member",
       "credentials": "Login Identifier & Email",
       "role": "Role",
       "status": "Portal Status",
@@ -980,7 +1098,8 @@
       "reactivate": "Reactivate Access",
       "noAccounts": "No accounts found matching criteria",
       "appAccess": "App Access",
-      "activeTown": "Active Town"
+      "activeTown": "Active Town",
+      "noAccountsDesc": "No authenticated accounts in this hub yet."
     },
     "modals": {
       "batchInviteTitle": "Batch Onboard Community Members",
@@ -1129,10 +1248,10 @@
     },
     "formats": {
       "all": "All Files",
-      "pdf": "PDFs",
-      "doc": "Word Docs",
-      "sheet": "Spreadsheets",
-      "image": "Images"
+      "pdf": "PDF Document",
+      "doc": "Word Document",
+      "sheet": "Spreadsheet",
+      "image": "Image File"
     },
     "preview": {
       "openDrive": "Open in Google Drive",
@@ -1141,6 +1260,33 @@
       "fileSize": "Size: {{size}}",
       "date": "Date: {{date}}",
       "activity": "Linked Activity"
-    }
+    },
+    "folders": "Folders",
+    "documents": "Documents",
+    "upOneLevel": "Up",
+    "newFolder": "New Folder",
+    "itemCount_one": "1 file",
+    "itemCount_other": "{{count}} files",
+    "empty": "Empty",
+    "emptyFolder": "This folder is currently empty",
+    "emptyFolderDesc": "Upload documents or notes to populate this folder.",
+    "noDirectFiles": "No documents directly in this folder",
+    "noDirectFilesDesc": "Navigate into one of the subfolders above to view its files, or upload a document here.",
+    "uploadHere": "Upload Document Here",
+    "uploadDocuments": "Upload Documents",
+    "includeSubfolders": "Include subfolder files"
+  },
+  "crash": {
+    "badge": "Application Error",
+    "title": "Something went wrong",
+    "description": "The application encountered an unexpected runtime error. Your recorded data remains safe.",
+    "reload": "Reload Application",
+    "returnHome": "Return to Sign-In",
+    "technicalDetails": "Technical Diagnostics",
+    "hideDetails": "Hide Diagnostics",
+    "copyDetails": "Copy Diagnostics",
+    "copied": "Copied to clipboard",
+    "errorName": "Error",
+    "errorLocation": "Component Stack"
   }
 }

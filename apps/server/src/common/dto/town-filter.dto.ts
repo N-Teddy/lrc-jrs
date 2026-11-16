@@ -8,4 +8,11 @@ export class TownFilterDto {
   @IsOptional()
   @IsString()
   townId?: string;
+
+  @ApiPropertyOptional({
+    description: 'Filter by multiple town IDs (comma-separated)',
+  })
+  @IsOptional()
+  @IsString()
+  townIds?: string;
 }

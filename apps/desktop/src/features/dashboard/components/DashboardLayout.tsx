@@ -6,16 +6,11 @@ import {
   useWebSocket,
 } from '@jrs/client-core';
 import type { IAuthUser, NotificationResource } from '@jrs/shared';
-import {
-  ArrowUUpLeft,
-  Buildings,
-  CheckCircle,
-  Sparkle,
-  SquaresFour,
-} from '@phosphor-icons/react';
+import { ArrowUUpLeft, Bug, Buildings } from '@phosphor-icons/react';
 import { motion } from 'motion/react';
 import type React from 'react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { AppCrashFallback } from '../../../components';
 import { APP_VERSION } from '../../../constants/version';
 import { ActivitiesFeature } from '../../activities';
 import { ChangePasswordModal } from '../../auth';
@@ -24,6 +19,7 @@ import { type MemberSubTab, MembersFeature } from '../../members';
 import { NotificationsFeature } from '../../notifications';
 import { TransfersFeature } from '../../transfers';
 import { useDashboardLayout } from '../hooks/use-dashboard-layout';
+import { DashboardOverview } from './DashboardOverview';
 import { Header } from './Header';
 import { HubSwitcherPopover } from './HubSwitcherPopover';
 import { Sidebar } from './Sidebar';
@@ -69,13 +65,25 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 
   // Resource Navigation Deep-link States
   const [memberSubTab, setMemberSubTab] = useState<MemberSubTab>('directory');
+  const [showDevErrorPreview, setShowDevErrorPreview] = useState(false);
+  const [sessionDuration, setSessionDuration] = useState('0m');
+
+  useEffect(() => {
+    const loginTime = Date.now();
+    const update = () => {
+      const mins = Math.floor((Date.now() - loginTime) / 60000);
+      const h = Math.floor(mins / 60);
+      const m = mins % 60;
+      setSessionDuration(h > 0 ? `${h}h ${m}m` : `${m}m`);
+    };
+    update();
+    const iv = setInterval(update, 30000);
+    return () => clearInterval(iv);
+  }, []);
   const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
   const [activitySubTab, setActivitySubTab] = useState<
     | 'schedule'
-    | 'reminders'
     | 'overview'
-    | 'preparation'
-    | 'checklist'
     | 'attendance'
     | 'report'
     | 'history'
@@ -117,16 +125,6 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           resource.entityType === 'ATTENDANCE'
         ) {
           setActivitySubTab('attendance');
-        } else if (
-          resource.subTab === 'reminders' ||
-          resource.subTab === 'guidelines'
-        ) {
-          setActivitySubTab('reminders');
-        } else if (
-          resource.subTab === 'preparation' ||
-          resource.subTab === 'checklist'
-        ) {
-          setActivitySubTab('preparation');
         } else if (
           resource.subTab === 'audit-log' ||
           resource.subTab === 'history'
@@ -212,37 +210,39 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 
       {/* 3. Main Workspace Area */}
       <main
-        className={`pt-16 pb-14 min-h-screen transition-all duration-200 ${
+        className={`pt-16 min-h-screen transition-all duration-200 pb-16 ${
           isSidebarCollapsed ? 'pl-[72px]' : 'pl-[260px]'
         }`}
       >
-        <div className="p-6 sm:p-8 max-w-[1536px] mx-auto w-full">
+        <div className="max-w-[1536px] mx-auto w-full p-4 sm:p-6 lg:p-8">
           {/* External Town Ambient Notification */}
           {!isViewingHomeTown && activeTown && (
-            <div className="mb-6 px-5 py-4 rounded-xl bg-[#fff8e1] border-2 border-[#ffe082] shadow-xs flex flex-wrap items-center justify-between gap-4 animate-in fade-in slide-in-from-top-2 duration-200">
+            <div className="mb-4 px-5 py-3 rounded-xl bg-[#fff8e1] border-2 border-[#ffe082] shadow-xs flex flex-wrap items-center justify-between gap-4 animate-in fade-in slide-in-from-top-2 duration-200 shrink-0">
               <div className="flex items-center gap-3.5">
-                <div className="w-11 h-11 rounded-lg bg-[#ffecb3] border border-[#ffd54f] flex items-center justify-center text-[#b78103] shrink-0">
-                  <Buildings size={24} weight="duotone" />
+                <div className="w-10 h-10 rounded-lg bg-[#ffecb3] border border-[#ffd54f] flex items-center justify-center text-[#b78103] shrink-0">
+                  <Buildings size={22} weight="duotone" />
                 </div>
                 <div className="flex flex-col">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-xs font-black text-[#7a5500] uppercase tracking-wider">
-                      External Hub: {activeTown.name} ({activeTown.code})
+                      {t('dashboard:externalHubTitle', {
+                        name: activeTown.name,
+                        code: activeTown.code,
+                      })}
                     </span>
                     {!canWrite ? (
-                      <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-[#ffe082] text-[#6d4c00]">
-                        Read-Only View
+                      <span className="px-2 py-0.5 rounded-sm text-[10px] font-bold bg-[#ffe082] text-[#6d4c00]">
+                        {t('dashboard:readOnlyView')}
                       </span>
                     ) : (
-                      <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-[#c2e9ca] text-[#2c4e37]">
-                        Write Access Enabled
+                      <span className="px-2 py-0.5 rounded-sm text-[10px] font-bold bg-[#c2e9ca] text-[#2c4e37]">
+                        {t('dashboard:writeAccessBadge')}
                       </span>
                     )}
                   </div>
                   <p className="text-xs text-[#8d6e19] mt-0.5 font-medium">
-                    You are browsing data for <strong>{activeTown.name}</strong>
-                    .
-                    {!canWrite && ' You do not have write access in this town.'}
+                    {t('dashboard:externalHubDesc')}{' '}
+                    {!canWrite && t('dashboard:noWriteAccessInTown')}
                   </p>
                 </div>
               </div>
@@ -251,10 +251,10 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                 <button
                   type="button"
                   onClick={() => setActiveTownId(user.homeTownId)}
-                  className="px-4 py-2 rounded-md bg-white hover:bg-[#fff9c4] text-[#7a5500] border border-[#ffd54f] text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
+                  className="px-4 py-2 rounded-lg bg-white hover:bg-[#fff9c4] text-[#7a5500] border border-[#ffd54f] text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
                 >
                   <ArrowUUpLeft size={16} weight="bold" />
-                  <span>Return to My Hub</span>
+                  <span>{t('dashboard:returnToMyHub')}</span>
                 </button>
               )}
             </div>
@@ -296,107 +296,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                 onNavigateToResource={handleNavigateToResource}
               />
             ) : (
-              /* Pristine Minimalist Workspace Card */
-              <div className="relative w-full min-h-[560px] rounded-xl bg-white border border-[#e8e1dd] shadow-xs flex flex-col justify-between p-8 sm:p-12 overflow-hidden">
-                {/* Background Subtle Hub Grid Pattern */}
-                <div className="absolute inset-0 pointer-events-none opacity-40">
-                  <svg
-                    className="w-full h-full text-[#e8e1dd]"
-                    width="100%"
-                    height="100%"
-                  >
-                    <defs>
-                      <pattern
-                        id="sanctuary-grid"
-                        width="40"
-                        height="40"
-                        patternUnits="userSpaceOnUse"
-                      >
-                        <circle cx="2" cy="2" r="1.2" fill="currentColor" />
-                      </pattern>
-                    </defs>
-                    <rect
-                      width="100%"
-                      height="100%"
-                      fill="url(#sanctuary-grid)"
-                    />
-                  </svg>
-                </div>
-
-                {/* Top Baseline Metadata */}
-                <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                  <div className="flex items-center gap-2.5 bg-[#faf2ee] border border-[#e8e1dd] px-3.5 py-1.5 rounded-full text-xs">
-                    <span className="w-2 h-2 rounded-full bg-[#486b52] animate-pulse" />
-                    <span className="font-bold text-[#1e1b19]">
-                      {activeTown
-                        ? `${activeTown.name} ${t('towns:hub')} (${activeTown.code})`
-                        : t('towns:activeHub')}
-                    </span>
-                    <span className="text-[#8a726a] font-mono text-[11px]">
-                      #LRC-JRS-PORTAL
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-2 text-xs font-semibold text-[#8a726a]">
-                    <span>SANCTUARY CANVAS</span>
-                    <span className="px-2 py-0.5 rounded-md bg-[#faf2ee] border border-[#e8e1dd] text-[#1e1b19] font-mono text-[11px]">
-                      {t('common:ready')}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Central Pristine Workspace Focus */}
-                <div className="relative z-10 my-auto py-12 flex flex-col items-center text-center max-w-md mx-auto">
-                  <div className="w-16 h-16 rounded-xl bg-[#faf2ee] border border-[#e8e1dd] flex items-center justify-center text-[#b85028] mb-5 shadow-xs">
-                    <SquaresFour size={32} weight="fill" />
-                  </div>
-
-                  <div className="inline-flex items-center gap-1.5 bg-[#ffdbcf]/50 text-[#812901] px-3 py-1 rounded-full text-xs font-bold mb-3 border border-[#ffb59c]/50">
-                    <Sparkle size={14} weight="fill" />
-                    <span>{t('dashboard:reservedWorkspace')}</span>
-                  </div>
-
-                  <h2 className="text-xl sm:text-2xl font-bold text-[#1e1b19] tracking-tight mb-2">
-                    {t('dashboard:pristineTitle')}
-                  </h2>
-
-                  <p className="text-xs sm:text-sm text-[#57423b] leading-relaxed">
-                    {t('dashboard:pristineDesc', {
-                      hub: activeTown
-                        ? activeTown.name
-                        : t('dashboard:assigned'),
-                    })}
-                  </p>
-                </div>
-
-                {/* Bottom Footer Specs */}
-                <div className="relative z-10 flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-[#e8e1dd]">
-                  <div className="flex items-center gap-4 text-xs text-[#8a726a]">
-                    <div className="flex items-center gap-1.5">
-                      <div className="w-2.5 h-2.5 rounded-full bg-[#b85028]" />
-                      <span>Terracotta</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <div className="w-2.5 h-2.5 rounded-full bg-[#486b52]" />
-                      <span>Sage Olive</span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-1.5 text-xs text-[#57423b] font-medium">
-                    <CheckCircle
-                      size={16}
-                      weight="fill"
-                      className="text-[#486b52]"
-                    />
-                    <span>
-                      {t('dashboard:signedInAs', {
-                        name: user.fullName,
-                        role: user.role,
-                      })}
-                    </span>
-                  </div>
-                </div>
-              </div>
+              <DashboardOverview user={user} onSelectTab={setActiveTab} />
             )}
           </motion.div>
         </div>
@@ -443,21 +343,28 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             )}
           </div>
 
-          {/* Center: Legal Copyright */}
-          <div className="text-center font-medium text-[#57423b] truncate hidden md:block">
-            {t('dashboard:footer.allRightsReserved', {
-              year: new Date().getFullYear(),
-            })}
-          </div>
-
-          {/* Right: Build & Edition Metadata */}
-          <div className="flex items-center gap-2 font-mono text-[11px] text-[#8a726a] shrink-0">
-            <span className="px-2 py-0.5 rounded-md bg-[#faf2ee] border border-[#e8e1dd] text-[#57423b] font-bold">
+          {/* Right: Build Metadata + Connected Session Duration */}
+          <div className="flex items-center gap-3 font-mono text-[11px] text-[#8a726a] shrink-0">
+            {import.meta.env.DEV && (
+              <button
+                type="button"
+                onClick={() => setShowDevErrorPreview(true)}
+                className="px-2 py-0.5 rounded-sm bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 font-sans text-[10px] font-bold transition-colors cursor-pointer flex items-center gap-1 mr-1"
+                title="Developer Only: Preview Crash & Error Screen"
+              >
+                <Bug size={12} weight="bold" />
+                <span>DEV: Review Error Page</span>
+              </button>
+            )}
+            <span className="font-sans font-medium text-[#57423b]">
+              {t('dashboard:footer.connectedDuration', {
+                time: sessionDuration,
+              })}
+            </span>
+            <span className="text-[#8a726a]/60">•</span>
+            <span className="px-2 py-0.5 rounded-sm bg-[#faf2ee] border border-[#e8e1dd] text-[#57423b] font-bold">
               v{APP_VERSION}
             </span>
-            <span>{t('dashboard:footer.build')}</span>
-            <span className="text-[#8a726a]/60">•</span>
-            <span>{t('dashboard:footer.desktopEdition')}</span>
           </div>
         </div>
       </footer>
@@ -475,6 +382,24 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         isOpen={isChangePasswordOpen}
         onClose={closeChangePassword}
       />
+
+      {/* 6. Dev-Only Error Page Preview Overlay */}
+      {showDevErrorPreview && (
+        <div className="fixed inset-0 z-50 bg-[#fff8f5] overflow-y-auto">
+          <AppCrashFallback
+            error={
+              new Error(
+                'DevSimulationError: Testing the application crash error page and diagnostics.',
+              )
+            }
+            errorInfo={{
+              componentStack:
+                '    at DashboardLayout (DashboardLayout.tsx:372)\n    at AppContent (App.tsx:144)',
+            }}
+            onReset={() => setShowDevErrorPreview(false)}
+          />
+        </div>
+      )}
     </div>
   );
 };

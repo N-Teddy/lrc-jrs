@@ -1,4 +1,4 @@
-import type { IAuthUser } from '@jrs/shared';
+import { type IAuthUser, UserRole } from '@jrs/shared';
 import {
   Body,
   Controller,
@@ -24,6 +24,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { CurrentUser } from '../../core/decorators/current-user.decorator';
+import { Roles } from '../../core/decorators/roles.decorator';
 import { TownScope } from '../../core/decorators/town-scope.decorator';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
 import { TownScopeGuard } from '../../core/guards/town-scope.guard';
@@ -77,6 +78,7 @@ export class UsersController {
   }
 
   @Post()
+  @Roles(UserRole.AP, UserRole.PC)
   @TownScope('homeTownId')
   @HttpCode(HttpStatus.CREATED)
   @UseInterceptors(
@@ -119,6 +121,7 @@ export class UsersController {
   }
 
   @Patch(':id')
+  @Roles(UserRole.AP, UserRole.PC)
   @UseInterceptors(
     FileFieldsInterceptor([
       { name: 'avatar', maxCount: 1 },
@@ -147,6 +150,7 @@ export class UsersController {
   }
 
   @Patch(':id/access')
+  @Roles(UserRole.AP, UserRole.PC)
   @ApiOperation({ summary: 'Update app login access or resend credentials' })
   @ApiResponse({ status: 200, description: 'Access updated successfully' })
   @ApiResponse({ status: 404, description: 'Member not found' })
@@ -159,6 +163,7 @@ export class UsersController {
   }
 
   @Post('change-pc')
+  @Roles(UserRole.AP)
   @ApiOperation({
     summary:
       'Transition PC leadership in a town, optionally demoting or revoking outgoing PC access',
@@ -178,6 +183,7 @@ export class UsersController {
   }
 
   @Post(':id/transfer')
+  @Roles(UserRole.AP, UserRole.PC)
   @ApiOperation({ summary: 'Transfer a community member to another town hub' })
   @ApiResponse({ status: 200, description: 'Member transferred successfully' })
   @ApiResponse({ status: 400, description: 'Invalid transfer parameters' })
@@ -192,6 +198,7 @@ export class UsersController {
   }
 
   @Delete(':id')
+  @Roles(UserRole.AP)
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Remove a member (AP only)' })
   @ApiResponse({ status: 204, description: 'Member removed' })

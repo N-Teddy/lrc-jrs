@@ -1,3 +1,4 @@
+import { useTranslation } from '@jrs/client-core';
 import {
   CalendarBlank,
   CaretDown,
@@ -15,7 +16,7 @@ import { CustomSelect, type SelectOption } from './CustomSelect';
 // CONSTANTS & HELPERS
 // ==========================================
 
-const MONTH_NAMES = [
+const MONTH_NAMES_EN = [
   'January',
   'February',
   'March',
@@ -30,7 +31,22 @@ const MONTH_NAMES = [
   'December',
 ];
 
-const MONTH_NAMES_SHORT = [
+const MONTH_NAMES_FR = [
+  'Janvier',
+  'Février',
+  'Mars',
+  'Avril',
+  'Mai',
+  'Juin',
+  'Juillet',
+  'Août',
+  'Septembre',
+  'Octobre',
+  'Novembre',
+  'Décembre',
+];
+
+const MONTH_NAMES_SHORT_EN = [
   'Jan',
   'Feb',
   'Mar',
@@ -45,7 +61,35 @@ const MONTH_NAMES_SHORT = [
   'Dec',
 ];
 
-const DAY_NAMES_SHORT = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
+const MONTH_NAMES_SHORT_FR = [
+  'Janv.',
+  'Févr.',
+  'Mars',
+  'Avr.',
+  'Mai',
+  'Juin',
+  'Juil.',
+  'Août',
+  'Sept.',
+  'Oct.',
+  'Nov.',
+  'Déc.',
+];
+
+const DAY_NAMES_SHORT_EN = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
+const DAY_NAMES_SHORT_FR = ['Lu', 'Ma', 'Me', 'Je', 'Ve', 'Sa', 'Di'];
+
+function getMonthNames(isFrench: boolean) {
+  return isFrench ? MONTH_NAMES_FR : MONTH_NAMES_EN;
+}
+
+function getMonthNamesShort(isFrench: boolean) {
+  return isFrench ? MONTH_NAMES_SHORT_FR : MONTH_NAMES_SHORT_EN;
+}
+
+function getDayNamesShort(isFrench: boolean) {
+  return isFrench ? DAY_NAMES_SHORT_FR : DAY_NAMES_SHORT_EN;
+}
 
 function padZero(n: number): string {
   return n.toString().padStart(2, '0');
@@ -81,7 +125,7 @@ function formatDateString(
   return `${year}-${padZero(monthIndex + 1)}-${padZero(day)}`;
 }
 
-function formatDisplayDate(isoDateStr?: string): string {
+function formatDisplayDate(isoDateStr?: string, isFrench = false): string {
   if (!isoDateStr) return '';
   const parts = isoDateStr.split('-');
   if (parts.length < 3) return isoDateStr;
@@ -90,17 +134,19 @@ function formatDisplayDate(isoDateStr?: string): string {
   const day = parseInt(parts[2], 10);
   if (Number.isNaN(year) || Number.isNaN(month) || Number.isNaN(day))
     return isoDateStr;
-  return `${day} ${MONTH_NAMES_SHORT[month]} ${year}`;
+  const monthNamesShort = getMonthNamesShort(isFrench);
+  return `${day} ${monthNamesShort[month]} ${year}`;
 }
 
-function formatDisplayMonthYear(val?: string): string {
+function formatDisplayMonthYear(val?: string, isFrench = false): string {
   if (!val) return '';
   const parts = val.split('-');
   if (parts.length < 2) return val;
   const year = parseInt(parts[0], 10);
   const month = parseInt(parts[1], 10) - 1;
   if (Number.isNaN(year) || Number.isNaN(month)) return val;
-  return `${MONTH_NAMES[month]} ${year}`;
+  const monthNames = getMonthNames(isFrench);
+  return `${monthNames[month]} ${year}`;
 }
 
 function getDaysInMonth(year: number, monthIndex: number): number {
@@ -215,11 +261,36 @@ export const DatePicker: React.FC<DatePickerProps> = ({
   className = '',
   ariaLabel,
 }) => {
+  const { i18n } = useTranslation();
+  const isFrench = i18n.language?.startsWith('fr');
+  const monthNames = getMonthNames(isFrench);
+  const monthNamesShort = getMonthNamesShort(isFrench);
+  const dayNamesShort = getDayNamesShort(isFrench);
+  const effectivePlaceholder =
+    placeholder !== 'Select date'
+      ? placeholder
+      : isFrench
+        ? 'Sélectionner une date'
+        : 'Select date';
+
   const generatedId = useId();
   const inputId = id || generatedId;
   const [isOpen, setIsOpen] = useState(false);
+  const [openUpwards, setOpenUpwards] = useState(false);
   const [viewMode, setViewMode] = useState<'days' | 'months' | 'years'>('days');
   const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!isOpen || !containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const spaceAbove = rect.top;
+    if (spaceBelow < 320 && spaceAbove > spaceBelow) {
+      setOpenUpwards(true);
+    } else {
+      setOpenUpwards(false);
+    }
+  }, [isOpen]);
 
   // Parse initial view
   const initialDate = value ? new Date(value) : new Date();
@@ -312,15 +383,23 @@ export const DatePicker: React.FC<DatePickerProps> = ({
         isOpen={isOpen}
         onToggle={() => setIsOpen(!isOpen)}
         ariaLabel={ariaLabel}
-        placeholder={placeholder}
-        displayText={value ? formatDisplayDate(value) : placeholder}
+        placeholder={effectivePlaceholder}
+        displayText={
+          value ? formatDisplayDate(value, isFrench) : effectivePlaceholder
+        }
         hasValue={Boolean(value)}
         onClear={() => onChange('')}
       />
 
       {/* Popover Calendar */}
       {isOpen && (
-        <div className="absolute top-[calc(100%+6px)] left-0 z-50 w-72 bg-white rounded-xl border border-[#e8e1dd] shadow-xl p-3.5 animate-in fade-in zoom-in-95 duration-150">
+        <div
+          className={`absolute ${
+            openUpwards
+              ? 'bottom-[calc(100%+6px)] origin-bottom-left'
+              : 'top-[calc(100%+6px)] origin-top-left'
+          } left-0 z-50 w-72 bg-white rounded-xl border border-[#e8e1dd] shadow-xl p-3.5 animate-in fade-in zoom-in-95 duration-150`}
+        >
           {/* Header */}
           <div className="flex items-center justify-between mb-3 pb-2 border-b border-[#f4ece9]">
             <div className="flex items-center gap-1">
@@ -331,7 +410,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
                 }
                 className="px-2 py-1 rounded-md text-xs font-bold text-[#1e1b19] hover:bg-[#faf2ee] hover:text-[#b85028] transition-colors flex items-center gap-1"
               >
-                <span>{MONTH_NAMES[viewMonth]}</span>
+                <span>{monthNames[viewMonth]}</span>
                 <CaretDown size={11} weight="bold" />
               </button>
               <button
@@ -351,7 +430,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
                 type="button"
                 onClick={handlePrevMonth}
                 className="w-7 h-7 rounded-md hover:bg-[#faf2ee] flex items-center justify-center text-[#57423b] hover:text-[#1e1b19] transition-colors"
-                title="Previous month"
+                title={isFrench ? 'Mois précédent' : 'Previous month'}
               >
                 <CaretLeft size={14} weight="bold" />
               </button>
@@ -359,7 +438,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
                 type="button"
                 onClick={handleNextMonth}
                 className="w-7 h-7 rounded-md hover:bg-[#faf2ee] flex items-center justify-center text-[#57423b] hover:text-[#1e1b19] transition-colors"
-                title="Next month"
+                title={isFrench ? 'Mois suivant' : 'Next month'}
               >
                 <CaretRight size={14} weight="bold" />
               </button>
@@ -369,7 +448,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
           {/* VIEW: Month selector grid */}
           {viewMode === 'months' && (
             <div className="grid grid-cols-3 gap-1.5 py-1">
-              {MONTH_NAMES_SHORT.map((mName, idx) => {
+              {monthNamesShort.map((mName, idx) => {
                 const isSelected = viewMonth === idx;
                 return (
                   <button
@@ -423,7 +502,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
             <>
               {/* Day of Week Headers */}
               <div className="grid grid-cols-7 gap-1 text-center mb-1">
-                {DAY_NAMES_SHORT.map((d) => (
+                {dayNamesShort.map((d) => (
                   <div
                     key={d}
                     className="h-6 flex items-center justify-center text-[10px] font-bold text-[#8a726a] uppercase"
@@ -496,7 +575,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
                   }}
                   className="font-bold text-[#b85028] hover:underline cursor-pointer"
                 >
-                  Today
+                  {isFrench ? "Aujourd'hui" : 'Today'}
                 </button>
                 {value && (
                   <button
@@ -507,7 +586,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
                     }}
                     className="font-medium text-[#8a726a] hover:text-[#1e1b19] cursor-pointer"
                   >
-                    Clear
+                    {isFrench ? 'Effacer' : 'Clear'}
                   </button>
                 )}
               </div>
@@ -544,10 +623,33 @@ export const MonthYearPicker: React.FC<MonthYearPickerProps> = ({
   className = '',
   ariaLabel,
 }) => {
+  const { i18n } = useTranslation();
+  const isFrench = i18n.language?.startsWith('fr');
+  const monthNamesShort = getMonthNamesShort(isFrench);
+  const effectivePlaceholder =
+    placeholder !== 'Select month & year'
+      ? placeholder
+      : isFrench
+        ? 'Sélectionner mois et année'
+        : 'Select month & year';
+
   const generatedId = useId();
   const inputId = id || generatedId;
   const [isOpen, setIsOpen] = useState(false);
+  const [openUpwards, setOpenUpwards] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!isOpen || !containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const spaceAbove = rect.top;
+    if (spaceBelow < 380 && spaceAbove > spaceBelow) {
+      setOpenUpwards(true);
+    } else {
+      setOpenUpwards(false);
+    }
+  }, [isOpen]);
 
   const initialYear = value
     ? parseInt(value.split('-')[0], 10) || new Date().getFullYear()
@@ -587,22 +689,30 @@ export const MonthYearPicker: React.FC<MonthYearPickerProps> = ({
         isOpen={isOpen}
         onToggle={() => setIsOpen(!isOpen)}
         ariaLabel={ariaLabel}
-        placeholder={placeholder}
-        displayText={value ? formatDisplayMonthYear(value) : placeholder}
+        placeholder={effectivePlaceholder}
+        displayText={
+          value ? formatDisplayMonthYear(value, isFrench) : effectivePlaceholder
+        }
         hasValue={Boolean(value)}
         onClear={() => onChange('')}
       />
 
       {/* Popover Card */}
       {isOpen && (
-        <div className="absolute top-[calc(100%+6px)] left-0 z-50 w-64 bg-white rounded-xl border border-[#e8e1dd] shadow-xl p-3.5 animate-in fade-in zoom-in-95 duration-150">
+        <div
+          className={`absolute ${
+            openUpwards
+              ? 'bottom-[calc(100%+6px)] origin-bottom-left'
+              : 'top-[calc(100%+6px)] origin-top-left'
+          } left-0 z-50 w-64 bg-white rounded-xl border border-[#e8e1dd] shadow-xl p-3.5 animate-in fade-in zoom-in-95 duration-150`}
+        >
           {/* Year Navigation */}
           <div className="flex items-center justify-between mb-3 pb-2 border-b border-[#f4ece9]">
             <button
               type="button"
               onClick={() => setViewYear((y) => y - 1)}
               className="w-7 h-7 rounded-md hover:bg-[#faf2ee] flex items-center justify-center text-[#57423b] hover:text-[#1e1b19] transition-colors"
-              title="Previous Year"
+              title={isFrench ? 'Année précédente' : 'Previous Year'}
             >
               <CaretLeft size={14} weight="bold" />
             </button>
@@ -611,7 +721,7 @@ export const MonthYearPicker: React.FC<MonthYearPickerProps> = ({
               type="button"
               onClick={() => setViewYear((y) => y + 1)}
               className="w-7 h-7 rounded-md hover:bg-[#faf2ee] flex items-center justify-center text-[#57423b] hover:text-[#1e1b19] transition-colors"
-              title="Next Year"
+              title={isFrench ? 'Année suivante' : 'Next Year'}
             >
               <CaretRight size={14} weight="bold" />
             </button>
@@ -619,7 +729,7 @@ export const MonthYearPicker: React.FC<MonthYearPickerProps> = ({
 
           {/* 12 Months Grid */}
           <div className="grid grid-cols-3 gap-2">
-            {MONTH_NAMES_SHORT.map((mShort, idx) => {
+            {monthNamesShort.map((mShort, idx) => {
               const isSelected =
                 selectedYear === viewYear && selectedMonth === idx;
               const isCurrent =
@@ -655,7 +765,7 @@ export const MonthYearPicker: React.FC<MonthYearPickerProps> = ({
               }}
               className="font-bold text-[#b85028] hover:underline cursor-pointer"
             >
-              This Month
+              {isFrench ? 'Ce mois-ci' : 'This Month'}
             </button>
             {value && (
               <button
@@ -666,7 +776,7 @@ export const MonthYearPicker: React.FC<MonthYearPickerProps> = ({
                 }}
                 className="font-medium text-[#8a726a] hover:text-[#1e1b19] cursor-pointer"
               >
-                Clear
+                {isFrench ? 'Effacer' : 'Clear'}
               </button>
             )}
           </div>
@@ -703,10 +813,32 @@ export const DateTimePicker: React.FC<DateTimePickerProps> = ({
   minDate,
   maxDate,
 }) => {
+  const { i18n } = useTranslation();
+  const isFrench = i18n.language?.startsWith('fr');
+  const effectivePlaceholder =
+    placeholder !== 'Select date & time'
+      ? placeholder
+      : isFrench
+        ? 'Sélectionner date et heure'
+        : 'Select date & time';
+
   const generatedId = useId();
   const inputId = id || generatedId;
   const [isOpen, setIsOpen] = useState(false);
+  const [openUpwards, setOpenUpwards] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!isOpen || !containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const spaceAbove = rect.top;
+    if (spaceBelow < 380 && spaceAbove > spaceBelow) {
+      setOpenUpwards(true);
+    } else {
+      setOpenUpwards(false);
+    }
+  }, [isOpen]);
 
   // Split date and time
   const [datePart, timePart] = value ? value.split('T') : ['', ''];
@@ -753,7 +885,7 @@ export const DateTimePicker: React.FC<DateTimePickerProps> = ({
   const displayFormatted = () => {
     if (!value) return '';
     const [d, t] = value.split('T');
-    return `${formatDisplayDate(d)}${t ? ` at ${t}` : ''}`;
+    return `${formatDisplayDate(d, isFrench)}${t ? (isFrench ? ` à ${t}` : ` at ${t}`) : ''}`;
   };
 
   return (
@@ -765,8 +897,8 @@ export const DateTimePicker: React.FC<DateTimePickerProps> = ({
         isOpen={isOpen}
         onToggle={() => setIsOpen(!isOpen)}
         ariaLabel={ariaLabel}
-        placeholder={placeholder}
-        displayText={value ? displayFormatted() : placeholder}
+        placeholder={effectivePlaceholder}
+        displayText={value ? displayFormatted() : effectivePlaceholder}
         hasValue={Boolean(value)}
         onClear={() => onChange('')}
         icon={<Clock size={16} weight="bold" className="text-[#b85028]" />}
@@ -774,11 +906,17 @@ export const DateTimePicker: React.FC<DateTimePickerProps> = ({
 
       {/* Popover */}
       {isOpen && (
-        <div className="absolute top-[calc(100%+6px)] left-0 z-50 w-80 bg-white rounded-xl border border-[#e8e1dd] shadow-xl p-3.5 animate-in fade-in zoom-in-95 duration-150">
+        <div
+          className={`absolute ${
+            openUpwards
+              ? 'bottom-[calc(100%+6px)] origin-bottom-left'
+              : 'top-[calc(100%+6px)] origin-top-left'
+          } left-0 z-50 w-80 bg-white rounded-xl border border-[#e8e1dd] shadow-xl p-3.5 animate-in fade-in zoom-in-95 duration-150`}
+        >
           <DatePicker
             value={datePart}
             onChange={handleDateChange}
-            placeholder="Select date"
+            placeholder={isFrench ? 'Sélectionner une date' : 'Select date'}
             className="mb-3"
             minDate={minDate}
             maxDate={maxDate}
@@ -788,7 +926,7 @@ export const DateTimePicker: React.FC<DateTimePickerProps> = ({
           <div className="p-3 bg-[#faf2ee] rounded-md border border-[#e8e1dd] flex items-center justify-between">
             <div className="flex items-center gap-1.5 text-xs font-bold text-[#57423b]">
               <Clock size={16} weight="duotone" className="text-[#b85028]" />
-              <span>Time:</span>
+              <span>{isFrench ? 'Heure :' : 'Time:'}</span>
             </div>
             <div className="flex items-center gap-1.5">
               <CustomSelect<string>
@@ -817,9 +955,9 @@ export const DateTimePicker: React.FC<DateTimePickerProps> = ({
             <button
               type="button"
               onClick={() => setIsOpen(false)}
-              className="px-3.5 py-1.5 bg-[#b85028] hover:bg-[#a44520] text-white text-xs font-bold rounded-md shadow-xs"
+              className="px-3.5 py-1.5 bg-[#b85028] hover:bg-[#a44520] text-white text-xs font-bold rounded-md shadow-xs cursor-pointer"
             >
-              Done
+              {isFrench ? 'Terminé' : 'Done'}
             </button>
           </div>
         </div>

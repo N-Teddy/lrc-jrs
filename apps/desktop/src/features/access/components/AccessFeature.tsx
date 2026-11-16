@@ -40,13 +40,22 @@ export const AccessFeature: React.FC<AccessFeatureProps> = ({
 
   // Filters State
   const [search, setSearch] = useState('');
-  const [selectedTownId, setSelectedTownId] = useState<string | null>(
-    activeTownId || null,
-  );
+  const selectedTownId = activeTownId || null;
   const [stateFilter, setStateFilter] = useState<AccountStateFilter>('ALL');
   const [roleFilter, setRoleFilter] = useState<string>('ALL');
   const [page, setPage] = useState(1);
   const limit = 10;
+
+  const hasActiveFilters = Boolean(
+    search.trim() || roleFilter !== 'ALL' || stateFilter !== 'ALL',
+  );
+
+  const handleClearFilters = () => {
+    setSearch('');
+    setRoleFilter('ALL');
+    setStateFilter('ALL');
+    setPage(1);
+  };
 
   // Modals State
   const [accessMember, setAccessMember] = useState<IUser | null>(null);
@@ -220,12 +229,6 @@ export const AccessFeature: React.FC<AccessFeatureProps> = ({
       <AccessFilterToolbar
         search={search}
         onSearchChange={setSearch}
-        selectedTownId={selectedTownId}
-        onTownChange={(tId) => {
-          setSelectedTownId(tId);
-          setPage(1);
-        }}
-        availableTowns={availableTowns}
         stateFilter={stateFilter}
         onStateFilterChange={(st) => {
           setStateFilter(st);
@@ -261,6 +264,8 @@ export const AccessFeature: React.FC<AccessFeatureProps> = ({
         onViewMemberDetail={(id) => setSelectedMemberDetailId(id)}
         availableTowns={availableTowns}
         isCurrentUserAp={isCurrentUserAp}
+        hasActiveFilters={hasActiveFilters}
+        onClearFilters={handleClearFilters}
       />
 
       {/* 5. Modals */}
@@ -286,6 +291,7 @@ export const AccessFeature: React.FC<AccessFeatureProps> = ({
         isOpen={isBatchInviteOpen}
         onClose={() => setIsBatchInviteOpen(false)}
         offlineMembers={offlineMembers}
+        activeTownId={selectedTownId || undefined}
         onBatchInvite={handleBatchInvite}
       />
 

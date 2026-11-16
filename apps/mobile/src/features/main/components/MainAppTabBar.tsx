@@ -169,7 +169,16 @@ export const MainAppTabBar: React.FC<MainAppTabBarProps> = ({
             onPress={() => openSidebar('town-switcher')}
             activeOpacity={0.8}
           >
-            <Text style={styles.centerPillPrimary}>LRC JRS</Text>
+            <View style={styles.brandTitleRow}>
+              <Text style={styles.centerPillPrimary}>
+                {__DEV__ ? 'LRC JRS (Dev)' : 'LRC JRS'}
+              </Text>
+              {__DEV__ && (
+                <View style={styles.centerPillDevBadge}>
+                  <Text style={styles.centerPillDevBadgeText}>DEV</Text>
+                </View>
+              )}
+            </View>
             <View style={styles.centerPillDivider} />
             <Text style={styles.centerPillSecondary}>
               {activeTown?.name || 'Réseau'}
@@ -394,6 +403,25 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '800',
     color: colors.primary,
+    letterSpacing: 0.2,
+  },
+  brandTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  centerPillDevBadge: {
+    backgroundColor: '#fef3c7',
+    borderColor: '#fcd34d',
+    borderWidth: 1,
+    borderRadius: 4,
+    paddingHorizontal: 3,
+    paddingVertical: 1,
+  },
+  centerPillDevBadgeText: {
+    color: '#92400e',
+    fontSize: 8,
+    fontWeight: '800',
     letterSpacing: 0.2,
   },
   centerPillDivider: {

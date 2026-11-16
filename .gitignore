@@ -66,3 +66,5 @@ uploads
 .agents.env
 .env.local
 .env.*.local
+coverage
+graphify-out/

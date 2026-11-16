@@ -10,12 +10,13 @@ import {
   LockOpen,
   MapPin,
   PencilSimple,
-  ShieldCheck,
   Tag,
   User,
 } from '@phosphor-icons/react';
 import type React from 'react';
 import { useMemo, useState } from 'react';
+import emptyTimelineSvg from '../../../assets/illustrations/empty-timeline.svg';
+import { EmptyState } from '../../../components';
 import {
   formatActivityDate,
   getActivityTypeConfig,
@@ -404,25 +405,22 @@ export const ActivityAuditLogView: React.FC<ActivityAuditLogViewProps> = ({
 
       {/* 4. Timeline View */}
       {filteredHistory.length === 0 ? (
-        <div className="bg-white rounded-xl border border-[#e8e1dd] shadow-xs p-12 text-center flex flex-col items-center justify-center">
-          <div className="w-12 h-12 rounded-xl bg-[#faf2ee] border border-[#e8e1dd] flex items-center justify-center text-[#8a726a] mb-3">
-            <ShieldCheck size={24} weight="duotone" />
-          </div>
-          <h3 className="text-sm font-bold text-[#1e1b19] mb-1">
-            {t('activities:noHistory', 'No modifications recorded.')}
-          </h3>
-          <p className="text-xs text-[#8a726a]">
-            {t(
-              'activities:audit.emptyStateDesc',
-              'This gathering follows its original schedule and venue baseline.',
-            )}
-          </p>
-        </div>
+        <EmptyState
+          size="md"
+          imageSrc={emptyTimelineSvg}
+          imageAlt="No modifications recorded"
+          title={t('activities:noHistory', 'No modifications recorded.')}
+          description={t(
+            'activities:audit.emptyStateDesc',
+            'This activity follows its original schedule baseline.',
+          )}
+        />
       ) : (
         <div className="flex flex-col">
           {filteredHistory.map((log, index) => {
             const isReschedule = log.changeType === 'RESCHEDULED';
             const isLocation = log.changeType === 'LOCATION_CHANGED';
+            const isCancel = log.changeType === 'CANCELLED';
             const changedFields = getChangedFields(log);
             const isLast = index === filteredHistory.length - 1;
 
@@ -432,11 +430,13 @@ export const ActivityAuditLogView: React.FC<ActivityAuditLogViewProps> = ({
                 <div className="flex flex-col items-center shrink-0">
                   <div
                     className={`w-8 h-8 rounded-full flex items-center justify-center shadow-xs border-2 border-white shrink-0 z-10 ${
-                      isReschedule
-                        ? 'bg-[#b85028] text-white'
-                        : isLocation
-                          ? 'bg-[#486b52] text-white'
-                          : 'bg-[#1e1b19] text-white'
+                      isCancel
+                        ? 'bg-[#ba1a1a] text-white'
+                        : isReschedule
+                          ? 'bg-[#b85028] text-white'
+                          : isLocation
+                            ? 'bg-[#486b52] text-white'
+                            : 'bg-[#1e1b19] text-white'
                     }`}
                   >
                     <ClockCounterClockwise size={15} weight="bold" />
@@ -454,14 +454,16 @@ export const ActivityAuditLogView: React.FC<ActivityAuditLogViewProps> = ({
                       <div className="flex items-center gap-2">
                         <span
                           className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
-                            isReschedule
-                              ? 'bg-[#ffdbcf] text-[#812901]'
-                              : isLocation
-                                ? 'bg-[#edf3ee] text-[#486b52]'
-                                : 'bg-[#faf2ee] text-[#1e1b19]'
+                            isCancel
+                              ? 'bg-[#ffdad6] text-[#ba1a1a]'
+                              : isReschedule
+                                ? 'bg-[#ffdbcf] text-[#812901]'
+                                : isLocation
+                                  ? 'bg-[#edf3ee] text-[#486b52]'
+                                  : 'bg-[#faf2ee] text-[#1e1b19]'
                           }`}
                         >
-                          {log.changeType.replace('_', ' ')}
+                          {log.changeType.replace(/_/g, ' ')}
                         </span>
                         <span className="text-[11px] font-mono text-[#8a726a]">
                           {t('activities:audit.revisionNumber', {

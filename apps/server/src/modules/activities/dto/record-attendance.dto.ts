@@ -62,6 +62,14 @@ class RecordAttendanceItemDto {
 }
 
 export class RecordAttendanceDto {
+  @ApiPropertyOptional({
+    example: '60c72b2f9b1d8b001f8e4a1a',
+    description: 'Activity ID (optional when passed via URL path parameter)',
+  })
+  @IsOptional()
+  @IsString()
+  activityId?: string;
+
   @ApiProperty({ type: [RecordAttendanceItemDto] })
   @IsArray()
   @ValidateNested({ each: true })

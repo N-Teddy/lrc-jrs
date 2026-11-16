@@ -299,7 +299,7 @@ export class ActivitiesService {
     const limit = Math.max(1, Math.min(100, Number(query.limit) || 20));
     const skip = (page - 1) * limit;
 
-    const filter: Record<string, any> = { isDeleted: false };
+    const andConditions: any[] = [{ isDeleted: false }];
 
     // Resolve town scoping: if a specific town is requested via header or query, prioritize it
     let effectiveTownId: Types.ObjectId | null = null;
@@ -315,19 +315,21 @@ export class ActivitiesService {
     }
 
     if (effectiveTownId) {
-      filter.$or = [
-        { hostTownId: effectiveTownId },
-        { townId: effectiveTownId },
-        { includedTownIds: effectiveTownId },
-      ];
+      andConditions.push({
+        $or: [
+          { hostTownId: effectiveTownId },
+          { townId: effectiveTownId },
+          { includedTownIds: effectiveTownId },
+        ],
+      });
     } else if (query.townId) {
       const townObjId = await this.resolveTownObjectId(query.townId);
-      if (townObjId) filter.townId = townObjId;
+      if (townObjId) andConditions.push({ townId: townObjId });
     }
 
     if (query.hostTownId) {
       const hostTownObjId = await this.resolveTownObjectId(query.hostTownId);
-      if (hostTownObjId) filter.hostTownId = hostTownObjId;
+      if (hostTownObjId) andConditions.push({ hostTownId: hostTownObjId });
     }
 
     // Date range filtering
@@ -340,31 +342,60 @@ export class ActivitiesService {
             Date.UTC(targetYear, targetMonth - 1, 1),
           );
           const endOfMonth = new Date(Date.UTC(targetYear, targetMonth, 1));
-          filter.startDate = { $gte: startOfMonth, $lt: endOfMonth };
+          andConditions.push({
+            startDate: { $gte: startOfMonth, $lt: endOfMonth },
+          });
         } else {
           const startOfYear = new Date(Date.UTC(targetYear, 0, 1));
           const endOfYear = new Date(Date.UTC(targetYear + 1, 0, 1));
-          filter.startDate = { $gte: startOfYear, $lt: endOfYear };
+          andConditions.push({
+            startDate: { $gte: startOfYear, $lt: endOfYear },
+          });
         }
       }
     }
 
     if (query.activityType) {
-      filter.activityType = query.activityType;
+      andConditions.push({ activityType: query.activityType });
     }
 
     if (query.status) {
-      filter.status = query.status;
+      const now = new Date();
+      if (query.status === ActivityStatus.CANCELLED) {
+        andConditions.push({ status: ActivityStatus.CANCELLED });
+      } else if (query.status === ActivityStatus.SCHEDULED) {
+        andConditions.push({
+          status: { $ne: ActivityStatus.CANCELLED },
+          startDate: { $gt: now },
+        });
+      } else if (query.status === ActivityStatus.IN_PROGRESS) {
+        andConditions.push({
+          status: { $ne: ActivityStatus.CANCELLED },
+          startDate: { $lte: now },
+          endDate: { $gte: now },
+        });
+      } else if (query.status === ActivityStatus.COMPLETED) {
+        andConditions.push({
+          status: { $ne: ActivityStatus.CANCELLED },
+          endDate: { $lt: now },
+        });
+      }
     }
 
     if (query.search?.trim()) {
-      const searchRegex = new RegExp(query.search.trim(), 'i');
-      filter.$or = [
-        ...(filter.$or || []),
-        { title: searchRegex },
-        { notes: searchRegex },
-      ];
+      const escaped = query.search
+        .trim()
+        .replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const searchRegex = new RegExp(escaped, 'i');
+      andConditions.push({
+        $or: [{ title: searchRegex }, { notes: searchRegex }],
+      });
     }
+
+    const filter =
+      andConditions.length > 1
+        ? { $and: andConditions }
+        : andConditions[0] || {};
 
     const [total, activities] = await Promise.all([
       this.activityModel.countDocuments(filter).exec(),
@@ -429,7 +460,7 @@ export class ActivitiesService {
     xTownId?: string,
     currentUser?: IAuthUser,
   ): Promise<IActivityStats> {
-    const filter: Record<string, any> = { isDeleted: false };
+    const andConditions: any[] = [{ isDeleted: false }];
 
     let effectiveTownId: Types.ObjectId | null = null;
     const requestedTown = xTownId || townId;
@@ -444,11 +475,13 @@ export class ActivitiesService {
     }
 
     if (effectiveTownId) {
-      filter.$or = [
-        { hostTownId: effectiveTownId },
-        { townId: effectiveTownId },
-        { includedTownIds: effectiveTownId },
-      ];
+      andConditions.push({
+        $or: [
+          { hostTownId: effectiveTownId },
+          { townId: effectiveTownId },
+          { includedTownIds: effectiveTownId },
+        ],
+      });
     }
 
     if (year) {
@@ -460,19 +493,27 @@ export class ActivitiesService {
             Date.UTC(targetYear, targetMonth - 1, 1),
           );
           const endOfMonth = new Date(Date.UTC(targetYear, targetMonth, 1));
-          filter.startDate = { $gte: startOfMonth, $lt: endOfMonth };
+          andConditions.push({
+            startDate: { $gte: startOfMonth, $lt: endOfMonth },
+          });
         } else {
           const startOfYear = new Date(Date.UTC(targetYear, 0, 1));
           const endOfYear = new Date(Date.UTC(targetYear + 1, 0, 1));
-          filter.startDate = { $gte: startOfYear, $lt: endOfYear };
+          andConditions.push({
+            startDate: { $gte: startOfYear, $lt: endOfYear },
+          });
         }
       }
     }
 
+    const filter =
+      andConditions.length > 1
+        ? { $and: andConditions }
+        : andConditions[0] || {};
+
     const activities = await this.activityModel.find(filter).exec();
     const totalActivities = activities.length;
 
-    const now = new Date();
     let upcomingCount = 0;
     let completedCount = 0;
 
@@ -490,9 +531,14 @@ export class ActivitiesService {
       if (typeBreakdown[act.activityType] !== undefined) {
         typeBreakdown[act.activityType]++;
       }
-      if (act.status === ActivityStatus.SCHEDULED && act.startDate >= now) {
+      const effectiveStatus =
+        act.status === ActivityStatus.CANCELLED
+          ? ActivityStatus.CANCELLED
+          : this.determineStatus(act.startDate, act.endDate);
+
+      if (effectiveStatus === ActivityStatus.SCHEDULED) {
         upcomingCount++;
-      } else if (act.status === ActivityStatus.COMPLETED) {
+      } else if (effectiveStatus === ActivityStatus.COMPLETED) {
         completedCount++;
       }
     }
@@ -734,7 +780,12 @@ export class ActivitiesService {
       throw new NotFoundAppException(ErrorCode.ACTIVITY_NOT_FOUND, { id });
     }
 
-    if (activity.status === ActivityStatus.COMPLETED) {
+    const effectiveStatus =
+      activity.status === ActivityStatus.CANCELLED
+        ? ActivityStatus.CANCELLED
+        : this.determineStatus(activity.startDate, activity.endDate);
+
+    if (effectiveStatus === ActivityStatus.COMPLETED) {
       throw new BadRequestAppException(ErrorCode.ACTIVITY_ALREADY_COMPLETED);
     }
 
@@ -970,9 +1021,12 @@ export class ActivitiesService {
   ): Promise<IAttendance> {
     const activity = await this.findValidActivityById(activityId);
 
-    // STRICT LOCK GUARD: Attendance cannot be modified if finalized and locked
+    // STRICT LOCK & STATUS GUARD: Attendance cannot be modified if finalized and locked or if activity is cancelled
     if (activity.isAttendanceLocked) {
       throw new BadRequestAppException(ErrorCode.ACTIVITY_ALREADY_COMPLETED);
+    }
+    if (activity.status === ActivityStatus.CANCELLED) {
+      throw new BadRequestAppException(ErrorCode.BAD_REQUEST);
     }
 
     // STRICT TIMING GUARD: Attendance is forbidden before activity start date
@@ -1489,6 +1543,13 @@ export class ActivitiesService {
       throw new ForbiddenAppException(ErrorCode.FORBIDDEN);
     }
 
+    if (
+      activity.status === ActivityStatus.CANCELLED ||
+      activity.status === ActivityStatus.SCHEDULED
+    ) {
+      throw new BadRequestAppException(ErrorCode.BAD_REQUEST);
+    }
+
     const now = new Date();
     activity.isAttendanceLocked = true;
     activity.attendanceLockedAt = now;
@@ -1755,7 +1816,11 @@ export class ActivitiesService {
     // Strict timing & status check: Must be past activity date and COMPLETED
     const now = new Date();
     const isPastActivity = now >= activity.endDate;
-    const isCompleted = activity.status === ActivityStatus.COMPLETED;
+    const effectiveStatus =
+      activity.status === ActivityStatus.CANCELLED
+        ? ActivityStatus.CANCELLED
+        : this.determineStatus(activity.startDate, activity.endDate);
+    const isCompleted = effectiveStatus === ActivityStatus.COMPLETED;
 
     if (!isCompleted || !isPastActivity) {
       throw new BadRequestAppException(ErrorCode.ACTIVITY_ALREADY_COMPLETED);
@@ -1763,6 +1828,13 @@ export class ActivitiesService {
 
     if (currentUser.role !== UserRole.AP && currentUser.role !== UserRole.PC) {
       throw new ForbiddenAppException(ErrorCode.FORBIDDEN);
+    }
+
+    if (
+      activity.status === ActivityStatus.CANCELLED ||
+      activity.status === ActivityStatus.SCHEDULED
+    ) {
+      throw new BadRequestAppException(ErrorCode.BAD_REQUEST);
     }
 
     const validFiles = (files || []).filter((f) => f?.buffer);

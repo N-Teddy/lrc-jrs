@@ -1,7 +1,10 @@
+export * from './AppCrashFallback';
 export * from './ComingSoonModal';
 export * from './CustomSelect';
 export * from './DatePeriodFilter';
 export * from './DatePicker';
+export * from './EmptyState';
+export * from './ErrorBoundary';
 export * from './LanguageToggle';
 export * from './notifications/NotificationBell';
 export * from './PaginationControl';
@@ -9,3 +12,4 @@ export * from './StatsOverviewSkeleton';
 export * from './skeletons';
 export * from './toast/ToastContainer';
 export * from './UserAvatar';
+export * from './ZoomIndicator';

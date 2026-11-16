@@ -1,5 +1,5 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsBoolean, IsOptional } from 'class-validator';
+import { IsBoolean, IsIn, IsOptional } from 'class-validator';
 
 export class UpdateAccessDto {
   @ApiPropertyOptional({
@@ -37,4 +37,12 @@ export class UpdateAccessDto {
   })
   @IsOptional()
   allowedReadTownIds?: string[];
+
+  @ApiPropertyOptional({
+    description: 'Preferred language for communication and credentials',
+    enum: ['fr', 'en'],
+  })
+  @IsOptional()
+  @IsIn(['fr', 'en'])
+  preferredLanguage?: 'fr' | 'en';
 }

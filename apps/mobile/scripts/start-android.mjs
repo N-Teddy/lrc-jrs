@@ -140,27 +140,31 @@ async function main() {
   // Ensure Electron DevTools doesn't crash on Linux due to SUID sandbox
   process.env.ELECTRON_DISABLE_SANDBOX = '1';
 
-  // Check if any connected device has the development build (com.lrc.jrs) installed
-  async function hasDevBuildInstalled(packageName = 'com.lrc.jrs') {
+  // Check if any connected device has the development build (com.lrc.jrs.dev or com.lrc.jrs) installed
+  async function hasDevBuildInstalled(
+    packageNames = ['com.lrc.jrs.dev', 'com.lrc.jrs'],
+  ) {
     const devices = await getConnectedAdbDevices();
     for (const dev of devices) {
-      const res = await execCommand(
-        `adb -s ${dev} shell pm list packages ${packageName}`,
-      );
-      if (res.stdout.includes(`package:${packageName}`)) {
-        return { installed: true, deviceId: dev };
+      for (const pkg of packageNames) {
+        const res = await execCommand(
+          `adb -s ${dev} shell pm list packages ${pkg}`,
+        );
+        if (res.stdout.includes(`package:${pkg}`)) {
+          return { installed: true, deviceId: dev, package: pkg };
+        }
       }
     }
-    return { installed: false, deviceId: null };
+    return { installed: false, deviceId: null, package: null };
   }
 
   // Handle dev-client vs Expo Go arguments intelligently
   let extraArgs = process.argv.slice(2);
-  const devCheck = await hasDevBuildInstalled('com.lrc.jrs');
+  const devCheck = await hasDevBuildInstalled();
 
   if (extraArgs.includes('--dev-client') && !devCheck.installed) {
     console.log(
-      `\x1b[33m[Android]\x1b[0m Development build (com.lrc.jrs) is not installed on connected device. Falling back to Expo Go (--go).`,
+      `\x1b[33m[Android]\x1b[0m Development build (com.lrc.jrs.dev / com.lrc.jrs) is not installed on connected device. Falling back to Expo Go (--go).`,
     );
     console.log(
       `\x1b[33m[Android]\x1b[0m (Run 'pnpm run android:build' to build and install the native development client APK)\n`,

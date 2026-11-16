@@ -1,4 +1,4 @@
-import { ActivityStatus, ActivityType, UserRole } from '@jrs/shared';
+import { ActivityType, UserRole } from '@jrs/shared';
 import { ConfigService } from '@nestjs/config';
 import { Types } from 'mongoose';
 import { ActivityReminderService } from './activity-reminder.service';

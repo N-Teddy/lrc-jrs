@@ -1,4 +1,4 @@
-import { useTranslation } from '@jrs/client-core';
+import { ErrorService, useTranslation } from '@jrs/client-core';
 import {
   ActivityStatus,
   ActivityType,
@@ -286,13 +286,19 @@ export const ActivityFormModal: React.FC<ActivityFormModalProps> = ({
       });
       onClose();
     } catch (err: any) {
-      setError(err?.message || 'Failed to save activity. Please try again.');
+      ErrorService.handle(err);
     }
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-[#23201e]/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-200">
-      <div className="relative w-full max-w-2xl bg-white rounded-xl border border-[#e8e1dd] shadow-2xl overflow-hidden flex flex-col my-auto max-h-[92vh]">
+    <div
+      className="fixed inset-0 z-50 bg-[#23201e]/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-200"
+      onClick={onClose}
+    >
+      <div
+        className="relative w-full max-w-2xl bg-white rounded-xl border border-[#e8e1dd] shadow-2xl overflow-hidden flex flex-col my-auto max-h-[92vh]"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Header */}
         <div className="px-6 py-5 flex items-start justify-between border-b border-[#f4ece9] bg-[#faf8f6]/50">
           <div className="flex items-center gap-3.5">
@@ -332,7 +338,7 @@ export const ActivityFormModal: React.FC<ActivityFormModalProps> = ({
         {/* Scrollable Form Body */}
         <form
           onSubmit={handleSubmit}
-          className="overflow-y-auto p-7 flex flex-col gap-6 text-xs text-[#1e1b19]"
+          className="overflow-y-auto p-7 pb-28 flex flex-col gap-6 text-xs text-[#1e1b19]"
         >
           {isCompleted && (
             <div className="p-3.5 bg-[#ffdad6] border border-[#ffb4a8] rounded-md text-[#ba1a1a] flex items-center gap-2.5 font-semibold">

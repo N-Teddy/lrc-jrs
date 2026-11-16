@@ -58,7 +58,7 @@ export interface IRecordAttendanceItemDto {
 }
 
 export interface IRecordAttendanceDto {
-  activityId: string;
+  activityId?: string;
   attendees: IRecordAttendanceItemDto[];
 }
 

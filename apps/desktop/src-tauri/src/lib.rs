@@ -9,11 +9,17 @@ fn greet(name: &str) -> String {
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_deep_link::init())
         .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_store::Builder::default().build())
         .setup(|app| {
+            if cfg!(debug_assertions) {
+                if let Some(window) = app.get_webview_window("main") {
+                    let _ = window.set_title("LRC JRS (Dev) - Youth Community Portal");
+                }
+            }
             if let Some(window) = app.get_webview_window("main") {
                 let _ = window.set_icon(tauri::include_image!("icons/128x128.png"));
             }

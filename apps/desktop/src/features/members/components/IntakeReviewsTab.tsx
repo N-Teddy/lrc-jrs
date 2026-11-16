@@ -6,6 +6,7 @@ import {
 } from '@jrs/client-core';
 import type { IUser } from '@jrs/shared';
 import {
+  ArrowCounterClockwise,
   ArrowsClockwise,
   Calendar,
   CheckCircle,
@@ -22,7 +23,8 @@ import {
 } from '@phosphor-icons/react';
 import type React from 'react';
 import { useMemo, useState } from 'react';
-import { UserAvatar } from '../../../components';
+import emptyIntakeSvg from '../../../assets/illustrations/empty-intake.svg';
+import { EmptyState, UserAvatar } from '../../../components';
 import {
   calculateAge,
   formatCameroonPhone,
@@ -238,12 +240,13 @@ export const IntakeReviewsTab: React.FC<IntakeReviewsTabProps> = ({
               type="button"
               onClick={onOpenIntakeLinksModal}
               className="h-9 px-3.5 rounded-md bg-[#faf2ee] hover:bg-[#f4ece9] text-[#57423b] border border-[#e8e1dd] text-xs font-bold transition-all shadow-2xs flex items-center gap-1.5 cursor-pointer"
-              title="Manage and copy member invitation links"
+              title={t(
+                'members:intake.createLinkTitle',
+                'Create and manage member intake links',
+              )}
             >
-              <Link size={16} weight="bold" />
-              <span>
-                {t('members:intake.manageLinks', 'Manage Intake Links')}
-              </span>
+              <Link size={15} weight="bold" className="text-[#b85028]" />
+              <span>{t('members:intake.createLink', 'Create Link')}</span>
             </button>
           )}
 
@@ -302,103 +305,105 @@ export const IntakeReviewsTab: React.FC<IntakeReviewsTabProps> = ({
         </div>
       )}
 
-      {/* 3. Filter & Search Toolbar */}
-      <div className="bg-white rounded-xl border border-[#e8e1dd] shadow-xs p-3.5 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-        {/* Search Input */}
-        <div className="relative flex items-center gap-2.5 px-3.5 h-9 rounded-md bg-[#faf2ee] border border-[#e8e1dd] focus-within:ring-2 focus-within:ring-[#b85028]/20 focus-within:border-[#b85028] focus-within:bg-white transition-all w-full sm:w-80 md:w-96">
-          <MagnifyingGlass
-            size={16}
-            className="text-[#8a726a] shrink-0"
-            weight="bold"
-          />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder={t(
-              'members:intake.searchPlaceholder',
-              'Search applicants by name, phone, or note...',
+      {/* 3. Filter & Search Toolbar (Only rendered when there are submissions to filter) */}
+      {pendingMembers.length > 0 && (
+        <div className="bg-white rounded-xl border border-[#e8e1dd] shadow-xs p-3.5 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+          {/* Search Input */}
+          <div className="relative flex items-center gap-2.5 px-3.5 h-9 rounded-md bg-[#faf2ee] border border-[#e8e1dd] focus-within:ring-2 focus-within:ring-[#b85028]/20 focus-within:border-[#b85028] focus-within:bg-white transition-all w-full sm:w-80 md:w-96">
+            <MagnifyingGlass
+              size={16}
+              className="text-[#8a726a] shrink-0"
+              weight="bold"
+            />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder={t(
+                'members:intake.searchPlaceholder',
+                'Search applicants by name, phone, or note...',
+              )}
+              className="bg-transparent text-xs text-[#1e1b19] placeholder:text-[#8a726a] outline-none w-full pr-6"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery('')}
+                className="absolute right-2 text-[#8a726a] hover:text-[#1e1b19] p-0.5 cursor-pointer"
+                title="Clear search"
+              >
+                <X size={14} weight="bold" />
+              </button>
             )}
-            className="bg-transparent text-xs text-[#1e1b19] placeholder:text-[#8a726a] outline-none w-full pr-6"
-          />
-          {searchQuery && (
-            <button
-              type="button"
-              onClick={() => setSearchQuery('')}
-              className="absolute right-2 text-[#8a726a] hover:text-[#1e1b19] p-0.5 cursor-pointer"
-              title="Clear search"
-            >
-              <X size={14} weight="bold" />
-            </button>
-          )}
-        </div>
-
-        {/* Gender & Sort Controls */}
-        <div className="flex items-center gap-2 flex-wrap justify-between sm:justify-end">
-          {/* Gender Filter Pills */}
-          <div className="flex items-center p-1 bg-[#faf2ee] rounded-md border border-[#e8e1dd] text-xs font-semibold text-[#8a726a]">
-            <button
-              type="button"
-              onClick={() => setGenderFilter('ALL')}
-              className={`px-2.5 py-1 rounded transition-all cursor-pointer ${
-                genderFilter === 'ALL'
-                  ? 'bg-white text-[#b85028] shadow-xs font-bold'
-                  : 'hover:text-[#1e1b19]'
-              }`}
-            >
-              {t('members:intake.filterAll', 'All')}
-            </button>
-            <button
-              type="button"
-              onClick={() => setGenderFilter('MALE')}
-              className={`px-2.5 py-1 rounded transition-all cursor-pointer ${
-                genderFilter === 'MALE'
-                  ? 'bg-white text-[#b85028] shadow-xs font-bold'
-                  : 'hover:text-[#1e1b19]'
-              }`}
-            >
-              {t('members:intake.filterMale', 'Male')}
-            </button>
-            <button
-              type="button"
-              onClick={() => setGenderFilter('FEMALE')}
-              className={`px-2.5 py-1 rounded transition-all cursor-pointer ${
-                genderFilter === 'FEMALE'
-                  ? 'bg-white text-[#b85028] shadow-xs font-bold'
-                  : 'hover:text-[#1e1b19]'
-              }`}
-            >
-              {t('members:intake.filterFemale', 'Female')}
-            </button>
           </div>
 
-          {/* Sort Order Selector */}
-          <div className="flex items-center p-1 bg-[#faf2ee] rounded-md border border-[#e8e1dd] text-xs font-semibold text-[#8a726a]">
-            <button
-              type="button"
-              onClick={() => setSortOrder('NEWEST')}
-              className={`px-2.5 py-1 rounded transition-all cursor-pointer ${
-                sortOrder === 'NEWEST'
-                  ? 'bg-white text-[#b85028] shadow-xs font-bold'
-                  : 'hover:text-[#1e1b19]'
-              }`}
-            >
-              {t('members:intake.sortNewest', 'Newest')}
-            </button>
-            <button
-              type="button"
-              onClick={() => setSortOrder('OLDEST')}
-              className={`px-2.5 py-1 rounded transition-all cursor-pointer ${
-                sortOrder === 'OLDEST'
-                  ? 'bg-white text-[#b85028] shadow-xs font-bold'
-                  : 'hover:text-[#1e1b19]'
-              }`}
-            >
-              {t('members:intake.sortOldest', 'Oldest')}
-            </button>
+          {/* Gender & Sort Controls */}
+          <div className="flex items-center gap-2 flex-wrap justify-between sm:justify-end">
+            {/* Gender Filter Pills */}
+            <div className="flex items-center p-1 bg-[#faf2ee] rounded-md border border-[#e8e1dd] text-xs font-semibold text-[#8a726a]">
+              <button
+                type="button"
+                onClick={() => setGenderFilter('ALL')}
+                className={`px-2.5 py-1 rounded transition-all cursor-pointer ${
+                  genderFilter === 'ALL'
+                    ? 'bg-white text-[#b85028] shadow-xs font-bold'
+                    : 'hover:text-[#1e1b19]'
+                }`}
+              >
+                {t('members:intake.filterAll', 'All')}
+              </button>
+              <button
+                type="button"
+                onClick={() => setGenderFilter('MALE')}
+                className={`px-2.5 py-1 rounded transition-all cursor-pointer ${
+                  genderFilter === 'MALE'
+                    ? 'bg-white text-[#b85028] shadow-xs font-bold'
+                    : 'hover:text-[#1e1b19]'
+                }`}
+              >
+                {t('members:intake.filterMale', 'Male')}
+              </button>
+              <button
+                type="button"
+                onClick={() => setGenderFilter('FEMALE')}
+                className={`px-2.5 py-1 rounded transition-all cursor-pointer ${
+                  genderFilter === 'FEMALE'
+                    ? 'bg-white text-[#b85028] shadow-xs font-bold'
+                    : 'hover:text-[#1e1b19]'
+                }`}
+              >
+                {t('members:intake.filterFemale', 'Female')}
+              </button>
+            </div>
+
+            {/* Sort Order Selector */}
+            <div className="flex items-center p-1 bg-[#faf2ee] rounded-md border border-[#e8e1dd] text-xs font-semibold text-[#8a726a]">
+              <button
+                type="button"
+                onClick={() => setSortOrder('NEWEST')}
+                className={`px-2.5 py-1 rounded transition-all cursor-pointer ${
+                  sortOrder === 'NEWEST'
+                    ? 'bg-white text-[#b85028] shadow-xs font-bold'
+                    : 'hover:text-[#1e1b19]'
+                }`}
+              >
+                {t('members:intake.sortNewest', 'Newest')}
+              </button>
+              <button
+                type="button"
+                onClick={() => setSortOrder('OLDEST')}
+                className={`px-2.5 py-1 rounded transition-all cursor-pointer ${
+                  sortOrder === 'OLDEST'
+                    ? 'bg-white text-[#b85028] shadow-xs font-bold'
+                    : 'hover:text-[#1e1b19]'
+                }`}
+              >
+                {t('members:intake.sortOldest', 'Oldest')}
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* 4. Submissions List View */}
       {isLoading ? (
@@ -409,65 +414,57 @@ export const IntakeReviewsTab: React.FC<IntakeReviewsTabProps> = ({
           </span>
         </div>
       ) : pendingMembers.length === 0 ? (
-        /* Empty State: Zero pending reviews */
-        <div className="bg-white rounded-xl border border-[#e8e1dd] p-12 text-center flex flex-col items-center shadow-xs">
-          <div className="w-14 h-14 rounded-full bg-[#c2e9ca]/40 text-[#2c4e37] flex items-center justify-center mb-3.5 shadow-2xs">
-            <CheckCircle size={32} weight="fill" />
-          </div>
-          <h3 className="text-base font-bold text-[#1e1b19] mb-1">
-            {t(
-              'members:intake.allCaughtUpTitle',
-              'All Caught Up! No Submissions Pending Review',
-            )}
-          </h3>
-          <p className="text-xs text-[#8a726a] max-w-md mb-6 leading-relaxed">
-            {t('members:intake.allCaughtUpDesc', {
-              town: activeTownName,
-              defaultValue: `All prospective members who registered through your intake invitation links for ${activeTownName} have been processed and admitted into the community directory.`,
-            })}
-          </p>
-          {onOpenIntakeLinksModal && (
-            <button
-              type="button"
-              onClick={onOpenIntakeLinksModal}
-              className="px-4 py-2 rounded-md bg-[#faf2ee] hover:bg-[#f4ece9] text-xs font-bold text-[#57423b] border border-[#e8e1dd] transition-all cursor-pointer flex items-center gap-2 shadow-2xs"
-            >
-              <Link size={16} weight="bold" />
-              <span>
-                {t('members:intake.shareLinks', 'Share & Manage Intake Links')}
-              </span>
-            </button>
+        /* Empty State: Zero pending reviews (True Zero State) */
+        <EmptyState
+          size="lg"
+          imageSrc={emptyIntakeSvg}
+          imageAlt="No pending submissions"
+          badge={t('members:intake.allCaughtUpBadge', 'All Caught Up')}
+          badgeVariant="sage"
+          title={t(
+            'members:intake.allCaughtUpTitle',
+            'All Caught Up! No Submissions Pending Review',
           )}
-        </div>
+          description={t(
+            'members:intake.allCaughtUpDescShort',
+            'All member submissions for this hub have been verified.',
+          )}
+          primaryAction={
+            onOpenIntakeLinksModal
+              ? {
+                  label: t(
+                    'members:intake.shareLinks',
+                    'Share & Manage Intake Links',
+                  ),
+                  icon: <Link size={16} weight="bold" />,
+                  onClick: onOpenIntakeLinksModal,
+                }
+              : undefined
+          }
+        />
       ) : filteredMembers.length === 0 ? (
-        /* Empty State: Search filter has no matches */
-        <div className="bg-white rounded-xl border border-[#e8e1dd] p-10 text-center flex flex-col items-center shadow-xs">
-          <div className="w-12 h-12 rounded-lg bg-[#faf2ee] text-[#8a726a] flex items-center justify-center mb-3">
-            <MagnifyingGlass size={24} weight="bold" />
-          </div>
-          <h3 className="text-sm font-bold text-[#1e1b19] mb-1">
-            {t(
-              'members:intake.noMatchesTitle',
-              'No submissions matched your criteria',
-            )}
-          </h3>
-          <p className="text-xs text-[#8a726a] max-w-sm mb-4">
-            {t(
-              'members:intake.noMatchesDesc',
-              'Try adjusting your search query or reset the gender filter.',
-            )}
-          </p>
-          <button
-            type="button"
-            onClick={() => {
+        /* Empty State: Search filter has no matches (Filtered Empty State) */
+        <EmptyState
+          size="lg"
+          imageSrc={emptyIntakeSvg}
+          imageAlt="No submissions match criteria"
+          title={t(
+            'members:intake.noMatchesTitle',
+            'No submissions matched your criteria',
+          )}
+          description={t(
+            'members:intake.noMatchesDescShort',
+            'Try adjusting your search query or gender filter.',
+          )}
+          primaryAction={{
+            label: t('members:intake.clearFilters', 'Clear Filters'),
+            icon: <ArrowCounterClockwise size={15} weight="bold" />,
+            onClick: () => {
               setSearchQuery('');
               setGenderFilter('ALL');
-            }}
-            className="px-3.5 py-1.5 rounded-md bg-[#faf2ee] hover:bg-[#f4ece9] text-xs font-bold text-[#1e1b19] border border-[#e8e1dd] transition-colors cursor-pointer"
-          >
-            {t('members:intake.clearFilters', 'Clear Filters')}
-          </button>
-        </div>
+            },
+          }}
+        />
       ) : (
         /* Review Submissions Cards */
         <div className="flex flex-col gap-3.5">

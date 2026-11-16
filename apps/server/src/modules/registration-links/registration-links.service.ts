@@ -102,16 +102,23 @@ export class RegistrationLinksService {
     // Generate secure random alphanumeric token (12 chars url safe)
     const token = crypto.randomBytes(9).toString('base64url');
 
+    let linkTitle = dto.title?.trim();
+    if (!linkTitle) {
+      const townDoc = await this.townModel.findById(townObjectId).lean().exec();
+      const townLabel = townDoc?.name || townDoc?.code || 'Hub';
+      linkTitle = `${townLabel} Intake (${token.slice(0, 6).toUpperCase()})`;
+    }
+
     const link = new this.linkModel({
       token,
-      title: dto.title.trim(),
+      title: linkTitle,
       homeTownId: townObjectId,
       createdBy: new Types.ObjectId(currentUser.id),
       expiresAt,
       isActive: true,
       usageCount: 0,
       maxUses: dto.maxUses || null,
-      customMessage: dto.customMessage?.trim(),
+      customMessage: undefined,
     });
 
     await link.save();

@@ -18,6 +18,71 @@ export function useDesktopAppFlow() {
 
   // Security Cutoff Modal State
   const [isSessionTerminated, setIsSessionTerminated] = useState(false);
+  const [deepLinkCode, setDeepLinkCode] = useState<string | null>(null);
+
+  // Deep linking listener (e.g. lrc-jrs://reset-password?code=123456 or lrc-jrs://login)
+  useEffect(() => {
+    let unlisten: (() => void) | undefined;
+
+    const processDeepLink = (rawUrl: string) => {
+      try {
+        const normalized = rawUrl
+          .replace(/^lrc-jrs:\/\//i, 'http://desktop.local/')
+          .replace(/^lrc:\/\//i, 'http://desktop.local/');
+        const parsed = new URL(normalized);
+        const action = (
+          parsed.pathname.replace(/^\//, '') ||
+          parsed.hostname ||
+          ''
+        ).toLowerCase();
+        const code = parsed.searchParams.get('code');
+        const identifier =
+          parsed.searchParams.get('identifier') ||
+          parsed.searchParams.get('email');
+
+        if (action === 'reset-password' || action === 'verify-otp') {
+          if (code) {
+            setDeepLinkCode(code);
+          }
+          if (identifier) {
+            flow.setRecoveryIdentifier(identifier);
+          }
+          flow.setCurrentScreen('verify-otp');
+        } else if (action === 'login' || action === 'setup') {
+          flow.setCurrentScreen('login');
+        }
+      } catch (err) {
+        console.warn('Failed to parse deep link URL:', rawUrl, err);
+      }
+    };
+
+    // Cold start & Runtime URL listeners via Tauri plugin
+    import('@tauri-apps/plugin-deep-link')
+      .then(({ getCurrent, onOpenUrl }) => {
+        getCurrent()
+          .then((urls) => {
+            if (urls && urls.length > 0) {
+              processDeepLink(urls[0]);
+            }
+          })
+          .catch(() => {});
+
+        onOpenUrl((urls) => {
+          if (urls && urls.length > 0) {
+            processDeepLink(urls[0]);
+          }
+        })
+          .then((fn) => {
+            unlisten = fn;
+          })
+          .catch(() => {});
+      })
+      .catch(() => {});
+
+    return () => {
+      if (unlisten) unlisten();
+    };
+  }, [flow.setCurrentScreen, flow.setRecoveryIdentifier]);
 
   // Listen for session termination events from HTTP client (expired/revoked refresh token)
   useEffect(() => {
@@ -83,6 +148,7 @@ export function useDesktopAppFlow() {
     recoveryIdentifier: flow.recoveryIdentifier,
     recoveryChannel: flow.recoveryChannel,
     resetToken: flow.resetToken,
+    deepLinkCode,
     isSessionTerminated,
     shouldShowRegionSelector,
     handleTownSelected: flow.handleTownSelected,

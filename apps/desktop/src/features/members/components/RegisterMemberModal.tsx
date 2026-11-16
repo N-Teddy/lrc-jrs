@@ -1,4 +1,4 @@
-import { useTranslation } from '@jrs/client-core';
+import { ErrorService, toast, useTranslation } from '@jrs/client-core';
 import {
   type ICreateMemberDto,
   MAX_ACTIVE_PCS_PER_TOWN,
@@ -132,6 +132,8 @@ export const RegisterMemberModal: React.FC<RegisterMemberModalProps> = ({
           payload.append('email', formData.email.trim());
         payload.append('role', formData.role);
         payload.append('hasAppAccess', String(hasAppAccess));
+        if (formData.preferredLanguage)
+          payload.append('preferredLanguage', formData.preferredLanguage);
         payload.append('avatar', formData.avatarFile);
         await onSubmit(payload);
       } else {
@@ -145,21 +147,27 @@ export const RegisterMemberModal: React.FC<RegisterMemberModalProps> = ({
           email: formData.email.trim() ? formData.email.trim() : undefined,
           role: formData.role,
           hasAppAccess,
+          preferredLanguage: formData.preferredLanguage,
         });
       }
+      toast.success(
+        t('members:registerModal.success', 'Member registered successfully.'),
+      );
       onClose();
     } catch (err: any) {
-      setErrorMsg(
-        err?.response?.data?.message ||
-          err?.message ||
-          'Failed to register member.',
-      );
+      ErrorService.handle(err);
     }
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-[#23201e]/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-200">
-      <div className="relative w-full max-w-[680px] my-auto bg-white rounded-xl border border-[#e8e1dd] shadow-2xl flex flex-col overflow-hidden">
+    <div
+      className="fixed inset-0 z-50 bg-[#23201e]/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-200"
+      onClick={onClose}
+    >
+      <div
+        className="relative w-full max-w-[680px] my-auto bg-white rounded-xl border border-[#e8e1dd] shadow-2xl flex flex-col overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Header */}
         <div className="p-6 pb-4 flex items-start justify-between border-b border-[#f4ece9]">
           <div className="flex items-center gap-3">
@@ -215,7 +223,7 @@ export const RegisterMemberModal: React.FC<RegisterMemberModalProps> = ({
                   {t('members:modal.sectionRole')}
                 </span>
               </div>
-              <div className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#faf2ee] border border-[#e8e1dd] text-[11px] font-bold text-[#57423b]">
+              <div className="flex items-center gap-1 px-2.5 py-0.5 rounded-sm bg-[#faf2ee] border border-[#e8e1dd] text-[11px] font-bold text-[#57423b]">
                 <MapPin size={12} className="text-[#b85028]" />
                 <span>
                   {activeTownName} ({activeTownCode})

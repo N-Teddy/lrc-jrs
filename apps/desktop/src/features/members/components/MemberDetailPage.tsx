@@ -1,10 +1,12 @@
 import {
+  toast,
+  useAuth,
   useMemberDetailQuery,
   useTownContext,
   useTownsQuery,
   useTranslation,
 } from '@jrs/client-core';
-import type { IUser } from '@jrs/shared';
+import { type IUser, UserRole } from '@jrs/shared';
 import {
   ArrowLeft,
   ArrowRight,
@@ -12,7 +14,7 @@ import {
   Buildings,
   CalendarCheck,
   Certificate,
-  ChatCircleText,
+  Check,
   CheckCircle,
   Copy,
   Crown,
@@ -25,9 +27,10 @@ import {
   Swap,
   Trash,
   User,
+  WhatsappLogo,
 } from '@phosphor-icons/react';
 import type React from 'react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { MemberDetailSkeleton, UserAvatar } from '../../../components';
 import { ChangeTownPcModal } from '../../access/components/ChangeTownPcModal';
 import {
@@ -59,6 +62,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
   initialTab,
 }) => {
   const { t } = useTranslation();
+  const { user } = useAuth();
   const { activeTown, canWrite } = useTownContext();
   const { data: member, isLoading, error } = useMemberDetailQuery(memberId);
   const { data: towns = [] } = useTownsQuery();
@@ -67,10 +71,38 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
     'identity' | 'transfers' | 'attendance' | 'access'
   >(initialTab ?? 'identity');
   const [copiedEmail, setCopiedEmail] = useState(false);
+  const [copiedPhone, setCopiedPhone] = useState(false);
   const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
   const [isChangePcOpen, setIsChangePcOpen] = useState(false);
 
   const townsMap = useMemo(() => new Map(towns.map((t) => [t.id, t])), [towns]);
+
+  const hasAppAccess = member?.account?.hasAppAccess ?? false;
+  const isRevoked = member?.account?.isAccessRevoked ?? false;
+
+  // Sync initialTab when provided
+  useEffect(() => {
+    if (initialTab) {
+      setActiveDetailTab(initialTab);
+    }
+  }, [initialTab]);
+
+  // Auto-switch away from restricted tab if account has no app access
+  useEffect(() => {
+    if (member && !hasAppAccess && activeDetailTab === 'access') {
+      setActiveDetailTab('identity');
+    }
+  }, [member, hasAppAccess, activeDetailTab]);
+
+  // Evaluate permissions: AP has full access across all hubs;
+  // PC can only manage members currently residing in their own assigned hub.
+  const isAp = isCurrentUserAp || user?.role === UserRole.AP;
+  const memberTownId = member?.homeTownId || member?.homeTown?.id;
+  const userTownId = user?.homeTownId;
+  const isMemberInUserTown = Boolean(
+    memberTownId && userTownId && String(memberTownId) === String(userTownId),
+  );
+  const canManageMember = isAp || (isMemberInUserTown && canWrite);
 
   if (isLoading) {
     return <MemberDetailSkeleton />;
@@ -83,10 +115,13 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
           <User size={28} />
         </div>
         <h3 className="text-lg font-bold text-[#1e1b19] mb-2">
-          Member Not Found
+          {t('members:detail.memberNotFound', 'Member Not Found')}
         </h3>
         <p className="text-xs text-[#8a726a] mb-6">
-          The requested member could not be retrieved from the active registry.
+          {t(
+            'members:detail.memberNotFoundDesc',
+            'The requested member could not be retrieved from the active registry.',
+          )}
         </p>
         <button
           type="button"
@@ -101,17 +136,27 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
 
   const age = calculateAge(member.dateOfBirth);
   const roleInfo = getRoleDisplayInfo(member.role);
-  const formattedPhone = formatCameroonPhone(member.phoneNumber);
+  const formattedPhone = formatCameroonPhone(member.phoneNumber, {
+    includeCountryCode: true,
+  });
   const cleanDigits = getCleanDigitsForWhatsApp(member.phoneNumber);
   const isEligibleJr = member.isJr ?? (age !== null && age >= 18 && age <= 30);
-  const hasAppAccess = member.account?.hasAppAccess ?? false;
-  const isRevoked = member.account?.isAccessRevoked ?? false;
 
   const handleCopyEmail = () => {
     if (member.email) {
       navigator.clipboard.writeText(member.email);
       setCopiedEmail(true);
+      toast.success(t('common:copiedToClipboard', 'Copied to clipboard'));
       setTimeout(() => setCopiedEmail(false), 1500);
+    }
+  };
+
+  const handleCopyPhone = () => {
+    if (member.phoneNumber) {
+      navigator.clipboard.writeText(member.phoneNumber);
+      setCopiedPhone(true);
+      toast.success(t('common:copiedToClipboard', 'Copied to clipboard'));
+      setTimeout(() => setCopiedPhone(false), 1500);
     }
   };
 
@@ -148,7 +193,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
                     'Pending Member Self-Entry',
                   )}
                 </span>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#ffdad6] text-[#ba1a1a]">
+                <span className="px-2 py-0.5 rounded-sm text-[10px] font-bold bg-[#ffdad6] text-[#ba1a1a]">
                   {t(
                     'members:intake.awaitingApproval',
                     'Awaiting Verification',
@@ -166,7 +211,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
           <button
             type="button"
             onClick={onBack}
-            className="px-4 py-2 rounded-lg bg-[#b85028] hover:bg-[#a44520] text-white text-xs font-bold transition-all shadow-xs shrink-0 cursor-pointer flex items-center gap-1.5 self-start sm:self-auto"
+            className="px-4 py-2 rounded-md bg-[#b85028] hover:bg-[#a44520] text-white text-xs font-bold transition-all shadow-xs shrink-0 cursor-pointer flex items-center gap-1.5 self-start sm:self-auto"
           >
             <span>
               {t('members:intake.goToReviewQueue', 'Go to Review Queue')}
@@ -190,11 +235,11 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
                 {member.fullName}
               </h1>
               <span
-                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold border ${roleInfo.badgeBg} ${roleInfo.badgeText} ${roleInfo.border}`}
+                className={`inline-flex items-center px-2.5 py-0.5 rounded-sm text-xs font-bold border ${roleInfo.badgeBg} ${roleInfo.badgeText} ${roleInfo.border}`}
               >
                 {roleInfo.label}
               </span>
-              <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-[#f4ece9] text-[#57423b] text-xs font-mono font-bold">
+              <span className="inline-flex items-center px-2 py-0.5 rounded-sm bg-[#f4ece9] text-[#57423b] text-xs font-mono font-bold">
                 {member.homeTown?.code ?? activeTown?.code ?? 'HUB'}
               </span>
             </div>
@@ -202,14 +247,18 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
             <div className="flex flex-wrap items-center gap-3 text-xs text-[#8a726a]">
               {age !== null && (
                 <span
-                  className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md font-bold ${
+                  className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-sm font-bold ${
                     isEligibleJr
                       ? 'bg-[#c2e9ca] text-[#2c4e37]'
                       : 'bg-[#faf2ee] text-[#8a726a]'
                   }`}
                 >
-                  <span>{age} yrs</span>
-                  {isEligibleJr && <span>· Eligible Youth</span>}
+                  <span>{t('members:detail.yearsOld', { age })}</span>
+                  {isEligibleJr && (
+                    <span>
+                      · {t('members:detail.eligibleYouth', 'Eligible Youth')}
+                    </span>
+                  )}
                 </span>
               )}
               <span>•</span>
@@ -238,13 +287,13 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
               rel="noreferrer"
               className="flex items-center gap-2 px-3.5 py-2 rounded-md bg-[#c2e9ca] hover:bg-[#a9d0b2] text-[#2c4e37] text-xs font-bold transition-colors cursor-pointer shadow-2xs"
             >
-              <ChatCircleText size={18} weight="fill" />
+              <WhatsappLogo size={18} weight="fill" />
               <span>WhatsApp</span>
             </a>
           )}
 
           {/* Edit Profile */}
-          {canWrite && (
+          {canManageMember && (
             <button
               type="button"
               onClick={() => onEdit(member)}
@@ -256,7 +305,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
           )}
 
           {/* Transfer Hub */}
-          {canWrite && (
+          {canManageMember && (
             <button
               type="button"
               onClick={() => setIsTransferModalOpen(true)}
@@ -267,12 +316,12 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
                 weight="bold"
                 className="text-[#b85028]"
               />
-              <span>Transfer Hub</span>
+              <span>{t('members:detail.transferHub')}</span>
             </button>
           )}
 
           {/* Manage Access */}
-          {canWrite && (
+          {canManageMember && (
             <button
               type="button"
               onClick={() => onManageAccess(member)}
@@ -283,8 +332,8 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
             </button>
           )}
 
-          {/* Deactivate (AP Only & canWrite) */}
-          {canWrite && isCurrentUserAp && onDelete && (
+          {/* Deactivate (AP Only & canManageMember) */}
+          {canManageMember && isAp && onDelete && (
             <button
               type="button"
               onClick={() => onDelete(member)}
@@ -347,21 +396,23 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
           <span>{t('members:detail.tabAttendance')}</span>
         </button>
 
-        <button
-          type="button"
-          onClick={() => setActiveDetailTab('access')}
-          className={`flex items-center justify-center min-w-[140px] gap-2 px-4 py-2 rounded-md text-xs font-bold transition-all cursor-pointer ${
-            activeDetailTab === 'access'
-              ? 'bg-white text-[#b85028] shadow-xs border border-[#e8e1dd]'
-              : 'text-[#8a726a] hover:text-[#57423b] hover:bg-[#f4ece9] border border-transparent'
-          }`}
-        >
-          <ShieldCheck
-            size={18}
-            weight={activeDetailTab === 'access' ? 'fill' : 'regular'}
-          />
-          <span>Access & Account</span>
-        </button>
+        {hasAppAccess && (
+          <button
+            type="button"
+            onClick={() => setActiveDetailTab('access')}
+            className={`flex items-center justify-center min-w-[140px] gap-2 px-4 py-2 rounded-md text-xs font-bold transition-all cursor-pointer ${
+              activeDetailTab === 'access'
+                ? 'bg-white text-[#b85028] shadow-xs border border-[#e8e1dd]'
+                : 'text-[#8a726a] hover:text-[#57423b] hover:bg-[#f4ece9] border border-transparent'
+            }`}
+          >
+            <ShieldCheck
+              size={18}
+              weight={activeDetailTab === 'access' ? 'fill' : 'regular'}
+            />
+            <span>{t('members:detail.tabAccess')}</span>
+          </button>
+        )}
       </div>
 
       {/* 4. Tab 1: Personal Identity & Credentials */}
@@ -374,31 +425,38 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
             className={`${hasAppAccess ? 'lg:col-span-2' : 'w-full'} flex flex-col gap-6`}
           >
             <div className="bg-white rounded-xl border border-[#e8e1dd] p-6 shadow-xs flex flex-col gap-5">
-              <h3 className="text-sm font-bold text-[#1e1b19] uppercase tracking-wider text-[#8a726a]">
-                Identity & Demographic Credentials
+              <h3 className="text-sm font-bold uppercase tracking-wider text-[#8a726a]">
+                {t('members:detail.identityHeader')}
               </h3>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                 <div className="p-3.5 rounded-lg bg-[#faf2ee] border border-[#e8e1dd] flex flex-col gap-1">
-                  <span className="text-[#8a726a] font-medium">Full Name</span>
+                  <span className="text-[#8a726a] font-medium">
+                    {t('members:detail.fullName')}
+                  </span>
                   <span className="font-bold text-[#1e1b19] text-sm">
                     {member.fullName}
                   </span>
                 </div>
 
                 <div className="p-3.5 rounded-lg bg-[#faf2ee] border border-[#e8e1dd] flex flex-col gap-1">
-                  <span className="text-[#8a726a] font-medium">Gender</span>
+                  <span className="text-[#8a726a] font-medium">
+                    {t('members:modal.gender', 'Gender')}
+                  </span>
                   <span className="font-bold text-[#1e1b19] text-sm">
                     {member.gender
-                      ? member.gender.charAt(0) +
-                        member.gender.slice(1).toLowerCase()
-                      : 'Not recorded'}
+                      ? t(
+                          `members:gender.${member.gender.toLowerCase()}`,
+                          member.gender.charAt(0) +
+                            member.gender.slice(1).toLowerCase(),
+                        )
+                      : t('common:notRecorded', 'Not recorded')}
                   </span>
                 </div>
 
                 <div className="p-3.5 rounded-lg bg-[#faf2ee] border border-[#e8e1dd] flex flex-col gap-1">
                   <span className="text-[#8a726a] font-medium">
-                    Date of Birth
+                    {t('members:modal.dob', 'Date of Birth')}
                   </span>
                   <span className="font-bold text-[#1e1b19] text-sm">
                     {member.dateOfBirth
@@ -410,13 +468,13 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
                             year: 'numeric',
                           },
                         )
-                      : 'Not recorded'}
+                      : t('common:notRecorded', 'Not recorded')}
                   </span>
                 </div>
 
                 <div className="p-3.5 rounded-lg bg-[#faf2ee] border border-[#e8e1dd] flex flex-col gap-1">
                   <span className="text-[#8a726a] font-medium">
-                    Integration Date
+                    {t('members:modal.integrationDate', 'Integration Date')}
                   </span>
                   <span className="font-bold text-[#1e1b19] text-sm">
                     {member.integrationDate
@@ -427,26 +485,61 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
                             year: 'numeric',
                           },
                         )
-                      : 'Not recorded'}
+                      : t('common:notRecorded', 'Not recorded')}
                   </span>
                 </div>
 
                 <div className="p-3.5 rounded-lg bg-[#faf2ee] border border-[#e8e1dd] flex flex-col gap-1">
                   <span className="text-[#8a726a] font-medium">
-                    Phone (WhatsApp Line)
+                    {t('members:table.phone', 'Phone')}
                   </span>
-                  <span className="font-mono font-bold text-[#1e1b19] text-sm">
-                    {formattedPhone || '—'}
-                  </span>
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <span className="font-mono font-bold text-[#1e1b19] text-sm truncate">
+                        {formattedPhone || '—'}
+                      </span>
+                      {member.isWhatsappVerified && (
+                        <span
+                          className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-sm text-[10px] font-bold bg-[#c2e9ca] text-[#2c4e37] border border-[#a9d0b2] shrink-0"
+                          title="WhatsApp"
+                        >
+                          <WhatsappLogo size={12} weight="fill" />
+                          <span>WhatsApp</span>
+                        </span>
+                      )}
+                    </div>
+                    {member.phoneNumber && (
+                      <button
+                        type="button"
+                        onClick={handleCopyPhone}
+                        className="text-[#8a726a] hover:text-[#b85028] transition-colors cursor-pointer shrink-0"
+                        title={
+                          copiedPhone
+                            ? t('common:copied', 'Copied!')
+                            : t('members:detail.copyPhone', 'Copy phone')
+                        }
+                      >
+                        {copiedPhone ? (
+                          <Check
+                            size={14}
+                            className="text-[#486b52]"
+                            weight="bold"
+                          />
+                        ) : (
+                          <Copy size={14} />
+                        )}
+                      </button>
+                    )}
+                  </div>
                 </div>
 
                 <div className="p-3.5 rounded-lg bg-[#faf2ee] border border-[#e8e1dd] flex flex-col gap-1">
                   <span className="text-[#8a726a] font-medium">
-                    Email Address
+                    {t('members:detail.emailAddress')}
                   </span>
                   <div className="flex items-center justify-between">
                     <span className="font-medium text-[#1e1b19] truncate">
-                      {member.email || 'None'}
+                      {member.email || t('common:none', 'None')}
                     </span>
                     {member.email && (
                       <button
@@ -455,7 +548,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
                         className="text-[#8a726a] hover:text-[#b85028] transition-colors cursor-pointer"
                         title={
                           copiedEmail
-                            ? 'Copied!'
+                            ? t('common:copied', 'Copied!')
                             : t('members:detail.copyEmail')
                         }
                       >
@@ -464,18 +557,6 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
                     )}
                   </div>
                 </div>
-              </div>
-
-              {/* Transfer & Community Notes */}
-              <div className="p-4 rounded-lg bg-[#faf2ee] border border-[#e8e1dd] flex flex-col gap-2">
-                <span className="text-xs font-bold text-[#1e1b19]">
-                  Official Community Standing
-                </span>
-                <p className="text-xs text-[#57423b] leading-relaxed">
-                  Member registered in good standing under Inter-Hub Youth
-                  Community guidelines. Eligible for community circles, regional
-                  gatherings, and program cohorts.
-                </p>
               </div>
             </div>
           </div>
@@ -493,7 +574,9 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
 
                 <div className="flex flex-col gap-3 text-xs">
                   <div className="flex items-center justify-between py-2 border-b border-[#f4ece9]">
-                    <span className="text-[#8a726a]">Portal Account</span>
+                    <span className="text-[#8a726a]">
+                      {t('members:detail.portalAccount')}
+                    </span>
                     <span
                       className={`font-bold ${
                         hasAppAccess && !isRevoked
@@ -508,7 +591,9 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
                   </div>
 
                   <div className="flex items-center justify-between py-2 border-b border-[#f4ece9]">
-                    <span className="text-[#8a726a]">Account Status</span>
+                    <span className="text-[#8a726a]">
+                      {t('members:detail.accountStatus')}
+                    </span>
                     <span
                       className={`font-bold ${
                         isRevoked
@@ -519,10 +604,10 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
                       }`}
                     >
                       {isRevoked
-                        ? 'Suspended'
+                        ? t('members:detail.suspended')
                         : hasAppAccess
-                          ? 'Active'
-                          : 'Offline Only'}
+                          ? t('members:detail.active')
+                          : t('members:detail.notGranted')}
                     </span>
                   </div>
 
@@ -538,7 +623,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
                   </div>
                 </div>
 
-                {canWrite && (
+                {canManageMember && (
                   <button
                     type="button"
                     onClick={() => onManageAccess(member)}
@@ -575,7 +660,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
                     <h3 className="text-base font-black text-[#1e1b19] tracking-tight">
                       Official Hub Registry & Passport
                     </h3>
-                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#ffdbcf]/60 text-[#812901] border border-[#ffb59c]/50">
+                    <span className="px-2.5 py-0.5 rounded-sm text-[10px] font-black uppercase tracking-wider bg-[#ffdbcf]/60 text-[#812901] border border-[#ffb59c]/50">
                       Registry Index
                     </span>
                   </div>
@@ -586,70 +671,25 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
                 </div>
               </div>
 
-              {canWrite && (
+              {canManageMember && (
                 <button
                   type="button"
                   onClick={() => setIsTransferModalOpen(true)}
                   className="px-4 py-2.5 rounded-md bg-[#b85028] hover:bg-[#9c421f] text-white text-xs font-bold transition-all flex items-center gap-2 shadow-2xs cursor-pointer self-start sm:self-auto shrink-0"
                 >
                   <ArrowsLeftRight size={16} weight="bold" />
-                  <span>Transfer Member Hub</span>
+                  <span>{t('members:detail.transferHub')}</span>
                 </button>
               )}
             </div>
 
-            {/* Official Dual Pillars: Current Resident Hub <-> Origin Hub */}
+            {/* Official Dual Pillars: Origin Hub -> Current Resident Hub */}
             <div className="grid grid-cols-1 lg:grid-cols-7 gap-4 items-center relative z-10">
-              {/* Pillar 1: Current Resident Hub (3 cols) */}
-              <div className="lg:col-span-3 p-5 rounded-lg bg-white border border-[#c2e9ca] shadow-2xs flex flex-col justify-between gap-3 relative overflow-hidden group">
-                <div className="absolute top-0 left-0 right-0 h-1 bg-[#486b52]" />
-                <div className="flex items-center justify-between gap-2">
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#eef7f0] text-[#2c4e37] border border-[#c2e9ca]">
-                    <span className="w-2 h-2 rounded-full bg-[#486b52] animate-pulse" />
-                    Active Jurisdiction
-                  </span>
-                  <span className="text-sm font-mono font-black text-[#486b52] bg-[#eef7f0] px-2.5 py-0.5 rounded-md border border-[#c2e9ca]">
-                    {member.homeTown?.code ?? activeTown?.code ?? 'HUB'}
-                  </span>
-                </div>
-
-                <div>
-                  <h4 className="text-xl font-black text-[#1e1b19] tracking-tight">
-                    {member.homeTown?.name ??
-                      activeTown?.name ??
-                      'Assigned Hub'}
-                  </h4>
-                  <div className="flex items-center gap-1.5 text-xs text-[#8a726a] mt-1">
-                    <Buildings size={14} className="text-[#486b52]" />
-                    <span>Official Current Hub in Cameroon</span>
-                  </div>
-                </div>
-
-                <div className="pt-2 border-t border-[#f4ece9] flex items-center justify-between text-[11px] text-[#57423b]">
-                  <span className="font-medium">Jurisdiction Status:</span>
-                  <span className="font-bold text-[#2c4e37]">
-                    Active Roll Member
-                  </span>
-                </div>
-              </div>
-
-              {/* Central Journey Indicator (1 col) */}
-              <div className="lg:col-span-1 flex flex-col items-center justify-center gap-1.5 py-2">
-                <div className="w-10 h-10 rounded-lg bg-[#faf2ee] border border-[#e8e1dd] text-[#b85028] flex items-center justify-center shadow-2xs">
-                  <ArrowsLeftRight size={18} weight="bold" />
-                </div>
-                <span className="text-[10px] font-black uppercase tracking-wider text-[#8a726a] text-center">
-                  {member.transferHistory && member.transferHistory.length > 0
-                    ? `${member.transferHistory.length} ${member.transferHistory.length === 1 ? 'Relocation' : 'Relocations'}`
-                    : 'Native Seat'}
-                </span>
-              </div>
-
-              {/* Pillar 2: Origin Hub / Origin Hub (3 cols) */}
+              {/* Pillar 1: Origin Hub (3 cols) */}
               <div className="lg:col-span-3 p-5 rounded-lg bg-white border border-[#ffdbcf] shadow-2xs flex flex-col justify-between gap-3 relative overflow-hidden group">
                 <div className="absolute top-0 left-0 right-0 h-1 bg-[#b85028]" />
                 <div className="flex items-center justify-between gap-2">
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#fff2ee] text-[#812901] border border-[#ffdbcf]">
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-sm text-[10px] font-black uppercase tracking-wider bg-[#fff2ee] text-[#812901] border border-[#ffdbcf]">
                     <Sparkle
                       size={12}
                       weight="fill"
@@ -657,7 +697,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
                     />
                     Origin Hub
                   </span>
-                  <span className="text-sm font-mono font-black text-[#b85028] bg-[#fff2ee] px-2.5 py-0.5 rounded-md border border-[#ffdbcf]">
+                  <span className="text-sm font-mono font-black text-[#b85028] bg-[#fff2ee] px-2.5 py-0.5 rounded-sm border border-[#ffdbcf]">
                     {member.transferHistory && member.transferHistory.length > 0
                       ? townsMap.get(member.transferHistory[0].fromTownId)
                           ?.code || 'HUB'
@@ -689,6 +729,51 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
                   </span>
                 </div>
               </div>
+
+              {/* Central Journey Indicator (1 col) */}
+              <div className="lg:col-span-1 flex flex-col items-center justify-center gap-1.5 py-2">
+                <div className="w-10 h-10 rounded-lg bg-[#faf2ee] border border-[#e8e1dd] text-[#b85028] flex items-center justify-center shadow-2xs">
+                  <ArrowRight size={18} weight="bold" />
+                </div>
+                <span className="text-[10px] font-black uppercase tracking-wider text-[#8a726a] text-center">
+                  {member.transferHistory && member.transferHistory.length > 0
+                    ? `${member.transferHistory.length} ${member.transferHistory.length === 1 ? 'Relocation' : 'Relocations'}`
+                    : 'Native Seat'}
+                </span>
+              </div>
+
+              {/* Pillar 2: Current Resident Hub (3 cols) */}
+              <div className="lg:col-span-3 p-5 rounded-lg bg-white border border-[#c2e9ca] shadow-2xs flex flex-col justify-between gap-3 relative overflow-hidden group">
+                <div className="absolute top-0 left-0 right-0 h-1 bg-[#486b52]" />
+                <div className="flex items-center justify-between gap-2">
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-sm text-[10px] font-black uppercase tracking-wider bg-[#eef7f0] text-[#2c4e37] border border-[#c2e9ca]">
+                    <span className="w-2 h-2 rounded-full bg-[#486b52] animate-pulse" />
+                    Active Jurisdiction
+                  </span>
+                  <span className="text-sm font-mono font-black text-[#486b52] bg-[#eef7f0] px-2.5 py-0.5 rounded-sm border border-[#c2e9ca]">
+                    {member.homeTown?.code ?? activeTown?.code ?? 'HUB'}
+                  </span>
+                </div>
+
+                <div>
+                  <h4 className="text-xl font-black text-[#1e1b19] tracking-tight">
+                    {member.homeTown?.name ??
+                      activeTown?.name ??
+                      'Assigned Hub'}
+                  </h4>
+                  <div className="flex items-center gap-1.5 text-xs text-[#8a726a] mt-1">
+                    <Buildings size={14} className="text-[#486b52]" />
+                    <span>Official Current Hub in Cameroon</span>
+                  </div>
+                </div>
+
+                <div className="pt-2 border-t border-[#f4ece9] flex items-center justify-between text-[11px] text-[#57423b]">
+                  <span className="font-medium">Jurisdiction Status:</span>
+                  <span className="font-bold text-[#2c4e37]">
+                    Active Roll Member
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -705,7 +790,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
                 </p>
               </div>
 
-              <span className="text-xs font-bold text-[#8a726a] px-3 py-1 rounded-full bg-[#faf2ee] border border-[#e8e1dd] self-start sm:self-auto">
+              <span className="text-xs font-bold text-[#8a726a] px-3 py-1 rounded-sm bg-[#faf2ee] border border-[#e8e1dd] self-start sm:self-auto">
                 {(member.transferHistory?.length || 0) + 1} Historical Events
               </span>
             </div>
@@ -730,7 +815,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
                       <div className="p-5 rounded-lg bg-white border border-[#e8e1dd] hover:border-[#b85028]/40 shadow-2xs hover:shadow-xs transition-all flex-1 flex flex-col gap-3 group">
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <span className="px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-[#fff2ee] text-[#b85028] border border-[#ffdbcf]">
+                            <span className="px-2 py-0.5 rounded-sm text-[10px] font-black uppercase tracking-wider bg-[#fff2ee] text-[#b85028] border border-[#ffdbcf]">
                               Relocation #{transferIndex}
                             </span>
                             <div className="flex items-center gap-2 font-bold text-sm text-[#1e1b19]">
@@ -842,7 +927,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
       )}
 
       {/* 7. Tab 4: Account Access & Security */}
-      {activeDetailTab === 'access' && (
+      {hasAppAccess && activeDetailTab === 'access' && (
         <div className="flex flex-col gap-6 animate-in fade-in duration-200">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Account Credentials & Status */}
@@ -855,16 +940,15 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
                     </div>
                     <div>
                       <h3 className="text-sm font-bold text-[#1e1b19]">
-                        Portal Account & Credentials
+                        {t('members:detail.portalCredentialsHeader')}
                       </h3>
                       <p className="text-xs text-[#8a726a]">
-                        Manage application login permissions, security state,
-                        and temporary passwords.
+                        {t('members:detail.portalCredentialsDesc')}
                       </p>
                     </div>
                   </div>
                   <span
-                    className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold ${
+                    className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-sm text-xs font-bold ${
                       isRevoked
                         ? 'bg-[#ffdad6] text-[#ba1a1a]'
                         : hasAppAccess
@@ -882,17 +966,17 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
                       }`}
                     />
                     {isRevoked
-                      ? 'Access Suspended'
+                      ? t('members:detail.accessSuspended')
                       : hasAppAccess
-                        ? 'Active App Access'
-                        : 'Offline Only (No Login)'}
+                        ? t('members:detail.activeAppAccess')
+                        : t('members:detail.offlineOnly')}
                   </span>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                   <div className="p-3.5 rounded-lg bg-[#faf2ee] border border-[#e8e1dd] flex flex-col gap-1">
                     <span className="text-[#8a726a] font-medium">
-                      Login Identifier (Phone)
+                      {t('members:accessModal.loginIdentifier')}
                     </span>
                     <span className="font-mono font-bold text-[#1e1b19] text-sm">
                       {formatCameroonPhone(member.phoneNumber)}
@@ -901,27 +985,27 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
 
                   <div className="p-3.5 rounded-lg bg-[#faf2ee] border border-[#e8e1dd] flex flex-col gap-1">
                     <span className="text-[#8a726a] font-medium">
-                      Notification Email
+                      {t('members:accessModal.registeredEmail')}
                     </span>
                     <span className="font-bold text-[#1e1b19] text-sm truncate">
-                      {member.email || 'None configured'}
+                      {member.email || t('members:detail.noneConfigured')}
                     </span>
                   </div>
 
                   <div className="p-3.5 rounded-lg bg-[#faf2ee] border border-[#e8e1dd] flex flex-col gap-1">
                     <span className="text-[#8a726a] font-medium">
-                      Assigned Role
+                      {t('members:detail.assignedRole')}
                     </span>
                     <div className="flex items-center gap-2 mt-0.5">
                       <span
-                        className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold border ${roleInfo.badgeBg} ${roleInfo.badgeText} ${roleInfo.border}`}
+                        className={`inline-flex items-center px-2 py-0.5 rounded-sm text-[11px] font-bold border ${roleInfo.badgeBg} ${roleInfo.badgeText} ${roleInfo.border}`}
                       >
                         {roleInfo.label}
                       </span>
                       {member.isActivePC && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold bg-[#ffdbcf] text-[#812901]">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-sm text-[11px] font-bold bg-[#ffdbcf] text-[#812901]">
                           <Crown size={12} weight="fill" />
-                          Active PC
+                          {t('members:detail.activePc')}
                         </span>
                       )}
                     </div>
@@ -929,19 +1013,19 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
 
                   <div className="p-3.5 rounded-lg bg-[#faf2ee] border border-[#e8e1dd] flex flex-col gap-1">
                     <span className="text-[#8a726a] font-medium">
-                      Credential Status
+                      {t('members:detail.credentialStatus')}
                     </span>
                     <span className="font-bold text-[#1e1b19] text-sm">
                       {member.isTemporaryPassword
-                        ? 'Temporary Password (Pending update)'
+                        ? t('members:detail.tempPasswordActive')
                         : hasAppAccess
-                          ? 'Permanent Password Set'
-                          : 'No Credentials Issued'}
+                          ? t('members:detail.permanentPasswordSet')
+                          : t('members:detail.noCredentialsIssued')}
                     </span>
                   </div>
                 </div>
 
-                {canWrite && (
+                {canManageMember && (
                   <div className="flex items-center gap-3 pt-3 border-t border-[#f4ece9]">
                     <button
                       type="button"
@@ -949,7 +1033,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
                       className="flex-1 py-2.5 px-4 rounded-md bg-[#b85028] hover:bg-[#a44520] text-white text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs"
                     >
                       <Key size={16} />
-                      <span>Manage Platform Access & Credentials</span>
+                      <span>{t('members:detail.manageAccessAction')}</span>
                     </button>
                   </div>
                 )}
@@ -965,22 +1049,24 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
                       </div>
                       <div>
                         <h4 className="text-sm font-bold text-[#1e1b19]">
-                          Program Coordinator (PC) Leadership
+                          {t('members:detail.pcLeadershipHeader')}
                         </h4>
                         <p className="text-xs text-[#8a726a]">
-                          {member.fullName} currently serves as Contact Person
-                          for {member.homeTown?.name || 'Assigned Town'}.
+                          {t('members:detail.pcLeadershipDesc', {
+                            name: member.fullName,
+                            town: member.homeTown?.name || 'Assigned Town',
+                          })}
                         </p>
                       </div>
                     </div>
-                    {canWrite && (
+                    {canManageMember && (
                       <button
                         type="button"
                         onClick={() => setIsChangePcOpen(true)}
                         className="py-2 px-3.5 rounded-md bg-white border border-[#ffb59c] text-[#b85028] hover:bg-[#fff2ee] text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-2xs"
                       >
                         <ArrowsLeftRight size={15} weight="bold" />
-                        <span>Transfer PC Leadership</span>
+                        <span>{t('members:detail.transferPcLeadership')}</span>
                       </button>
                     )}
                   </div>
@@ -994,12 +1080,11 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
                 <div className="flex items-center gap-2.5">
                   <ShieldCheck size={20} className="text-[#b85028]" />
                   <h4 className="text-xs font-bold text-[#1e1b19] uppercase tracking-wider">
-                    Cross-Hub Read Scopes
+                    {t('members:detail.crossHubScopes')}
                   </h4>
                 </div>
                 <p className="text-xs text-[#8a726a] leading-relaxed">
-                  External community hubs this member is permitted to inspect in
-                  read-only mode.
+                  {t('members:detail.crossHubScopesDesc')}
                 </p>
 
                 <div className="flex flex-wrap gap-1.5 pt-2 border-t border-[#f4ece9]">
@@ -1010,7 +1095,7 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
                       return (
                         <span
                           key={id}
-                          className="px-2.5 py-1 rounded-md text-[11px] font-bold bg-[#faf2ee] text-[#57423b] border border-[#e8e1dd]"
+                          className="px-2.5 py-1 rounded-sm text-[11px] font-bold bg-[#faf2ee] text-[#57423b] border border-[#e8e1dd]"
                         >
                           {town?.name || id}
                         </span>
@@ -1018,7 +1103,9 @@ export const MemberDetailPage: React.FC<MemberDetailPageProps> = ({
                     })
                   ) : (
                     <span className="text-xs text-[#8a726a] italic">
-                      Home hub only ({member.homeTown?.name || 'Local'})
+                      {t('members:detail.homeHubOnly', {
+                        name: member.homeTown?.name || 'Local',
+                      })}
                     </span>
                   )}
                 </div>

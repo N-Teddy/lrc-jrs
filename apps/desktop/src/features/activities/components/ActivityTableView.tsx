@@ -4,16 +4,29 @@ import {
   useUpdateActivityMutation,
 } from '@jrs/client-core';
 import { ActivityStatus, type IActivity } from '@jrs/shared';
-import { Bell, Buildings, CalendarBlank } from '@phosphor-icons/react';
+import {
+  ArrowCounterClockwise,
+  Bell,
+  Buildings,
+  CalendarBlank,
+  Clock,
+  Plus,
+} from '@phosphor-icons/react';
 import type React from 'react';
 import { useState } from 'react';
-import { PaginationControl, TableSkeleton } from '../../../components';
+import emptyActivitiesImg from '../../../assets/illustrations/empty-activities.jpg';
+import {
+  EmptyState,
+  PaginationControl,
+  TableSkeleton,
+} from '../../../components';
 import {
   formatActivityDateRange,
   getActivityStatusConfig,
   getActivityTypeConfig,
 } from '../utils/activity-ui.utils';
 import { ActivityActionMenu } from './ActivityActionMenu';
+import { CancelActivityModal } from './CancelActivityModal';
 
 interface ActivityTableViewProps {
   activities: IActivity[];
@@ -23,11 +36,13 @@ interface ActivityTableViewProps {
   limit: number;
   onPageChange: (page: number) => void;
   onViewDetails: (activity: IActivity) => void;
-  onViewPreparation?: (activity: IActivity) => void;
   onEditActivity: (activity: IActivity) => void;
   onViewHistory: (activity: IActivity) => void;
   onDeleteActivity?: (activity: IActivity) => void;
   isPrivileged: boolean;
+  hasActiveFilters?: boolean;
+  onClearFilters?: () => void;
+  onPlanActivity?: () => void;
 }
 
 export const ActivityTableView: React.FC<ActivityTableViewProps> = ({
@@ -38,32 +53,32 @@ export const ActivityTableView: React.FC<ActivityTableViewProps> = ({
   limit,
   onPageChange,
   onViewDetails,
-  onViewPreparation,
   onEditActivity,
   onViewHistory,
   onDeleteActivity,
   isPrivileged,
+  hasActiveFilters = false,
+  onClearFilters,
+  onPlanActivity,
 }) => {
   const { t } = useTranslation();
   const { activeTownId } = useTownContext();
   const updateActivityMutation = useUpdateActivityMutation();
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const [activityToCancel, setActivityToCancel] = useState<IActivity | null>(
+    null,
+  );
 
   const totalPages = Math.ceil(total / limit) || 1;
 
-  const handleCancelActivity = async (activity: IActivity) => {
-    if (
-      !window.confirm(
-        t(
-          'activities:detail.confirmCancel',
-          'Are you sure you want to cancel this activity? You can undo this cancellation at any time.',
-        ),
-      )
-    ) {
-      return;
-    }
+  const handleCancelActivity = (activity: IActivity) => {
+    setActivityToCancel(activity);
+  };
+
+  const handleConfirmCancel = async () => {
+    if (!activityToCancel) return;
     await updateActivityMutation.mutateAsync({
-      id: activity.id,
+      id: activityToCancel.id,
       dto: {
         status: ActivityStatus.CANCELLED,
         changeReason: t(
@@ -72,6 +87,7 @@ export const ActivityTableView: React.FC<ActivityTableViewProps> = ({
         ),
       },
     });
+    setActivityToCancel(null);
   };
 
   const handleUndoCancel = async (activity: IActivity) => {
@@ -102,18 +118,56 @@ export const ActivityTableView: React.FC<ActivityTableViewProps> = ({
   }
 
   if (activities.length === 0) {
+    if (hasActiveFilters) {
+      return (
+        <EmptyState
+          size="lg"
+          imageSrc={emptyActivitiesImg}
+          imageAlt="No activities match filters"
+          title={t(
+            'activities:filters.noMatchesTitle',
+            'No activities match your filters',
+          )}
+          description={t(
+            'activities:filters.noMatchesDescShort',
+            'Try adjusting your search terms or filters.',
+          )}
+          primaryAction={
+            onClearFilters
+              ? {
+                  label: t('common:clearFilters', 'Clear all filters'),
+                  icon: <ArrowCounterClockwise size={15} weight="bold" />,
+                  onClick: onClearFilters,
+                }
+              : undefined
+          }
+        />
+      );
+    }
+
     return (
-      <div className="bg-white rounded-xl border border-[#e8e1dd] shadow-xs p-12 flex flex-col items-center justify-center text-center min-h-[320px]">
-        <div className="w-14 h-14 rounded-xl bg-[#faf2ee] border border-[#e8e1dd] flex items-center justify-center text-[#8a726a] mb-4">
-          <CalendarBlank size={28} weight="duotone" />
-        </div>
-        <h3 className="text-base font-bold text-[#1e1b19] mb-1">
-          {t('activities:table.empty')}
-        </h3>
-        <p className="text-xs text-[#8a726a] max-w-sm">
-          {t('activities:filters.searchPlaceholder')}
-        </p>
-      </div>
+      <EmptyState
+        size="lg"
+        imageSrc={emptyActivitiesImg}
+        imageAlt="No activities"
+        title={t('activities:table.empty', 'No activities scheduled yet')}
+        description={t(
+          'activities:table.emptyDescShort',
+          'No scheduled activities in this hub yet.',
+        )}
+        primaryAction={
+          isPrivileged && onPlanActivity
+            ? {
+                label: t(
+                  'activities:actions.newActivity',
+                  'Plan First Activity',
+                ),
+                icon: <Plus size={16} weight="bold" />,
+                onClick: onPlanActivity,
+              }
+            : undefined
+        }
+      />
     );
   }
 
@@ -164,15 +218,17 @@ export const ActivityTableView: React.FC<ActivityTableViewProps> = ({
               return (
                 <tr
                   key={activity.id}
-                  className="hover:bg-[#faf2ee]/60 transition-colors group"
+                  className={`hover:bg-[#faf2ee]/60 transition-colors group ${
+                    openMenuId === activity.id ? 'relative z-30' : ''
+                  }`}
                 >
                   {/* Activity & Agenda */}
                   <td className="py-3.5 px-4">
-                    <div className="flex items-start gap-3">
-                      <div className="w-9 h-9 rounded-xl bg-[#faf2ee] border border-[#e8e1dd] flex items-center justify-center text-[#b85028] mt-0.5 shrink-0 shadow-2xs">
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-md bg-[#faf2ee] border border-[#e8e1dd] flex items-center justify-center text-[#b85028] shrink-0 shadow-2xs">
                         <TypeIcon size={18} weight="duotone" />
                       </div>
-                      <div className="flex flex-col min-w-0 max-w-sm">
+                      <div className="flex flex-col justify-center min-w-0 max-w-sm">
                         <button
                           type="button"
                           onClick={() => onViewDetails(activity)}
@@ -180,20 +236,21 @@ export const ActivityTableView: React.FC<ActivityTableViewProps> = ({
                         >
                           {activity.title}
                         </button>
-                        {activity.notes && (
-                          <span className="text-[11px] text-[#8a726a] line-clamp-1 mt-0.5">
-                            {activity.notes}
-                          </span>
-                        )}
                         {isParticipating && (
                           <div className="flex items-center mt-1">
-                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold border bg-[#edf3ee] text-[#486b52] border-[#c2e9ca]">
+                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-sm text-[10px] font-bold border bg-[#edf3ee] text-[#486b52] border-[#c2e9ca]">
                               <Buildings size={11} weight="bold" />
                               <span>
-                                Inter-villes · Hôte:{' '}
-                                {activity.hostTown?.name ||
-                                  activity.town?.name ||
-                                  'Autre'}
+                                {t(
+                                  'activities:detail.interTownHost',
+                                  'Inter-Town · Host: {{host}}',
+                                  {
+                                    host:
+                                      activity.hostTown?.name ||
+                                      activity.town?.name ||
+                                      t('activities:detail.otherHost', 'Other'),
+                                  },
+                                )}
                               </span>
                             </span>
                           </div>
@@ -201,13 +258,19 @@ export const ActivityTableView: React.FC<ActivityTableViewProps> = ({
                         {!isParticipating &&
                           (activity.includedTownIds?.length ?? 0) > 0 && (
                             <div className="flex items-center mt-1">
-                              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium border bg-[#faf2ee] text-[#b85028] border-[#e8e1dd]">
+                              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-sm text-[10px] font-medium border bg-[#faf2ee] text-[#b85028] border-[#e8e1dd]">
                                 <Buildings size={11} weight="duotone" />
                                 <span>
                                   +{activity.includedTownIds?.length}{' '}
                                   {activity.includedTownIds?.length === 1
-                                    ? 'ville participante'
-                                    : 'villes participantes'}
+                                    ? t(
+                                        'activities:interTown.singleTown',
+                                        'participating city',
+                                      )
+                                    : t(
+                                        'activities:interTown.multipleTowns',
+                                        'participating cities',
+                                      )}
                                 </span>
                               </span>
                             </div>
@@ -219,7 +282,7 @@ export const ActivityTableView: React.FC<ActivityTableViewProps> = ({
                   {/* Type */}
                   <td className="py-3.5 px-3">
                     <span
-                      className={`inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold border ${typeConfig.badgeBg} ${typeConfig.badgeText} ${typeConfig.badgeBorder}`}
+                      className={`inline-flex items-center px-2 py-0.5 rounded-sm text-[10px] font-bold border ${typeConfig.badgeBg} ${typeConfig.badgeText} ${typeConfig.badgeBorder}`}
                     >
                       {typeConfig.label}
                     </span>
@@ -237,9 +300,10 @@ export const ActivityTableView: React.FC<ActivityTableViewProps> = ({
                         <span>{dateInfo.dateRange}</span>
                       </div>
                       <div className="flex items-center gap-1.5 text-[11px] text-[#8a726a]">
+                        <Clock size={13} className="text-[#8a726a] shrink-0" />
                         <span>{dateInfo.timeRange}</span>
                         {dateInfo.isMultiDay && (
-                          <span className="px-1.5 py-0.2 rounded bg-[#faf2ee] border border-[#e8e1dd] text-[10px] font-bold uppercase text-[#57423b]">
+                          <span className="px-1.5 py-0.2 rounded-sm bg-[#faf2ee] border border-[#e8e1dd] text-[10px] font-bold uppercase text-[#57423b]">
                             Multi-Day
                           </span>
                         )}
@@ -251,7 +315,7 @@ export const ActivityTableView: React.FC<ActivityTableViewProps> = ({
                   <td className="py-3.5 px-3">
                     <div className="flex flex-col gap-1 items-start">
                       <span
-                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold border ${statusConfig.badgeBg} ${statusConfig.badgeText} ${statusConfig.badgeBorder}`}
+                        className={`inline-flex items-center gap-1.5 px-1.5 py-0.5 rounded-sm text-[10px] font-semibold border ${statusConfig.badgeBg} ${statusConfig.badgeText} ${statusConfig.badgeBorder}`}
                       >
                         <span
                           className={`w-1.5 h-1.5 rounded-full ${statusConfig.dotColor} ${
@@ -267,7 +331,7 @@ export const ActivityTableView: React.FC<ActivityTableViewProps> = ({
                             'activities:reminders.d7Title',
                             '7-Day Final Call (D-7)',
                           )}
-                          className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold bg-[#edf3ee] text-[#486b52] border border-[#c2e9ca]"
+                          className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-sm text-[9px] font-bold bg-[#edf3ee] text-[#486b52] border border-[#c2e9ca]"
                         >
                           <Bell size={10} weight="fill" />
                           <span>
@@ -280,7 +344,7 @@ export const ActivityTableView: React.FC<ActivityTableViewProps> = ({
                             'activities:reminders.d14Title',
                             '14-Day Advance Notice (D-14)',
                           )}
-                          className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold bg-[#fff0eb] text-[#b85028] border border-[#ffd8cb]"
+                          className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-sm text-[9px] font-bold bg-[#fff0eb] text-[#b85028] border border-[#ffd8cb]"
                         >
                           <Bell size={10} weight="fill" />
                           <span>
@@ -292,7 +356,10 @@ export const ActivityTableView: React.FC<ActivityTableViewProps> = ({
                   </td>
 
                   {/* Actions */}
-                  <td className="py-3.5 px-4 text-right">
+                  <td
+                    className="py-3.5 px-4 text-right"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     <ActivityActionMenu
                       activity={activity}
                       isOpen={openMenuId === activity.id}
@@ -303,7 +370,6 @@ export const ActivityTableView: React.FC<ActivityTableViewProps> = ({
                       }
                       onClose={() => setOpenMenuId(null)}
                       onViewDetails={onViewDetails}
-                      onViewPreparation={onViewPreparation}
                       onEditActivity={onEditActivity}
                       onViewHistory={onViewHistory}
                       onCancelActivity={handleCancelActivity}
@@ -311,8 +377,13 @@ export const ActivityTableView: React.FC<ActivityTableViewProps> = ({
                       onDeleteActivity={onDeleteActivity}
                       isPrivileged={isPrivileged}
                       openUpwards={
-                        index >= Math.max(1, activities.length - 2) &&
-                        activities.length > 2
+                        activities.length > 1 &&
+                        index >=
+                          Math.max(
+                            1,
+                            activities.length -
+                              (activities.length >= 5 ? 3 : 2),
+                          )
                       }
                     />
                   </td>
@@ -324,23 +395,34 @@ export const ActivityTableView: React.FC<ActivityTableViewProps> = ({
       </div>
 
       {/* Pagination Footer */}
-      <div className="py-3 px-4 bg-[#faf2ee] border-t border-[#e8e1dd] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#8a726a]">
-        <span>
-          {t('common:showingActivities', {
-            start: (page - 1) * limit + 1,
-            end: Math.min(page * limit, total),
-            total,
-          }) ||
-            `Showing ${(page - 1) * limit + 1} - ${Math.min(page * limit, total)} of ${total} activities`}
-        </span>
+      {totalPages > 1 && (
+        <div className="py-3 px-4 bg-[#faf2ee] border-t border-[#e8e1dd] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#8a726a]">
+          <span>
+            {t('common:showingActivities', {
+              start: (page - 1) * limit + 1,
+              end: Math.min(page * limit, total),
+              total,
+            }) ||
+              `Showing ${(page - 1) * limit + 1} - ${Math.min(page * limit, total)} of ${total} activities`}
+          </span>
 
-        <PaginationControl
-          page={page}
-          totalPages={totalPages}
-          onPageChange={onPageChange}
-          variant="white"
-        />
-      </div>
+          <PaginationControl
+            page={page}
+            totalPages={totalPages}
+            onPageChange={onPageChange}
+            variant="white"
+          />
+        </div>
+      )}
+
+      {/* Cancel Activity Confirmation Modal */}
+      <CancelActivityModal
+        isOpen={Boolean(activityToCancel)}
+        onClose={() => setActivityToCancel(null)}
+        onConfirm={handleConfirmCancel}
+        activityTitle={activityToCancel?.title}
+        isLoading={updateActivityMutation.isPending}
+      />
     </div>
   );
 };

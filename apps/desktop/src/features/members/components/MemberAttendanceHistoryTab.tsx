@@ -11,7 +11,6 @@ import {
 } from '@jrs/shared';
 import {
   ArrowCounterClockwise,
-  CalendarBlank,
   CalendarCheck,
   ChatCircleText,
   CheckCircle,
@@ -26,10 +25,13 @@ import {
   XCircle,
 } from '@phosphor-icons/react';
 import type React from 'react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import emptyAttendanceSvg from '../../../assets/illustrations/empty-attendance.svg';
 import {
   CustomSelect,
   DatePeriodFilter,
+  EmptyState,
+  PaginationControl,
   type SelectOption,
 } from '../../../components';
 import { getActivityTypeConfig } from '../../activities/utils/activity-ui.utils';
@@ -38,6 +40,8 @@ import { getCleanDigitsForWhatsApp } from '../utils/member-ui.utils';
 interface MemberAttendanceHistoryTabProps {
   member: IUser;
 }
+
+const PAGE_SIZE = 10;
 
 function getEngagementConfig(level: MemberEngagementLevel) {
   switch (level) {
@@ -168,6 +172,9 @@ export const MemberAttendanceHistoryTab: React.FC<
   const [filterYear, setFilterYear] = useState<number | undefined>(undefined);
   const [filterMonth, setFilterMonth] = useState<number | undefined>(undefined);
 
+  // Pagination state
+  const [page, setPage] = useState(1);
+
   // Available years dynamically derived from history items
   const availableYears = useMemo(() => {
     const yearsSet = new Set<number>([2026, 2025, 2024]);
@@ -288,6 +295,20 @@ export const MemberAttendanceHistoryTab: React.FC<
     filterMonth,
   ]);
 
+  const totalPages = Math.ceil(filteredItems.length / PAGE_SIZE) || 1;
+
+  // Auto-clamp page if filter results decrease
+  useEffect(() => {
+    if (page > totalPages) {
+      setPage(1);
+    }
+  }, [page, totalPages]);
+
+  const paginatedItems = useMemo(() => {
+    const startIndex = (page - 1) * PAGE_SIZE;
+    return filteredItems.slice(startIndex, startIndex + PAGE_SIZE);
+  }, [filteredItems, page]);
+
   const hasActiveFilters =
     Boolean(searchQuery.trim()) ||
     statusFilter !== 'ALL' ||
@@ -303,6 +324,7 @@ export const MemberAttendanceHistoryTab: React.FC<
     setSelectedHubFilter(null);
     setFilterYear(undefined);
     setFilterMonth(undefined);
+    setPage(1);
   };
 
   const cleanDigits = getCleanDigitsForWhatsApp(member.phoneNumber);
@@ -392,7 +414,7 @@ export const MemberAttendanceHistoryTab: React.FC<
           {engagement && (
             <div className="flex items-center gap-1.5">
               <span
-                className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold border ${engagement.badgeBg} ${engagement.badgeText} ${engagement.borderColor}`}
+                className={`inline-flex items-center px-2 py-0.5 rounded-sm text-[11px] font-bold border ${engagement.badgeBg} ${engagement.badgeText} ${engagement.borderColor}`}
               >
                 {engagement.label}
               </span>
@@ -419,7 +441,7 @@ export const MemberAttendanceHistoryTab: React.FC<
           </div>
 
           <div className="flex items-center gap-2 text-[11px] font-medium">
-            <span className="inline-flex items-center gap-1 text-[#ba1a1a] bg-[#ffdad6]/60 px-1.5 py-0.5 rounded-full">
+            <span className="inline-flex items-center gap-1 text-[#ba1a1a] bg-[#ffdad6]/60 px-1.5 py-0.5 rounded-sm">
               <XCircle size={12} weight="bold" />
               <span>{history.totalAbsent} Absent</span>
             </span>
@@ -501,7 +523,7 @@ export const MemberAttendanceHistoryTab: React.FC<
                       setSelectedHubFilter(isSelected ? null : hub.townId)
                     }
                     title={`Click to filter by ${hub.townName}`}
-                    className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-mono font-bold transition-colors cursor-pointer border ${
+                    className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-sm text-[10px] font-mono font-bold transition-colors cursor-pointer border ${
                       isSelected
                         ? 'bg-[#b85028] text-white border-[#b85028]'
                         : 'bg-[#faf2ee] text-[#57423b] border-[#e8e1dd] hover:bg-[#f4ece9]'
@@ -570,14 +592,20 @@ export const MemberAttendanceHistoryTab: React.FC<
           <input
             type="text"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setPage(1);
+            }}
             placeholder="Search gathering by title, venue..."
             className="bg-transparent text-xs text-[#1e1b19] placeholder:text-[#8a726a] outline-none w-full pr-6"
           />
           {searchQuery && (
             <button
               type="button"
-              onClick={() => setSearchQuery('')}
+              onClick={() => {
+                setSearchQuery('');
+                setPage(1);
+              }}
               className="absolute right-2.5 text-[#8a726a] hover:text-[#1e1b19] p-0.5 cursor-pointer"
               title="Clear search"
             >
@@ -591,7 +619,10 @@ export const MemberAttendanceHistoryTab: React.FC<
           {/* Status CustomSelect Filter */}
           <CustomSelect<string>
             value={statusFilter}
-            onChange={(val) => setStatusFilter(val as 'ALL' | AttendanceStatus)}
+            onChange={(val) => {
+              setStatusFilter(val as 'ALL' | AttendanceStatus);
+              setPage(1);
+            }}
             options={statusOptions}
             size="md"
             className="w-36"
@@ -600,9 +631,10 @@ export const MemberAttendanceHistoryTab: React.FC<
           {/* Scope CustomSelect Filter */}
           <CustomSelect<string>
             value={scopeFilter}
-            onChange={(val) =>
-              setScopeFilter(val as 'ALL' | 'HOME' | 'EXTERNAL')
-            }
+            onChange={(val) => {
+              setScopeFilter(val as 'ALL' | 'HOME' | 'EXTERNAL');
+              setPage(1);
+            }}
             options={scopeOptions}
             size="md"
             className="w-36"
@@ -615,6 +647,7 @@ export const MemberAttendanceHistoryTab: React.FC<
             onPeriodChange={(y, m) => {
               setFilterYear(y);
               setFilterMonth(m);
+              setPage(1);
             }}
             availableYears={availableYears}
             size="md"
@@ -642,7 +675,7 @@ export const MemberAttendanceHistoryTab: React.FC<
             <h3 className="text-sm font-bold text-[#1e1b19]">
               Gathering Attendance Records
             </h3>
-            <span className="px-2 py-0.5 rounded-full bg-[#faf2ee] text-[#8a726a] text-xs font-bold font-mono">
+            <span className="px-2 py-0.5 rounded-sm bg-[#faf2ee] text-[#8a726a] text-xs font-bold font-mono">
               {filteredItems.length} of {history.items.length}
             </span>
           </div>
@@ -665,30 +698,45 @@ export const MemberAttendanceHistoryTab: React.FC<
         </div>
 
         {filteredItems.length === 0 ? (
-          <div className="p-12 text-center flex flex-col items-center">
-            <div className="w-12 h-12 rounded-xl bg-[#faf2ee] text-[#8a726a] flex items-center justify-center mb-3">
-              <CalendarBlank size={24} />
-            </div>
-            <h4 className="text-sm font-bold text-[#1e1b19] mb-1">
-              {hasActiveFilters
+          <EmptyState
+            size="md"
+            imageSrc={emptyAttendanceSvg}
+            imageAlt={
+              hasActiveFilters
                 ? 'No matching attendance records'
-                : 'No gathering records found'}
-            </h4>
-            <p className="text-xs text-[#8a726a] max-w-sm mb-4">
-              {hasActiveFilters
-                ? 'Try adjusting your search keywords, status filter, or hub scope.'
-                : 'This member has not yet had attendance logged for community gatherings.'}
-            </p>
-            {hasActiveFilters && (
-              <button
-                type="button"
-                onClick={handleClearFilters}
-                className="px-4 py-2 rounded-lg bg-[#faf2ee] hover:bg-[#f4ece9] text-xs font-bold text-[#b85028] transition-colors cursor-pointer"
-              >
-                Clear all filters
-              </button>
-            )}
-          </div>
+                : 'No attendance records'
+            }
+            title={
+              hasActiveFilters
+                ? t(
+                    'members:detail.attendance.noFilterMatches',
+                    'No matching attendance records',
+                  )
+                : t(
+                    'members:detail.attendance.emptyTitle',
+                    'No attendance records found',
+                  )
+            }
+            description={
+              hasActiveFilters
+                ? t(
+                    'members:detail.attendance.noFilterMatchesDesc',
+                    'Try adjusting your search keywords or filters.',
+                  )
+                : t(
+                    'members:detail.attendance.emptyDesc',
+                    'No attendance records logged for this member yet.',
+                  )
+            }
+            primaryAction={
+              hasActiveFilters
+                ? {
+                    label: t('common:clearFilters', 'Clear all filters'),
+                    onClick: handleClearFilters,
+                  }
+                : undefined
+            }
+          />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs border-collapse">
@@ -702,7 +750,7 @@ export const MemberAttendanceHistoryTab: React.FC<
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#f4ece9]">
-                {filteredItems.map((item: IMemberAttendanceHistoryItem) => {
+                {paginatedItems.map((item: IMemberAttendanceHistoryItem) => {
                   const typeConfig = getActivityTypeConfig(
                     item.activityType as ActivityType,
                   );
@@ -768,7 +816,7 @@ export const MemberAttendanceHistoryTab: React.FC<
                           </span>
                           <div className="flex items-center gap-1.5">
                             <span
-                              className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold border ${typeConfig.badgeBg} ${typeConfig.badgeText} ${typeConfig.badgeBorder}`}
+                              className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-sm text-[10px] font-bold border ${typeConfig.badgeBg} ${typeConfig.badgeText} ${typeConfig.badgeBorder}`}
                             >
                               <TypeIcon size={12} weight="bold" />
                               <span>{typeConfig.label}</span>
@@ -781,14 +829,11 @@ export const MemberAttendanceHistoryTab: React.FC<
                       <td className="py-4 px-6">
                         <div className="flex flex-col gap-1">
                           <div className="flex items-center gap-1.5">
-                            <span className="px-1.5 py-0.5 rounded bg-[#f4ece9] text-[#57423b] text-[10px] font-mono font-bold">
-                              {item.townCode}
-                            </span>
                             <span className="font-medium text-[#1e1b19]">
-                              {item.townName}
+                              {item.townName || item.townCode}
                             </span>
                             {item.isExternal && (
-                              <span className="px-1.5 py-0.5 rounded-full bg-[#ffdbcf] text-[#812901] text-[9px] font-bold uppercase tracking-wider">
+                              <span className="px-1.5 py-0.5 rounded-sm bg-[#ffdbcf] text-[#812901] text-[9px] font-bold uppercase tracking-wider">
                                 External Hub
                               </span>
                             )}
@@ -805,7 +850,7 @@ export const MemberAttendanceHistoryTab: React.FC<
                       {/* Check-In Time */}
                       <td className="py-4 px-6 whitespace-nowrap">
                         {formattedCheckIn ? (
-                          <span className="inline-flex items-center gap-1 font-mono text-[11px] font-bold text-[#486b52] bg-[#c2e9ca]/40 px-2 py-0.5 rounded">
+                          <span className="inline-flex items-center gap-1 font-mono text-[11px] font-bold text-[#486b52] bg-[#c2e9ca]/40 px-2 py-0.5 rounded-sm">
                             <CheckCircle size={12} weight="fill" />
                             <span>{formattedCheckIn}</span>
                           </span>
@@ -819,7 +864,7 @@ export const MemberAttendanceHistoryTab: React.FC<
                       {/* Status Badge */}
                       <td className="py-4 px-6 whitespace-nowrap text-right">
                         <span
-                          className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${statusBadge.bg} ${statusBadge.text} ${statusBadge.border}`}
+                          className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-sm text-xs font-bold border ${statusBadge.bg} ${statusBadge.text} ${statusBadge.border}`}
                         >
                           <StatusIcon size={14} weight="bold" />
                           <span>{statusBadge.label}</span>
@@ -830,6 +875,23 @@ export const MemberAttendanceHistoryTab: React.FC<
                 })}
               </tbody>
             </table>
+          </div>
+        )}
+
+        {/* Attendance Pagination Footer */}
+        {filteredItems.length > 0 && (
+          <div className="p-4 bg-[#faf2ee]/70 border-t border-[#e8e1dd] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#8a726a]">
+            <div>
+              Showing {(page - 1) * PAGE_SIZE + 1} to{' '}
+              {Math.min(page * PAGE_SIZE, filteredItems.length)} of{' '}
+              {filteredItems.length} records
+            </div>
+            <PaginationControl
+              page={page}
+              totalPages={totalPages}
+              onPageChange={setPage}
+              variant="white"
+            />
           </div>
         )}
       </div>

@@ -11,21 +11,39 @@ import { useCountdownTimer } from './use-countdown-timer';
 interface UseVerifyOtpOptions {
   identifier: string;
   channel?: 'auto' | 'whatsapp' | 'email';
+  initialCode?: string;
   onCodeVerified: (resetToken: string) => void;
 }
 
 export function useVerifyOtp({
   identifier,
   channel = 'auto',
+  initialCode,
   onCodeVerified,
 }: UseVerifyOtpOptions) {
-  const [digits, setDigits] = useState<string[]>(['', '', '', '', '', '']);
+  const [digits, setDigits] = useState<string[]>(() => {
+    if (initialCode && /^\d+$/.test(initialCode)) {
+      const arr = initialCode.slice(0, 6).split('');
+      while (arr.length < 6) arr.push('');
+      return arr;
+    }
+    return ['', '', '', '', '', ''];
+  });
   const [attemptsRemaining, setAttemptsRemaining] = useState(5);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLockedOut, setIsLockedOut] = useState(false);
   const [resendNotice, setResendNotice] = useState<string | null>(null);
 
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  // Sync if initialCode arrives asynchronously via deep-link event
+  useEffect(() => {
+    if (initialCode && /^\d+$/.test(initialCode)) {
+      const arr = initialCode.slice(0, 6).split('');
+      while (arr.length < 6) arr.push('');
+      setDigits(arr);
+    }
+  }, [initialCode]);
 
   const {
     secondsRemaining,

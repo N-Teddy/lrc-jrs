@@ -1,7 +1,7 @@
 import { CaretDown, Check } from '@phosphor-icons/react';
 import type React from 'react';
-import { useEffect, useId, useRef, useState } from 'react';
-import { useClickOutside } from '../hooks/use-click-outside';
+import { useCallback, useEffect, useId, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 
 export interface SelectOption<T = string> {
   value: T;
@@ -27,6 +27,7 @@ export interface CustomSelectProps<T = string> {
   menuClassName?: string;
   id?: string;
   ariaLabel?: string;
+  disablePortal?: boolean;
 }
 
 export function CustomSelect<T extends string = string>({
@@ -42,25 +43,111 @@ export function CustomSelect<T extends string = string>({
   size = 'md',
   id,
   ariaLabel,
+  disablePortal = false,
 }: CustomSelectProps<T>) {
   const generatedId = useId();
   const selectId = id || generatedId;
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const popoverRef = useRef<HTMLDivElement>(null);
+
+  const [coords, setCoords] = useState<{
+    top?: number;
+    bottom?: number;
+    left: number;
+    width: number;
+    placement: 'bottom' | 'top';
+  } | null>(null);
 
   const selectedOption = options.find((opt) => opt.value === value);
 
-  useClickOutside(containerRef, () => setIsOpen(false), isOpen);
+  const updatePosition = useCallback(() => {
+    if (!containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const popoverEstimatedHeight = 240;
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const spaceAbove = rect.top;
+
+    let effectivePlacement = menuPlacement;
+    if (
+      menuPlacement === 'bottom' &&
+      spaceBelow < popoverEstimatedHeight &&
+      spaceAbove > spaceBelow
+    ) {
+      effectivePlacement = 'top';
+    }
+
+    const width = Math.max(rect.width, 210);
+    // Keep popover inside horizontal window boundaries
+    let left = rect.left;
+    if (left + width > window.innerWidth - 8) {
+      left = Math.max(8, window.innerWidth - width - 8);
+    }
+
+    if (effectivePlacement === 'top') {
+      setCoords({
+        bottom: window.innerHeight - rect.top + 4,
+        left,
+        width,
+        placement: 'top',
+      });
+    } else {
+      setCoords({
+        top: rect.bottom + 4,
+        left,
+        width,
+        placement: 'bottom',
+      });
+    }
+  }, [menuPlacement]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      setCoords(null);
+      return;
+    }
+
+    updatePosition();
+
+    function handleScrollOrResize() {
+      updatePosition();
+    }
+
+    window.addEventListener('resize', handleScrollOrResize);
+    window.addEventListener('scroll', handleScrollOrResize, true);
+    return () => {
+      window.removeEventListener('resize', handleScrollOrResize);
+      window.removeEventListener('scroll', handleScrollOrResize, true);
+    };
+  }, [isOpen, updatePosition]);
 
   useEffect(() => {
     if (!isOpen) return;
+
+    function handleClickOutside(event: MouseEvent) {
+      const target = event.target as Node;
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(target) &&
+        popoverRef.current &&
+        !popoverRef.current.contains(target)
+      ) {
+        setIsOpen(false);
+      }
+    }
+
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === 'Escape') {
         setIsOpen(false);
       }
     }
+
+    document.addEventListener('mousedown', handleClickOutside);
     document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
   }, [isOpen]);
 
   const handleSelect = (option: SelectOption<T>) => {
@@ -80,6 +167,98 @@ export function CustomSelect<T extends string = string>({
     md: 'h-10 px-3.5 text-xs rounded-md',
     lg: 'h-11 px-4 text-sm rounded-md',
   }[size];
+
+  const renderDropdownContent = () => (
+    <div
+      ref={popoverRef}
+      role="listbox"
+      tabIndex={-1}
+      style={
+        !disablePortal && coords
+          ? {
+              position: 'fixed',
+              left: `${coords.left}px`,
+              top: coords.top !== undefined ? `${coords.top}px` : undefined,
+              bottom:
+                coords.bottom !== undefined ? `${coords.bottom}px` : undefined,
+              width: `${coords.width}px`,
+              zIndex: 9999,
+            }
+          : undefined
+      }
+      className={`${
+        disablePortal
+          ? `absolute z-50 ${
+              menuPlacement === 'top'
+                ? 'bottom-[calc(100%+4px)]'
+                : 'top-[calc(100%+4px)]'
+            } min-w-[210px] w-full`
+          : ''
+      } max-h-64 overflow-y-auto bg-white rounded-md border border-[#e8e1dd] shadow-2xl p-1 animate-in fade-in zoom-in-95 duration-100 focus:outline-none ${menuClassName}`}
+    >
+      {options.map((option) => {
+        const isSelected = option.value === value;
+        const level = option.level || 0;
+        return (
+          <button
+            type="button"
+            key={option.value}
+            role="option"
+            aria-selected={isSelected}
+            disabled={option.disabled}
+            onClick={() => handleSelect(option)}
+            style={{
+              paddingLeft: level > 0 ? `${level * 16 + 10}px` : undefined,
+            }}
+            className={`w-full text-left flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-md text-xs font-semibold cursor-pointer transition-all ${
+              option.disabled
+                ? 'opacity-40 cursor-not-allowed text-[#8a726a]'
+                : isSelected
+                  ? 'bg-[#fff2ee] text-[#b85028] font-bold'
+                  : 'text-[#1e1b19] hover:bg-[#faf2ee] hover:text-[#b85028]'
+            }`}
+          >
+            <div className="flex flex-col min-w-0 flex-1">
+              <div className="flex items-center gap-1.5 min-w-0">
+                {/* Visual tree branch connector for nested levels */}
+                {level > 0 && (
+                  <span className="inline-flex items-center justify-center shrink-0 w-3 h-3 text-[#b09e97] -ml-0.5 mr-0.5">
+                    <span className="w-2.5 h-2.5 border-b-2 border-l-2 border-[#cfbeba] rounded-bl-xs" />
+                  </span>
+                )}
+
+                {option.icon && (
+                  <option.icon
+                    size={15}
+                    weight={isSelected ? 'fill' : 'regular'}
+                    className={`shrink-0 ${
+                      isSelected ? 'text-[#b85028]' : 'text-[#8a726a]'
+                    }`}
+                  />
+                )}
+                <span className="truncate">{option.label}</span>
+                {option.badge && (
+                  <span className="shrink-0">{option.badge}</span>
+                )}
+              </div>
+              {option.description && level === 0 && (
+                <span className="text-[10px] font-normal text-[#8a726a] mt-0.5 truncate">
+                  {option.description}
+                </span>
+              )}
+            </div>
+            {isSelected && (
+              <Check
+                size={14}
+                weight="bold"
+                className="text-[#b85028] shrink-0"
+              />
+            )}
+          </button>
+        );
+      })}
+    </div>
+  );
 
   return (
     <div
@@ -125,81 +304,10 @@ export function CustomSelect<T extends string = string>({
       </button>
 
       {/* Dropdown Popover */}
-      {isOpen && (
-        <div
-          role="listbox"
-          tabIndex={-1}
-          className={`absolute z-50 ${
-            menuPlacement === 'top'
-              ? 'bottom-[calc(100%+4px)]'
-              : 'top-[calc(100%+4px)]'
-          } ${
-            menuClassName || 'min-w-[210px] w-full'
-          } max-h-64 overflow-y-auto bg-white rounded-md border border-[#e8e1dd] shadow-xl p-1 animate-in fade-in zoom-in-95 duration-150 focus:outline-none`}
-        >
-          {options.map((option) => {
-            const isSelected = option.value === value;
-            const level = option.level || 0;
-            return (
-              <button
-                type="button"
-                key={option.value}
-                role="option"
-                aria-selected={isSelected}
-                disabled={option.disabled}
-                onClick={() => handleSelect(option)}
-                style={{
-                  paddingLeft: level > 0 ? `${level * 16 + 10}px` : undefined,
-                }}
-                className={`w-full text-left flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-md text-xs font-semibold cursor-pointer transition-all ${
-                  option.disabled
-                    ? 'opacity-40 cursor-not-allowed text-[#8a726a]'
-                    : isSelected
-                      ? 'bg-[#fff2ee] text-[#b85028] font-bold'
-                      : 'text-[#1e1b19] hover:bg-[#faf2ee] hover:text-[#b85028]'
-                }`}
-              >
-                <div className="flex flex-col min-w-0 flex-1">
-                  <div className="flex items-center gap-1.5 min-w-0">
-                    {/* Visual tree branch connector for nested levels */}
-                    {level > 0 && (
-                      <span className="inline-flex items-center justify-center shrink-0 w-3 h-3 text-[#b09e97] -ml-0.5 mr-0.5">
-                        <span className="w-2.5 h-2.5 border-b-2 border-l-2 border-[#cfbeba] rounded-bl-xs" />
-                      </span>
-                    )}
-
-                    {option.icon && (
-                      <option.icon
-                        size={15}
-                        weight={isSelected ? 'fill' : 'regular'}
-                        className={`shrink-0 ${
-                          isSelected ? 'text-[#b85028]' : 'text-[#8a726a]'
-                        }`}
-                      />
-                    )}
-                    <span className="truncate">{option.label}</span>
-                    {option.badge && (
-                      <span className="shrink-0">{option.badge}</span>
-                    )}
-                  </div>
-                  {option.description && level === 0 && (
-                    <span className="text-[10px] font-normal text-[#8a726a] mt-0.5 truncate">
-                      {option.description}
-                    </span>
-                  )}
-                </div>
-                {isSelected && (
-                  <Check
-                    size={14}
-                    weight="bold"
-                    className="text-[#b85028] shrink-0"
-                  />
-                )}
-              </button>
-            );
-          })}
-        </div>
-      )}
+      {isOpen &&
+        (!disablePortal && typeof document !== 'undefined'
+          ? coords && createPortal(renderDropdownContent(), document.body)
+          : renderDropdownContent())}
     </div>
   );
 }

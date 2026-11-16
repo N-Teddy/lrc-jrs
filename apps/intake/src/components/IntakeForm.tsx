@@ -90,6 +90,7 @@ export const IntakeForm: React.FC<IntakeFormProps> = ({
   // 2 = Contact (Phone & Email)
   // 3 = Review & Confirmation (Member Card)
   const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1);
+  const [touchedStep2, setTouchedStep2] = useState(false);
 
   // Form Fields
   const [fullName, setFullName] = useState('');
@@ -136,8 +137,10 @@ export const IntakeForm: React.FC<IntakeFormProps> = ({
     let digits = val.replace(/\D/g, '');
     if (digits.startsWith('00237')) {
       digits = digits.slice(5);
-    } else if (digits.startsWith('237')) {
+    } else if (digits.startsWith('237') && digits.length > 3) {
       digits = digits.slice(3);
+    } else if (digits.startsWith('0')) {
+      digits = digits.replace(/^0+/, '');
     }
     const localDigits = digits.slice(0, 9);
     let formatted = localDigits;
@@ -180,13 +183,29 @@ export const IntakeForm: React.FC<IntakeFormProps> = ({
   const isTownValid = Boolean(selectedTownId || linkInfo?.town?.id);
   const isStep1Valid = isNameValid && isDobValid && isTownValid;
 
-  const isPhoneValid = phoneNumber.replace(/\D/g, '').length >= 9;
-  const isStep2Valid = isPhoneValid;
+  const rawPhoneDigits = phoneNumber.replace(/\D/g, '');
+  const isPhoneValid = rawPhoneDigits.length >= 9;
+  const isEmailValid =
+    !email.trim() || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+  const isStep2Valid = isPhoneValid && isEmailValid;
   const isAllValid = isStep1Valid && isStep2Valid;
 
-  // Form Submission
+  // Form Submission & Step Navigation
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (currentStep === 1) {
+      if (isStep1Valid) {
+        setCurrentStep(2);
+      }
+      return;
+    }
+    if (currentStep === 2) {
+      setTouchedStep2(true);
+      if (isStep2Valid) {
+        setCurrentStep(3);
+      }
+      return;
+    }
     if (!isAllValid || isLoading) return;
 
     const data: IntakeFormData = {
@@ -514,12 +533,13 @@ export const IntakeForm: React.FC<IntakeFormProps> = ({
           <div className="pt-4 mt-2">
             <button
               type="button"
-              disabled={!isStep1Valid}
-              onClick={() => isStep1Valid && setCurrentStep(2)}
+              onClick={() => {
+                if (isStep1Valid) setCurrentStep(2);
+              }}
               className={`w-full h-12 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all shadow-xs cursor-pointer ${
                 isStep1Valid
                   ? 'bg-[#B85028] hover:bg-[#A44520] active:scale-[0.99] text-white shadow-sm'
-                  : 'bg-[#EAE4DC] text-[#A89F95] cursor-not-allowed shadow-none'
+                  : 'bg-[#B85028]/60 text-white/90 hover:bg-[#B85028]/70 shadow-none'
               }`}
             >
               <span>{t('form.next')}</span>
@@ -554,7 +574,13 @@ export const IntakeForm: React.FC<IntakeFormProps> = ({
                 {t('form.phoneNumber')}{' '}
                 <span className="text-[#B85028]">*</span>
               </label>
-              <div className="relative flex rounded-xl border border-[#E0D7CE] bg-white hover:border-[#C8BEB4] focus-within:border-[#B85028] focus-within:ring-3 focus-within:ring-[#B85028]/12 transition-all overflow-hidden h-11">
+              <div
+                className={`relative flex rounded-xl border bg-white transition-all overflow-hidden h-11 ${
+                  touchedStep2 && !isPhoneValid
+                    ? 'border-[#ba1a1a] ring-2 ring-[#ba1a1a]/20'
+                    : 'border-[#E0D7CE] hover:border-[#C8BEB4] focus-within:border-[#B85028] focus-within:ring-3 focus-within:ring-[#B85028]/12'
+                }`}
+              >
                 <div className="inline-flex items-center gap-1.5 px-3.5 bg-[#FAF7F2] border-r border-[#E0D7CE] text-xs font-bold text-[#23201E] shrink-0 select-none">
                   <span>🇨🇲</span>
                   <span>+237</span>
@@ -571,6 +597,14 @@ export const IntakeForm: React.FC<IntakeFormProps> = ({
                   className="w-full px-3.5 text-xs sm:text-sm text-[#23201E] placeholder:text-[#A89F95] bg-transparent outline-none"
                 />
               </div>
+              {touchedStep2 && !isPhoneValid && (
+                <p className="text-[11px] text-[#ba1a1a] mt-1.5 font-medium">
+                  {t('form.phoneError', {
+                    defaultValue:
+                      'Veuillez entrer un numéro à 9 chiffres valide (ex. 671 23 45 67)',
+                  })}
+                </p>
+              )}
               <p className="text-[11px] text-[#8C847C] mt-1.5 flex items-center gap-1">
                 <WhatsappLogo
                   size={13}
@@ -600,8 +634,20 @@ export const IntakeForm: React.FC<IntakeFormProps> = ({
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder={t('form.emailPlaceholder')}
-                className="w-full h-11 px-3.5 rounded-xl border border-[#E0D7CE] bg-white hover:border-[#C8BEB4] focus:border-[#B85028] focus:ring-3 focus:ring-[#B85028]/12 outline-hidden text-xs sm:text-sm text-[#23201E] placeholder:text-[#A89F95] transition-all"
+                className={`w-full h-11 px-3.5 rounded-xl border bg-white outline-hidden text-xs sm:text-sm text-[#23201E] placeholder:text-[#A89F95] transition-all ${
+                  touchedStep2 && email.trim().length > 0 && !isEmailValid
+                    ? 'border-[#ba1a1a] ring-2 ring-[#ba1a1a]/20'
+                    : 'border-[#E0D7CE] hover:border-[#C8BEB4] focus:border-[#B85028] focus:ring-3 focus:ring-[#B85028]/12'
+                }`}
               />
+              {touchedStep2 && email.trim().length > 0 && !isEmailValid && (
+                <p className="text-[11px] text-[#ba1a1a] mt-1.5 font-medium">
+                  {t('form.emailError', {
+                    defaultValue:
+                      'Veuillez entrer une adresse e-mail valide (ex. nom@example.com)',
+                  })}
+                </p>
+              )}
             </div>
           </div>
 
@@ -618,12 +664,14 @@ export const IntakeForm: React.FC<IntakeFormProps> = ({
 
             <button
               type="button"
-              disabled={!isStep2Valid}
-              onClick={() => isStep2Valid && setCurrentStep(3)}
+              onClick={() => {
+                setTouchedStep2(true);
+                if (isStep2Valid) setCurrentStep(3);
+              }}
               className={`flex-1 h-12 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all shadow-xs cursor-pointer ${
                 isStep2Valid
                   ? 'bg-[#B85028] hover:bg-[#A44520] active:scale-[0.99] text-white shadow-sm'
-                  : 'bg-[#EAE4DC] text-[#A89F95] cursor-not-allowed shadow-none'
+                  : 'bg-[#B85028]/60 text-white/90 hover:bg-[#B85028]/70 shadow-none'
               }`}
             >
               <span>{t('form.next')}</span>

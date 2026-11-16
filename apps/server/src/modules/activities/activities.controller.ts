@@ -1,4 +1,4 @@
-import { ActivityType, type IAuthUser, type IChecklistItem } from '@jrs/shared';
+import { type IAuthUser, UserRole } from '@jrs/shared';
 import {
   Body,
   Controller,
@@ -10,7 +10,6 @@ import {
   Param,
   Patch,
   Post,
-  Put,
   Query,
   Res,
   UploadedFiles,
@@ -28,11 +27,11 @@ import {
 import type { Response } from 'express';
 import { CurrentUser } from '../../core/decorators/current-user.decorator';
 import { Public } from '../../core/decorators/public.decorator';
+import { Roles } from '../../core/decorators/roles.decorator';
 import { TownScope } from '../../core/decorators/town-scope.decorator';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
 import { TownScopeGuard } from '../../core/guards/town-scope.guard';
 import { ActivitiesService } from './activities.service';
-import { ActivityReminderService } from './activity-reminder.service';
 import {
   ActivityQueryDto,
   CreateActivityDto,
@@ -45,10 +44,7 @@ import {
 @UseGuards(JwtAuthGuard, TownScopeGuard)
 @Controller('activities')
 export class ActivitiesController {
-  constructor(
-    private readonly activitiesService: ActivitiesService,
-    private readonly reminderService: ActivityReminderService,
-  ) {}
+  constructor(private readonly activitiesService: ActivitiesService) {}
 
   @Get()
   @TownScope('townId')
@@ -115,6 +111,7 @@ export class ActivitiesController {
   }
 
   @Post('report/drive-upload')
+  @Roles(UserRole.AP, UserRole.PC)
   @HttpCode(HttpStatus.OK)
   @UseInterceptors(AnyFilesInterceptor())
   @ApiConsumes('multipart/form-data')
@@ -137,6 +134,7 @@ export class ActivitiesController {
   }
 
   @Delete('report/drive-file/:fileId')
+  @Roles(UserRole.AP, UserRole.PC)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary:
@@ -151,6 +149,7 @@ export class ActivitiesController {
   }
 
   @Post('report/drive-folders')
+  @Roles(UserRole.AP, UserRole.PC)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create a new Google Drive folder' })
   @ApiResponse({ status: 201, description: 'Folder created successfully' })
@@ -162,6 +161,7 @@ export class ActivitiesController {
   }
 
   @Patch('report/drive-folders/:id')
+  @Roles(UserRole.AP, UserRole.PC)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Rename a Google Drive folder' })
   @ApiResponse({ status: 200, description: 'Folder renamed successfully' })
@@ -170,6 +170,7 @@ export class ActivitiesController {
   }
 
   @Delete('report/drive-folders/:id')
+  @Roles(UserRole.AP, UserRole.PC)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Delete a Google Drive folder' })
   @ApiResponse({ status: 200, description: 'Folder deleted successfully' })
@@ -229,64 +230,6 @@ export class ActivitiesController {
     fileData.stream.pipe(res);
   }
 
-  // --------------------------------------------------------------------------
-  // Dynamic Reminder Templates & Admin Checklists
-  // --------------------------------------------------------------------------
-
-  @Get('reminder-templates')
-  @ApiOperation({ summary: 'List all activity reminder checklist templates' })
-  @ApiResponse({ status: 200, description: 'List of reminder templates' })
-  async getReminderTemplates() {
-    return this.reminderService.getTemplates();
-  }
-
-  @Get('reminder-templates/:type')
-  @ApiOperation({
-    summary: 'Get reminder checklist template for specific activity type',
-  })
-  @ApiResponse({ status: 200, description: 'Reminder template' })
-  async getReminderTemplate(@Param('type') type: ActivityType) {
-    return this.reminderService.getTemplateByType(type);
-  }
-
-  @Put('reminder-templates/:type')
-  @ApiOperation({
-    summary: 'Update reminder checklist template for specific activity type',
-  })
-  @ApiResponse({ status: 200, description: 'Template updated' })
-  async updateReminderTemplate(
-    @Param('type') type: ActivityType,
-    @Body()
-    dto: {
-      items: IChecklistItem[];
-      customInstructionsFr?: string;
-      customInstructionsEn?: string;
-    },
-  ) {
-    return this.reminderService.updateTemplate(type, dto);
-  }
-
-  @Post('reminders/trigger-daily')
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({
-    summary:
-      'Manually trigger daily activity milestones and report follow-up check',
-  })
-  @ApiResponse({ status: 200, description: 'Daily milestones processed' })
-  async triggerDailyMilestones() {
-    return this.reminderService.processDailyMilestones();
-  }
-
-  @Post('reminders/trigger-monthly')
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({
-    summary: 'Manually trigger monthly activities digest dispatch',
-  })
-  @ApiResponse({ status: 200, description: 'Monthly digest processed' })
-  async triggerMonthlyDigest() {
-    return this.reminderService.processMonthlyDigest();
-  }
-
   @Get(':id')
   @ApiOperation({ summary: 'Get single activity details' })
   @ApiResponse({ status: 200, description: 'Activity details' })
@@ -295,6 +238,7 @@ export class ActivitiesController {
   }
 
   @Post()
+  @Roles(UserRole.AP, UserRole.PC)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create a new community activity' })
   @ApiResponse({ status: 201, description: 'Activity successfully created' })
@@ -306,6 +250,7 @@ export class ActivitiesController {
   }
 
   @Patch(':id')
+  @Roles(UserRole.AP, UserRole.PC)
   @ApiOperation({
     summary:
       'Update activity details with audit history on reschedules/relocations',
@@ -320,6 +265,7 @@ export class ActivitiesController {
   }
 
   @Delete(':id')
+  @Roles(UserRole.AP, UserRole.PC)
   @ApiOperation({ summary: 'Soft delete an activity' })
   @ApiResponse({ status: 200, description: 'Activity deleted' })
   async delete(@Param('id') id: string, @CurrentUser() currentUser: IAuthUser) {
@@ -336,6 +282,7 @@ export class ActivitiesController {
   }
 
   @Post(':id/attendance')
+  @Roles(UserRole.AP, UserRole.PC)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary:
@@ -351,6 +298,7 @@ export class ActivitiesController {
   }
 
   @Post(':id/attendance/lock')
+  @Roles(UserRole.AP, UserRole.PC)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Finalize and lock attendance for an activity' })
   @ApiResponse({ status: 200, description: 'Attendance locked' })
@@ -363,6 +311,7 @@ export class ActivitiesController {
   }
 
   @Post(':id/attendance/unlock')
+  @Roles(UserRole.AP)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Unlock finalized attendance for an activity (AP only)',
@@ -377,6 +326,7 @@ export class ActivitiesController {
   }
 
   @Post(':id/report')
+  @Roles(UserRole.AP, UserRole.PC)
   @HttpCode(HttpStatus.OK)
   @UseInterceptors(AnyFilesInterceptor())
   @ApiConsumes('multipart/form-data')
@@ -402,6 +352,7 @@ export class ActivitiesController {
   }
 
   @Delete(':id/report/:fileId')
+  @Roles(UserRole.AP, UserRole.PC)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Delete a specific activity report file from Google Drive',
@@ -416,6 +367,7 @@ export class ActivitiesController {
   }
 
   @Delete(':id/report')
+  @Roles(UserRole.AP, UserRole.PC)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Delete activity reports from Google Drive' })
   @ApiResponse({ status: 200, description: 'Reports removed' })

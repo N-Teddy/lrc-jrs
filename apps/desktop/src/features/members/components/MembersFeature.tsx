@@ -58,13 +58,14 @@ export const MembersFeature: React.FC<MembersFeatureProps> = ({
   }, [initialSubTab]);
 
   // Navigation State
-  const [selectedMemberId, setSelectedMemberId] = useState<string | null>(
-    initialMemberId || null,
-  );
+  const [selectedMember, setSelectedMember] = useState<{
+    id: string;
+    initialTab?: 'identity' | 'transfers' | 'attendance' | 'access';
+  } | null>(initialMemberId ? { id: initialMemberId } : null);
 
   useEffect(() => {
     if (initialMemberId !== undefined) {
-      setSelectedMemberId(initialMemberId);
+      setSelectedMember(initialMemberId ? { id: initialMemberId } : null);
     }
   }, [initialMemberId]);
 
@@ -154,20 +155,32 @@ export const MembersFeature: React.FC<MembersFeatureProps> = ({
         defaultValue: 'Member profile deleted successfully',
       }),
     );
-    if (selectedMemberId === id) {
-      setSelectedMemberId(null);
+    if (selectedMember?.id === id) {
+      setSelectedMember(null);
     }
   };
 
   const members = membersData?.items ?? [];
   const total = membersData?.total ?? members.length;
 
+  const handleClearFilters = () => {
+    setSearch('');
+    setRoleFilter('all');
+    setIsJrOnly(false);
+    setPage(1);
+  };
+
+  const hasActiveFilters = Boolean(
+    search.trim() || roleFilter !== 'all' || isJrOnly,
+  );
+
   return (
     <div className="w-full flex flex-col gap-6">
-      {selectedMemberId ? (
+      {selectedMember ? (
         <MemberDetailPage
-          memberId={selectedMemberId}
-          onBack={() => setSelectedMemberId(null)}
+          memberId={selectedMember.id}
+          initialTab={selectedMember.initialTab}
+          onBack={() => setSelectedMember(null)}
           onEdit={(m) => setEditingMember(m)}
           onManageAccess={(m) => setAccessMember(m)}
           onDelete={isCurrentUserAp ? (m) => setDeletingMember(m) : undefined}
@@ -319,13 +332,18 @@ export const MembersFeature: React.FC<MembersFeatureProps> = ({
                   page={page}
                   limit={limit}
                   onPageChange={setPage}
-                  onViewMember={(id) => setSelectedMemberId(id)}
+                  onViewMember={(id, tab) =>
+                    setSelectedMember({ id, initialTab: tab || 'identity' })
+                  }
                   onEditMember={(m) => setEditingMember(m)}
                   onManageAccess={(m) => setAccessMember(m)}
                   onDeleteMember={
                     isCurrentUserAp ? (m) => setDeletingMember(m) : undefined
                   }
                   isCurrentUserAp={isCurrentUserAp}
+                  hasActiveFilters={hasActiveFilters}
+                  onClearFilters={handleClearFilters}
+                  onRegisterMember={() => setIsRegisterModalOpen(true)}
                 />
               ) : (
                 <MemberCardGridView
@@ -335,13 +353,18 @@ export const MembersFeature: React.FC<MembersFeatureProps> = ({
                   page={page}
                   limit={limit}
                   onPageChange={setPage}
-                  onViewMember={(id) => setSelectedMemberId(id)}
+                  onViewMember={(id, tab) =>
+                    setSelectedMember({ id, initialTab: tab || 'identity' })
+                  }
                   onEditMember={(m) => setEditingMember(m)}
                   onManageAccess={(m) => setAccessMember(m)}
                   onDeleteMember={
                     isCurrentUserAp ? (m) => setDeletingMember(m) : undefined
                   }
                   isCurrentUserAp={isCurrentUserAp}
+                  hasActiveFilters={hasActiveFilters}
+                  onClearFilters={handleClearFilters}
+                  onRegisterMember={() => setIsRegisterModalOpen(true)}
                 />
               )}
 

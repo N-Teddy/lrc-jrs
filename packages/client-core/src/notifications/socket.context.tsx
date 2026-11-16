@@ -48,7 +48,7 @@ export interface WebSocketProviderProps {
 export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
   children,
 }) => {
-  const { user, isAuthenticated, token } = useAuth();
+  const { user, isAuthenticated, token, signOut } = useAuth();
   const http = useHttp();
   const queryClient = useQueryClient();
 
@@ -131,6 +131,20 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
 
       socket.io.on('reconnect_failed', () => {
         setStatus('disconnected');
+      });
+
+      socket.on('session:terminated', async () => {
+        toast.error(
+          i18n.t(
+            'auth:accountRevoked.title',
+            'Your account access has been revoked by an administrator.',
+          ),
+        );
+        if (socketRef.current) {
+          socketRef.current.disconnect();
+          socketRef.current = null;
+        }
+        await signOut();
       });
 
       socket.on('notification:new', (notification: INotification) => {
@@ -237,7 +251,7 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
     } catch {
       setStatus('disconnected');
     }
-  }, [isAuthenticated, user, token, http, queryClient]);
+  }, [isAuthenticated, user, token, http, queryClient, signOut]);
 
   const value = useMemo<WebSocketContextValue>(
     () => ({

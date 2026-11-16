@@ -9,7 +9,8 @@ import {
 } from '@phosphor-icons/react';
 import type React from 'react';
 import { useMemo } from 'react';
-import { UserAvatar } from '../../../components';
+import emptyAccessSvg from '../../../assets/illustrations/empty-access.svg';
+import { EmptyState, UserAvatar } from '../../../components';
 
 interface SecurityAuditFeedViewProps {
   members: IUser[];
@@ -152,12 +153,18 @@ export const SecurityAuditFeedView: React.FC<SecurityAuditFeedViewProps> = ({
       </div>
 
       {events.length === 0 ? (
-        <div className="p-12 text-center text-xs text-[#8a726a]">
-          {t(
+        <EmptyState
+          imageSrc={emptyAccessSvg}
+          imageSize="sm"
+          title={t(
+            'access:auditFeed.noEntriesTitle',
+            'No security logs recorded',
+          )}
+          description={t(
             'access:auditFeed.noEntries',
             'No security or credential logs recorded for members in the active scope.',
           )}
-        </div>
+        />
       ) : (
         <div className="relative pl-6 space-y-6 before:absolute before:left-3 before:top-2 before:bottom-2 before:w-0.5 before:bg-[#f4ece9]">
           {events.map((ev) => {

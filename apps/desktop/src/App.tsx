@@ -1,5 +1,7 @@
 import { CoreProviders, useTranslation } from '@jrs/client-core';
-import { ToastContainer } from './components';
+import { useEffect } from 'react';
+import { ErrorBoundary, ToastContainer, ZoomIndicator } from './components';
+import { setSentryUser } from './core/sentry';
 import {
   FirstTimeSetupScreen,
   ForgotPasswordScreen,
@@ -12,6 +14,7 @@ import { DashboardLayout } from './features/dashboard';
 import { RegionSelectorScreen } from './features/towns';
 import { UpdateModal, useAppUpdater } from './features/updater';
 import { useDesktopAppFlow } from './hooks/use-desktop-app-flow';
+import { useZoomShortcuts } from './hooks/use-zoom-shortcuts';
 import { tauriStoreAdapter } from './storage/tauri-store.adapter';
 
 const API_BASE_URL =
@@ -29,6 +32,7 @@ function AppContent() {
     recoveryIdentifier,
     recoveryChannel,
     resetToken,
+    deepLinkCode,
     isSessionTerminated,
     shouldShowRegionSelector,
     handleTownSelected,
@@ -46,6 +50,21 @@ function AppContent() {
   } = useDesktopAppFlow();
 
   const updater = useAppUpdater();
+  const { zoom, showIndicator } = useZoomShortcuts();
+
+  // Synchronize authenticated user context with Sentry telemetry
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      setSentryUser({
+        id: user.id,
+        role: user.role,
+        townCode: user.homeTownId,
+        email: user.email,
+      });
+    } else {
+      setSentryUser(null);
+    }
+  }, [isAuthenticated, user]);
 
   if (isLoading) {
     return (
@@ -112,6 +131,7 @@ function AppContent() {
         <VerifyOtpScreen
           identifier={recoveryIdentifier}
           channel={recoveryChannel}
+          initialCode={deepLinkCode || undefined}
           onBackToChangeContact={handleBackToChangeContact}
           onCodeVerified={handleCodeVerified}
         />
@@ -141,7 +161,7 @@ function AppContent() {
 
   return (
     <>
-      {renderScreenContent()}
+      <ErrorBoundary>{renderScreenContent()}</ErrorBoundary>
 
       <SessionTerminatedModal
         isOpen={isSessionTerminated}
@@ -150,6 +170,7 @@ function AppContent() {
 
       <UpdateModal updater={updater} />
       <ToastContainer />
+      <ZoomIndicator zoom={zoom} visible={showIndicator} />
     </>
   );
 }

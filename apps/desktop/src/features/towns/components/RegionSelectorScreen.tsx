@@ -48,7 +48,7 @@ export const RegionSelectorScreen: React.FC<RegionSelectorScreenProps> = ({
 
   return (
     <div
-      className="relative flex h-screen w-screen overflow-hidden bg-[#faf8f5] select-none"
+      className="relative flex h-screen w-full overflow-hidden bg-[#faf8f5] select-none"
       onMouseMove={handleContainerMouseMove}
     >
       {/* Background Subtle Grid Texture */}

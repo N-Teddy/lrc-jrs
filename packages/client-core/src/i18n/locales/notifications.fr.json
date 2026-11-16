@@ -10,7 +10,6 @@
   "minutesAgo": "Il y a {{count}} min",
   "hoursAgo": "Il y a {{count}} h",
   "daysAgo": "Il y a {{count}} j",
-
   "centerSubtitle": "Flux en direct des activités et mises à jour",
   "allCaughtUp": "Vous êtes à jour !",
   "noNotifications": "Aucune notification",
@@ -37,7 +36,6 @@
   "yesterday": "Hier",
   "earlierThisWeek": "Plus tôt cette semaine",
   "older": "Plus ancien",
-
   "categories": {
     "activity": "Activités",
     "attendance": "Présences",
@@ -48,106 +46,72 @@
     "alert": "Alertes",
     "system": "Système"
   },
-
   "activityCreatedTitle": "Nouvelle activité programmée",
   "activityCreatedBody": "{{name}} programmée pour le {{date}}",
-
   "activityUpdatedTitle": "Activité modifiée",
   "activityUpdatedBody": "Les informations de {{name}} ont été mises à jour",
-
   "activityRescheduledTitle": "Activité reprogrammée",
   "activityRescheduledBody": "{{name}} a été reprogrammée du {{oldDate}} au {{newDate}}",
-
   "activityLocationChangedTitle": "Lieu d'activité modifié",
   "activityLocationChangedBody": "Le lieu pour {{name}} a été déplacé à {{venue}}",
-
   "activityCancelledTitle": "Activité annulée",
   "activityCancelledBody": "L'activité {{name}} du {{date}} a été annulée",
-
   "activityReopenedTitle": "Activité réouverte",
   "activityReopenedBody": "{{name}} a été réouverte pour le {{date}}",
-
   "activityCompletedTitle": "Activité terminée",
   "activityCompletedBody": "{{name}} a pris fin. Veuillez finaliser les présences et déposer le rapport.",
-
   "activityDeletedTitle": "Activité supprimée",
   "activityDeletedBody": "L'activité {{name}} a été supprimée par {{by}}",
-
   "attendanceRecordedTitle": "Présences enregistrées",
   "attendanceRecordedBody": "La feuille de présence pour {{name}} a été validée",
-
   "memberRegisteredTitle": "Nouveau membre inscrit",
   "memberRegisteredBody": "{{name}} a rejoint la ville de {{town}}",
-
   "memberUpdatedTitle": "Profil membre mis à jour",
   "memberUpdatedBody": "Les informations du profil de {{name}} ont été mises à jour",
-
   "memberDeletedTitle": "Membre retiré",
   "memberDeletedBody": "{{name}} a été retiré(e) de {{town}} par {{by}}",
-
   "memberIntakeSubmittedTitle": "Nouvelle fiche de renseignement",
   "memberIntakeSubmittedBody": "{{name}} a renseigné sa fiche de coordonnées pour {{town}}",
-
   "memberIntakeApprovedTitle": "Fiche validée",
   "memberIntakeApprovedBody": "Votre fiche de membre pour {{town}} a été validée et enregistrée",
-
   "townTransferTitle": "Mutation de ville",
   "townTransferBody": "{{name}} a été transféré de {{fromTown}} vers {{toTown}}",
-
   "accessGrantedTitle": "Accès à l'application activé",
   "accessGrantedBody": "Votre accès au portail LRC JRS est désormais actif",
-
   "accessRevokedTitle": "Accès à l'application révoqué",
   "accessRevokedBody": "Votre accès a été révoqué par la coordination",
-
   "roleChangedTitle": "Rôle modifié",
   "roleChangedBody": "Votre rôle a été mis à jour : {{role}}",
-
   "townScopeUpdatedTitle": "Périmètre de juridiction étendu",
   "townScopeUpdatedBody": "Votre accès a été étendu avec les permissions de consultation pour d'autres paroisses",
-
   "attendanceLockedTitle": "Présences verrouillées",
   "attendanceLockedBody": "La feuille de présence pour {{name}} a été validée et verrouillée",
-
   "attendanceUnlockedTitle": "Présences déverrouillées",
   "attendanceUnlockedBody": "La feuille de présence pour {{name}} a été déverrouillée pour révision",
-
   "reportUploadedTitle": "Rapport téléversé",
   "reportUploadedBody": "{{fileName}} a été ajouté pour {{name}}",
-
   "reportDeletedTitle": "Rapport supprimé",
   "reportDeletedBody": "Un fichier de rapport pour {{name}} a été supprimé",
-
   "driveFileUploadedTitle": "Nouveau document",
   "driveFileUploadedBody": "{{fileName}} a été ajouté à l'espace documentaire",
-
   "driveFileDeletedTitle": "Document retiré",
   "driveFileDeletedBody": "Le document {{fileName}} a été retiré par {{by}}",
-
   "memberIntakeRejectedTitle": "Mise à jour de votre fiche",
   "memberIntakeRejectedBody": "Votre fiche de coordonnées pour {{town}} a été traitée",
-
   "passwordChangedTitle": "Alerte de sécurité : Mot de passe modifié",
   "passwordChangedBody": "Le mot de passe de votre compte a été récemment mis à jour",
-
   "systemAnnouncementTitle": "Communiqué de la coordination",
   "systemAnnouncementBody": "{{message}}",
-
   "newTownPcAnnouncedTitle": "Nouveau coordinateur paroissial",
   "newTownPcAnnouncedBody": "Veuillez accueillir {{name}} en tant que nouveau coordinateur paroissial pour {{town}}.",
-
   "memberAccountActivatedTitle": "Nouveau compte activé",
   "memberAccountActivatedBody": "{{name}} a activé son compte et s'est connecté.",
-
   "driveFolderDeletedTitle": "Dossier supprimé",
   "driveFolderDeletedBody": "Un dossier documentaire a été supprimé par {{by}}",
-
   "registrationLinkDeactivatedTitle": "Lien d'inscription désactivé",
   "registrationLinkDeactivatedBody": "Le lien d'inscription pour {{town}} a été désactivé par {{by}}",
-
   "reminderTemplateUpdatedTitle": "Consignes d'activité mises à jour",
   "reminderTemplateUpdatedBody": "Les consignes de préparation pour l'activité {{type}} ont été mises à jour.",
-
   "activity": {
     "monthlyDigest": {
       "title": "Planning mensuel des activités",
@@ -161,5 +125,13 @@
       "title": "Rapport d'activité attendu",
       "body": "Le rapport d'activité pour {{name}} n'a pas encore été finalisé"
     }
-  }
+  },
+  "birthday": {
+    "todayTitle": "🎉 Anniversaire aujourd'hui : {{name}} ({{age}} ans) !",
+    "todayBody": "C'est l'anniversaire de {{name}} aujourd'hui ({{age}} ans, {{town}}). Pensez à lui envoyer un message de vœux !",
+    "upcoming7dTitle": "🎂 Anniversaire dans 7 jours : {{name}} ({{age}} ans)",
+    "upcoming7dBody": "{{name}} ({{town}}) fêtera ses {{age}} ans le {{date}}. Pensez à lui préparer ses vœux."
+  },
+  "accessRevokedBroadcastTitle": "Accès au compte révoqué",
+  "accessRevokedBroadcastBody": "L'accès au compte de {{name}} a été suspendu."
 }

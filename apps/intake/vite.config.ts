@@ -3,7 +3,7 @@ import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 
-export default defineConfig(() => ({
+export default defineConfig(({ mode }) => ({
   plugins: [react(), tailwindcss()],
   resolve: {
     dedupe: ['react', 'react-dom'],
@@ -17,6 +17,15 @@ export default defineConfig(() => ({
         '../../packages/api-client/src/index.ts',
       ),
     },
+  },
+  build: {
+    sourcemap: false,
+    minify: 'esbuild',
+    cssMinify: true,
+  },
+  esbuild: {
+    drop: mode === 'production' ? ['debugger'] : [],
+    legalComments: 'none',
   },
   server: {
     port: 5174,

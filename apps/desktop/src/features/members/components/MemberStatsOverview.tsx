@@ -114,7 +114,7 @@ export const MemberStatsOverview: React.FC<MemberStatsOverviewProps> = ({
             </div>
           </div>
           {isPcQuotaFull ? (
-            <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-[#ffdbcf] text-[#812901] text-[11px] font-bold border border-[#ffb59c]">
+            <span className="inline-flex items-center px-2 py-0.5 rounded-sm bg-[#ffdbcf] text-[#812901] text-[11px] font-bold border border-[#ffb59c]">
               {t('members:stats.fullQuota')}
             </span>
           ) : (
@@ -130,9 +130,7 @@ export const MemberStatsOverview: React.FC<MemberStatsOverviewProps> = ({
             className="text-[#486b52] shrink-0"
           />
           <span className="truncate font-medium">
-            {isPcQuotaFull
-              ? t('members:modal.quotaAlert')
-              : `${activePcCount} active in ${hubName}`}
+            {`${activePcCount} active in ${hubName}`}
           </span>
         </div>
       </div>

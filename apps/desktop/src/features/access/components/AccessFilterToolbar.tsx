@@ -1,5 +1,4 @@
 import { useTranslation } from '@jrs/client-core';
-import type { ITown } from '@jrs/shared';
 import {
   Crown,
   MagnifyingGlass,
@@ -15,9 +14,6 @@ export type AccountStateFilter = 'ALL' | 'ACTIVE' | 'PENDING' | 'REVOKED';
 interface AccessFilterToolbarProps {
   search: string;
   onSearchChange: (value: string) => void;
-  selectedTownId: string | null;
-  onTownChange: (townId: string | null) => void;
-  availableTowns: ITown[];
   stateFilter: AccountStateFilter;
   onStateFilterChange: (state: AccountStateFilter) => void;
   roleFilter: string;
@@ -30,9 +26,6 @@ interface AccessFilterToolbarProps {
 export const AccessFilterToolbar: React.FC<AccessFilterToolbarProps> = ({
   search,
   onSearchChange,
-  selectedTownId,
-  onTownChange,
-  availableTowns,
   stateFilter,
   onStateFilterChange,
   roleFilter,
@@ -42,20 +35,6 @@ export const AccessFilterToolbar: React.FC<AccessFilterToolbarProps> = ({
   isPrivileged,
 }) => {
   const { t } = useTranslation(['access', 'common']);
-
-  // Town options
-  const townOptions: SelectOption<string>[] = useMemo(() => {
-    return [
-      {
-        value: 'ALL',
-        label: t('access:filters.allTowns') || 'All Hubs / Inter-Hub',
-      },
-      ...availableTowns.map((t) => ({
-        value: t.id,
-        label: `${t.name} (${t.code})`,
-      })),
-    ];
-  }, [availableTowns, t]);
 
   // Account state options
   const stateOptions: SelectOption<AccountStateFilter>[] = useMemo(
@@ -135,15 +114,6 @@ export const AccessFilterToolbar: React.FC<AccessFilterToolbarProps> = ({
       </div>
 
       <div className="flex flex-wrap items-center gap-2.5 flex-1 justify-start xl:justify-end">
-        {/* Hub Select */}
-        <CustomSelect<string>
-          value={selectedTownId || 'ALL'}
-          onChange={(val) => onTownChange(val === 'ALL' ? null : val)}
-          options={townOptions}
-          size="md"
-          className="w-44"
-        />
-
         {/* Account State Select */}
         <CustomSelect<AccountStateFilter>
           value={stateFilter}

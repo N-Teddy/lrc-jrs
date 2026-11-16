@@ -38,6 +38,7 @@
     "remaining": "restant",
     "expired": "Expiré",
     "close": "Fermer",
+    "notRecorded": "Non renseigné",
     "loadingPortal": "Chargement du portail LRC JRS...",
     "prev": "Préc.",
     "next": "Suiv.",
@@ -47,7 +48,11 @@
     "showingMembers": "Affichage de {{count}} sur {{total}} membres enregistrés",
     "showingActivities": "Affichage de {{start}} - {{end}} sur {{total}} activités",
     "showingTransfers": "Affichage de {{count}} sur {{total}} mutations enregistrées",
-    "showingAccounts": "Affichage de {{count}} sur {{total}} membres enregistrés"
+    "showingAccounts": "Affichage de {{count}} sur {{total}} membres enregistrés",
+    "communityName": "Jeunesse Paroissiale Saint-Joseph",
+    "upload": "Téléverser",
+    "details": "Détails",
+    "copiedToClipboard": "Copié dans le presse-papiers !"
   },
   "auth": {
     "login": {
@@ -253,6 +258,14 @@
       "noRemoteRelease": "Aucune version en ligne trouvée. La compilation est peut-être en cours sur GitHub, ou vous êtes déjà à jour."
     },
     "reservedWorkspace": "Espace réservé initialisé",
+    "comingSoonTitle": "Tableau de Bord & Métriques en Construction",
+    "comingSoonBadge": "En cours de construction",
+    "comingSoonDesc": "Statistiques et métriques de centre en cours de déploiement.",
+    "quickActionsTitle": "Accès direct aux modules actifs",
+    "goToMembers": "Annuaire des membres",
+    "goToActivities": "Activités & Calendrier",
+    "goToIntake": "Fiches d'auto-saisie",
+    "goToDrive": "Coffre de documents",
     "pristineTitle": "Espace de travail prêt",
     "pristineDesc": "L'environnement pour le centre de {{hub}} est actif. Cette zone est l'espace dédié aux registres des jeunes, activités et notes.",
     "assigned": "votre centre assigné",
@@ -275,8 +288,18 @@
       "allRightsReserved": "© {{year}} Plateforme JRS. Tous droits réservés.",
       "version": "v0.1.0",
       "build": "Version 2026.10",
-      "desktopEdition": "Édition Bureau"
-    }
+      "desktopEdition": "Édition Bureau",
+      "connectedDuration": "Connecté : {{time}}"
+    },
+    "greetingMorning": "Bonjour",
+    "greetingAfternoon": "Bon après-midi",
+    "greetingEvening": "Bonsoir",
+    "externalHubTitle": "Centre Externe : {{name}} ({{code}})",
+    "readOnlyView": "Mode Lecture Seule",
+    "writeAccessBadge": "Accès en écriture activé",
+    "externalHubDesc": "Vous consultez des données hors de votre centre paroissial d'attache.",
+    "noWriteAccessInTown": "Vous n'avez pas d'accès en écriture dans ce centre.",
+    "returnToMyHub": "Retourner à mon centre"
   },
   "roles": {
     "ap": "AP",
@@ -368,7 +391,8 @@
       "turnout": "Participation",
       "status": "Statut",
       "actions": "Actions",
-      "empty": "Aucune activité trouvée correspondant aux critères."
+      "empty": "Aucune activité trouvée correspondant aux critères.",
+      "emptyDescShort": "Aucune activité planifiée dans ce centre pour le moment."
     },
     "card": {
       "details": "Détails",
@@ -376,7 +400,30 @@
       "trackAttendance": "Pointer les Présences",
       "viewHistory": "Historique ({{count}})",
       "edit": "Modifier",
-      "delete": "Supprimer"
+      "delete": "Supprimer",
+      "attendancePending": "Présences en attente",
+      "attendees": "Participants",
+      "attendee": "Participant",
+      "attendanceBreakdown": "({{members}}m · {{guests}}i)"
+    },
+    "interTown": {
+      "hostBanner": "Inter-villes · Hôte : {{town}}",
+      "singleTown": "ville participante",
+      "multipleTowns": "villes participantes"
+    },
+    "calendar": {
+      "activitySingle": "Activité",
+      "activityPlural": "Activités",
+      "today": "Aujourd'hui",
+      "days": {
+        "sun": "Dim",
+        "mon": "Lun",
+        "tue": "Mar",
+        "wed": "Mer",
+        "thu": "Jeu",
+        "fri": "Ven",
+        "sat": "Sam"
+      }
     },
     "timingNotice": {
       "notStarted": "Cette activité n'a pas encore débuté. La prise des présences est verrouillée jusqu'à l'heure officielle de début.",
@@ -630,6 +677,9 @@
       "d7Pill": "J-7 Envoyé",
       "reportDuePill": "Rapport en attente",
       "menuChecklist": "Directives & Rappels"
+    },
+    "attendance": {
+      "savedSuccess": "Présences enregistrées et synchronisées avec succès."
     }
   },
   "attendance": {
@@ -639,6 +689,9 @@
     "notStartedDesc": "Les présences ne peuvent pas être enregistrées avant le début officiel de l'activité ({{date}}). Veuillez revenir une fois le rassemblement commencé.",
     "markAttendance": "Enregistrer les Présences",
     "savedSuccess": "Présences mises à jour avec succès.",
+    "lockSuccess": "Les présences ont été finalisées et verrouillées avec succès.",
+    "unlockSuccess": "Les présences ont été déverrouillées avec succès.",
+    "duplicateGuestError": "Un invité portant ce nom a déjà été enregistré pour cette activité.",
     "markAllPresent": "Marquer tous présents",
     "clearAll": "Effacer tout",
     "visiting": "En visite",
@@ -670,7 +723,8 @@
       "confirmAdd": "Ajouter l'invité",
       "notes": "Notes / Invité par",
       "remove": "Retirer",
-      "noGuests": "Aucun invité enregistré pour cette session."
+      "noGuests": "Aucun invité enregistré pour cette session.",
+      "badge": "Invité"
     }
   },
   "members": {
@@ -728,7 +782,11 @@
       "modalTitle": "Validation des Fiches de Renseignement",
       "modalSubtitle": "Membres ayant renseigné leurs coordonnées via le lien d'auto-saisie pour {{town}}. Vérifiez et confirmez avant ajout dans l'annuaire.",
       "pendingCount": "{{count}} En attente",
-      "checking": "Vérification des fiches en cours..."
+      "checking": "Vérification des fiches en cours...",
+      "createLinkTitle": "Créer et gérer les liens d'inscription des membres",
+      "createLink": "Créer un lien",
+      "allCaughtUpBadge": "À jour",
+      "allCaughtUpDescShort": "Toutes les soumissions de membres pour ce centre ont été vérifiées."
     },
     "intakeLinks": {
       "modalTitle": "Liens d'Auto-saisie des Fiches Membres",
@@ -824,7 +882,10 @@
       "viewProfile": "Voir le profil",
       "editRecord": "Modifier le profil",
       "manageAccess": "Gérer les accès",
-      "deactivateMember": "Désactiver"
+      "deactivateMember": "Désactiver",
+      "phone": "Téléphone",
+      "directoryEmpty": "Le répertoire communautaire est vide",
+      "directoryEmptyDesc": "Aucun membre enregistré dans ce centre pour le moment."
     },
     "modal": {
       "registerTitle": "Enregistrer un Nouveau Membre",
@@ -871,7 +932,15 @@
       "accessHelper": "Un mot de passe temporaire à usage unique sera généré et envoyé immédiatement par WhatsApp et Email. Si décoché, le membre reste enregistré hors-ligne uniquement.",
       "submitting": "Enregistrement...",
       "saving": "Sauvegarde des modifications...",
-      "saveChanges": "Enregistrer les Modifications"
+      "saveChanges": "Enregistrer les Modifications",
+      "yearsShort": "ans",
+      "defaultMemberName": "Membre",
+      "emailPlaceholder": "membre@exemple.com",
+      "errorImageSize": "La taille de l'image doit être inférieure à 5 Mo",
+      "errorFullNameRequired": "Le nom complet est obligatoire.",
+      "errorDobRequired": "La date de naissance est obligatoire.",
+      "errorInvalidPhone": "Veuillez saisir un numéro de téléphone camerounais valide à 9 chiffres.",
+      "errorUpdateFailed": "Échec de la mise à jour du membre."
     },
     "detail": {
       "backToMembers": "Retour aux Membres",
@@ -892,7 +961,38 @@
       "granted": "Accordé",
       "notGranted": "Hors-ligne Uniquement",
       "lastLogin": "Dernière Connexion",
-      "registeredOn": "Inscrit le"
+      "registeredOn": "Inscrit le",
+      "copyPhone": "Copier le numéro",
+      "transferHub": "Transférer de centre",
+      "tabAccess": "Accès & Compte",
+      "identityHeader": "Identité & Données démographiques",
+      "fullName": "Nom complet",
+      "emailAddress": "Adresse email",
+      "copied": "Copié !",
+      "none": "Aucun",
+      "noneConfigured": "Aucun configuré",
+      "portalCredentialsHeader": "Compte & Identifiants du Portail",
+      "portalCredentialsDesc": "Gérer les autorisations de connexion, la sécurité et les mots de passe temporaires.",
+      "accessSuspended": "Accès suspendu",
+      "activeAppAccess": "Accès actif à l'application",
+      "offlineOnly": "Hors-ligne uniquement (Sans connexion)",
+      "assignedRole": "Rôle attribué",
+      "activePc": "PC Actif",
+      "credentialStatus": "Statut des identifiants",
+      "tempPasswordActive": "Mot de passe temporaire (En attente de modification)",
+      "permanentPasswordSet": "Mot de passe permanent défini",
+      "noCredentialsIssued": "Aucun identifiant émis",
+      "manageAccessAction": "Gérer les accès & identifiants de la plateforme",
+      "pcLeadershipHeader": "Coordination de Programme (PC)",
+      "pcLeadershipDesc": "{{name}} est actuellement la personne contact pour {{town}}.",
+      "transferPcLeadership": "Transférer la responsabilité de PC",
+      "crossHubScopes": "Périmètres de lecture inter-centres",
+      "crossHubScopesDesc": "Centres externes que ce membre est autorisé à consulter en lecture seule.",
+      "homeHubOnly": "Centre principal uniquement ({{name}})",
+      "active": "Actif",
+      "suspended": "Suspendu",
+      "portalAccount": "Compte Portail",
+      "accountStatus": "Statut du compte"
     },
     "accessModal": {
       "title": "Gérer les Accès & Identifiants du Portail",
@@ -906,7 +1006,23 @@
       "suspendDesc": "Bloquer temporairement l'accès au portail sans supprimer le profil.",
       "suspendAction": "Suspendre l'Accès",
       "reactivateAction": "Réactiver l'Accès",
-      "deactivateConfirmation": "Êtes-vous sûr de vouloir désactiver {{name}} ? Le membre sera archivé et n'apparaîtra plus dans les listes actives."
+      "deactivateConfirmation": "Êtes-vous sûr de vouloir désactiver {{name}} ? Le membre sera archivé et n'apparaîtra plus dans les listes actives.",
+      "accountStatus": "Statut du compte",
+      "active": "Actif",
+      "suspended": "Suspendu",
+      "noAppAccess": "Aucun accès à l'application",
+      "loginIdentifier": "Identifiant de connexion (Téléphone)",
+      "registeredEmail": "Email enregistré",
+      "none": "Aucun",
+      "inviteToApp": "Inviter sur l'application",
+      "inviteDesc": "Accorder à ce membre l'accès à l'application et lui envoyer ses identifiants de connexion.",
+      "preferredLanguage": "Langue préférée",
+      "french": "Français",
+      "english": "Anglais",
+      "sendInvitation": "Envoyer l'invitation",
+      "sending": "Envoi en cours...",
+      "accountSuspendedSuccess": "L'accès au compte a été suspendu.",
+      "accountReactivatedSuccess": "Compte réactivé avec succès."
     },
     "transferModal": {
       "title": "Transférer le Centre du Membre",
@@ -926,6 +1042,9 @@
       "transferringMember": "Transfert du Membre en Cours...",
       "selectDestError": "Veuillez sélectionner un centre de ville de destination.",
       "transferFailedError": "Échec du transfert du membre. Veuillez vérifier vos autorisations et réessayer."
+    },
+    "actions": {
+      "registerMember": "Enregistrer le premier membre"
     }
   },
   "access": {
@@ -959,7 +1078,7 @@
       "batchInvite": "Inviter en Masse"
     },
     "table": {
-      "member": "Membre & Centre",
+      "member": "Membre",
       "credentials": "Identifiant & Email",
       "role": "Rôle",
       "status": "Statut Portail",
@@ -979,7 +1098,8 @@
       "manageScopes": "Accès Centres",
       "suspend": "Suspendre Accès",
       "reactivate": "Réactiver Accès",
-      "noAccounts": "Aucun compte trouvé correspondant aux critères"
+      "noAccounts": "Aucun compte trouvé correspondant aux critères",
+      "noAccountsDesc": "Aucun compte authentifié dans ce centre pour le moment."
     },
     "modals": {
       "batchInviteTitle": "Intégration Groupée des Membres",
@@ -1127,7 +1247,11 @@
       "searchPlaceholder": "Rechercher par nom de fichier, résumé, activité ou auteur..."
     },
     "formats": {
-      "all": "Tous les fichiers"
+      "all": "Tous les fichiers",
+      "doc": "Document Word",
+      "sheet": "Feuille de calcul",
+      "pdf": "Document PDF",
+      "image": "Fichier Image"
     },
     "preview": {
       "openDrive": "Ouvrir dans Google Drive",
@@ -1136,6 +1260,33 @@
       "fileSize": "Taille : {{size}}",
       "date": "Date : {{date}}",
       "activity": "Activité associée"
-    }
+    },
+    "folders": "Dossiers",
+    "documents": "Documents",
+    "upOneLevel": "Parent",
+    "newFolder": "Nouveau dossier",
+    "itemCount_one": "1 fichier",
+    "itemCount_other": "{{count}} fichiers",
+    "empty": "Vide",
+    "emptyFolder": "Ce dossier est actuellement vide",
+    "emptyFolderDesc": "Téléversez des documents ou des notes pour alimenter ce dossier.",
+    "noDirectFiles": "Aucun document directement dans ce dossier",
+    "noDirectFilesDesc": "Accédez à l'un des sous-dossiers ci-dessus pour consulter ses fichiers, ou téléversez un document ici.",
+    "uploadHere": "Téléverser un document ici",
+    "uploadDocuments": "Téléverser des documents",
+    "includeSubfolders": "Inclure les fichiers des sous-dossiers"
+  },
+  "crash": {
+    "badge": "Erreur d'application",
+    "title": "Une erreur inattendue est survenue",
+    "description": "L'application a rencontré une erreur d'exécution. Vos données enregistrées restent en sécurité.",
+    "reload": "Redémarrer l'application",
+    "returnHome": "Retourner à la connexion",
+    "technicalDetails": "Diagnostic technique",
+    "hideDetails": "Masquer le diagnostic",
+    "copyDetails": "Copier les détails",
+    "copied": "Copié dans le presse-papiers",
+    "errorName": "Erreur",
+    "errorLocation": "Pile du composant"
   }
 }

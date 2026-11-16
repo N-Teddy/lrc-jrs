@@ -1,9 +1,10 @@
-import { useTranslation } from '@jrs/client-core';
+import { ErrorService, toast, useTranslation } from '@jrs/client-core';
 import { type IUpdateMemberDto, type IUser, UserRole } from '@jrs/shared';
 import { PencilSimple, Warning, X } from '@phosphor-icons/react';
 import type React from 'react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { SelectOption } from '../../../components';
+import { formatCameroonPhoneInput } from '../utils/member-ui.utils';
 import {
   type MemberModalFormData,
   MemberModalFormFields,
@@ -62,6 +63,7 @@ export const EditMemberModal: React.FC<EditMemberModalProps> = ({
     if (!member) return null;
     const digits = (member.phoneNumber || '').replace(/\D/g, '');
     const localDigits = digits.startsWith('237') ? digits.slice(3) : digits;
+    const formattedDigits = formatCameroonPhoneInput(localDigits);
     const dob = member.dateOfBirth
       ? new Date(member.dateOfBirth).toISOString().split('T')[0]
       : '';
@@ -70,10 +72,11 @@ export const EditMemberModal: React.FC<EditMemberModalProps> = ({
       gender: (member.gender as 'MALE' | 'FEMALE') || 'MALE',
       dateOfBirth: dob,
       integrationDate: member.integrationDate || '',
-      phoneDigits: localDigits,
+      phoneDigits: formattedDigits,
       email: member.email || '',
       role: (member.role as UserRole) || UserRole.MEMBER,
       avatarUrl: member.avatarUrl || null,
+      preferredLanguage: member.preferredLanguage || 'fr',
     };
   }, [member]);
 
@@ -89,6 +92,7 @@ export const EditMemberModal: React.FC<EditMemberModalProps> = ({
         role: initialValues.role,
         avatarFile: null,
         avatarPreview: initialValues.avatarUrl,
+        preferredLanguage: initialValues.preferredLanguage,
       });
       setErrorMsg(null);
     }
@@ -104,6 +108,7 @@ export const EditMemberModal: React.FC<EditMemberModalProps> = ({
       formData.phoneDigits !== initialValues.phoneDigits ||
       formData.email.trim() !== initialValues.email ||
       formData.role !== initialValues.role ||
+      formData.preferredLanguage !== initialValues.preferredLanguage ||
       Boolean(formData.avatarFile)
     );
   }, [initialValues, formData]);
@@ -121,7 +126,9 @@ export const EditMemberModal: React.FC<EditMemberModalProps> = ({
     const file = e.target.files?.[0];
     if (file) {
       if (file.size > 5 * 1024 * 1024) {
-        setErrorMsg('Image size must be less than 5MB');
+        setErrorMsg(
+          t('members:modal.errorImageSize', 'Image size must be less than 5MB'),
+        );
         return;
       }
       const url = URL.createObjectURL(file);
@@ -150,15 +157,24 @@ export const EditMemberModal: React.FC<EditMemberModalProps> = ({
     setErrorMsg(null);
 
     if (!formData.fullName.trim()) {
-      setErrorMsg('Full name is required.');
+      setErrorMsg(
+        t('members:modal.errorFullNameRequired', 'Full name is required.'),
+      );
       return;
     }
     if (!formData.dateOfBirth) {
-      setErrorMsg('Date of birth is required.');
+      setErrorMsg(
+        t('members:modal.errorDobRequired', 'Date of birth is required.'),
+      );
       return;
     }
     if (formData.phoneDigits.length < 9) {
-      setErrorMsg('Please enter a valid 9-digit Cameroonian telephone number.');
+      setErrorMsg(
+        t(
+          'members:modal.errorInvalidPhone',
+          'Please enter a valid 9-digit Cameroonian telephone number.',
+        ),
+      );
       return;
     }
 
@@ -175,6 +191,8 @@ export const EditMemberModal: React.FC<EditMemberModalProps> = ({
         if (formData.email.trim())
           payload.append('email', formData.email.trim());
         payload.append('role', formData.role);
+        if (formData.preferredLanguage)
+          payload.append('preferredLanguage', formData.preferredLanguage);
         payload.append('avatar', formData.avatarFile);
         await onSubmit(member.id, payload);
       } else {
@@ -187,21 +205,27 @@ export const EditMemberModal: React.FC<EditMemberModalProps> = ({
           phoneNumber: `+237${cleanDigits}`,
           email: formData.email.trim() ? formData.email.trim() : undefined,
           role: formData.role,
+          preferredLanguage: formData.preferredLanguage,
         });
       }
-      onClose();
-    } catch (err: any) {
-      setErrorMsg(
-        err?.response?.data?.message ||
-          err?.message ||
-          'Failed to update member.',
+      toast.success(
+        t('members:modal.updateSuccess', 'Member updated successfully.'),
       );
+      onClose();
+    } catch (err: unknown) {
+      ErrorService.handle(err);
     }
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-[#23201e]/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-200">
-      <div className="relative w-full max-w-[680px] my-auto bg-white rounded-xl border border-[#e8e1dd] shadow-2xl flex flex-col overflow-hidden">
+    <div
+      className="fixed inset-0 z-50 bg-[#23201e]/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-200"
+      onClick={onClose}
+    >
+      <div
+        className="relative w-full max-w-[680px] my-auto bg-white rounded-xl border border-[#e8e1dd] shadow-2xl flex flex-col overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Header */}
         <div className="p-6 pb-4 flex items-start justify-between border-b border-[#f4ece9]">
           <div className="flex items-center gap-3">

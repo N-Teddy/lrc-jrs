@@ -150,12 +150,16 @@ export const EditApproveIntakeModal: React.FC<EditApproveIntakeModalProps> = ({
   const selectedTown = availableTowns.find((town) => town.id === townId);
 
   return (
-    <div className="fixed inset-0 z-50 bg-[#23201e]/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-200">
+    <div
+      className="fixed inset-0 z-50 bg-[#23201e]/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-200"
+      onClick={onClose}
+    >
       <div
         className="relative w-full max-w-[680px] my-auto bg-white rounded-xl border border-[#e8e1dd] shadow-2xl flex flex-col overflow-hidden max-h-[92vh] animate-in zoom-in-95 duration-150"
         role="dialog"
         aria-modal="true"
         aria-labelledby="edit-approve-intake-title"
+        onClick={(e) => e.stopPropagation()}
       >
         {/* Header - App Theme */}
         <div className="p-6 pb-4 flex items-start justify-between border-b border-[#f4ece9] shrink-0">

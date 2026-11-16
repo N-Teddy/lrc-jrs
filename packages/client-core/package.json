@@ -12,13 +12,13 @@
     }
   },
   "scripts": {
-    "build": "tsc",
+    "build": "node scripts/validate-i18n.cjs && tsc",
     "dev": "tsc --watch",
-    "check-types": "tsc --noEmit"
+    "check-types": "node scripts/validate-i18n.cjs && tsc --noEmit"
   },
   "dependencies": {
     "@jrs/shared": "workspace:*",
-    "@tanstack/react-query": "^5.67.0",
+    "@tanstack/react-query": "^5.104.2",
     "axios": "^1.8.1",
     "i18next": "^24.2.2",
     "react-i18next": "^15.4.1",

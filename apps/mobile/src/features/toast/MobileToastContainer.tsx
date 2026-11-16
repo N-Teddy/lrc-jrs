@@ -139,15 +139,38 @@ const ToastItemComponent: React.FC<{
                 lower.includes('network error') ||
                 lower.includes('err_network') ||
                 lower.includes('failed to fetch') ||
+                lower.includes('network request failed') ||
+                lower.includes('econnrefused') ||
+                lower.includes('etimedout') ||
                 lower.includes('timeout')
               ) {
                 return 'Network connection error. Please verify your internet connection.';
               }
               if (
                 lower.includes('axioserror') ||
-                lower.includes('status code 500')
+                lower.includes('status code 500') ||
+                lower.includes('internal server error') ||
+                lower.includes('cannot post') ||
+                lower.includes('cannot get') ||
+                lower.includes('cast to objectid') ||
+                lower.includes('duplicate key') ||
+                lower.includes('syntaxerror')
               ) {
                 return 'A server error occurred. Please try again later.';
+              }
+              if (
+                lower.includes('should not exist') ||
+                lower.includes('must be a') ||
+                lower.includes('must be an') ||
+                lower.includes('should not be empty') ||
+                lower.includes('each value in') ||
+                lower.includes('validation failed') ||
+                lower.includes('property ')
+              ) {
+                if (lower.includes('attendance')) {
+                  return 'Failed to record attendance for the selected members.';
+                }
+                return 'Some entered information is invalid or incomplete. Please verify the form and try again.';
               }
               return item.message;
             })()}

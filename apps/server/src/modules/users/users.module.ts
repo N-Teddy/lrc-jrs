@@ -10,6 +10,7 @@ import {
   User,
   UserSchema,
 } from '../../database/schemas';
+import { BirthdayReminderService } from './birthday-reminder.service';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 
@@ -23,7 +24,7 @@ import { UsersService } from './users.service';
     ]),
   ],
   controllers: [UsersController],
-  providers: [UsersService],
-  exports: [UsersService, MongooseModule],
+  providers: [UsersService, BirthdayReminderService],
+  exports: [UsersService, BirthdayReminderService, MongooseModule],
 })
 export class UsersModule {}

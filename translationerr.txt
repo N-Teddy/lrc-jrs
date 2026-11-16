@@ -1,0 +1,291 @@
+514i18n.ts:146 [i18n ERROR] Missing translation key: "attendance:guest.badge" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "activities:attendance.savedSuccess" for language(s): en
+(anonymous) @ i18n.ts:146
+60i18n.ts:146 [i18n ERROR] Missing translation key: "attendance:guest.badge" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:table.phone" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:detail.copyPhone" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:table.phone" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:detail.copyPhone" for language(s): en
+(anonymous) @ i18n.ts:146
+8i18n.ts:146 [i18n ERROR] Missing translation key: "common:upload" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:table.phone" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:detail.copyPhone" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:table.phone" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:detail.copyPhone" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:table.phone" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:detail.copyPhone" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:table.phone" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:detail.copyPhone" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:table.phone" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:detail.copyPhone" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:table.phone" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:detail.copyPhone" for language(s): en
+(anonymous) @ i18n.ts:146
+websocket.js:119 WebSocket connection to 'ws://localhost:3000/socket.io/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED
+createSocket @ websocket.js:119
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:table.phone" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:detail.copyPhone" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:table.phone" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:detail.copyPhone" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:table.phone" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:detail.copyPhone" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:table.phone" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:detail.copyPhone" for language(s): en
+(anonymous) @ i18n.ts:146
+websocket.js:119 WebSocket connection to 'ws://localhost:3000/socket.io/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED
+createSocket @ websocket.js:119
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:table.phone" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:detail.copyPhone" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:table.phone" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:detail.copyPhone" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:table.phone" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:detail.copyPhone" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:table.phone" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:detail.copyPhone" for language(s): en
+(anonymous) @ i18n.ts:146
+websocket.js:119 WebSocket connection to 'ws://localhost:3000/socket.io/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED
+createSocket @ websocket.js:119
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:table.phone" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:detail.copyPhone" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:table.phone" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:detail.copyPhone" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:table.phone" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:detail.copyPhone" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:table.phone" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:detail.copyPhone" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:table.phone" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:detail.copyPhone" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:table.phone" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:detail.copyPhone" for language(s): en
+(anonymous) @ i18n.ts:146
+:3000/api/dashboard/overview?period=month:1  Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+:3000/api/users?townId=6af4c4460a0c5737240a8273&page=1&limit=10:1  Failed to load resource: the server responded with a status of 403 (Forbidden)
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:table.directoryEmpty" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:table.directoryEmptyDesc" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:actions.registerMember" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:table.directoryEmpty" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:table.directoryEmptyDesc" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:actions.registerMember" for language(s): en
+(anonymous) @ i18n.ts:146
+:3000/api/users/stats?townId=6af4c4460a0c5737240a8273:1  Failed to load resource: the server responded with a status of 403 (Forbidden)
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:table.directoryEmpty" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:table.directoryEmptyDesc" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:actions.registerMember" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:table.directoryEmpty" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:table.directoryEmptyDesc" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:actions.registerMember" for language(s): en
+(anonymous) @ i18n.ts:146
+:3000/api/registration-links/pending-reviews?townId=6af4c4460a0c5737240a8273:1  Failed to load resource: the server responded with a status of 403 (Forbidden)
+:3000/api/registration-links?townId=6af4c4460a0c5737240a8273:1  Failed to load resource: the server responded with a status of 403 (Forbidden)
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:table.directoryEmpty" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:table.directoryEmptyDesc" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:actions.registerMember" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:table.directoryEmpty" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:table.directoryEmptyDesc" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:actions.registerMember" for language(s): en
+(anonymous) @ i18n.ts:146
+:3000/api/activities/stats?townId=6af4c4460a0c5737240a8273&year=2026:1  Failed to load resource: the server responded with a status of 403 (Forbidden)
+:3000/api/activities?townId=6af4c4460a0c5737240a8273&year=2026&page=1&limit=10:1  Failed to load resource: the server responded with a status of 403 (Forbidden)
+2i18n.ts:146 [i18n ERROR] Missing translation key: "activities:table.emptyDescShort" for language(s): en
+(anonymous) @ i18n.ts:146
+:3000/api/activities?limit=150&townId=6af4c4460a0c5737240a8273:1  Failed to load resource: the server responded with a status of 403 (Forbidden)
+:3000/api/registration-links?townId=6af4c4460a0c5737240a8273:1  Failed to load resource: the server responded with a status of 403 (Forbidden)
+:3000/api/registration-links/pending-reviews?townId=6af4c4460a0c5737240a8273:1  Failed to load resource: the server responded with a status of 403 (Forbidden)
+:3000/api/users/stats?townId=6af4c4460a0c5737240a8273:1  Failed to load resource: the server responded with a status of 403 (Forbidden)
+:3000/api/users?townId=6af4c4460a0c5737240a8273&page=1&limit=10:1  Failed to load resource: the server responded with a status of 403 (Forbidden)
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:table.directoryEmpty" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:table.directoryEmptyDesc" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:actions.registerMember" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:table.directoryEmpty" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:table.directoryEmptyDesc" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:actions.registerMember" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:table.directoryEmpty" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:table.directoryEmptyDesc" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:actions.registerMember" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:table.directoryEmpty" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:table.directoryEmptyDesc" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:actions.registerMember" for language(s): en
+(anonymous) @ i18n.ts:146
+:3000/api/activities/stats?townId=6af4c4460a0c5737240a8273&year=2026:1  Failed to load resource: the server responded with a status of 403 (Forbidden)
+:3000/api/activities?townId=6af4c4460a0c5737240a8273&year=2026&page=1&limit=10:1  Failed to load resource: the server responded with a status of 403 (Forbidden)
+4i18n.ts:146 [i18n ERROR] Missing translation key: "activities:table.emptyDescShort" for language(s): en
+(anonymous) @ i18n.ts:146
+:3000/api/dashboard/overview?period=month:1  Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+:3000/api/registration-links?townId=6af4c4460a0c5737240a8273:1  Failed to load resource: the server responded with a status of 403 (Forbidden)
+:3000/api/registration-links/pending-reviews?townId=6af4c4460a0c5737240a8273:1  Failed to load resource: the server responded with a status of 403 (Forbidden)
+:3000/api/users/stats?townId=6af4c4460a0c5737240a8273:1  Failed to load resource: the server responded with a status of 403 (Forbidden)
+:3000/api/users?townId=6af4c4460a0c5737240a8273&page=1&limit=10:1  Failed to load resource: the server responded with a status of 403 (Forbidden)
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:table.directoryEmpty" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:table.directoryEmptyDesc" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:actions.registerMember" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:table.directoryEmpty" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:table.directoryEmptyDesc" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:actions.registerMember" for language(s): en
+(anonymous) @ i18n.ts:146
+:3000/api/activities/stats?townId=6af4c4460a0c5737240a8273&year=2026:1  Failed to load resource: the server responded with a status of 403 (Forbidden)
+:3000/api/activities?townId=6af4c4460a0c5737240a8273&year=2026&page=1&limit=10:1  Failed to load resource: the server responded with a status of 403 (Forbidden)
+2i18n.ts:146 [i18n ERROR] Missing translation key: "activities:table.emptyDescShort" for language(s): en
+(anonymous) @ i18n.ts:146
+:3000/api/activities?limit=150&townId=6af4c4460a0c5737240a8273:1  Failed to load resource: the server responded with a status of 403 (Forbidden)
+:3000/api/registration-links?townId=6af4c4460a0c5737240a8273:1  Failed to load resource: the server responded with a status of 403 (Forbidden)
+:3000/api/registration-links/pending-reviews?townId=6af4c4460a0c5737240a8273:1  Failed to load resource: the server responded with a status of 403 (Forbidden)
+:3000/api/users?townId=6af4c4460a0c5737240a8273&page=1&limit=10:1  Failed to load resource: the server responded with a status of 403 (Forbidden)
+:3000/api/users/stats?townId=6af4c4460a0c5737240a8273:1  Failed to load resource: the server responded with a status of 403 (Forbidden)
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:table.directoryEmpty" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:table.directoryEmptyDesc" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:actions.registerMember" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:table.directoryEmpty" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:table.directoryEmptyDesc" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:actions.registerMember" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:table.directoryEmpty" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:table.directoryEmptyDesc" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:actions.registerMember" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:table.directoryEmpty" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:table.directoryEmptyDesc" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:actions.registerMember" for language(s): en
+(anonymous) @ i18n.ts:146
+:3000/api/activities/stats?townId=6af4c4460a0c5737240a8273&year=2026:1  Failed to load resource: the server responded with a status of 403 (Forbidden)
+:3000/api/activities?townId=6af4c4460a0c5737240a8273&year=2026&page=1&limit=10:1  Failed to load resource: the server responded with a status of 403 (Forbidden)
+4i18n.ts:146 [i18n ERROR] Missing translation key: "activities:table.emptyDescShort" for language(s): en
+(anonymous) @ i18n.ts:146
+:3000/api/activities?limit=150&townId=6af4c4460a0c5737240a8273:1  Failed to load resource: the server responded with a status of 403 (Forbidden)
+:3000/api/dashboard/overview?period=month:1  Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+:3000/api/registration-links?townId=6af4c4460a0c5737240a8279:1  Failed to load resource: the server responded with a status of 403 (Forbidden)
+:3000/api/registration-links/pending-reviews?townId=6af4c4460a0c5737240a8279:1  Failed to load resource: the server responded with a status of 403 (Forbidden)
+:3000/api/users/stats?townId=6af4c4460a0c5737240a8279:1  Failed to load resource: the server responded with a status of 403 (Forbidden)
+:3000/api/users?townId=6af4c4460a0c5737240a8279&page=1&limit=10:1  Failed to load resource: the server responded with a status of 403 (Forbidden)
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:table.directoryEmpty" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:table.directoryEmptyDesc" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:actions.registerMember" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:table.directoryEmpty" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:table.directoryEmptyDesc" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:actions.registerMember" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:table.directoryEmpty" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:table.directoryEmptyDesc" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:actions.registerMember" for language(s): en
+(anonymous) @ i18n.ts:146
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:table.directoryEmpty" for language(s): en
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:table.directoryEmptyDesc" for language(s): en
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:actions.registerMember" for language(s): en
+:3000/api/users/stats?townId=6af4c4460a0c5737240a8279:1  Failed to load resource: the server responded with a status of 403 (Forbidden)
+:3000/api/users?townId=6af4c4460a0c5737240a8279&limit=150:1  Failed to load resource: the server responded with a status of 403 (Forbidden)
+:3000/api/users?townId=6af4c4460a0c5737240a8279&hasAppAccess=true&page=1&limit=50:1  Failed to load resource: the server responded with a status of 403 (Forbidden)
+2i18n.ts:146 [i18n ERROR] Missing translation key: "access:table.noAccountsDesc" for language(s): en
+:3000/api/activities/stats?townId=6af4c4460a0c5737240a8279&year=2026:1  Failed to load resource: the server responded with a status of 403 (Forbidden)
+:3000/api/activities?townId=6af4c4460a0c5737240a8279&year=2026&page=1&limit=10:1  Failed to load resource: the server responded with a status of 403 (Forbidden)
+2i18n.ts:146 [i18n ERROR] Missing translation key: "activities:table.emptyDescShort" for language(s): en
+:3000/api/activities?limit=150&townId=6af4c4460a0c5737240a8279:1  Failed to load resource: the server responded with a status of 403 (Forbidden)
+:3000/api/auth/login:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+:3000/api/auth/login:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+:3000/api/auth/login:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+:3000/api/auth/login:1  Failed to load resource: the server responded with a status of 403 (Forbidden)
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:intake.createLinkTitle" for language(s): en
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:intake.createLink" for language(s): en
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:intake.allCaughtUpBadge" for language(s): en
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:intake.allCaughtUpDescShort" for language(s): en
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:intake.createLinkTitle" for language(s): en
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:intake.createLink" for language(s): en
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:intake.allCaughtUpBadge" for language(s): en
+i18n.ts:146 [i18n ERROR] Missing translation key: "members:intake.allCaughtUpDescShort" for language(s): en
+96i18n.ts:146 [i18n ERROR] Missing translation key: "common:details" for language(s): en
+8i18n.ts:146 [i18n ERROR] Missing translation key: "common:upload" for language(s): en
+i18n.ts:146 [i18n ERROR] Missing translation key: "common:upload" for language(s): en
+i18n.ts:146 [i18n ERROR] Missing translation key: "common:upload" for language(s): en
+i18n.ts:146 [i18n ERROR] Missing translation key: "common:upload" for language(s): en
+i18n.ts:146 [i18n ERROR] Missing translation key: "common:upload" for language(s): en
+websocket.js:119 WebSocket connection to 'ws://localhost:3000/socket.io/?EIO=4&transport=websocket' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED
+i18n.ts:146 [i18n ERROR] Missing translation key: "common:upload" for language(s): en
+i18n.ts:146 [i18n ERROR] Missing translation key: "common:upload" for language(s): en
+axios-client.ts:316  GET http://localhost:3000/api/notifications/unread-count net::ERR_CONNECTION_REFUSED

@@ -5,17 +5,24 @@ import {
 } from '@jrs/client-core';
 import { ActivityStatus, type IActivity } from '@jrs/shared';
 import {
+  ArrowCounterClockwise,
+  ArrowRight,
   Bell,
   Buildings,
   CalendarBlank,
-  Eye,
-  MapPin,
+  Clock,
   PencilSimple,
+  Plus,
   UserCheck,
 } from '@phosphor-icons/react';
 import type React from 'react';
 import { useState } from 'react';
-import { CardGridSkeleton, PaginationControl } from '../../../components';
+import emptyActivitiesImg from '../../../assets/illustrations/empty-activities.jpg';
+import {
+  CardGridSkeleton,
+  EmptyState,
+  PaginationControl,
+} from '../../../components';
 import {
   formatActivityDateRange,
   getActivityStatusConfig,
@@ -23,6 +30,7 @@ import {
   getActivityTypeConfig,
 } from '../utils/activity-ui.utils';
 import { ActivityActionMenu } from './ActivityActionMenu';
+import { CancelActivityModal } from './CancelActivityModal';
 
 interface ActivityCardGridViewProps {
   activities: IActivity[];
@@ -32,11 +40,13 @@ interface ActivityCardGridViewProps {
   limit: number;
   onPageChange: (page: number) => void;
   onViewDetails: (activity: IActivity) => void;
-  onViewPreparation?: (activity: IActivity) => void;
   onEditActivity: (activity: IActivity) => void;
   onViewHistory: (activity: IActivity) => void;
   onDeleteActivity?: (activity: IActivity) => void;
   isPrivileged: boolean;
+  hasActiveFilters?: boolean;
+  onClearFilters?: () => void;
+  onPlanActivity?: () => void;
 }
 
 export const ActivityCardGridView: React.FC<ActivityCardGridViewProps> = ({
@@ -47,32 +57,32 @@ export const ActivityCardGridView: React.FC<ActivityCardGridViewProps> = ({
   limit,
   onPageChange,
   onViewDetails,
-  onViewPreparation,
   onEditActivity,
   onViewHistory,
   onDeleteActivity,
   isPrivileged,
+  hasActiveFilters = false,
+  onClearFilters,
+  onPlanActivity,
 }) => {
   const { t } = useTranslation();
   const { canWrite, activeTownId } = useTownContext();
   const updateActivityMutation = useUpdateActivityMutation();
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const [activityToCancel, setActivityToCancel] = useState<IActivity | null>(
+    null,
+  );
 
   const totalPages = Math.ceil(total / limit) || 1;
 
-  const handleCancelActivity = async (activity: IActivity) => {
-    if (
-      !window.confirm(
-        t(
-          'activities:detail.confirmCancel',
-          'Are you sure you want to cancel this activity? You can undo this cancellation at any time.',
-        ),
-      )
-    ) {
-      return;
-    }
+  const handleCancelActivity = (activity: IActivity) => {
+    setActivityToCancel(activity);
+  };
+
+  const handleConfirmCancel = async () => {
+    if (!activityToCancel) return;
     await updateActivityMutation.mutateAsync({
-      id: activity.id,
+      id: activityToCancel.id,
       dto: {
         status: ActivityStatus.CANCELLED,
         changeReason: t(
@@ -81,6 +91,7 @@ export const ActivityCardGridView: React.FC<ActivityCardGridViewProps> = ({
         ),
       },
     });
+    setActivityToCancel(null);
   };
 
   const handleUndoCancel = async (activity: IActivity) => {
@@ -101,18 +112,56 @@ export const ActivityCardGridView: React.FC<ActivityCardGridViewProps> = ({
   }
 
   if (activities.length === 0) {
+    if (hasActiveFilters) {
+      return (
+        <EmptyState
+          size="lg"
+          imageSrc={emptyActivitiesImg}
+          imageAlt="No activities match filters"
+          title={t(
+            'activities:filters.noMatchesTitle',
+            'No activities match your filters',
+          )}
+          description={t(
+            'activities:filters.noMatchesDescShort',
+            'Try adjusting your search terms or filters.',
+          )}
+          primaryAction={
+            onClearFilters
+              ? {
+                  label: t('common:clearFilters', 'Clear all filters'),
+                  icon: <ArrowCounterClockwise size={15} weight="bold" />,
+                  onClick: onClearFilters,
+                }
+              : undefined
+          }
+        />
+      );
+    }
+
     return (
-      <div className="bg-white rounded-md border border-[#e8e1dd] shadow-xs p-12 flex flex-col items-center justify-center text-center min-h-[320px]">
-        <div className="w-14 h-14 rounded-md bg-[#faf2ee] border border-[#e8e1dd] flex items-center justify-center text-[#8a726a] mb-4">
-          <CalendarBlank size={28} weight="duotone" />
-        </div>
-        <h3 className="text-base font-bold text-[#1e1b19] mb-1">
-          {t('activities:table.empty')}
-        </h3>
-        <p className="text-xs text-[#8a726a] max-w-sm">
-          {t('activities:filters.searchPlaceholder')}
-        </p>
-      </div>
+      <EmptyState
+        size="lg"
+        imageSrc={emptyActivitiesImg}
+        imageAlt="No activities"
+        title={t('activities:table.empty', 'No activities scheduled yet')}
+        description={t(
+          'activities:table.emptyDescShort',
+          'No scheduled activities in this hub yet.',
+        )}
+        primaryAction={
+          isPrivileged && onPlanActivity
+            ? {
+                label: t(
+                  'activities:actions.newActivity',
+                  'Plan First Activity',
+                ),
+                icon: <Plus size={16} weight="bold" />,
+                onClick: onPlanActivity,
+              }
+            : undefined
+        }
+      />
     );
   }
 
@@ -140,11 +189,12 @@ export const ActivityCardGridView: React.FC<ActivityCardGridViewProps> = ({
           return (
             <div
               key={activity.id}
-              className="bg-white rounded-md border border-[#e8e1dd] hover:border-[#b85028]/40 hover:shadow-md transition-all duration-200 p-4 flex flex-col justify-between gap-3 group"
+              onClick={() => onViewDetails(activity)}
+              className="bg-white rounded-md border border-[#e8e1dd] hover:border-[#b85028]/40 hover:shadow-md transition-all duration-200 p-4 flex flex-col justify-between gap-3 group cursor-pointer"
             >
               {/* Header: Type, Status & Dropdown */}
               <div className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-1.5 min-w-0">
+                <div className="flex items-center gap-1.5 min-w-0 flex-wrap">
                   <span
                     className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold border truncate ${typeConfig.badgeBg} ${typeConfig.badgeText} ${typeConfig.badgeBorder}`}
                   >
@@ -193,41 +243,44 @@ export const ActivityCardGridView: React.FC<ActivityCardGridViewProps> = ({
                   ) : null}
                 </div>
 
-                <ActivityActionMenu
-                  activity={activity}
-                  isOpen={openMenuId === activity.id}
-                  onToggle={() =>
-                    setOpenMenuId(
-                      openMenuId === activity.id ? null : activity.id,
-                    )
-                  }
-                  onClose={() => setOpenMenuId(null)}
-                  onViewDetails={onViewDetails}
-                  onViewPreparation={onViewPreparation}
-                  onEditActivity={onEditActivity}
-                  onViewHistory={onViewHistory}
-                  onCancelActivity={handleCancelActivity}
-                  onUndoCancelActivity={handleUndoCancel}
-                  onDeleteActivity={onDeleteActivity}
-                  isPrivileged={isPrivileged}
-                />
+                <div onClick={(e) => e.stopPropagation()}>
+                  <ActivityActionMenu
+                    activity={activity}
+                    isOpen={openMenuId === activity.id}
+                    onToggle={() =>
+                      setOpenMenuId(
+                        openMenuId === activity.id ? null : activity.id,
+                      )
+                    }
+                    onClose={() => setOpenMenuId(null)}
+                    onViewDetails={onViewDetails}
+                    onEditActivity={onEditActivity}
+                    onViewHistory={onViewHistory}
+                    onCancelActivity={handleCancelActivity}
+                    onUndoCancelActivity={handleUndoCancel}
+                    onDeleteActivity={onDeleteActivity}
+                    isPrivileged={isPrivileged}
+                  />
+                </div>
               </div>
 
-              {/* Title & Metadata */}
-              <div className="flex flex-col gap-1.5">
-                <h3 className="font-bold text-sm text-[#1e1b19] group-hover:text-[#b85028] transition-colors leading-snug line-clamp-1">
-                  {activity.title}
-                </h3>
-
+              {/* Metadata */}
+              <div className="flex flex-col gap-2">
                 {isParticipating && (
                   <div className="flex items-center">
                     <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold border bg-[#edf3ee] text-[#486b52] border-[#c2e9ca]">
                       <Buildings size={11} weight="bold" />
                       <span>
-                        Inter-villes · Hôte:{' '}
-                        {activity.hostTown?.name ||
-                          activity.town?.name ||
-                          'Autre'}
+                        {t(
+                          'activities:detail.interTownHost',
+                          'Inter-Town · Host: {{host}}',
+                          {
+                            host:
+                              activity.hostTown?.name ||
+                              activity.town?.name ||
+                              t('activities:detail.otherHost', 'Other'),
+                          },
+                        )}
                       </span>
                     </span>
                   </div>
@@ -240,90 +293,101 @@ export const ActivityCardGridView: React.FC<ActivityCardGridViewProps> = ({
                         <span>
                           +{activity.includedTownIds?.length}{' '}
                           {activity.includedTownIds?.length === 1
-                            ? 'ville participante'
-                            : 'villes participantes'}
+                            ? t(
+                                'activities:interTown.singleTown',
+                                'participating city',
+                              )
+                            : t(
+                                'activities:interTown.multipleTowns',
+                                'participating cities',
+                              )}
                         </span>
                       </span>
                     </div>
                   )}
 
-                <div className="flex flex-col gap-1 text-[11px] text-[#57423b]">
-                  <div className="flex items-center gap-1.5 truncate">
-                    <CalendarBlank
-                      size={13}
-                      weight="bold"
-                      className="text-[#b85028] shrink-0"
-                    />
-                    <span className="font-semibold text-[#1e1b19]">
-                      {dateInfo.dateRange}
-                    </span>
-                    <span className="text-[#8a726a]">
-                      · {dateInfo.timeRange}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-1.5 truncate text-[#8a726a]">
-                    <MapPin
-                      size={13}
-                      weight="fill"
-                      className="text-[#486b52] shrink-0"
-                    />
-                    <span className="truncate">
-                      {activity.town?.name || 'Local'} Hub
-                    </span>
-                  </div>
-                </div>
-
-                {/* Turnout Pill - Clickable to open Activity Details */}
-                <button
-                  type="button"
-                  onClick={() => onViewDetails(activity)}
-                  className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-md bg-[#faf6f4] hover:bg-[#f4ede9] border border-[#f2ebe7] hover:border-[#b85028]/30 text-[11px] mt-0.5 cursor-pointer transition-colors text-left"
-                  title="Click to view full activity & attendance details"
-                >
-                  <div className="flex items-center gap-1.5">
-                    <UserCheck
-                      size={14}
-                      weight="bold"
-                      className="text-[#486b52]"
-                    />
-                    <span className="font-bold text-[#1e1b19]">
-                      {turnoutStats.total > 0
-                        ? `${turnoutStats.total} Attendees`
-                        : 'Attendance Pending'}
-                    </span>
-                  </div>
-                  <span className="text-[10px] text-[#8a726a]">
-                    {turnoutStats.total > 0
-                      ? `${turnoutStats.members} mbrs · ${turnoutStats.guests} gst`
-                      : 'Not recorded'}
+                <div className="flex items-center gap-1.5 text-xs text-[#57423b]">
+                  <CalendarBlank
+                    size={14}
+                    weight="bold"
+                    className="text-[#b85028] shrink-0"
+                  />
+                  <span className="font-semibold text-[#1e1b19]">
+                    {dateInfo.dateRange}
                   </span>
-                </button>
+                  <span className="text-[#d8cfca]">·</span>
+                  <Clock size={13} className="text-[#8a726a] shrink-0" />
+                  <span className="text-[#8a726a]">{dateInfo.timeRange}</span>
+                </div>
               </div>
 
               {/* Bottom Actions Footer */}
-              <div className="flex items-center gap-1.5 pt-2 border-t border-[#f4ece9]">
-                <button
-                  type="button"
-                  onClick={() => onViewDetails(activity)}
-                  className="flex-1 h-8 px-2.5 rounded-md bg-[#b85028] text-white hover:bg-[#a44520] font-bold text-xs shadow-2xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
-                >
-                  <Eye size={14} weight="bold" />
-                  <span className="truncate">
-                    {t('activities:card.details', 'Details')}
-                  </span>
-                </button>
+              <div className="flex items-center justify-between pt-2.5 border-t border-[#f4ece9] mt-auto gap-2">
+                <div className="flex items-center gap-1.5 text-xs min-w-0">
+                  <UserCheck
+                    size={15}
+                    weight="bold"
+                    className={
+                      turnoutStats.total > 0
+                        ? 'text-[#486b52] shrink-0'
+                        : 'text-[#8a726a] shrink-0'
+                    }
+                  />
+                  {turnoutStats.total > 0 ? (
+                    <span className="text-[11px] font-medium text-[#1e1b19] truncate">
+                      <span className="font-bold">{turnoutStats.total}</span>{' '}
+                      {turnoutStats.total === 1
+                        ? t('activities:card.attendee', 'Attendee')
+                        : t('activities:card.attendees', 'Attendees')}{' '}
+                      <span className="text-[#8a726a] font-normal">
+                        {t(
+                          'activities:card.attendanceBreakdown',
+                          '({{members}}m · {{guests}}g)',
+                          {
+                            members: turnoutStats.members,
+                            guests: turnoutStats.guests,
+                          },
+                        )}
+                      </span>
+                    </span>
+                  ) : (
+                    <span className="text-[11px] text-[#8a726a] truncate">
+                      {t(
+                        'activities:card.attendancePending',
+                        'Attendance Pending',
+                      )}
+                    </span>
+                  )}
+                </div>
 
-                {canWrite && (
+                <div className="flex items-center gap-1 shrink-0">
+                  {canWrite &&
+                    activity.status !== ActivityStatus.COMPLETED &&
+                    new Date(activity.endDate).getTime() >= Date.now() && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onEditActivity(activity);
+                        }}
+                        className="w-7 h-7 rounded text-[#8a726a] hover:text-[#b85028] hover:bg-[#eddcd5] flex items-center justify-center transition-colors cursor-pointer"
+                        title={t('common:edit', 'Edit')}
+                      >
+                        <PencilSimple size={14} weight="bold" />
+                      </button>
+                    )}
                   <button
                     type="button"
-                    onClick={() => onEditActivity(activity)}
-                    className="w-8 h-8 rounded-md bg-[#faf2ee] border border-[#e8e1dd] hover:bg-white text-[#57423b] hover:text-[#1e1b19] flex items-center justify-center transition-colors cursor-pointer shrink-0"
-                    title="Edit or Reschedule"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onViewDetails(activity);
+                    }}
+                    className="h-7 px-2.5 rounded bg-[#faf2ee] hover:bg-[#b85028] text-[#b85028] hover:text-white border border-[#e8d5cc] font-semibold text-xs transition-colors flex items-center gap-1 cursor-pointer"
                   >
-                    <PencilSimple size={14} weight="bold" />
+                    <span>{t('activities:card.details', 'Details')}</span>
+                    <ArrowRight size={12} weight="bold" />
                   </button>
-                )}
+                </div>
               </div>
             </div>
           );
@@ -349,6 +413,15 @@ export const ActivityCardGridView: React.FC<ActivityCardGridViewProps> = ({
           />
         </div>
       )}
+
+      {/* Cancel Activity Confirmation Modal */}
+      <CancelActivityModal
+        isOpen={Boolean(activityToCancel)}
+        onClose={() => setActivityToCancel(null)}
+        onConfirm={handleConfirmCancel}
+        activityTitle={activityToCancel?.title}
+        isLoading={updateActivityMutation.isPending}
+      />
     </div>
   );
 };

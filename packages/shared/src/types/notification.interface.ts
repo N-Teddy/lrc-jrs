@@ -35,11 +35,14 @@ export type NotificationAction =
   | 'ROLE_CHANGED'
   | 'TOWN_SCOPE_UPDATED'
   | 'PASSWORD_CHANGED'
+  | 'MEMBER_BIRTHDAY_UPCOMING_7D'
+  | 'MEMBER_BIRTHDAY_TODAY'
   | 'SYSTEM_ANNOUNCEMENT';
 
 export type NotificationResourceType =
   | 'ACTIVITY'
   | 'MEMBER'
+  | 'BIRTHDAY'
   | 'TOWN_TRANSFER'
   | 'ATTENDANCE'
   | 'ACCESS'

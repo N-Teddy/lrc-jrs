@@ -1,6 +1,7 @@
 import { useTranslation } from '@jrs/client-core';
 import type { ITown, IUser } from '@jrs/shared';
 import {
+  ArrowCounterClockwise,
   ChatCircleText,
   ClockCountdown,
   Crown,
@@ -10,12 +11,13 @@ import {
   Key,
   Phone,
   Prohibit,
-  ShieldCheck,
   User,
 } from '@phosphor-icons/react';
 import type React from 'react';
 import { useEffect, useRef, useState } from 'react';
+import emptyAccessSvg from '../../../assets/illustrations/empty-access.svg';
 import {
+  EmptyState,
   PaginationControl,
   TableSkeleton,
   UserAvatar,
@@ -39,6 +41,8 @@ interface AccountsDirectoryTableProps {
   onViewMemberDetail: (memberId: string) => void;
   availableTowns: ITown[];
   isCurrentUserAp: boolean;
+  hasActiveFilters?: boolean;
+  onClearFilters?: () => void;
 }
 
 export const AccountsDirectoryTable: React.FC<AccountsDirectoryTableProps> = ({
@@ -54,6 +58,8 @@ export const AccountsDirectoryTable: React.FC<AccountsDirectoryTableProps> = ({
   onViewMemberDetail,
   availableTowns,
   isCurrentUserAp,
+  hasActiveFilters = false,
+  onClearFilters,
 }) => {
   const { t } = useTranslation(['access', 'members', 'common']);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
@@ -100,31 +106,58 @@ export const AccountsDirectoryTable: React.FC<AccountsDirectoryTableProps> = ({
   }
 
   if (members.length === 0) {
+    if (hasActiveFilters) {
+      return (
+        <EmptyState
+          size="lg"
+          imageSrc={emptyAccessSvg}
+          imageAlt="No accounts match filters"
+          title={t(
+            'access:table.noFilterMatches',
+            'No accounts found matching criteria',
+          )}
+          description={t(
+            'access:table.noFilterMatchesDesc',
+            'Try adjusting your search query or filters.',
+          )}
+          primaryAction={
+            onClearFilters
+              ? {
+                  label: t('common:clearFilters', 'Clear all filters'),
+                  icon: <ArrowCounterClockwise size={15} weight="bold" />,
+                  onClick: onClearFilters,
+                }
+              : undefined
+          }
+        />
+      );
+    }
+
     return (
-      <div className="bg-white rounded-xl border border-[#e8e1dd] shadow-xs p-12 flex flex-col items-center justify-center text-center min-h-[360px]">
-        <div className="w-14 h-14 rounded-lg bg-[#faf2ee] border border-[#e8e1dd] flex items-center justify-center text-[#8a726a] mb-4">
-          <ShieldCheck size={28} weight="duotone" />
-        </div>
-        <h3 className="text-base font-bold text-[#1e1b19] mb-1">
-          {t('access:table.noAccounts') ||
-            'No accounts found matching criteria'}
-        </h3>
-        <p className="text-xs text-[#8a726a] max-w-sm">
-          Try clearing filters or search terms to inspect member portal
-          accounts.
-        </p>
-      </div>
+      <EmptyState
+        size="lg"
+        imageSrc={emptyAccessSvg}
+        imageAlt="No accounts found"
+        title={t(
+          'access:table.noAccounts',
+          'No authenticated accounts in this scope',
+        )}
+        description={t(
+          'access:table.noAccountsDesc',
+          'No authenticated accounts in this hub yet.',
+        )}
+      />
     );
   }
 
   return (
     <div className="bg-white rounded-xl border border-[#e8e1dd] shadow-xs flex flex-col overflow-hidden">
-      <div className="overflow-x-auto min-h-[340px]">
+      <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-[#faf2ee] border-b border-[#e8e1dd] text-[11px] font-bold text-[#8a726a] uppercase tracking-wider">
               <th className="py-3.5 px-6">
-                {t('access:table.member') || 'Member & Hub'}
+                {t('access:table.member') || 'Member'}
               </th>
               <th className="py-3.5 px-6">
                 {t('access:table.credentials') || 'Login Identifier & Email'}
@@ -158,10 +191,12 @@ export const AccountsDirectoryTable: React.FC<AccountsDirectoryTableProps> = ({
                 index >= 2 &&
                 index >= members.length - (members.length >= 5 ? 3 : 2);
 
-              // Town codes for granted external hubs
-              const externalTownCodes = allowedTownIds
-                .map((id) => availableTowns.find((t) => t.id === id)?.code)
-                .filter(Boolean) as string[];
+              // Town objects for granted external hubs and home hub
+              const externalTowns = allowedTownIds
+                .map((id) => availableTowns.find((t) => t.id === id))
+                .filter(Boolean) as ITown[];
+              const homeTown =
+                availableTowns.find((t) => t.id === m.homeTownId) || m.homeTown;
 
               return (
                 <tr
@@ -183,14 +218,6 @@ export const AccountsDirectoryTable: React.FC<AccountsDirectoryTableProps> = ({
                         >
                           {m.fullName}
                         </span>
-                        <div className="flex items-center gap-1.5 mt-0.5">
-                          <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-[#f4ece9] text-[#57423b]">
-                            {m.homeTown?.code ?? 'HUB'}
-                          </span>
-                          <span className="text-[11px] text-[#8a726a] truncate">
-                            {m.homeTown?.name}
-                          </span>
-                        </div>
                       </div>
                     </div>
                   </td>
@@ -225,7 +252,7 @@ export const AccountsDirectoryTable: React.FC<AccountsDirectoryTableProps> = ({
                   {/* 3. Role */}
                   <td className="py-3.5 px-4">
                     <span
-                      className={`inline-flex px-2 py-0.5 rounded-md text-[10px] font-bold border ${roleInfo.badgeBg} ${roleInfo.badgeText} ${roleInfo.border}`}
+                      className={`inline-flex px-2 py-0.5 rounded-sm text-[10px] font-bold border ${roleInfo.badgeBg} ${roleInfo.badgeText} ${roleInfo.border}`}
                     >
                       {roleInfo.shortLabel}
                     </span>
@@ -234,14 +261,14 @@ export const AccountsDirectoryTable: React.FC<AccountsDirectoryTableProps> = ({
                   {/* 4. Portal Status */}
                   <td className="py-3.5 px-6">
                     {isRevoked ? (
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-[#ffdad6] text-[#ba1a1a]">
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-sm text-[11px] font-bold bg-[#ffdad6] text-[#ba1a1a]">
                         <span className="w-1.5 h-1.5 rounded-full bg-[#ba1a1a]" />
                         <span>
                           {t('access:table.suspended') || 'Suspended'}
                         </span>
                       </span>
                     ) : isTempPassword ? (
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-[#fff8e1] text-[#b78103] border border-[#ffe082]">
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-sm text-[11px] font-bold bg-[#fff8e1] text-[#b78103] border border-[#ffe082]">
                         <ClockCountdown size={13} weight="bold" />
                         <span>
                           {t('access:table.mustChangePassword') ||
@@ -249,7 +276,7 @@ export const AccountsDirectoryTable: React.FC<AccountsDirectoryTableProps> = ({
                         </span>
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-[#c2e9ca] text-[#2c4e37]">
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-sm text-[11px] font-bold bg-[#c2e9ca] text-[#2c4e37]">
                         <span className="w-1.5 h-1.5 rounded-full bg-[#486b52]" />
                         <span>{t('access:table.active') || 'Active'}</span>
                       </span>
@@ -258,20 +285,24 @@ export const AccountsDirectoryTable: React.FC<AccountsDirectoryTableProps> = ({
 
                   {/* 5. Cross-Hub Scopes */}
                   <td className="py-3.5 px-4">
-                    {externalTownCodes.length > 0 ? (
+                    {externalTowns.length > 0 ? (
                       <div className="flex items-center gap-1 flex-wrap">
-                        {externalTownCodes.map((code) => (
+                        {externalTowns.map((tw) => (
                           <span
-                            key={code}
-                            className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-[#eef7f0] text-[#2c4e37] border border-[#c2e9ca]"
+                            key={tw.id}
+                            title={tw.name}
+                            className="px-1.5 py-0.5 rounded-sm text-[10px] font-mono font-bold bg-[#eef7f0] text-[#2c4e37] border border-[#c2e9ca] cursor-help"
                           >
-                            {code}
+                            {tw.code}
                           </span>
                         ))}
                       </div>
                     ) : (
-                      <span className="text-[11px] text-[#8a726a]">
-                        {t('access:table.homeOnly') || 'Home Hub Only'}
+                      <span
+                        title={homeTown?.name || 'Home Hub'}
+                        className="px-1.5 py-0.5 rounded-sm text-[10px] font-mono font-bold bg-[#faf2ee] text-[#57423b] border border-[#e8e1dd] cursor-help inline-block"
+                      >
+                        {homeTown?.code || 'HUB'}
                       </span>
                     )}
                   </td>
@@ -289,7 +320,7 @@ export const AccountsDirectoryTable: React.FC<AccountsDirectoryTableProps> = ({
                           onClick={() =>
                             setOpenMenuId(openMenuId === m.id ? null : m.id)
                           }
-                          className="w-7 h-7 rounded-md text-[#8a726a] hover:text-[#1e1b19] hover:bg-[#faf2ee] flex items-center justify-center transition-colors cursor-pointer"
+                          className="w-7 h-7 rounded-md text-[#8a726a] hover:text-[#b85028] hover:bg-[#eddcd5] flex items-center justify-center transition-colors cursor-pointer"
                         >
                           <DotsThreeVertical size={16} weight="bold" />
                         </button>

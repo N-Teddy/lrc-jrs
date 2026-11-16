@@ -18,10 +18,54 @@ export interface ExtractedErrorInfo {
   details?: Record<string, unknown>;
 }
 
+export interface ErrorReportContext {
+  componentStack?: string;
+  screen?: string;
+  userId?: string;
+  userRole?: string;
+  townHub?: string;
+  details?: Record<string, unknown>;
+  statusCode?: number;
+  errorCode?: string;
+  tags?: Record<string, string>;
+  extra?: Record<string, unknown>;
+}
+
+export type ErrorReporter = (
+  error: unknown,
+  context?: ErrorReportContext,
+) => void;
+
 // biome-ignore lint/complexity/noStaticOnlyClass: Centralized static utility service
 export class ErrorService {
   private static lastNetworkErrorTime = 0;
   private static readonly NETWORK_ERROR_THROTTLE_MS = 6000;
+  private static reporters: ErrorReporter[] = [];
+
+  /**
+   * Register a telemetry or error tracking reporter callback (e.g. Sentry)
+   */
+  static registerReporter(reporter: ErrorReporter): () => void {
+    ErrorService.reporters.push(reporter);
+    return () => {
+      ErrorService.reporters = ErrorService.reporters.filter(
+        (r) => r !== reporter,
+      );
+    };
+  }
+
+  /**
+   * Dispatches an error with context to all registered telemetry reporters
+   */
+  static reportError(error: unknown, context?: ErrorReportContext): void {
+    for (const reporter of ErrorService.reporters) {
+      try {
+        reporter(error, context);
+      } catch (err) {
+        console.warn('[ErrorService] Error reporter failed:', err);
+      }
+    }
+  }
 
   /**
    * Reset the network error throttle window (e.g. when network requests resume successfully)
@@ -62,7 +106,42 @@ export class ErrorService {
     return (
       lower.includes('request failed with status code 500') ||
       lower.includes('internal server error') ||
-      lower.includes('err_internal_server')
+      lower.includes('err_internal_server') ||
+      lower.includes('cannot post') ||
+      lower.includes('cannot get') ||
+      lower.includes('cannot patch') ||
+      lower.includes('cannot put') ||
+      lower.includes('cannot delete') ||
+      lower.includes('cast to objectid') ||
+      lower.includes('duplicate key') ||
+      lower.includes('e11000') ||
+      lower.includes('syntaxerror') ||
+      lower.includes('typeerror') ||
+      lower.includes('referenceerror') ||
+      lower.includes('rangeerror')
+    );
+  }
+
+  /**
+   * Determine if an error message represents developer validation or technical schema jargon
+   */
+  static isTechnicalOrValidationJargon(message?: string): boolean {
+    if (!message) return false;
+    const lower = message.toLowerCase();
+    return (
+      lower.includes('should not exist') ||
+      lower.includes('must be a') ||
+      lower.includes('must be an') ||
+      lower.includes('must be valid') ||
+      lower.includes('should not be empty') ||
+      lower.includes('cannot be empty') ||
+      lower.includes('must not be empty') ||
+      lower.includes('each value in') ||
+      lower.includes('is not a valid') ||
+      lower.includes('validation failed') ||
+      lower.includes('bad request') ||
+      lower.includes('dto') ||
+      lower.includes('property ')
     );
   }
 
@@ -191,6 +270,22 @@ export class ErrorService {
         localizedMessage = i18n.t(`errors:${ErrorCode.INTERNAL_SERVER_ERROR}`, {
           defaultValue: 'A server error occurred. Please try again later.',
         });
+      } else if (
+        ErrorService.isTechnicalOrValidationJargon(localizedMessage) ||
+        statusCode === 400
+      ) {
+        const lower = (localizedMessage || '').toLowerCase();
+        if (lower.includes('attendance')) {
+          localizedMessage = i18n.t('errors:ERR_ATTENDANCE_RECORDING_FAILED', {
+            defaultValue:
+              'Failed to record attendance for the selected members.',
+          });
+        } else {
+          localizedMessage = i18n.t('errors:ERR_VALIDATION_FAILED', {
+            defaultValue:
+              'Some entered information is invalid or incomplete. Please verify the form and try again.',
+          });
+        }
       }
     }
 
@@ -209,6 +304,24 @@ export class ErrorService {
         return localizedMessage;
       }
       ErrorService.lastNetworkErrorTime = now;
+    }
+
+    // Forward server crashes (500s), uncaught exceptions, and non-routine errors to telemetry
+    const isRoutineClientValidation =
+      statusCode === 400 &&
+      !ErrorService.isRawServerError(message, statusCode) &&
+      !(message || '').toLowerCase().includes('axioserror');
+
+    if (!isNetwork && !isRoutineClientValidation) {
+      ErrorService.reportError(error, {
+        statusCode,
+        errorCode,
+        details,
+        extra: {
+          localizedMessage,
+          title: options?.title,
+        },
+      });
     }
 
     if (!options?.silent) {

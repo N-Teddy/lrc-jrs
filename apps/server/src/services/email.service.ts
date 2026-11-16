@@ -1,3 +1,5 @@
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 import { Injectable, Logger, type OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
@@ -65,6 +67,7 @@ export class EmailService implements OnModuleInit, NotificationStrategy {
   }
 
   async onModuleInit() {
+    this.ensureBrandingAssets();
     if (this.transporter) {
       try {
         await this.transporter.verify();
@@ -75,6 +78,37 @@ export class EmailService implements OnModuleInit, NotificationStrategy {
           `SMTP verification failed: ${msg}. If using Maildev, ensure it is running ("maildev").`,
         );
       }
+    }
+  }
+
+  private ensureBrandingAssets(): void {
+    try {
+      const brandingDir = path.join(process.cwd(), 'uploads', 'branding');
+      if (!fs.existsSync(brandingDir)) {
+        fs.mkdirSync(brandingDir, { recursive: true });
+      }
+
+      const targetLogo = path.join(brandingDir, 'logo.png');
+      if (!fs.existsSync(targetLogo)) {
+        const candidates = [
+          path.resolve(process.cwd(), 'templates/emails/assets/logo.png'),
+          path.resolve(
+            process.cwd(),
+            'apps/server/templates/emails/assets/logo.png',
+          ),
+          path.resolve(__dirname, '../../templates/emails/assets/logo.png'),
+          path.resolve(__dirname, '../../../templates/emails/assets/logo.png'),
+        ];
+
+        for (const candidate of candidates) {
+          if (fs.existsSync(candidate)) {
+            fs.copyFileSync(candidate, targetLogo);
+            break;
+          }
+        }
+      }
+    } catch (err) {
+      this.logger.warn(`Could not sync email logo asset: ${err}`);
     }
   }
 
@@ -126,9 +160,25 @@ export class EmailService implements OnModuleInit, NotificationStrategy {
    */
   async sendPasswordResetEmail(
     to: string,
-    data: { fullName: string; code: string; expiresInMinutes: number },
+    data: {
+      fullName: string;
+      code: string;
+      expiresInMinutes: number;
+      loginUrl?: string;
+      logoUrl?: string;
+    },
   ): Promise<boolean> {
-    const html = TemplateLoaderUtil.render('emails/password-reset.hbs', data);
+    const host =
+      this.configService.get<string>('APP_URL') || 'http://localhost:3000';
+    const logoUrl = data.logoUrl || `${host}/uploads/branding/logo.png`;
+    const loginUrl =
+      data.loginUrl ||
+      `lrc-jrs://reset-password?code=${encodeURIComponent(data.code)}&email=${encodeURIComponent(to)}`;
+    const html = TemplateLoaderUtil.render('emails/password-reset.hbs', {
+      ...data,
+      logoUrl,
+      loginUrl,
+    });
 
     return this.sendEmail({
       to,
@@ -147,16 +197,33 @@ export class EmailService implements OnModuleInit, NotificationStrategy {
       tempPassword: string;
       expiresInHours: number;
       loginUrl?: string;
+      logoUrl?: string;
     },
+    language: 'fr' | 'en' = 'fr',
   ): Promise<boolean> {
-    const html = TemplateLoaderUtil.render(
-      'emails/temporary-password.hbs',
-      data,
-    );
+    const host =
+      this.configService.get<string>('APP_URL') || 'http://localhost:3000';
+    const logoUrl = data.logoUrl || `${host}/uploads/branding/logo.png`;
+    const loginUrl =
+      data.loginUrl || `lrc-jrs://login?email=${encodeURIComponent(to)}`;
+    const templateName =
+      language === 'en'
+        ? 'emails/temporary-password.en.hbs'
+        : 'emails/temporary-password.hbs';
+    const html = TemplateLoaderUtil.render(templateName, {
+      ...data,
+      logoUrl,
+      loginUrl,
+    });
+
+    const subject =
+      language === 'en'
+        ? 'Welcome to LRC JRS - Your temporary access credentials'
+        : 'Bienvenue sur LRC JRS - Vos accès temporaires';
 
     return this.sendEmail({
       to,
-      subject: 'Bienvenue sur LRC JRS - Vos accès temporaires',
+      subject,
       html,
     });
   }

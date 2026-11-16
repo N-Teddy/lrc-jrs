@@ -12,7 +12,6 @@ import {
   ArrowsClockwise,
   ArrowsLeftRight,
   Bell,
-  BellSlash,
   Buildings,
   CalendarCheck,
   CaretRight,
@@ -31,7 +30,8 @@ import {
 } from '@phosphor-icons/react';
 import type React from 'react';
 import { useMemo, useState } from 'react';
-import { CustomSelect, type SelectOption } from '../../components';
+import emptyNotificationsImg from '../../assets/illustrations/empty-notifications.jpg';
+import { CustomSelect, EmptyState, type SelectOption } from '../../components';
 
 interface NotificationsFeatureProps {
   onNavigateToResource?: (resource: NotificationResource) => void;
@@ -552,29 +552,20 @@ export const NotificationsFeature: React.FC<NotificationsFeatureProps> = ({
           </div>
         ) : filteredNotifications.length === 0 ? (
           /* Empty State */
-          <div className="rounded-lg bg-white border border-[#e8e1dd] p-12 text-center flex flex-col items-center justify-center shadow-xs">
-            <div className="w-16 h-16 rounded-lg bg-[#fff5f0] border border-[#ffd8cb] flex items-center justify-center text-[#b85028] mb-3.5 shadow-2xs">
-              {activeTab === 'unread' ? (
-                <CheckCircle
-                  size={32}
-                  weight="fill"
-                  className="text-[#486b52]"
-                />
-              ) : (
-                <BellSlash size={32} weight="duotone" />
-              )}
-            </div>
-            <h3 className="text-base font-bold text-[#1e1b19]">
-              {searchQuery ||
+          <EmptyState
+            imageSrc={emptyNotificationsImg}
+            imageAlt="No notifications"
+            title={
+              searchQuery ||
               selectedCategory !== 'ALL' ||
               selectedTownFilter !== 'ALL'
                 ? t('notifications:noResultsTitle', 'No notifications found')
                 : activeTab === 'unread'
                   ? t('notifications:allCaughtUp', "You're all caught up!")
-                  : t('notifications:noNotifications', 'No notifications yet')}
-            </h3>
-            <p className="text-xs text-[#8a726a] max-w-sm mt-1 leading-relaxed">
-              {searchQuery ||
+                  : t('notifications:noNotifications', 'No notifications yet')
+            }
+            description={
+              searchQuery ||
               selectedCategory !== 'ALL' ||
               selectedTownFilter !== 'ALL'
                 ? t(
@@ -589,24 +580,23 @@ export const NotificationsFeature: React.FC<NotificationsFeatureProps> = ({
                   : t(
                       'notifications:emptySubtitle',
                       'Activity and community notices will appear here.',
-                    )}
-            </p>
-            {(searchQuery ||
+                    )
+            }
+            primaryAction={
+              searchQuery ||
               selectedCategory !== 'ALL' ||
-              selectedTownFilter !== 'ALL') && (
-              <button
-                type="button"
-                onClick={() => {
-                  setSearchQuery('');
-                  setSelectedCategory('ALL');
-                  setSelectedTownFilter('ALL');
-                }}
-                className="mt-4 px-4 py-2 rounded-lg bg-[#faf2ee] hover:bg-[#f2e6e0] text-[#b85028] text-xs font-bold transition cursor-pointer border border-[#e8e1dd]"
-              >
-                {t('notifications:clearFilters', 'Clear filters')}
-              </button>
-            )}
-          </div>
+              selectedTownFilter !== 'ALL'
+                ? {
+                    label: t('notifications:clearFilters', 'Clear filters'),
+                    onClick: () => {
+                      setSearchQuery('');
+                      setSelectedCategory('ALL');
+                      setSelectedTownFilter('ALL');
+                    },
+                  }
+                : undefined
+            }
+          />
         ) : (
           /* Chronologically Grouped Notification Cards */
           groupedNotifications.map((group) => (

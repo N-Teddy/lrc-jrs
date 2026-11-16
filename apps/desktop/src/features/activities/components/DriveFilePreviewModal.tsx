@@ -149,6 +149,7 @@ export const DriveFilePreviewModal: React.FC<DriveFilePreviewModalProps> = ({
       role="dialog"
       aria-modal="true"
       className="fixed inset-0 z-50 flex items-center justify-center bg-[#1e1b19]/75 p-3 sm:p-6 backdrop-blur-xs animate-in fade-in duration-150"
+      onClick={onClose}
     >
       <div
         className={`bg-white rounded-xl border border-[#e8e1dd] shadow-2xl flex flex-col overflow-hidden transition-all duration-200 ${
@@ -156,6 +157,7 @@ export const DriveFilePreviewModal: React.FC<DriveFilePreviewModalProps> = ({
             ? 'w-full h-full rounded-none'
             : 'w-full max-w-5xl h-[88vh] max-h-[920px]'
         }`}
+        onClick={(e) => e.stopPropagation()}
       >
         {/* Header Bar */}
         <div className="px-5 py-4 border-b border-[#e8e1dd] bg-white flex items-center justify-between gap-3 shrink-0">

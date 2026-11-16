@@ -29,12 +29,17 @@ export function extractCameroonLocalDigits(
   val: string | undefined | null,
 ): string {
   if (!val) return '';
-  let digits = val.replace(/\D/g, '');
+  const trimmed = val.trim();
+  let digits = trimmed.replace(/\D/g, '');
 
-  // Strip international prefix (00237 or 237)
-  if (digits.startsWith('00237')) {
-    digits = digits.slice(5);
-  } else if (digits.startsWith('237')) {
+  // Strip international prefix (00237 or 237) if prefix is explicitly present
+  if (trimmed.startsWith('+237') || trimmed.startsWith('00237')) {
+    if (digits.startsWith('00237')) {
+      digits = digits.slice(5);
+    } else if (digits.startsWith('237')) {
+      digits = digits.slice(3);
+    }
+  } else if (digits.length >= 11 && digits.startsWith('237')) {
     digits = digits.slice(3);
   }
 
@@ -47,12 +52,20 @@ export function formatCameroonPhone(
 ): string {
   if (!phone) return '';
   const localDigits = extractCameroonLocalDigits(phone);
+  if (!localDigits) return phone;
 
-  if (localDigits.length === 9) {
-    const formatted = `${localDigits.slice(0, 3)} ${localDigits.slice(3, 5)} ${localDigits.slice(5, 7)} ${localDigits.slice(7, 9)}`;
-    return options?.includeCountryCode ? `+237 ${formatted}` : formatted;
+  // Format with space after first 3 digits, then after every 2 digits
+  let formatted = '';
+  if (localDigits.length <= 3) {
+    formatted = localDigits;
+  } else {
+    formatted = localDigits.slice(0, 3);
+    for (let i = 3; i < localDigits.length; i += 2) {
+      formatted += ` ${localDigits.slice(i, i + 2)}`;
+    }
   }
-  return phone;
+
+  return options?.includeCountryCode ? `+237 ${formatted}` : formatted;
 }
 
 export function formatCameroonPhoneInput(

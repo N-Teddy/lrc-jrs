@@ -22,6 +22,7 @@ import { useVerifyOtp } from '../hooks/use-verify-otp';
 interface VerifyOtpScreenProps {
   identifier: string;
   channel?: 'auto' | 'whatsapp' | 'email';
+  initialCode?: string;
   onBackToChangeContact: () => void;
   onCodeVerified: (resetToken: string) => void;
 }
@@ -29,6 +30,7 @@ interface VerifyOtpScreenProps {
 export const VerifyOtpScreen: React.FC<VerifyOtpScreenProps> = ({
   identifier,
   channel = 'auto',
+  initialCode,
   onBackToChangeContact,
   onCodeVerified,
 }) => {
@@ -55,6 +57,7 @@ export const VerifyOtpScreen: React.FC<VerifyOtpScreenProps> = ({
   } = useVerifyOtp({
     identifier,
     channel,
+    initialCode,
     onCodeVerified,
   });
 

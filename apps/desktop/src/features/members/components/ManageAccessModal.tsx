@@ -1,14 +1,14 @@
-import { useTranslation } from '@jrs/client-core';
+import { ErrorService, toast, useTranslation } from '@jrs/client-core';
 import type { IUpdateMemberAccessDto, IUser } from '@jrs/shared';
 import {
   ChatCircleText,
-  CheckCircle,
+  Copy,
   EnvelopeSimple,
+  Globe,
   Key,
   LockKey,
   PaperPlaneTilt,
   Prohibit,
-  Warning,
   X,
 } from '@phosphor-icons/react';
 import React, { useEffect, useState } from 'react';
@@ -29,17 +29,17 @@ export const ManageAccessModal: React.FC<ManageAccessModalProps> = ({
 }) => {
   const { t } = useTranslation(['members', 'access', 'common']);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [successMsg, setSuccessMsg] = useState<string | null>(null);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const [inviteChannel, setInviteChannel] = useState<'whatsapp' | 'email'>(
     'email',
   );
+  const [preferredLanguage, setPreferredLanguage] = useState<'fr' | 'en'>('fr');
 
-  // Update default channel when member changes
+  // Update default channel and language when member changes
   useEffect(() => {
     if (member) {
       setInviteChannel(member.isWhatsappVerified ? 'whatsapp' : 'email');
+      setPreferredLanguage(member.preferredLanguage || 'fr');
     }
   }, [member]);
 
@@ -52,17 +52,19 @@ export const ManageAccessModal: React.FC<ManageAccessModalProps> = ({
 
   const handleResendCredentials = async () => {
     setIsSubmitting(true);
-    setErrorMsg(null);
-    setSuccessMsg(null);
     try {
-      await onUpdateAccess(member.id, { resendInvite: true });
-      setSuccessMsg(t('members:accessModal.resendSuccess'));
-    } catch (err: any) {
-      setErrorMsg(
-        err?.response?.data?.message ||
-          err?.message ||
-          'Failed to resend credentials.',
+      await onUpdateAccess(member.id, {
+        resendInvite: true,
+        preferredLanguage,
+      });
+      toast.success(
+        t(
+          'members:accessModal.resendSuccess',
+          'Credentials resent successfully.',
+        ),
       );
+    } catch (err: any) {
+      ErrorService.handle(err);
     } finally {
       setIsSubmitting(false);
     }
@@ -70,20 +72,17 @@ export const ManageAccessModal: React.FC<ManageAccessModalProps> = ({
 
   const handleInviteToApp = async () => {
     setIsSubmitting(true);
-    setErrorMsg(null);
-    setSuccessMsg(null);
     try {
       await onUpdateAccess(member.id, {
         hasAppAccess: true,
         channel: inviteChannel,
+        preferredLanguage,
       });
-      setSuccessMsg('Invitation sent successfully.');
-    } catch (err: any) {
-      setErrorMsg(
-        err?.response?.data?.message ||
-          err?.message ||
-          'Failed to send invitation.',
+      toast.success(
+        t('members:access.inviteSuccess', 'Invitation sent successfully.'),
       );
+    } catch (err: any) {
+      ErrorService.handle(err);
     } finally {
       setIsSubmitting(false);
     }
@@ -91,32 +90,38 @@ export const ManageAccessModal: React.FC<ManageAccessModalProps> = ({
 
   const handleToggleActive = async () => {
     setIsSubmitting(true);
-    setErrorMsg(null);
-    setSuccessMsg(null);
     try {
       const nextRevoked = !isRevoked;
       await onUpdateAccess(member.id, {
         isAccessRevoked: nextRevoked,
       });
-      setSuccessMsg(
+      toast.success(
         nextRevoked
-          ? 'Account access has been suspended.'
-          : 'Account successfully reactivated.',
+          ? t(
+              'members:accessModal.accountSuspendedSuccess',
+              'Account access has been suspended.',
+            )
+          : t(
+              'members:accessModal.accountReactivatedSuccess',
+              'Account successfully reactivated.',
+            ),
       );
     } catch (err: any) {
-      setErrorMsg(
-        err?.response?.data?.message ||
-          err?.message ||
-          'Failed to toggle account access.',
-      );
+      ErrorService.handle(err);
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-[#23201e]/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-200">
-      <div className="relative w-full max-w-[560px] my-auto bg-white rounded-xl border border-[#e8e1dd] shadow-2xl flex flex-col overflow-hidden">
+    <div
+      className="fixed inset-0 z-50 bg-[#23201e]/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-200"
+      onClick={onClose}
+    >
+      <div
+        className="relative w-full max-w-[560px] my-auto bg-white rounded-xl border border-[#e8e1dd] shadow-2xl flex flex-col overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Header */}
         <div className="p-6 pb-4 flex items-start justify-between border-b border-[#f4ece9]">
           <div className="flex items-center gap-3">
@@ -135,7 +140,7 @@ export const ManageAccessModal: React.FC<ManageAccessModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="w-8 h-8 rounded-md bg-[#faf2ee] hover:bg-[#f4ece9] border border-[#e8e1dd] flex items-center justify-center text-[#8a726a] hover:text-[#1e1b19] transition-colors cursor-pointer"
+            className="w-8 h-8 rounded-lg bg-[#faf2ee] hover:bg-[#f4ece9] border border-[#e8e1dd] flex items-center justify-center text-[#8a726a] hover:text-[#1e1b19] transition-colors cursor-pointer"
           >
             <X size={18} />
           </button>
@@ -143,28 +148,14 @@ export const ManageAccessModal: React.FC<ManageAccessModalProps> = ({
 
         {/* Content Body */}
         <div className="p-6 flex flex-col gap-4">
-          {errorMsg && (
-            <div className="p-3.5 rounded-lg bg-[#ffdad6] border border-[#ffb4a8] text-[#ba1a1a] text-xs font-semibold flex items-center gap-2">
-              <Warning size={18} className="shrink-0" />
-              <span>{errorMsg}</span>
-            </div>
-          )}
-
-          {successMsg && (
-            <div className="p-3.5 rounded-lg bg-[#c2e9ca] border border-[#a9d0b2] text-[#2c4e37] text-xs font-semibold flex items-center gap-2">
-              <CheckCircle size={18} weight="fill" className="shrink-0" />
-              <span>{successMsg}</span>
-            </div>
-          )}
-
           {/* Account Status Card */}
           <div className="p-4 rounded-xl bg-[#faf2ee] border border-[#e8e1dd] flex flex-col gap-3">
             <div className="flex items-center justify-between pb-2 border-b border-[#e8e1dd]">
               <span className="text-[11px] font-bold text-[#8a726a] uppercase tracking-wider">
-                Account Status
+                {t('members:accessModal.accountStatus', 'Account Status')}
               </span>
               <span
-                className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
+                className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-sm text-[11px] font-bold ${
                   isActive
                     ? 'bg-[#c2e9ca] text-[#2c4e37]'
                     : 'bg-[#ffdad6] text-[#ba1a1a]'
@@ -176,29 +167,69 @@ export const ManageAccessModal: React.FC<ManageAccessModalProps> = ({
                   }`}
                 />
                 {isActive
-                  ? 'Active'
+                  ? t('members:accessModal.active', 'Active')
                   : isRevoked
-                    ? 'Suspended'
-                    : 'No App Access'}
+                    ? t('members:accessModal.suspended', 'Suspended')
+                    : t('members:accessModal.noAppAccess', 'No App Access')}
               </span>
             </div>
 
             <div className="grid grid-cols-2 gap-3 text-xs">
               <div>
                 <span className="text-[#8a726a] text-[11px] block">
-                  Login Identifier (Phone)
+                  {t(
+                    'members:accessModal.loginIdentifier',
+                    'Login Identifier (Phone)',
+                  )}
                 </span>
-                <span className="font-mono font-bold text-[#1e1b19]">
-                  {formatCameroonPhone(member.phoneNumber)}
-                </span>
+                <div className="flex items-center gap-1.5 mt-0.5">
+                  <span className="font-mono font-bold text-[#1e1b19]">
+                    {formatCameroonPhone(member.phoneNumber)}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard.writeText(member.phoneNumber);
+                      toast.success(
+                        t('common:copiedToClipboard', 'Copied to clipboard'),
+                      );
+                    }}
+                    title={t('common:copy', 'Copy')}
+                    className="p-1 rounded text-[#8a726a] hover:text-[#b85028] hover:bg-[#fff2ee] transition-colors cursor-pointer"
+                  >
+                    <Copy size={13} weight="bold" />
+                  </button>
+                </div>
               </div>
               <div>
                 <span className="text-[#8a726a] text-[11px] block">
-                  Registered Email
+                  {t('members:accessModal.registeredEmail', 'Registered Email')}
                 </span>
-                <span className="font-medium text-[#1e1b19] truncate block">
-                  {member.email || 'None'}
-                </span>
+                <div className="flex items-center gap-1.5 mt-0.5">
+                  <span className="font-medium text-[#1e1b19] truncate block">
+                    {member.email || t('members:accessModal.none', 'None')}
+                  </span>
+                  {member.email && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (member.email) {
+                          navigator.clipboard.writeText(member.email);
+                          toast.success(
+                            t(
+                              'common:copiedToClipboard',
+                              'Copied to clipboard',
+                            ),
+                          );
+                        }
+                      }}
+                      title={t('common:copy', 'Copy')}
+                      className="p-1 rounded text-[#8a726a] hover:text-[#b85028] hover:bg-[#fff2ee] transition-colors cursor-pointer shrink-0"
+                    >
+                      <Copy size={13} weight="bold" />
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -211,12 +242,51 @@ export const ManageAccessModal: React.FC<ManageAccessModalProps> = ({
                 </div>
                 <div className="flex flex-col">
                   <h4 className="text-xs font-bold text-[#1e1b19]">
-                    Invite to App
+                    {t('members:accessModal.inviteToApp', 'Invite to App')}
                   </h4>
                   <p className="text-[11px] text-[#57423b] mt-0.5 leading-relaxed">
-                    Grant this member access to the application and send them
-                    login credentials.
+                    {t(
+                      'members:accessModal.inviteDesc',
+                      'Grant this member access to the application and send them login credentials.',
+                    )}
                   </p>
+                </div>
+              </div>
+
+              {/* Preferred Language for Invitation */}
+              <div className="flex flex-col gap-1.5 mt-2">
+                <span className="text-[11px] font-bold text-[#8a726a] flex items-center gap-1">
+                  <Globe size={13} />
+                  {t(
+                    'members:accessModal.preferredLanguage',
+                    'Preferred Language',
+                  )}
+                </span>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setPreferredLanguage('fr')}
+                    className={`py-1.5 px-3 rounded-md text-xs font-semibold flex items-center justify-center gap-1.5 border transition-all cursor-pointer ${
+                      preferredLanguage === 'fr'
+                        ? 'bg-[#fff2ee] text-[#b85028] border-[#ffdbcf]'
+                        : 'bg-[#faf2ee] text-[#57423b] border-[#e8e1dd]'
+                    }`}
+                  >
+                    <span>🇫🇷</span>
+                    <span>{t('members:accessModal.french', 'Français')}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPreferredLanguage('en')}
+                    className={`py-1.5 px-3 rounded-md text-xs font-semibold flex items-center justify-center gap-1.5 border transition-all cursor-pointer ${
+                      preferredLanguage === 'en'
+                        ? 'bg-[#fff2ee] text-[#b85028] border-[#ffdbcf]'
+                        : 'bg-[#faf2ee] text-[#57423b] border-[#e8e1dd]'
+                    }`}
+                  >
+                    <span>🇬🇧</span>
+                    <span>{t('members:accessModal.english', 'English')}</span>
+                  </button>
                 </div>
               </div>
 
@@ -260,7 +330,14 @@ export const ManageAccessModal: React.FC<ManageAccessModalProps> = ({
                 className="w-full mt-2 py-2 px-4 rounded-md bg-[#b85028] hover:bg-[#a44520] text-white text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
               >
                 <PaperPlaneTilt size={16} weight="bold" />
-                <span>{isSubmitting ? 'Sending...' : 'Send Invitation'}</span>
+                <span>
+                  {isSubmitting
+                    ? t('members:accessModal.sending', 'Sending...')
+                    : t(
+                        'members:accessModal.sendInvitation',
+                        'Send Invitation',
+                      )}
+                </span>
               </button>
             </div>
           ) : (
@@ -287,6 +364,42 @@ export const ManageAccessModal: React.FC<ManageAccessModalProps> = ({
                       </p>
                     </div>
                   </div>
+
+                  {/* Language selector for resending */}
+                  <div className="flex items-center justify-between text-xs pt-1">
+                    <span className="text-[11px] font-bold text-[#8a726a] flex items-center gap-1">
+                      <Globe size={13} />
+                      {t(
+                        'members:accessModal.preferredLanguage',
+                        'Preferred Language',
+                      )}
+                    </span>
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => setPreferredLanguage('fr')}
+                        className={`px-2.5 py-1 rounded text-xs font-semibold border transition-all cursor-pointer ${
+                          preferredLanguage === 'fr'
+                            ? 'bg-[#fff2ee] text-[#b85028] border-[#ffdbcf]'
+                            : 'bg-[#faf2ee] text-[#57423b] border-[#e8e1dd]'
+                        }`}
+                      >
+                        🇫🇷 FR
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setPreferredLanguage('en')}
+                        className={`px-2.5 py-1 rounded text-xs font-semibold border transition-all cursor-pointer ${
+                          preferredLanguage === 'en'
+                            ? 'bg-[#fff2ee] text-[#b85028] border-[#ffdbcf]'
+                            : 'bg-[#faf2ee] text-[#57423b] border-[#e8e1dd]'
+                        }`}
+                      >
+                        🇬🇧 EN
+                      </button>
+                    </div>
+                  </div>
+
                   <button
                     type="button"
                     disabled={isSubmitting}

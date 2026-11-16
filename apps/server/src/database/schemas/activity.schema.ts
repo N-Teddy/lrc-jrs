@@ -13,7 +13,13 @@ class ActivityChangeLog {
   @Prop({
     type: String,
     required: true,
-    enum: ['RESCHEDULED', 'LOCATION_CHANGED', 'STATUS_CHANGED'],
+    enum: [
+      'RESCHEDULED',
+      'LOCATION_CHANGED',
+      'STATUS_CHANGED',
+      'CANCELLED',
+      'REOPENED',
+    ],
   })
   changeType: string;
 

@@ -6,7 +6,6 @@ import {
   CheckCircle,
   DownloadSimple,
   Sparkle,
-  WarningCircle,
   Wrench,
   X,
 } from '@phosphor-icons/react';
@@ -35,7 +34,6 @@ export const UpdateModal: React.FC<UpdateModalProps> = ({ updater }) => {
     availableUpdate,
     currentVersion,
     hasUpdate,
-    error,
     dismiss,
     startUpdate,
     checkForUpdates,
@@ -320,27 +318,6 @@ export const UpdateModal: React.FC<UpdateModalProps> = ({ updater }) => {
                 {isLinux
                   ? 'Please close and restart the application from your menu.'
                   : 'The application will now apply the updates.'}
-              </div>
-            </div>
-          )}
-
-          {/* Error Notice */}
-          {error && (
-            <div className="rounded-lg bg-[#ffdad6] border border-[#ffb4a8] p-3.5 flex items-start gap-2.5">
-              <WarningCircle
-                size={18}
-                weight="fill"
-                className="text-[#ba1a1a] shrink-0 mt-0.5"
-              />
-              <div className="text-xs text-[#410002] leading-relaxed">
-                <span className="font-bold">Notice: </span>
-                {error.includes('Could not fetch a valid release JSON') ||
-                error.includes('404')
-                  ? t(
-                      'dashboard:whatsNewModal.noRemoteRelease',
-                      'No online release found. The build may still be compiling on GitHub, or you are already up to date.',
-                    )
-                  : error}
               </div>
             </div>
           )}

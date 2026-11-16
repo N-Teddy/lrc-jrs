@@ -1,0 +1,78 @@
+name: Dependabot Auto-Merge
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  auto-merge-pr:
+    name: Auto-merge New/Updated PR
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && github.actor == 'dependabot[bot]'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Fetch Dependabot metadata
+        id: metadata
+        uses: dependabot/fetch-metadata@v2
+        with:
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: Approve Dependabot PR
+        run: gh pr review --approve "$PR_URL" || true
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+
+      - name: Enable auto-merge for Dependabot PR
+        run: |
+          gh pr merge --squash "$PR_URL" || gh pr comment "$PR_URL" --body "@dependabot squash and merge" || true
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+
+  sweep-existing-prs:
+    name: Sweep All Existing Dependabot PRs
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Enable auto-merge on all open Dependabot PRs
+        run: |
+          echo "Scanning open Dependabot PRs for $GH_REPO..."
+          prs=$(gh pr list -R "$GH_REPO" --author "app/dependabot" --state open --json number,url --jq '.[].url')
+          if [ -z "$prs" ]; then
+            prs=$(gh pr list -R "$GH_REPO" --author "dependabot[bot]" --state open --json number,url --jq '.[].url')
+          fi
+          if [ -z "$prs" ]; then
+            prs=$(gh pr list -R "$GH_REPO" --state open --json number,url,author --jq '.[] | select(.author.login | test("dependabot"; "i")) | .url')
+          fi
+          if [ -z "$prs" ]; then
+            echo "No open Dependabot PRs found."
+            exit 0
+          fi
+          echo "Found PRs:"
+          echo "$prs"
+          for url in $prs; do
+            echo "----------------------------------------"
+            echo "Processing $url"
+            gh pr review --approve "$url" || echo "Note: approval step skipped or already approved"
+            if ! gh pr merge --squash "$url"; then
+              echo "Direct squash not possible (may touch workflows or have conflicts)..."
+              echo "Instructing Dependabot via comment: @dependabot squash and merge"
+              gh pr comment "$url" --body "@dependabot squash and merge" || true
+            fi
+          done
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}

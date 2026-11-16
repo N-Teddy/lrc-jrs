@@ -30,16 +30,13 @@ import {
   FileText,
   HardDrives,
   Info,
-  ListChecks,
   Lock,
   LockOpen,
-  MagnifyingGlass,
   MapPin,
   PencilSimple,
   Plus,
   Trash,
   UserCheck,
-  Users,
   WarningCircle,
   X,
   XCircle,
@@ -48,41 +45,36 @@ import { openUrl } from '@tauri-apps/plugin-opener';
 import type React from 'react';
 import { useEffect, useMemo, useState } from 'react';
 
-import Skeleton from 'react-loading-skeleton';
-import { AppSkeletonTheme, UserAvatar } from '../../../components';
-import { formatCameroonPhone } from '../../members/utils/member-ui.utils';
+import emptyDriveJpg from '../../../assets/illustrations/empty-drive.jpg';
+import emptyTimelineSvg from '../../../assets/illustrations/empty-timeline.svg';
+import { EmptyState } from '../../../components';
 import {
   formatActivityDate,
   formatActivityDateRange,
   getActivityStatusConfig,
   getActivityTypeConfig,
 } from '../utils/activity-ui.utils';
-import { ActivityPreparationTab } from './ActivityPreparationTab';
-import { ActivityReminderTemplatesModal } from './ActivityReminderTemplatesModal';
+import { ActivityAttendanceRoster } from './ActivityAttendanceRoster';
 import { ActivityReportUploadModal } from './ActivityReportUploadModal';
+import { CancelActivityModal } from './CancelActivityModal';
 import { DriveFilePreviewModal } from './DriveFilePreviewModal';
 
 interface ActivityDetailPageProps {
   activity: IActivity;
   onBack: () => void;
-  onTrackAttendance: (activity: IActivity) => void;
+  onTrackAttendance?: (activity: IActivity) => void;
   onEditActivity: (activity: IActivity) => void;
   onDeleteActivity?: (activity: IActivity) => void;
   isPrivileged: boolean;
   initialTab?: ActivityDetailTab;
 }
 
-type ActivityDetailTab =
-  | 'overview'
-  | 'preparation'
-  | 'attendance'
-  | 'report'
-  | 'history';
+type ActivityDetailTab = 'overview' | 'attendance' | 'report' | 'history';
 
 export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
   activity,
   onBack,
-  onTrackAttendance,
+  onTrackAttendance: _onTrackAttendance,
   onEditActivity,
   onDeleteActivity,
   isPrivileged,
@@ -108,12 +100,8 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
       setActiveTab(initialTab);
     }
   }, [initialTab]);
-  const [search, setSearch] = useState('');
-  const [attendanceFilter, setAttendanceFilter] = useState<'ALL' | 'GUESTS'>(
-    'ALL',
-  );
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
-  const [isTemplatesModalOpen, setIsTemplatesModalOpen] = useState(false);
+  const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
   const [reportToDelete, setReportToDelete] = useState<IActivityReport | null>(
     null,
   );
@@ -122,8 +110,7 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
   const [lockReason, setLockReason] = useState('');
 
   // Attendance live data
-  const { data: attendanceData, isLoading: isAttendanceLoading } =
-    useAttendanceQuery(activity.id);
+  const { data: attendanceData } = useAttendanceQuery(activity.id);
 
   const lockMutation = useLockAttendanceMutation();
   const unlockMutation = useUnlockAttendanceMutation();
@@ -157,26 +144,24 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
   );
   const isDayOfActivityOrLater = todayDay.getTime() >= startDay.getTime();
   const isCancelled = activity.status === ActivityStatus.CANCELLED;
+  const isScheduled = activity.status === ActivityStatus.SCHEDULED;
   const isPastActivity = now >= new Date(activity.endDate);
   const isCompleted = activity.status === ActivityStatus.COMPLETED;
+  const isFinished = isCompleted || isPastActivity;
   const canShowReportUi = isCompleted && isPastActivity && !isCancelled;
+  const canShowCheckInBanner =
+    isLocked || (!isScheduled && !isCancelled && isDayOfActivityOrLater);
 
   const activeTab =
     !isDayOfActivityOrLater && activeTabState === 'attendance'
       ? 'overview'
       : activeTabState;
 
-  const handleCancelActivity = async () => {
-    if (
-      !window.confirm(
-        t(
-          'activities:detail.confirmCancel',
-          'Are you sure you want to cancel this activity? You can undo this cancellation at any time.',
-        ),
-      )
-    ) {
-      return;
-    }
+  const handleCancelActivity = () => {
+    setIsCancelModalOpen(true);
+  };
+
+  const handleConfirmCancel = async () => {
     await updateActivityMutation.mutateAsync({
       id: activity.id,
       dto: {
@@ -187,6 +172,7 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
         ),
       },
     });
+    setIsCancelModalOpen(false);
   };
 
   const handleUndoCancel = async () => {
@@ -230,40 +216,6 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
     membersCount > 0
       ? Math.round((summary.membersPresent / membersCount) * 100)
       : 0;
-
-  // Only display those who attended (status === PRESENT)
-  const attendedAttendees = useMemo(() => {
-    return attendees.filter((item) => item.status === AttendanceStatus.PRESENT);
-  }, [attendees]);
-
-  const attendedGuests = useMemo(() => {
-    return attendedAttendees.filter(
-      (item) => item.attendeeType === AttendeeType.GUEST,
-    );
-  }, [attendedAttendees]);
-
-  // Filtered Attendees list (cards)
-  const filteredAttendees = useMemo(() => {
-    return attendedAttendees.filter((item) => {
-      const name =
-        item.member?.fullName || item.guestInfo?.fullName || 'Anonymous';
-      const phone =
-        item.member?.phoneNumber || item.guestInfo?.phoneNumber || '';
-
-      if (search.trim()) {
-        const query = search.toLowerCase();
-        const matchesName = name.toLowerCase().includes(query);
-        const matchesPhone = phone.includes(query);
-        if (!matchesName && !matchesPhone) return false;
-      }
-
-      if (attendanceFilter === 'GUESTS') {
-        return item.attendeeType === AttendeeType.GUEST;
-      }
-
-      return true;
-    });
-  }, [attendedAttendees, search, attendanceFilter]);
 
   const typeConfig = getActivityTypeConfig(activity.activityType, t);
   const statusConfig = getActivityStatusConfig(activity.status, t);
@@ -329,7 +281,7 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
         </button>
 
         <div className="flex items-center gap-2 self-end sm:self-auto">
-          {canManageActivity && !isCompleted && (
+          {canManageActivity && !isFinished && (
             <button
               type="button"
               onClick={() => onEditActivity(activity)}
@@ -420,14 +372,14 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
         <div className="flex flex-col gap-3 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <span
-              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-bold border ${typeConfig.badgeBg} ${typeConfig.badgeText} ${typeConfig.badgeBorder}`}
+              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-sm text-xs font-bold border ${typeConfig.badgeBg} ${typeConfig.badgeText} ${typeConfig.badgeBorder}`}
             >
               <typeConfig.icon size={14} weight="bold" />
               <span>{typeConfig.label}</span>
             </span>
 
             <span
-              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-semibold border ${statusConfig.badgeBg} ${statusConfig.badgeText} ${statusConfig.badgeBorder}`}
+              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-sm text-xs font-semibold border ${statusConfig.badgeBg} ${statusConfig.badgeText} ${statusConfig.badgeBorder}`}
             >
               <span
                 className={`w-1.5 h-1.5 rounded-full ${statusConfig.dotColor} ${
@@ -437,13 +389,13 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
               <span>{statusConfig.label}</span>
             </span>
 
-            <span className="px-2.5 py-1 rounded-md text-xs font-mono font-bold bg-[#faf2ee] text-[#57423b] border border-[#e8e1dd]">
+            <span className="px-2.5 py-1 rounded-sm text-xs font-mono font-bold bg-[#faf2ee] text-[#57423b] border border-[#e8e1dd]">
               {activity.town?.name || activity.town?.code}{' '}
               {t('activities:detail.hub', 'Hub')}
             </span>
 
             {isParticipating && (
-              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold bg-[#edf3ee] border border-[#c2e9ca] text-[#486b52]">
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-sm text-xs font-bold bg-[#edf3ee] border border-[#c2e9ca] text-[#486b52]">
                 <Buildings size={13} weight="bold" />
                 <span>
                   {t('activities:detail.interTownHost', {
@@ -458,7 +410,7 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
             )}
 
             {isLocked && (
-              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold bg-[#fff8e1] border border-[#ffe082] text-[#812901]">
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-sm text-xs font-bold bg-[#fff8e1] border border-[#ffe082] text-[#812901]">
                 <Lock size={13} weight="bold" />
                 <span>
                   {t('activities:detail.attendanceSealed', 'Attendance Sealed')}
@@ -565,7 +517,7 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
           ) : (
             <button
               type="button"
-              onClick={() => onTrackAttendance(activity)}
+              onClick={() => setActiveTab('attendance')}
               disabled={isLocked && !isCurrentUserAp}
               className={`h-11 px-5 rounded-md font-bold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs ${
                 isLocked && !isCurrentUserAp
@@ -639,24 +591,6 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
           >
             <Info size={15} weight="bold" />
             <span>{t('activities:detail.tabs.overview', 'Overview')}</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveTab('preparation')}
-            className={`px-4 py-2 rounded-md text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
-              activeTab === 'preparation'
-                ? 'bg-white text-[#1e1b19] shadow-2xs border border-[#e8e1dd]/60'
-                : 'text-[#8a726a] hover:text-[#1e1b19]'
-            }`}
-          >
-            <ListChecks size={15} weight="bold" />
-            <span>
-              {t('activities:detail.tabs.preparation', 'Checklist & Reminders')}
-            </span>
-            {(activity.remindersSent?.length ?? 0) > 0 && (
-              <span className="w-1.5 h-1.5 rounded-full bg-[#b85028]" />
-            )}
           </button>
 
           {/* Attendance tab ONLY appears on or after the day of the activity */}
@@ -790,92 +724,94 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
           </div>
 
           {/* Lock Status & Roll Call Banner */}
-          <div
-            className={`p-4 sm:p-5 rounded-xl border flex items-center justify-between gap-4 flex-wrap shadow-2xs max-w-2xl ${
-              isLocked
-                ? 'bg-[#fffbf2] border-[#fde8bb] text-[#812901]'
-                : 'bg-[#eef7f0] border-[#c2e9ca] text-[#2c4e37]'
-            }`}
-          >
-            <div className="flex items-center gap-3.5">
-              <div
-                className={`w-11 h-11 rounded-lg flex items-center justify-center shrink-0 ${
-                  isLocked
-                    ? 'bg-[#ffe082] text-[#812901]'
-                    : 'bg-[#c2e9ca] text-[#2c4e37]'
-                }`}
-              >
-                {isLocked ? (
-                  <Lock size={22} weight="bold" />
-                ) : (
-                  <LockOpen size={22} weight="bold" />
-                )}
-              </div>
-              <div className="flex flex-col">
-                <span className="font-bold text-sm">
-                  {isLocked
-                    ? t(
-                        'activities:detail.lockBanner.sealedTitle',
-                        'Attendance Finalized & Sealed',
-                      )
-                    : t(
-                        'activities:detail.lockBanner.openTitle',
-                        'Attendance Open for Check-In',
-                      )}
-                </span>
-                <span className="text-xs opacity-85">
-                  {isLocked
-                    ? t('activities:detail.lockBanner.sealedSubtitle', {
-                        name:
-                          activity.attendanceLockedByName ||
-                          t('common:roles.administrator', 'Administrator'),
-                        defaultValue: `Locked by ${activity.attendanceLockedByName || 'Administrator'} • Edits disabled without AP override`,
-                      })
-                    : t(
-                        'activities:detail.lockBanner.openSubtitle',
-                        'Active check-in session • Changes are autosaved to hub record',
-                      )}
-                </span>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              {isLocked
-                ? isCurrentUserAp && (
-                    <button
-                      type="button"
-                      onClick={() => setLockPromptOpen(true)}
-                      className="px-3.5 py-1.5 rounded-md bg-white border border-[#ffe082] text-xs font-bold text-[#812901] hover:bg-[#fffbf0] transition-colors cursor-pointer flex items-center gap-1.5 shadow-2xs"
-                    >
-                      <LockOpen size={14} weight="bold" />
-                      <span>
-                        {t(
-                          'activities:detail.lockBanner.unlockAp',
-                          'Unlock (AP Override)',
-                        )}
-                      </span>
-                    </button>
-                  )
-                : isPrivileged && (
-                    <button
-                      type="button"
-                      onClick={() => setLockPromptOpen(true)}
-                      className="px-4 py-2 rounded-md bg-[#2c4e37] hover:bg-[#233f2c] text-xs font-bold text-white transition-colors cursor-pointer flex items-center gap-1.5 shadow-2xs"
-                    >
-                      <Lock size={15} weight="bold" />
-                      <span>
-                        {t(
-                          'activities:detail.lockBanner.finalizeAndLock',
-                          'Finalize & Lock Attendance',
-                        )}
-                      </span>
-                    </button>
+          {canShowCheckInBanner && (
+            <div
+              className={`p-4 sm:p-5 rounded-xl border flex items-center justify-between gap-4 flex-wrap shadow-2xs max-w-2xl ${
+                isLocked
+                  ? 'bg-[#fffbf2] border-[#fde8bb] text-[#812901]'
+                  : 'bg-[#eef7f0] border-[#c2e9ca] text-[#2c4e37]'
+              }`}
+            >
+              <div className="flex items-center gap-3.5">
+                <div
+                  className={`w-11 h-11 rounded-lg flex items-center justify-center shrink-0 ${
+                    isLocked
+                      ? 'bg-[#ffe082] text-[#812901]'
+                      : 'bg-[#c2e9ca] text-[#2c4e37]'
+                  }`}
+                >
+                  {isLocked ? (
+                    <Lock size={22} weight="bold" />
+                  ) : (
+                    <LockOpen size={22} weight="bold" />
                   )}
+                </div>
+                <div className="flex flex-col">
+                  <span className="font-bold text-sm">
+                    {isLocked
+                      ? t(
+                          'activities:detail.lockBanner.sealedTitle',
+                          'Attendance Finalized & Sealed',
+                        )
+                      : t(
+                          'activities:detail.lockBanner.openTitle',
+                          'Attendance Open for Check-In',
+                        )}
+                  </span>
+                  <span className="text-xs opacity-85">
+                    {isLocked
+                      ? t('activities:detail.lockBanner.sealedSubtitle', {
+                          name:
+                            activity.attendanceLockedByName ||
+                            t('common:roles.administrator', 'Administrator'),
+                          defaultValue: `Locked by ${activity.attendanceLockedByName || 'Administrator'} • Edits disabled without AP override`,
+                        })
+                      : t(
+                          'activities:detail.lockBanner.openSubtitle',
+                          'Active check-in session • Changes are autosaved to hub record',
+                        )}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                {isLocked
+                  ? isCurrentUserAp && (
+                      <button
+                        type="button"
+                        onClick={() => setLockPromptOpen(true)}
+                        className="px-3.5 py-1.5 rounded-md bg-white border border-[#ffe082] text-xs font-bold text-[#812901] hover:bg-[#fffbf0] transition-colors cursor-pointer flex items-center gap-1.5 shadow-2xs"
+                      >
+                        <LockOpen size={14} weight="bold" />
+                        <span>
+                          {t(
+                            'activities:detail.lockBanner.unlockAp',
+                            'Unlock (AP Override)',
+                          )}
+                        </span>
+                      </button>
+                    )
+                  : isPrivileged && (
+                      <button
+                        type="button"
+                        onClick={() => setLockPromptOpen(true)}
+                        className="px-4 py-2 rounded-md bg-[#2c4e37] hover:bg-[#233f2c] text-xs font-bold text-white transition-colors cursor-pointer flex items-center gap-1.5 shadow-2xs"
+                      >
+                        <Lock size={15} weight="bold" />
+                        <span>
+                          {t(
+                            'activities:detail.lockBanner.finalizeAndLock',
+                            'Finalize & Lock Attendance',
+                          )}
+                        </span>
+                      </button>
+                    )}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Lock / Unlock Confirmation Prompt */}
-          {lockPromptOpen && (
+          {canShowCheckInBanner && lockPromptOpen && (
             <div className="p-5 rounded-xl bg-white border-2 border-[#b85028] shadow-md flex flex-col gap-3 animate-in fade-in duration-150">
               <div className="flex items-center justify-between">
                 <h4 className="text-xs font-bold text-[#1e1b19] flex items-center gap-2">
@@ -981,225 +917,13 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
         </div>
       )}
 
-      {/* TAB: PREPARATION & REMINDERS */}
-      {activeTab === 'preparation' && (
-        <ActivityPreparationTab
+      {/* TAB 2: ATTENDANCE (Inline interactive roster) */}
+      {activeTab === 'attendance' && (
+        <ActivityAttendanceRoster
           activity={activity}
           isPrivileged={isPrivileged}
-          onOpenTemplatesModal={() => setIsTemplatesModalOpen(true)}
+          embedded={true}
         />
-      )}
-
-      {/* TAB 2: ATTENDANCE */}
-      {isDayOfActivityOrLater && activeTab === 'attendance' && (
-        <div className="bg-white rounded-xl border border-[#e8e1dd] shadow-xs p-6 flex flex-col gap-6 animate-in fade-in duration-150">
-          {/* Attendees Toolbar */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-            <div className="relative w-full sm:w-80">
-              <MagnifyingGlass
-                size={16}
-                className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8a726a]"
-              />
-              <input
-                type="text"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder={t(
-                  'activities:detail.attendanceTab.searchPlaceholder',
-                  'Search attendees by name or phone...',
-                )}
-                className="w-full pl-10 pr-3.5 py-2 rounded-md bg-[#faf2ee]/60 border border-[#e8e1dd] text-xs text-[#1e1b19] focus:outline-none focus:border-[#b85028]"
-              />
-            </div>
-
-            <div className="flex items-center gap-2 flex-wrap">
-              {/* Only ALL and GUESTS filters */}
-              <div className="inline-flex p-1 rounded-lg bg-[#faf2ee] border border-[#e8e1dd] gap-1">
-                {(
-                  [
-                    {
-                      id: 'ALL',
-                      label: t('activities:detail.attendanceTab.allCount', {
-                        count: attendedAttendees.length,
-                        defaultValue: `All (${attendedAttendees.length})`,
-                      }),
-                    },
-                    {
-                      id: 'GUESTS',
-                      label: t('activities:detail.attendanceTab.guestsCount', {
-                        count: attendedGuests.length,
-                        defaultValue: `Guests (${attendedGuests.length})`,
-                      }),
-                    },
-                  ] as const
-                ).map((tab) => (
-                  <button
-                    key={tab.id}
-                    type="button"
-                    onClick={() => setAttendanceFilter(tab.id)}
-                    className={`px-3 py-1 rounded-md text-xs font-bold transition-all cursor-pointer ${
-                      attendanceFilter === tab.id
-                        ? 'bg-white text-[#1e1b19] shadow-2xs'
-                        : 'text-[#8a726a] hover:text-[#1e1b19]'
-                    }`}
-                  >
-                    {tab.label}
-                  </button>
-                ))}
-              </div>
-
-              <button
-                type="button"
-                onClick={() => onTrackAttendance(activity)}
-                disabled={isLocked && !isCurrentUserAp}
-                className={`px-3.5 py-1.5 rounded-md text-xs font-bold text-white transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs ${
-                  isLocked && !isCurrentUserAp
-                    ? 'bg-[#8a726a]/30 text-[#8a726a] cursor-not-allowed'
-                    : 'bg-[#b85028] hover:bg-[#a44520]'
-                }`}
-              >
-                <UserCheck size={14} weight="bold" />
-                <span>
-                  {isLocked
-                    ? t(
-                        'activities:detail.attendanceTab.editAttendanceAp',
-                        'Edit Attendance (AP)',
-                      )
-                    : t(
-                        'activities:detail.attendanceTab.trackAttendance',
-                        'Track Attendance',
-                      )}
-                </span>
-              </button>
-            </div>
-          </div>
-
-          {/* Attendees Cards Grid */}
-          <div>
-            {isAttendanceLoading ? (
-              <AppSkeletonTheme>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                  {Array.from({ length: 8 }).map((_, i) => (
-                    <div
-                      key={i}
-                      className="rounded-xl border border-[#e8e1dd] bg-white p-4 flex items-center justify-between shadow-2xs"
-                    >
-                      <div className="flex items-center gap-3">
-                        <Skeleton circle width={40} height={40} />
-                        <div className="flex flex-col gap-1">
-                          <Skeleton width={110} height={14} />
-                          <Skeleton width={70} height={11} />
-                        </div>
-                      </div>
-                      <Skeleton width={48} height={20} borderRadius={6} />
-                    </div>
-                  ))}
-                </div>
-              </AppSkeletonTheme>
-            ) : filteredAttendees.length === 0 ? (
-              <div className="p-12 text-center flex flex-col items-center justify-center text-xs text-[#8a726a] border border-[#e8e1dd] rounded-xl bg-[#faf2ee]/30">
-                <Users size={32} className="text-[#b85028]/60 mb-2" />
-                <span className="font-bold text-[#1e1b19]">
-                  {t(
-                    'activities:detail.attendanceTab.noAttendeesTitle',
-                    'No Attendees Recorded',
-                  )}
-                </span>
-                <span className="mt-1 text-[11px]">
-                  {search
-                    ? t(
-                        'activities:detail.attendanceTab.noSearchMatches',
-                        'No attendees match your search query.',
-                      )
-                    : t(
-                        'activities:detail.attendanceTab.noAttendeesRecorded',
-                        'No members or guests have been recorded as present for this activity yet.',
-                      )}
-                </span>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {filteredAttendees.map((att) => {
-                  const name =
-                    att.member?.fullName ||
-                    att.guestInfo?.fullName ||
-                    t('activities:detail.attendanceTab.anonymous', 'Anonymous');
-                  const phone =
-                    att.member?.phoneNumber || att.guestInfo?.phoneNumber || '';
-                  const avatarUrl = att.member?.avatarUrl;
-                  const role =
-                    att.attendeeType === AttendeeType.GUEST
-                      ? t('activities:detail.attendanceTab.guestBadge', 'Guest')
-                      : att.member?.role ||
-                        t(
-                          'activities:detail.attendanceTab.memberBadge',
-                          'Member',
-                        );
-                  const checkIn = att.checkInTime
-                    ? new Date(att.checkInTime).toLocaleTimeString([], {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                      })
-                    : '—';
-
-                  return (
-                    <div
-                      key={att.id || att.memberId || name}
-                      className="bg-white rounded-lg border border-[#e8e1dd] hover:border-[#b85028]/40 p-4 flex flex-col gap-3 shadow-2xs hover:shadow-xs transition-all group"
-                    >
-                      <div className="flex items-center gap-3">
-                        <UserAvatar
-                          name={name}
-                          avatarUrl={avatarUrl}
-                          size="lg"
-                          className="rounded-lg shadow-2xs shrink-0"
-                        />
-                        <div className="flex flex-col min-w-0 flex-1">
-                          <span className="font-bold text-xs text-[#1e1b19] truncate group-hover:text-[#b85028] transition-colors">
-                            {name}
-                          </span>
-                          {phone ? (
-                            <span className="text-[10px] text-[#8a726a] font-mono mt-0.5 truncate">
-                              {formatCameroonPhone(phone)}
-                            </span>
-                          ) : (
-                            <span className="text-[10px] text-[#8a726a] italic mt-0.5">
-                              {t(
-                                'activities:detail.attendanceTab.noPhone',
-                                'No phone',
-                              )}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="pt-2 border-t border-[#f4ece9] flex items-center justify-between text-xs">
-                        <span
-                          className={`px-2 py-0.5 rounded-md text-[10px] font-bold border ${
-                            att.attendeeType === AttendeeType.GUEST
-                              ? 'bg-[#f4ece9] text-[#715b53] border-[#e8e1dd]'
-                              : 'bg-[#faf2ee] text-[#b85028] border-[#ffdbcf]'
-                          }`}
-                        >
-                          {role}
-                        </span>
-
-                        <div className="flex items-center gap-1.5 text-[11px] font-mono text-[#57423b]">
-                          <Clock
-                            size={13}
-                            className="text-[#486b52]"
-                            weight="bold"
-                          />
-                          <span>{checkIn}</span>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        </div>
       )}
 
       {/* TAB 3: ACTIVITY REPORTS (STRICTLY IF COMPLETED & PAST) */}
@@ -1424,38 +1148,30 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
               ))}
             </div>
           ) : (
-            <div className="p-12 rounded-xl border-2 border-dashed border-[#e8e1dd] flex flex-col items-center justify-center text-center gap-3 bg-[#faf2ee]/20">
-              <div className="w-12 h-12 rounded-lg bg-[#faf2ee] text-[#b85028] flex items-center justify-center">
-                <CloudArrowUp size={24} weight="duotone" />
-              </div>
-              <h4 className="text-sm font-bold text-[#1e1b19]">
-                {t(
-                  'activities:detail.reportsTab.noReportsTitle',
-                  'No Reports Attached Yet',
-                )}
-              </h4>
-              <p className="text-xs text-[#8a726a] max-w-sm">
-                {t(
-                  'activities:detail.reportsTab.noReportsDesc',
-                  'This activity has concluded. Hub coordinators can upload session minutes, attendance summaries, photos, or meeting notes directly to Google Drive.',
-                )}
-              </p>
-              {isPrivileged && (
-                <button
-                  type="button"
-                  onClick={() => setIsReportModalOpen(true)}
-                  className="mt-2 px-5 py-2.5 rounded-md bg-[#b85028] hover:bg-[#a44520] text-xs font-bold text-white transition-all shadow-xs cursor-pointer flex items-center gap-2"
-                >
-                  <Plus size={16} weight="bold" />
-                  <span>
-                    {t(
-                      'activities:detail.reportsTab.uploadActivityReports',
-                      'Upload Activity Reports',
-                    )}
-                  </span>
-                </button>
+            <EmptyState
+              size="sm"
+              imageSrc={emptyDriveJpg}
+              imageAlt="No reports attached"
+              title={t(
+                'activities:detail.reportsTab.noReportsTitle',
+                'No Reports Attached Yet',
               )}
-            </div>
+              description={t(
+                'activities:detail.reportsTab.noReportsDesc',
+                'No session minutes or reports attached yet.',
+              )}
+              primaryAction={
+                isPrivileged
+                  ? {
+                      label: t(
+                        'activities:detail.reportsTab.uploadActivityReports',
+                        'Upload Activity Reports',
+                      ),
+                      onClick: () => setIsReportModalOpen(true),
+                    }
+                  : undefined
+              }
+            />
           )}
         </div>
       )}
@@ -1478,12 +1194,16 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
           </h3>
 
           {history.length === 0 ? (
-            <p className="text-xs text-[#8a726a] italic p-6 text-center">
-              {t(
+            <EmptyState
+              size="sm"
+              imageSrc={emptyTimelineSvg}
+              imageAlt="No modifications recorded"
+              title={t('activities:noHistory', 'No modifications recorded.')}
+              description={t(
                 'activities:detail.historyTab.empty',
-                'No modifications recorded. This activity has remained in its initial configuration.',
+                'This activity follows its initial configuration.',
               )}
-            </p>
+            />
           ) : (
             <div className="divide-y divide-[#f4ece9] border border-[#e8e1dd] rounded-lg overflow-hidden">
               {history.map((log) => (
@@ -1618,11 +1338,13 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
         file={previewFile}
       />
 
-      {/* Reminder Templates Guidelines Modal */}
-      <ActivityReminderTemplatesModal
-        isOpen={isTemplatesModalOpen}
-        onClose={() => setIsTemplatesModalOpen(false)}
-        initialType={activity.activityType}
+      {/* Cancel Activity Confirmation Modal */}
+      <CancelActivityModal
+        isOpen={isCancelModalOpen}
+        onClose={() => setIsCancelModalOpen(false)}
+        onConfirm={handleConfirmCancel}
+        activityTitle={activity.title}
+        isLoading={updateActivityMutation.isPending}
       />
     </div>
   );
