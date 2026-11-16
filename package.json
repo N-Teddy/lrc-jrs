@@ -17,6 +17,7 @@
     "server": "pnpm --filter @jrs/server start:dev",
     "backend": "pnpm --filter @jrs/server start:dev",
     "mongo:start": "cmd /c start-mongo.bat",
+    "mongo:stop": "cmd /c stop-mongo.bat",
     "intake": "pnpm --filter @jrs/intake dev",
     "maildev": "maildev",
     "prepare": "husky"
