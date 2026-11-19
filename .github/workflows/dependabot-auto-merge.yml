@@ -16,7 +16,7 @@ jobs:
     if: github.event_name == 'pull_request' && github.actor == 'dependabot[bot]'
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Fetch Dependabot metadata
         id: metadata
@@ -45,7 +45,7 @@ jobs:
     if: github.event_name == 'workflow_dispatch'
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Enable auto-merge on all open Dependabot PRs
         run: |
