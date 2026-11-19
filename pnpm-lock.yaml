@@ -302,8 +302,8 @@ importers:
         specifier: ^1.8.2
         version: 1.8.2(supports-color@8.1.1)
       expo-server-sdk:
-        specifier: ^3.7.0
-        version: 3.15.0
+        specifier: ^8.0.0
+        version: 8.0.0
       handlebars:
         specifier: ^4.7.10
         version: 4.7.10
@@ -4716,8 +4716,9 @@ packages:
     peerDependencies:
       expo: '*'
 
-  expo-server-sdk@3.15.0:
-    resolution: {integrity: sha512-Y71mQ7yeDhq6miHzn4kwRQOjqvBBsWeFXvyS9PYc6uqO/+UiYvrw3vMQiQqRxg2y0qgn9jMsvjf8T+mukSH85A==}
+  expo-server-sdk@8.0.0:
+    resolution: {integrity: sha512-AN0JuacmrO32hxv95EPqPfPIRqj0neCnh0ooxQFAd3lkJXu4ytWduvxzawzHEOSn4jV/1vx8xbtOXpuVV9Tg3Q==}
+    engines: {node: '>=22.12.0'}
 
   expo-server@57.0.3:
     resolution: {integrity: sha512-aK+LdKzauHSGmsOStZtyxdzv0zWssCkxTw3m4QuOhfDSJsZaMRTd9O41d8ixU/QfELTbaJ0oRNcF7JFV/7O9YQ==}
@@ -11760,13 +11761,10 @@ snapshots:
     dependencies:
       expo: 57.0.27(@babel/core@7.29.7(supports-color@8.1.1))(@expo/dom-webview@57.0.1)(react-dom@19.3.0(react@19.2.3))(react-native@0.88.0(@babel/core@7.29.7(supports-color@8.1.1))(@types/react@19.2.18)(react@19.2.3)(supports-color@8.1.1))(react@19.2.3)(supports-color@8.1.1)(typescript@6.0.3)
 
-  expo-server-sdk@3.15.0:
+  expo-server-sdk@8.0.0:
     dependencies:
-      node-fetch: 2.7.0
       promise-limit: 2.7.0
       promise-retry: 2.0.1
-    transitivePeerDependencies:
-      - encoding
 
   expo-server@57.0.3: {}
 
