@@ -334,10 +334,10 @@ importers:
     devDependencies:
       '@nestjs/cli':
         specifier: ^11.0.0
-        version: 11.0.24(@swc/core@1.16.18)(@types/node@24.19.1)(esbuild@0.28.2)(lightningcss@1.33.0)(postcss@8.5.29)(prettier@3.9.9)(uglify-js@3.19.3)
+        version: 11.0.24(@swc/core@1.16.18)(@types/node@24.19.1)(esbuild@0.28.2)(lightningcss@1.33.0)(postcss@8.5.29)(prettier@3.10.1)(uglify-js@3.19.3)
       '@nestjs/schematics':
         specifier: ^11.0.0
-        version: 11.1.0(chokidar@4.0.3)(prettier@3.9.9)(typescript@6.0.3)
+        version: 11.1.0(chokidar@4.0.3)(prettier@3.10.1)(typescript@6.0.3)
       '@nestjs/testing':
         specifier: ^11.0.0
         version: 11.2.9(@nestjs/common@11.2.7(class-transformer@0.5.1)(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2)(supports-color@8.1.1))(@nestjs/core@11.2.7)(@nestjs/platform-express@11.2.10)
@@ -381,8 +381,8 @@ importers:
         specifier: ^7.0.2005
         version: 7.0.2007
       prettier:
-        specifier: ^3.4.2
-        version: 3.9.9
+        specifier: ^3.10.1
+        version: 3.10.1
       supertest:
         specifier: ^7.0.0
         version: 7.3.1(supports-color@8.1.1)
@@ -6319,8 +6319,8 @@ packages:
     resolution: {integrity: sha512-49cGhUbXj8Qenv0iTMxA1cFBzxXoctpC9Ujd77t1WcbJIr6nF/eI7g/8MgxrYldFRuAXvja7xQRwavoW7kgrxQ==}
     engines: {node: ^10 || ^12 || >=14}
 
-  prettier@3.9.9:
-    resolution: {integrity: sha512-Z/CJHIkdujO/OtN7nXUii0Rf3VT5SRuhjBA82Xvu2XhBUgX3nhP67T0LHceBdQLex7OOFGTox+Q5Yg8Jk2Qivg==}
+  prettier@3.10.1:
+    resolution: {integrity: sha512-70vp3ZUYoPlFbF9uiTdXHUUCGEIp7d4+6p+8DYbkm2jP7x/3i/paXVF6dopSI3zd/CEitrZN1rc4i85xWmmXlg==}
     engines: {node: '>=14'}
     hasBin: true
 
@@ -9283,13 +9283,13 @@ snapshots:
       '@tybys/wasm-util': 0.10.4
     optional: true
 
-  '@nestjs/cli@11.0.24(@swc/core@1.16.18)(@types/node@24.19.1)(esbuild@0.28.2)(lightningcss@1.33.0)(postcss@8.5.29)(prettier@3.9.9)(uglify-js@3.19.3)':
+  '@nestjs/cli@11.0.24(@swc/core@1.16.18)(@types/node@24.19.1)(esbuild@0.28.2)(lightningcss@1.33.0)(postcss@8.5.29)(prettier@3.10.1)(uglify-js@3.19.3)':
     dependencies:
       '@angular-devkit/core': 19.2.27(chokidar@4.0.3)
       '@angular-devkit/schematics': 19.2.27(chokidar@4.0.3)
       '@angular-devkit/schematics-cli': 19.2.27(@types/node@24.19.1)(chokidar@4.0.3)
       '@inquirer/prompts': 7.10.1(@types/node@24.19.1)
-      '@nestjs/schematics': 11.1.0(chokidar@4.0.3)(prettier@3.9.9)(typescript@5.9.3)
+      '@nestjs/schematics': 11.1.0(chokidar@4.0.3)(prettier@3.10.1)(typescript@5.9.3)
       ansis: 4.2.0
       chokidar: 4.0.3
       cli-table3: 0.6.5
@@ -9414,7 +9414,7 @@ snapshots:
       '@nestjs/core': 11.2.7(@nestjs/common@11.2.7(class-transformer@0.5.1)(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2)(supports-color@8.1.1))(@nestjs/platform-express@11.2.10)(@nestjs/websockets@11.2.8)(reflect-metadata@0.2.2)(rxjs@7.8.2)
       cron: 4.4.0
 
-  '@nestjs/schematics@11.1.0(chokidar@4.0.3)(prettier@3.9.9)(typescript@5.9.3)':
+  '@nestjs/schematics@11.1.0(chokidar@4.0.3)(prettier@3.10.1)(typescript@5.9.3)':
     dependencies:
       '@angular-devkit/core': 19.2.24(chokidar@4.0.3)
       '@angular-devkit/schematics': 19.2.24(chokidar@4.0.3)
@@ -9423,11 +9423,11 @@ snapshots:
       pluralize: 8.0.0
       typescript: 5.9.3
     optionalDependencies:
-      prettier: 3.9.9
+      prettier: 3.10.1
     transitivePeerDependencies:
       - chokidar
 
-  '@nestjs/schematics@11.1.0(chokidar@4.0.3)(prettier@3.9.9)(typescript@6.0.3)':
+  '@nestjs/schematics@11.1.0(chokidar@4.0.3)(prettier@3.10.1)(typescript@6.0.3)':
     dependencies:
       '@angular-devkit/core': 19.2.24(chokidar@4.0.3)
       '@angular-devkit/schematics': 19.2.24(chokidar@4.0.3)
@@ -9436,7 +9436,7 @@ snapshots:
       pluralize: 8.0.0
       typescript: 6.0.3
     optionalDependencies:
-      prettier: 3.9.9
+      prettier: 3.10.1
     transitivePeerDependencies:
       - chokidar
 
@@ -13681,7 +13681,7 @@ snapshots:
       picocolors: 1.1.1
       source-map-js: 1.2.2
 
-  prettier@3.9.9: {}
+  prettier@3.10.1: {}
 
   pretty-format@29.7.0:
     dependencies:
