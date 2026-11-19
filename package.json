@@ -24,7 +24,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.6.8",
-    "@commitlint/cli": "^21.2.3",
+    "@commitlint/cli": "^21.2.4",
     "@commitlint/config-conventional": "^21.2.4",
     "@rolldown/binding-win32-x64-msvc": "1.2.12",
     "cross-env": "^10.1.0",
