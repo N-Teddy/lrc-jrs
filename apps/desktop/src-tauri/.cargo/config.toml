@@ -1,3 +1,11 @@
+[build]
+target-dir = "D:/cargo-target"
+
 [target.x86_64-pc-windows-gnu]
-rustflags = ["-L", "C:/Users/Teddy/.cargo/lib"]
+rustflags = [
+  "-L", "D:/mingw/mingw64/lib/gcc/x86_64-w64-mingw32/16.2.0",
+  "-L", "D:/mingw/mingw64/lib"
+]
+
+
 

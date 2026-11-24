@@ -10,41 +10,25 @@ const desktopRoot = path.resolve(__dirname, '..');
 
 const home = os.homedir();
 const cargoBin = path.join(home, '.cargo', 'bin');
-const cargoLib = path.join(home, '.cargo', 'lib');
 
-// Locate LLVM-MinGW bin if present
-const wingetPackages = path.join(home, 'AppData', 'Local', 'Microsoft', 'WinGet', 'Packages');
-let llvmBin = '';
-if (fs.existsSync(wingetPackages)) {
-  try {
-    const dirs = fs.readdirSync(wingetPackages);
-    for (const dir of dirs) {
-      if (dir.includes('LLVM-MinGW')) {
-        const candidate = path.join(wingetPackages, dir, 'llvm-mingw-20261020-ucrt-x86_64', 'bin');
-        if (fs.existsSync(candidate)) {
-          llvmBin = candidate;
-          break;
-        }
-        const directBin = path.join(wingetPackages, dir, 'bin');
-        if (fs.existsSync(directBin)) {
-          llvmBin = directBin;
-          break;
-        }
-      }
-    }
-  } catch {}
-}
+// MinGW / GCC paths
+const mingwBin = 'D:\\mingw\\mingw64\\bin';
+const mingwLib = 'D:\\mingw\\mingw64\\lib';
+const mingwGccLib = 'D:\\mingw\\mingw64\\lib\\gcc\\x86_64-w64-mingw32\\16.2.0';
 
 const env = { ...process.env };
+env.CARGO_TARGET_DIR = 'D:\\cargo-target';
 env.WEBKIT_DISABLE_DMABUF_RENDERER = '1';
 env.WEBKIT_DISABLE_SANDBOX_THIS_IS_DANGEROUS = '1';
 
-if (fs.existsSync(cargoLib)) {
-  env.LIBRARY_PATH = [cargoLib, env.LIBRARY_PATH].filter(Boolean).join(path.delimiter);
+const libPaths = [mingwGccLib, mingwLib].filter((p) => fs.existsSync(p));
+if (libPaths.length > 0) {
+  env.LIBRARY_PATH = [...libPaths, env.LIBRARY_PATH].filter(Boolean).join(path.delimiter);
 }
 
-const extraPaths = [cargoBin, llvmBin].filter((p) => p && fs.existsSync(p));
+const extraPaths = [cargoBin, mingwBin].filter((p) => fs.existsSync(p));
 if (extraPaths.length > 0) {
+  // Put D:\mingw\mingw64\bin ahead of PATH so genuine GNU GCC is used instead of LLVM-MinGW clang wrapper
   env.PATH = [...extraPaths, env.PATH].filter(Boolean).join(path.delimiter);
 }
 
