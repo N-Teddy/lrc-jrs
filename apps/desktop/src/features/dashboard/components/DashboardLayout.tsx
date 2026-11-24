@@ -210,7 +210,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 
       {/* 3. Main Workspace Area */}
       <main
-        className={`pt-16 min-h-screen transition-all duration-200 pb-16 bg-[#f8fafc] ${
+        className={`pt-16 min-h-screen transition-all duration-200 pb-16 ${
           isSidebarCollapsed ? 'pl-[72px]' : 'pl-[260px]'
         }`}
       >
@@ -304,7 +304,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 
       {/* 4. Global Stationary Operations Footer (Style 1 - Tech & System Status) */}
       <footer
-        className={`fixed bottom-0 right-0 h-11 z-20 border-t border-slate-100 bg-white/80 backdrop-blur-md px-6 sm:px-8 transition-all duration-200 select-none flex items-center ${
+        className={`fixed bottom-0 right-0 h-11 z-20 border-t border-[#e8e1dd] bg-white/80 backdrop-blur-md px-6 sm:px-8 transition-all duration-200 select-none flex items-center ${
           isSidebarCollapsed ? 'left-[72px]' : 'left-[260px]'
         }`}
       >

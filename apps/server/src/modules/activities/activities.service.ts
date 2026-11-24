@@ -793,6 +793,9 @@ export class ActivitiesService {
     let dateChanged = false;
     let locationChanged = false;
     let statusChanged = false;
+    let typeChanged = false;
+    let participantsChanged = false;
+    let detailsChanged = false;
 
     const previousValues: Record<string, any> = {};
     const newValues: Record<string, any> = {};
@@ -868,9 +871,35 @@ export class ActivitiesService {
       }
     }
 
-    if (dto.title) activity.title = dto.title.trim();
-    if (dto.activityType) activity.activityType = dto.activityType;
-    if (dto.notes !== undefined) activity.notes = dto.notes?.trim();
+    if (dto.title !== undefined) {
+      const trimmedTitle = dto.title.trim();
+      if (trimmedTitle !== activity.title) {
+        detailsChanged = true;
+        previousValues.title = activity.title;
+        newValues.title = trimmedTitle;
+        activity.title = trimmedTitle;
+      }
+    }
+
+    if (dto.activityType !== undefined) {
+      if (dto.activityType !== activity.activityType) {
+        typeChanged = true;
+        previousValues.activityType = activity.activityType;
+        newValues.activityType = dto.activityType;
+        activity.activityType = dto.activityType;
+      }
+    }
+
+    if (dto.notes !== undefined) {
+      const trimmedNotes = dto.notes?.trim() || '';
+      const existingNotes = activity.notes?.trim() || '';
+      if (trimmedNotes !== existingNotes) {
+        detailsChanged = true;
+        previousValues.notes = activity.notes || '';
+        newValues.notes = trimmedNotes;
+        activity.notes = trimmedNotes;
+      }
+    }
 
     if (dto.includedTownIds !== undefined) {
       const updatedIncludedTownIds: Types.ObjectId[] = [];
@@ -886,20 +915,83 @@ export class ActivitiesService {
           }
         }
       }
-      activity.includedTownIds = updatedIncludedTownIds;
+
+      const prevIds = (activity.includedTownIds || [])
+        .map((id) => id.toString())
+        .sort();
+      const nextIds = updatedIncludedTownIds.map((id) => id.toString()).sort();
+
+      const areParticipantsEqual =
+        prevIds.length === nextIds.length &&
+        prevIds.every((id, idx) => id === nextIds[idx]);
+
+      if (!areParticipantsEqual) {
+        participantsChanged = true;
+        previousValues.includedTownIds = prevIds;
+        newValues.includedTownIds = nextIds;
+        activity.includedTownIds = updatedIncludedTownIds;
+      }
     }
 
-    // Push to change history if audited field changed
-    if (dateChanged || locationChanged || statusChanged) {
-      let changeType = 'STATUS_CHANGED';
-      if (activity.status === ActivityStatus.CANCELLED) {
+    // Push to change history if any audited field changed
+    const hasAnyChange =
+      dateChanged ||
+      locationChanged ||
+      statusChanged ||
+      typeChanged ||
+      participantsChanged ||
+      detailsChanged;
+
+    if (hasAnyChange) {
+      let changeType = 'UPDATED';
+      if (activity.status === ActivityStatus.CANCELLED && statusChanged) {
         changeType = 'CANCELLED';
-      } else if (previousValues.status === ActivityStatus.CANCELLED) {
+      } else if (
+        previousValues.status === ActivityStatus.CANCELLED &&
+        statusChanged
+      ) {
         changeType = 'REOPENED';
-      } else if (dateChanged) {
+      } else if (
+        dateChanged &&
+        !typeChanged &&
+        !participantsChanged &&
+        !detailsChanged
+      ) {
         changeType = 'RESCHEDULED';
-      } else if (locationChanged) {
+      } else if (
+        locationChanged &&
+        !dateChanged &&
+        !typeChanged &&
+        !participantsChanged &&
+        !detailsChanged
+      ) {
         changeType = 'LOCATION_CHANGED';
+      } else if (
+        typeChanged &&
+        !dateChanged &&
+        !locationChanged &&
+        !participantsChanged &&
+        !detailsChanged
+      ) {
+        changeType = 'TYPE_CHANGED';
+      } else if (
+        participantsChanged &&
+        !dateChanged &&
+        !locationChanged &&
+        !typeChanged &&
+        !detailsChanged
+      ) {
+        changeType = 'PARTICIPANTS_CHANGED';
+      } else if (
+        detailsChanged &&
+        !dateChanged &&
+        !locationChanged &&
+        !typeChanged &&
+        !participantsChanged
+      ) {
+        changeType = 'DETAILS_CHANGED';
+      } else if (statusChanged) {
+        changeType = 'STATUS_CHANGED';
       }
 
       activity.changeHistory.push({
@@ -911,7 +1003,7 @@ export class ActivitiesService {
         newValues,
         reason:
           dto.changeReason ||
-          `Updated ${changeType.toLowerCase().replace('_', ' ')}`,
+          `Updated ${changeType.toLowerCase().replace(/_/g, ' ')}`,
       });
     }
 

@@ -16,7 +16,6 @@ import { CircleNotch } from '@phosphor-icons/react';
 import type React from 'react';
 import { useEffect, useMemo, useState } from 'react';
 import { ActivityAttendanceRoster } from './ActivityAttendanceRoster';
-import { ActivityAuditLogView } from './ActivityAuditLogView';
 import { ActivityCalendarView } from './ActivityCalendarView';
 import { ActivityCardGridView } from './ActivityCardGridView';
 import { ActivityDetailPage } from './ActivityDetailPage';
@@ -29,7 +28,7 @@ import { ActivityStatsOverview } from './ActivityStatsOverview';
 import { ActivityTableView } from './ActivityTableView';
 import { DeleteActivityDialog } from './DeleteActivityDialog';
 
-type ActivitySubView = 'list' | 'details' | 'attendance' | 'audit-log';
+type ActivitySubView = 'list' | 'details' | 'attendance';
 
 export interface ActivitiesFeatureProps {
   initialActivityId?: string | null;
@@ -54,6 +53,17 @@ export const ActivitiesFeature: React.FC<ActivitiesFeatureProps> = ({
   const [subView, setSubView] = useState<ActivitySubView>('list');
   const [selectedActivity, setSelectedActivity] = useState<IActivity | null>(
     null,
+  );
+  const [detailTab, setDetailTab] = useState<
+    'overview' | 'attendance' | 'report' | 'history'
+  >(
+    initialSubTab === 'history' || initialSubTab === 'audit-log'
+      ? 'history'
+      : initialSubTab === 'attendance'
+        ? 'attendance'
+        : initialSubTab === 'report'
+          ? 'report'
+          : 'overview',
   );
 
   // Filter & View State
@@ -129,10 +139,15 @@ export const ActivitiesFeature: React.FC<ActivitiesFeatureProps> = ({
       setSelectedActivity(targetActivity);
       if (initialSubTab === 'attendance') {
         setSubView('attendance');
-      } else if (initialSubTab === 'audit-log' || initialSubTab === 'history') {
-        setSubView('audit-log');
       } else {
         setSubView('details');
+        if (initialSubTab === 'audit-log' || initialSubTab === 'history') {
+          setDetailTab('history');
+        } else if (initialSubTab === 'report') {
+          setDetailTab('report');
+        } else {
+          setDetailTab('overview');
+        }
       }
     }
   }, [initialActivityId, directActivity, activitiesData, initialSubTab]);
@@ -147,6 +162,7 @@ export const ActivitiesFeature: React.FC<ActivitiesFeatureProps> = ({
   // Navigation Handlers
   const handleViewDetails = (activity: IActivity) => {
     setSelectedActivity(activity);
+    setDetailTab('overview');
     setSubView('details');
   };
 
@@ -157,7 +173,8 @@ export const ActivitiesFeature: React.FC<ActivitiesFeatureProps> = ({
 
   const handleViewHistory = (activity: IActivity) => {
     setSelectedActivity(activity);
-    setSubView('audit-log');
+    setDetailTab('history');
+    setSubView('details');
   };
 
   const handleEditActivity = (activity: IActivity) => {
@@ -266,15 +283,7 @@ export const ActivitiesFeature: React.FC<ActivitiesFeatureProps> = ({
           onEditActivity={handleEditActivity}
           onDeleteActivity={(act) => setDeletingActivity(act)}
           isPrivileged={isPrivileged}
-          initialTab={
-            initialSubTab === 'history'
-              ? 'history'
-              : initialSubTab === 'attendance'
-                ? 'attendance'
-                : initialSubTab === 'report'
-                  ? 'report'
-                  : 'overview'
-          }
+          initialTab={detailTab}
         />
       ) : subView === 'attendance' && selectedActivity ? (
         /* 2. Attendance Roster View */
@@ -282,15 +291,8 @@ export const ActivitiesFeature: React.FC<ActivitiesFeatureProps> = ({
           activity={selectedActivity}
           onBack={() => setSubView('details')}
         />
-      ) : subView === 'audit-log' && selectedActivity ? (
-        /* 3. Audit History View */
-        <ActivityAuditLogView
-          activity={selectedActivity}
-          onBack={() => setSubView('details')}
-          onEditActivity={handleEditActivity}
-        />
       ) : (
-        /* 4. Main Activities Hub View */
+        /* 3. Main Activities Hub View */
         <>
           {/* 1. Header */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-[#f4ece9]">

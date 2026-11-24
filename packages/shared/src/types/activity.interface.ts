@@ -11,7 +11,12 @@ export interface IActivityChangeLog {
     | 'LOCATION_CHANGED'
     | 'STATUS_CHANGED'
     | 'CANCELLED'
-    | 'REOPENED';
+    | 'REOPENED'
+    | 'ATTENDANCE_LOCK_OVERRIDE'
+    | 'TYPE_CHANGED'
+    | 'PARTICIPANTS_CHANGED'
+    | 'DETAILS_CHANGED'
+    | 'UPDATED';
   changedBy: string;
   changedByName: string;
   changedAt: string;
@@ -21,6 +26,11 @@ export interface IActivityChangeLog {
     townId?: string;
     locationVenue?: string;
     status?: ActivityStatus;
+    title?: string;
+    activityType?: ActivityType;
+    notes?: string;
+    includedTownIds?: string[];
+    isAttendanceLocked?: boolean;
   };
   newValues: {
     startDate?: string;
@@ -28,6 +38,11 @@ export interface IActivityChangeLog {
     townId?: string;
     locationVenue?: string;
     status?: ActivityStatus;
+    title?: string;
+    activityType?: ActivityType;
+    notes?: string;
+    includedTownIds?: string[];
+    isAttendanceLocked?: boolean;
   };
   reason?: string;
 }

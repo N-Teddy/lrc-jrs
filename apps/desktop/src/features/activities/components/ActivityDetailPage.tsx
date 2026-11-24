@@ -46,15 +46,14 @@ import type React from 'react';
 import { useEffect, useMemo, useState } from 'react';
 
 import emptyDriveJpg from '../../../assets/illustrations/empty-drive.jpg';
-import emptyTimelineSvg from '../../../assets/illustrations/empty-timeline.svg';
 import { EmptyState } from '../../../components';
 import {
-  formatActivityDate,
   formatActivityDateRange,
   getActivityStatusConfig,
   getActivityTypeConfig,
 } from '../utils/activity-ui.utils';
 import { ActivityAttendanceRoster } from './ActivityAttendanceRoster';
+import { ActivityHistoryTimeline } from './ActivityHistoryTimeline';
 import { ActivityReportUploadModal } from './ActivityReportUploadModal';
 import { CancelActivityModal } from './CancelActivityModal';
 import { DriveFilePreviewModal } from './DriveFilePreviewModal';
@@ -95,11 +94,16 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
   const [activeTabState, setActiveTab] =
     useState<ActivityDetailTab>(initialTab);
 
+  const history = activity.changeHistory || [];
+
   useEffect(() => {
-    if (initialTab) {
+    if (initialTab === 'history' && history.length === 0) {
+      setActiveTab('overview');
+    } else if (initialTab) {
       setActiveTab(initialTab);
     }
-  }, [initialTab]);
+  }, [initialTab, history.length]);
+
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
   const [reportToDelete, setReportToDelete] = useState<IActivityReport | null>(
@@ -152,8 +156,20 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
   const canShowCheckInBanner =
     isLocked || (!isScheduled && !isCancelled && isDayOfActivityOrLater);
 
+  // Existing reports list
+  const reports: IActivityReport[] = useMemo(() => {
+    if (activity.reports && activity.reports.length > 0) {
+      return activity.reports;
+    }
+    return activity.report?.fileId ? [activity.report] : [];
+  }, [activity.reports, activity.report]);
+
+  const canShowReportTab = canShowReportUi && reports.length > 0;
+
   const activeTab =
-    !isDayOfActivityOrLater && activeTabState === 'attendance'
+    (!isDayOfActivityOrLater && activeTabState === 'attendance') ||
+    (activeTabState === 'history' && history.length === 0) ||
+    (activeTabState === 'report' && !canShowReportTab)
       ? 'overview'
       : activeTabState;
 
@@ -188,14 +204,6 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
     });
   };
 
-  // Existing reports list
-  const reports: IActivityReport[] = useMemo(() => {
-    if (activity.reports && activity.reports.length > 0) {
-      return activity.reports;
-    }
-    return activity.report?.fileId ? [activity.report] : [];
-  }, [activity.reports, activity.report]);
-
   // Attendees & Turnout KPIs
   const attendees = attendanceData?.attendees || [];
   const summary = attendanceData?.summary || {
@@ -223,7 +231,6 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
     activity.startDate,
     activity.endDate,
   );
-  const history = activity.changeHistory || [];
 
   const handleToggleLock = async () => {
     try {
@@ -614,8 +621,8 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
             </button>
           )}
 
-          {/* Strictly conditional Report Tab - ONLY visible if activity completed and past */}
-          {canShowReportUi && (
+          {/* Strictly conditional Report Tab - ONLY visible if activity completed, past, and has reports */}
+          {canShowReportTab && (
             <button
               type="button"
               onClick={() => setActiveTab('report')}
@@ -627,33 +634,33 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
             >
               <HardDrives size={15} weight="bold" />
               <span>
-                {reports.length > 0
-                  ? t('activities:detail.tabs.reportsCount', {
-                      count: reports.length,
-                      defaultValue: `Activity Reports (${reports.length})`,
-                    })
-                  : t('activities:detail.tabs.reports', 'Activity Reports')}
+                {t('activities:detail.tabs.reportsCount', {
+                  count: reports.length,
+                  defaultValue: `Activity Reports (${reports.length})`,
+                })}
               </span>
             </button>
           )}
 
-          <button
-            type="button"
-            onClick={() => setActiveTab('history')}
-            className={`px-4 py-2 rounded-md text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
-              activeTab === 'history'
-                ? 'bg-white text-[#1e1b19] shadow-2xs border border-[#e8e1dd]/60'
-                : 'text-[#8a726a] hover:text-[#1e1b19]'
-            }`}
-          >
-            <ClockCounterClockwise size={15} weight="bold" />
-            <span>
-              {t('activities:detail.tabs.history', {
-                count: history.length,
-                defaultValue: `Audit History (${history.length})`,
-              })}
-            </span>
-          </button>
+          {history.length > 0 && (
+            <button
+              type="button"
+              onClick={() => setActiveTab('history')}
+              className={`px-4 py-2 rounded-md text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+                activeTab === 'history'
+                  ? 'bg-white text-[#1e1b19] shadow-2xs border border-[#e8e1dd]/60'
+                  : 'text-[#8a726a] hover:text-[#1e1b19]'
+              }`}
+            >
+              <ClockCounterClockwise size={15} weight="bold" />
+              <span>
+                {t('activities:detail.tabs.history', {
+                  count: history.length,
+                  defaultValue: `Audit History (${history.length})`,
+                })}
+              </span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -1178,66 +1185,7 @@ export const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({
 
       {/* TAB 4: AUDIT HISTORY */}
       {activeTab === 'history' && (
-        <div className="bg-white rounded-xl border border-[#e8e1dd] shadow-xs p-6 flex flex-col gap-4 animate-in fade-in duration-150">
-          <h3 className="text-sm font-bold text-[#1e1b19] flex items-center gap-2">
-            <ClockCounterClockwise
-              size={16}
-              weight="bold"
-              className="text-[#b85028]"
-            />
-            <span>
-              {t(
-                'activities:detail.historyTab.title',
-                'Activity Change & Audit History',
-              )}
-            </span>
-          </h3>
-
-          {history.length === 0 ? (
-            <EmptyState
-              size="sm"
-              imageSrc={emptyTimelineSvg}
-              imageAlt="No modifications recorded"
-              title={t('activities:noHistory', 'No modifications recorded.')}
-              description={t(
-                'activities:detail.historyTab.empty',
-                'This activity follows its initial configuration.',
-              )}
-            />
-          ) : (
-            <div className="divide-y divide-[#f4ece9] border border-[#e8e1dd] rounded-lg overflow-hidden">
-              {history.map((log) => (
-                <div
-                  key={log.id}
-                  className="p-4 flex flex-col gap-1.5 hover:bg-[#faf2ee]/30 transition-colors"
-                >
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="font-bold text-xs text-[#1e1b19]">
-                      {log.changeType.replace(/_/g, ' ')}
-                    </span>
-                    <span className="text-[11px] text-[#8a726a] font-mono">
-                      {formatActivityDate(log.changedAt)}
-                    </span>
-                  </div>
-                  {log.reason && (
-                    <p className="text-xs text-[#57423b] italic">
-                      "{log.reason}"
-                    </p>
-                  )}
-                  <span className="text-[10px] text-[#8a726a]">
-                    {t('activities:detail.historyTab.recordedBy', {
-                      name:
-                        log.changedByName ||
-                        log.changedBy ||
-                        t('common:roles.administrator', 'Administrator'),
-                      defaultValue: `Recorded by ${log.changedByName || log.changedBy || 'Administrator'}`,
-                    })}
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+        <ActivityHistoryTimeline activity={activity} />
       )}
 
       {/* Report Upload Modal Dialog */}

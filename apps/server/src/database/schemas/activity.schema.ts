@@ -19,6 +19,11 @@ class ActivityChangeLog {
       'STATUS_CHANGED',
       'CANCELLED',
       'REOPENED',
+      'ATTENDANCE_LOCK_OVERRIDE',
+      'TYPE_CHANGED',
+      'PARTICIPANTS_CHANGED',
+      'DETAILS_CHANGED',
+      'UPDATED',
     ],
   })
   changeType: string;
