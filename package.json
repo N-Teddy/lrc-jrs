@@ -30,7 +30,7 @@
     "cross-env": "^10.1.0",
     "husky": "^9.1.7",
     "lint-staged": "^17.6.0",
-    "turbo": "^2.11.7",
+    "turbo": "^2.11.13",
     "typescript": "7.0.2"
   },
   "packageManager": "pnpm@11.25.0",
