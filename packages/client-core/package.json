@@ -20,7 +20,7 @@
     "@jrs/shared": "workspace:*",
     "@tanstack/react-query": "^5.108.3",
     "axios": "^1.21.1",
-    "i18next": "^24.2.2",
+    "i18next": "^27.2.4",
     "react-i18next": "^18.0.3",
     "socket.io-client": "^4.8.1"
   },
