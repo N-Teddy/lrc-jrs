@@ -16,7 +16,7 @@
     "@jrs/client-core": "workspace:*",
     "@jrs/shared": "workspace:*",
     "buffer": "^6.0.3",
-    "expo": "~57.0.27",
+    "expo": "~58.0.26",
     "expo-notifications": "^58.1.6",
     "expo-secure-store": "~57.0.4",
     "expo-status-bar": "~58.0.5",
