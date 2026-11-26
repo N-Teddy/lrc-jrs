@@ -47,7 +47,7 @@
     "compression": "^1.8.2",
     "expo-server-sdk": "^3.7.0",
     "handlebars": "^4.7.10",
-    "mongoose": "^8.9.5",
+    "mongoose": "^9.12.3",
     "multer": "^2.5.0",
     "nodemailer": "^10.1.0",
     "passport": "^0.7.0",
